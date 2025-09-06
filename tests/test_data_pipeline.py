@@ -9,7 +9,9 @@ from sensor_modeling.utils.data_io import SensorDataset
 
 def _sample_df():
     idx = pd.date_range("2024-01-01", periods=5, freq="1min")
-    df = pd.DataFrame({"sensor_0": [0, 1, np.nan, 0, 1], "sensor_1": [1, 1, 1, 0, 0]}, index=idx)
+    df = pd.DataFrame(
+        {"sensor_0": [0, 1, np.nan, 0, 1], "sensor_1": [1, 1, 1, 0, 0]}, index=idx
+    )
     df.index.name = "timestamp"
     return df
 
@@ -70,7 +72,9 @@ def test_preprocessing_and_validation():
 
 
 def test_synthetic_generation_and_export(tmp_path):
-    cfg = synthetic.SyntheticConfig(n_steps=50, n_sensors=2, change_points=[20], failure_rate=0.0)
+    cfg = synthetic.SyntheticConfig(
+        n_steps=50, n_sensors=2, change_points=[20], failure_rate=0.0
+    )
     ds, meta = synthetic.generate(cfg)
     assert 20 in meta["change_points"]
     out_csv = tmp_path / "syn.csv"

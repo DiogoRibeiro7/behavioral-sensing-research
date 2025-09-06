@@ -1,9 +1,159 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it using the metadata below."
-title: "Behavioral Sensing Research"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "Sensor Modeling Research Toolkit"
+abstract: "A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies multiple modeling paradigms including Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes into a single cohesive framework designed for ambient assisted living (AAL), digital health, and smart home research applications."
+
 authors:
-  - family-names: Ribeiro
-    given-names: Diogo
-    email: dfr@esmad.ipp.pt
-    affiliation: ESMAD - Instituto Politécnico do Porto
-    orcid: https://orcid.org/0009-0001-2022-7072
+  - family-names: "Ribeiro"
+    given-names: "Diogo"
+    email: "dfr@esmad.ipp.pt"
+    affiliation: "ESMAD - Instituto Politécnico do Porto"
+    orcid: "https://orcid.org/0009-0001-2022-7072"
+    alias: "DiogoRibeiro7"
+
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.17070042"
+    description: "This is the collection of archived snapshots of all versions of the Sensor Modeling Research Toolkit"
+  - type: url
+    value: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
+    description: "The GitHub repository containing the source code"
+
+repository-code: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
+repository-artifact: "https://zenodo.org/records/17070042"
+url: "https://sensor-modeling.readthedocs.io"
+
+version: "0.1.0"
+date-released: "2025-01-15"
+license: MIT
+license-url: "https://opensource.org/licenses/MIT"
+
+keywords:
+  - "sensor modeling"
+  - "ambient assisted living"
+  - "digital health"
+  - "smart homes"
+  - "time series analysis"
+  - "change point detection"
+  - "hidden markov models"
+  - "behavioral monitoring"
+  - "activity recognition"
+  - "python"
+  - "machine learning"
+  - "healthcare technology"
+  - "IoT sensors"
+  - "elderly care"
+  - "assistive technology"
+
+# Software-specific metadata
+programming-languages:
+  - "Python"
+
+operating-systems:
+  - "Linux"
+  - "macOS" 
+  - "Windows"
+
+# Research domain classification
+subjects:
+  - term: "Computer Science"
+    scheme: "Library of Congress Subject Headings"
+    scheme-uri: "https://id.loc.gov/authorities/subjects.html"
+  - term: "Biomedical Engineering"
+    scheme: "Library of Congress Subject Headings"
+    scheme-uri: "https://id.loc.gov/authorities/subjects.html"
+  - term: "Assistive Technology"
+    scheme: "Library of Congress Subject Headings"
+    scheme-uri: "https://id.loc.gov/authorities/subjects.html"
+
+# Related publications and references
+references:
+  - type: article
+    title: "Modeling and forecasting of at home activity in older adults using passive sensor technology"
+    authors:
+      - family-names: "Gillam"
+        given-names: "Jeremy"
+      - family-names: "Hoque"
+        given-names: "Estiaque"
+      - family-names: "Alshurafa"
+        given-names: "Nabil"
+    journal: "Computers in Biology and Medicine"
+    year: 2022
+    volume: 143
+    doi: "10.1016/j.compbiomed.2022.105286"
+    scope: "Implements the core Bernoulli autoregressive model from this paper"
+
+  - type: article
+    title: "Online Human Activity Recognition Employing Hierarchical Hidden Markov Models"
+    authors:
+      - family-names: "Asghari"
+        given-names: "Parviz"
+      - family-names: "Nazerfard"
+        given-names: "Ehsan"
+    journal: "arXiv preprint"
+    year: 2019
+    identifiers:
+      - type: other
+        value: "arXiv:1903.04820"
+    scope: "Hierarchical HMM implementation based on this methodology"
+
+  - type: article
+    title: "Embedding-based real-time change point detection with application to activity segmentation in smart home time series data"
+    authors:
+      - family-names: "Dadi"
+        given-names: "Kamalaker"
+    journal: "Expert Systems with Applications"
+    year: 2021
+    volume: 182
+    doi: "10.1016/j.eswa.2021.115217"
+    scope: "Embedding-based change-point detection algorithm implementation"
+
+  - type: article
+    title: "Easing Power Consumption of Wearable Activity Monitoring with Change Point Detection"
+    authors:
+      - family-names: "Cook"
+        given-names: "Diane"
+    journal: "Sensors"
+    year: 2020
+    volume: 20
+    issue: 1
+    doi: "10.3390/s20010310"
+    scope: "Energy-efficient change-point detection (CPAM) algorithm"
+
+# Preferred citation format
+preferred-citation:
+  type: software
+  title: "Sensor Modeling Research Toolkit"
+  authors:
+    - family-names: "Ribeiro"
+      given-names: "Diogo"
+      email: "dfr@esmad.ipp.pt"
+      affiliation: "ESMAD - Instituto Politécnico do Porto"
+      orcid: "https://orcid.org/0009-0001-2022-7072"
+  year: 2025
+  version: "0.1.0"
+  doi: "10.5281/zenodo.17070042"
+  url: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
+  abstract: "A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies multiple modeling paradigms including Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes into a single cohesive framework designed for ambient assisted living (AAL), digital health, and smart home research applications."
+
+# Contact information
+contact:
+  - family-names: "Ribeiro"
+    given-names: "Diogo"
+    email: "dfr@esmad.ipp.pt"
+    affiliation: "ESMAD - Instituto Politécnico do Porto"
+    orcid: "https://orcid.org/0009-0001-2022-7072"
+
+# Funding information (if applicable)
+# funding:
+#   - agency: "Funding Agency Name"
+#     award-number: "Grant Number"
+#     award-title: "Grant Title"
+
+# Related software/datasets
+# related-identifiers:
+#   - type: "dataset"
+#     identifier: "10.5281/zenodo.XXXXXXX"
+#     relation: "isSupplementedBy"
+#     description: "Example datasets for the Sensor Modeling Research Toolkit"

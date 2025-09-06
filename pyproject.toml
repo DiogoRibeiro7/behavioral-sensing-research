@@ -1,45 +1,420 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "wheel", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sensor_modeling"
+name = "sensor-modeling"
 version = "0.1.0"
-description = "Unified sensor modeling and analysis"
-readme = "README.md"
-requires-python = ">=3.9"
+description = "Comprehensive research-grade toolkit for analyzing behavioral sensor data in smart environments"
+readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
+requires-python = ">=3.9"
+
 authors = [
-  {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"}
+    {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"},
 ]
+maintainers = [
+    {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"},
+]
+
+keywords = [
+    "sensor-modeling",
+    "ambient-assisted-living",
+    "digital-health", 
+    "smart-homes",
+    "time-series-analysis",
+    "change-point-detection",
+    "hidden-markov-models",
+    "behavioral-monitoring",
+    "activity-recognition",
+    "machine-learning",
+    "healthcare-technology",
+    "iot-sensors",
+    "elderly-care",
+    "assistive-technology",
+    "python",
+]
+
+classifiers = [
+    # Development Status
+    "Development Status :: 4 - Beta",
+    
+    # Intended Audience
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    
+    # Topic Classification
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis", 
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Home Automation",
+    "Topic :: System :: Monitoring",
+    
+    # License
+    "License :: OSI Approved :: MIT License",
+    
+    # Programming Language
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    
+    # Operating System
+    "Operating System :: OS Independent",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    
+    # Natural Language
+    "Natural Language :: English",
+    
+    # Environment
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    
+    # Framework
+    "Framework :: Flask",
+    "Framework :: Matplotlib",
+    "Framework :: Jupyter",
+]
+
+# Core dependencies for basic functionality
 dependencies = [
-  "numpy",
-  "pandas",
-  "matplotlib",
-  "seaborn",
-  "scipy",
-  "scikit-learn",
-  "networkx",
-  "h5py",
-  "plotly",
-  "bokeh",
-  "flask",
+    "numpy>=1.21.0",
+    "pandas>=1.3.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=1.0.0",
+    "matplotlib>=3.5.0",
+    "seaborn>=0.11.0",
+    "networkx>=2.6",
+    "h5py>=3.1.0",
+    "plotly>=5.0.0",
+    "bokeh>=2.4.0",
+    "flask>=2.0.0",
+    "click>=8.0.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.60.0",
+    "joblib>=1.1.0",
 ]
 
 [project.optional-dependencies]
+# Development dependencies
 dev = [
-  "pytest",
-  "pytest-cov",
-  "hypothesis",
-  "pytest-benchmark",
-  "pre-commit",
-  "sphinx",
-  "sphinx-rtd-theme",
-  "nbsphinx",
-  "radon",
+    # Testing
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-benchmark>=4.0.0",
+    "hypothesis>=6.0.0",
+    "coverage[toml]>=7.0.0",
+    
+    # Code Quality
+    "pre-commit>=3.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "flake8-docstrings>=1.7.0",
+    "mypy>=1.0.0",
+    "bandit>=1.7.0",
+    "safety>=2.0.0",
+    "radon>=5.1.0",
+    
+    # Build and Release
+    "build>=0.10.0",
+    "twine>=4.0.0",
+    "setuptools-scm>=7.0.0",
+]
+
+# Documentation dependencies
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "sphinx-autodoc-typehints>=1.20.0",
+    "nbsphinx>=0.9.0",
+    "myst-parser>=1.0.0",
+    "sphinx-copybutton>=0.5.0",
+    "sphinx-design>=0.4.0",
+    "jupyterlab>=4.0.0",
+    "notebook>=7.0.0",
+    "ipykernel>=6.20.0",
+]
+
+# Performance optimization dependencies
+performance = [
+    "numba>=0.58.0",
+    "cython>=3.0.0",
+    "bottleneck>=1.3.0",
+    "numexpr>=2.8.0",
+]
+
+# Visualization extras
+viz = [
+    "plotly>=5.15.0",
+    "bokeh>=3.0.0", 
+    "holoviews>=1.16.0",
+    "panel>=1.0.0",
+    "dash>=2.10.0",
+    "streamlit>=1.25.0",
+]
+
+# Machine learning extras
+ml = [
+    "tensorflow>=2.13.0",
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
+    "xgboost>=1.7.0",
+    "lightgbm>=4.0.0",
+    "catboost>=1.2.0",
+]
+
+# Clinical/Healthcare extras  
+clinical = [
+    "fhir.resources>=7.0.0",
+    "pydicom>=2.4.0",
+    "nibabel>=5.0.0",
+    "mne>=1.4.0",
+]
+
+# All optional dependencies combined
+all = [
+    "sensor-modeling[dev,docs,performance,viz,ml,clinical]"
 ]
 
 [project.urls]
 Homepage = "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
-Documentation = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/tree/main/docs"
+Documentation = "https://sensor-modeling.readthedocs.io"
 Repository = "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
+"Bug Tracker" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/issues"
+"Feature Requests" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/discussions"
+Changelog = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/main/CHANGELOG.md"
+"Zenodo DOI" = "https://doi.org/10.5281/zenodo.17070042"
+"Citation" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/main/CITATION.cff"
+"Research Papers" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/main/paper.bib"
+Funding = "https://github.com/sponsors/DiogoRibeiro7"
+
+[project.scripts]
+sensor-modeling = "sensor_modeling.cli:main"
+sensor-analysis = "sensor_modeling.analysis.pipeline:main"
+sensor-viz = "sensor_modeling.visualization.web_app:main"
+
+[project.gui-scripts]
+sensor-modeling-gui = "sensor_modeling.visualization.web_app:create_app"
+
+[project.entry-points."sensor_modeling.models"]
+bernoulli_ar = "sensor_modeling.models.bernoulli_ar:BernoulliAutoregressiveModel"
+nhpp_pelt = "sensor_modeling.models.nhpp_pelt:NHPPPELT"
+hmm_hierarchical = "sensor_modeling.hmm.hierarchical_hmm:HierarchicalHMM"
+
+[project.entry-points."sensor_modeling.change_point"]
+embedding_cpd = "sensor_modeling.change_point:EmbeddingCPD"
+energy_efficient = "sensor_modeling.change_point:EnergyEfficientCPD"
+adaptive_normalizer = "sensor_modeling.change_point:AdaptiveNormalizer"
+genetic_optimization = "sensor_modeling.change_point:GeneticOptimizationCPD"
+
+# Tool configurations
+[tool.setuptools]
+package-dir = {"" = "."}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sensor_modeling*"]
+exclude = ["tests*", "docs*", "examples*", "benchmarking*"]
+
+[tool.setuptools.package-data]
+"sensor_modeling" = [
+    "examples/**/*",
+    "data/*.csv", 
+    "data/*.json",
+    "templates/*.html",
+    "static/**/*",
+]
+
+# Black configuration
+[tool.black]
+line-length = 88
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | docs/_build
+)/
+'''
+
+# isort configuration
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["sensor_modeling"]
+known_third_party = [
+    "numpy", "pandas", "scipy", "sklearn", "matplotlib", 
+    "seaborn", "plotly", "bokeh", "flask", "networkx"
+]
+
+# mypy configuration
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "scipy.*",
+    "sklearn.*", 
+    "matplotlib.*",
+    "seaborn.*",
+    "plotly.*",
+    "bokeh.*",
+    "networkx.*",
+    "h5py.*",
+]
+ignore_missing_imports = true
+
+# pytest configuration
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "--cov=sensor_modeling",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-report=html",
+    "--strict-markers",
+    "--strict-config",
+    "--disable-warnings",
+]
+testpaths = ["tests"]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests", 
+    "benchmark: marks tests as performance benchmarks",
+    "web: marks tests that require web interface",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["sensor_modeling"]
+omit = [
+    "sensor_modeling/__init__.py",
+    "sensor_modeling/examples/*",
+    "tests/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+# Bandit security configuration
+[tool.bandit]
+exclude_dirs = ["tests", "docs"]
+skips = ["B101", "B601"]
+
+# Ruff configuration (alternative to flake8)
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["B011"]
+
+# Sphinx configuration helper
+[tool.sphinx]
+source-dir = "docs"
+build-dir = "docs/_build"
+
+# Version bumping configuration
+[tool.bumpversion]
+current_version = "0.1.0"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+commit = true
+tag = true
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "sensor_modeling/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = "version: \"{current_version}\""
+replace = "version: \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "docs/conf.py"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""

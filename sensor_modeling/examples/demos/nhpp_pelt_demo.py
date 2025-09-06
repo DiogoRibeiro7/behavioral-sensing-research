@@ -6,13 +6,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sensor_modeling.models.nhpp_pelt import NHPPConfig, NHPPPELT
-from sensor_modeling.models.nhpp_pelt.plotting import PlotConfig, HistConfig, plot_segments_and_intensities_with_histograms
+from sensor_modeling.models.nhpp_pelt.plotting import (
+    PlotConfig,
+    HistConfig,
+    plot_segments_and_intensities_with_histograms,
+)
 
 
 Array1D = np.ndarray
 
 
-def simulate_ihpp(rng: np.random.Generator, lam: Callable[[Array1D], Array1D], delta: float, lam_max: float) -> Array1D:
+def simulate_ihpp(
+    rng: np.random.Generator,
+    lam: Callable[[Array1D], Array1D],
+    delta: float,
+    lam_max: float,
+) -> Array1D:
     """Ogata thinning with a supplied upper bound lam_max >= sup_t λ(t)."""
     t = 0.0
     events: List[float] = []
@@ -32,8 +41,11 @@ def main() -> None:
     def shape_peak(mu_hour: float):
         def lam(tt: Array1D) -> Array1D:
             g1 = np.exp(-0.5 * ((tt - mu_hour) / 2.0) ** 2) / (2.0 * np.sqrt(2 * np.pi))
-            g2 = np.exp(-0.5 * ((tt - (mu_hour + 8.0)) / np.sqrt(8.0)) ** 2) / (np.sqrt(8.0) * np.sqrt(2 * np.pi))
+            g2 = np.exp(-0.5 * ((tt - (mu_hour + 8.0)) / np.sqrt(8.0)) ** 2) / (
+                np.sqrt(8.0) * np.sqrt(2 * np.pi)
+            )
             return 20.0 * (g1 + g2)
+
         return lam
 
     lam1 = shape_peak(6.0)

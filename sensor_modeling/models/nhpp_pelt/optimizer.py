@@ -9,7 +9,7 @@ import numpy as np
 from .bspline import bspline_design_matrix
 from .quad import QuadratureConfig, leggauss_on_interval
 from .utils import type_check
-from .regularization import p_spline_RtR   # <-- NEW
+from .regularization import p_spline_RtR  # <-- NEW
 
 Array1D = np.ndarray
 Array2D = np.ndarray
@@ -18,6 +18,7 @@ Array2D = np.ndarray
 @dataclass(frozen=True)
 class NewtonConfig:
     """Tuning for Newton backtracking solver."""
+
     max_iter: int = 60
     tol: float = 1e-7
     step_shrink: float = 0.5
@@ -41,8 +42,8 @@ class SegmentOptimizer:
         quad: QuadratureConfig = QuadratureConfig(),
         newton: NewtonConfig = NewtonConfig(),
         *,
-        pspline_gamma: float = 0.0,     # <-- NEW (optional)
-        pspline_order: int = 2          # <-- NEW (optional)
+        pspline_gamma: float = 0.0,  # <-- NEW (optional)
+        pspline_order: int = 2,  # <-- NEW (optional)
     ) -> None:
         type_check(delta > 0.0, "delta must be positive.")
         self.delta = float(delta)
@@ -65,7 +66,7 @@ class SegmentOptimizer:
 
     def _integrals(self, w: Array1D) -> Tuple[float, Array1D, Array2D]:
         psi = self._q_psi  # (Q,P)
-        u = psi @ w        # (Q,)
+        u = psi @ w  # (Q,)
         m = float(np.max(u))
         e_scaled = np.exp(u - m)
         wq = self._q_w
@@ -79,10 +80,16 @@ class SegmentOptimizer:
 
     # ------------------------- Newton optimizer -------------------------
 
-    def minimize(self, L: int, s: Array1D, w0: Optional[Array1D] = None) -> Tuple[Array1D, float]:
+    def minimize(
+        self, L: int, s: Array1D, w0: Optional[Array1D] = None
+    ) -> Tuple[Array1D, float]:
         type_check(L >= 1, "Segment length L must be >= 1.")
         s = np.asarray(s, dtype=float)
-        w = np.zeros(self.P, dtype=float) if w0 is None else np.asarray(w0, dtype=float).copy()
+        w = (
+            np.zeros(self.P, dtype=float)
+            if w0 is None
+            else np.asarray(w0, dtype=float).copy()
+        )
         type_check(w.shape == (self.P,), "Initial w has wrong shape.")
 
         ridgeI = self.quad.ridge * np.eye(self.P, dtype=float)
@@ -94,14 +101,16 @@ class SegmentOptimizer:
             H = L * I2 + ridgeI
 
             # ======== P-spline penalty (γ‖D²w‖²) — 3 math lines ========
-            if np.any(self._RtR):                 # skip if gamma == 0
+            if np.any(self._RtR):  # skip if gamma == 0
                 cost += float(w @ (self._RtR @ w))
                 grad += 2.0 * (self._RtR @ w)
                 H += 2.0 * self._RtR
             # ===========================================================
 
             # Convergence
-            if np.linalg.norm(grad, ord=np.inf) <= self.newton.tol * max(1.0, np.linalg.norm(s, ord=np.inf)):
+            if np.linalg.norm(grad, ord=np.inf) <= self.newton.tol * max(
+                1.0, np.linalg.norm(s, ord=np.inf)
+            ):
                 return w, cost
 
             # Newton step

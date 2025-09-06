@@ -14,6 +14,7 @@ Array2D = np.ndarray
 
 # ---------------------------- Validators ----------------------------
 
+
 def type_check(condition: bool, msg: str) -> None:
     """Runtime guard with a concise error message."""
     if not condition:
@@ -21,6 +22,7 @@ def type_check(condition: bool, msg: str) -> None:
 
 
 # -------------------------- Normal PPF (Φ⁻¹) -------------------------
+
 
 def normal_ppf(p: float) -> float:
     """
@@ -83,6 +85,7 @@ def normal_ppf(p: float) -> float:
 
 # --------------------------- JSON exporters --------------------------
 
+
 def to_jsonable(model: "NHPPPELT") -> dict:
     """
     Convert a fitted model into a JSON-serializable dictionary.
@@ -116,6 +119,7 @@ def save_results_json(model: "NHPPPELT", path: str) -> None:
 
 # ------------------------------ Sweep β ------------------------------
 
+
 def sweep_beta(
     days: Sequence[Array1D],
     base_cfg: "NHPPConfig",
@@ -146,8 +150,11 @@ def sweep_beta(
         for (i, j), w in zip(model.segments_, model.weights_):
             quad = QuadratureConfig(n_points=cfg.quad.n_points, ridge=cfg.hessian_ridge)
             opt = SegmentOptimizer(
-                delta=model.delta_, degree=model.degree_, knots=model.knots_,
-                quad=quad, newton=cfg.newton
+                delta=model.delta_,
+                degree=model.degree_,
+                knots=model.knots_,
+                quad=quad,
+                newton=cfg.newton,
             )
             # build sufficient statistics s for days i..j
             s = np.zeros(cfg.n_basis, dtype=float)

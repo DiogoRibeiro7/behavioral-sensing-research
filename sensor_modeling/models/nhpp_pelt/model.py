@@ -42,6 +42,7 @@ class NHPPConfig:
     min_seg_len : int
         Minimum number of days per segment (>=1). Use 1 to disable.
     """
+
     delta: float = 24.0
     degree: int = 3
     n_basis: int = 5
@@ -102,7 +103,9 @@ class NHPPPELT:
 
     # ------------------------------ Fit ------------------------------
 
-    def fit(self, data: Sequence[Array1D] | SensorDataset, sensor: str | None = None) -> "NHPPPELT":
+    def fit(
+        self, data: Sequence[Array1D] | SensorDataset, sensor: str | None = None
+    ) -> "NHPPPELT":
         """
         Fit the model. After fitting, attributes include:
           - changepoints_ : List[int] in 1..n-1
@@ -121,9 +124,16 @@ class NHPPPELT:
         n = len(days)
         delta = float(self.cfg.delta)
 
-        all_ts = np.concatenate([np.asarray(d, dtype=float) for d in days]) if n > 0 else np.array([], float)
+        all_ts = (
+            np.concatenate([np.asarray(d, dtype=float) for d in days])
+            if n > 0
+            else np.array([], float)
+        )
         if all_ts.size > 0:
-            type_check(np.all((all_ts >= 0.0) & (all_ts <= delta)), "Event times must lie in [0, delta].")
+            type_check(
+                np.all((all_ts >= 0.0) & (all_ts <= delta)),
+                "Event times must lie in [0, delta].",
+            )
 
         knots = self._build_knots(all_ts)
         degree = self.cfg.degree
@@ -138,15 +148,23 @@ class NHPPPELT:
             else:
                 Psi = bspline_design_matrix(d, degree, knots)
                 s_list.append(Psi.sum(axis=0))
-        S = np.vstack(s_list)                     # (n,P)
+        S = np.vstack(s_list)  # (n,P)
         S_cum = np.vstack([np.zeros((1, P)), np.cumsum(S, axis=0)])  # (n+1,P)
 
         # Penalty
-        beta = self.cfg.penalty_beta if self.cfg.penalty_beta is not None else (P + 1) * math.log(n)
+        beta = (
+            self.cfg.penalty_beta
+            if self.cfg.penalty_beta is not None
+            else (P + 1) * math.log(n)
+        )
 
         # Optimizer
-        quad = QuadratureConfig(n_points=self.cfg.quad.n_points, ridge=self.cfg.hessian_ridge)
-        opt = SegmentOptimizer(delta=delta, degree=degree, knots=knots, quad=quad, newton=self.cfg.newton)
+        quad = QuadratureConfig(
+            n_points=self.cfg.quad.n_points, ridge=self.cfg.hessian_ridge
+        )
+        opt = SegmentOptimizer(
+            delta=delta, degree=degree, knots=knots, quad=quad, newton=self.cfg.newton
+        )
 
         # Segment caches
         cost_cache: Dict[Tuple[int, int], float] = {}
@@ -157,7 +175,9 @@ class NHPPPELT:
             s = S_cum[j, :] - S_cum[i - 1, :]
             return L, s
 
-        def seg_cost(i: int, j: int, warm: Optional[Array1D] = None) -> Tuple[float, Array1D]:
+        def seg_cost(
+            i: int, j: int, warm: Optional[Array1D] = None
+        ) -> Tuple[float, Array1D]:
             key = (i, j)
             if key in cost_cache:
                 return cost_cache[key], w_cache[key]
@@ -261,20 +281,34 @@ class NHPPPELT:
         i_start, i_end = self.segments_[seg_index]
         L = i_end - i_start + 1
 
-        quad = QuadratureConfig(n_points=self.cfg.quad.n_points, ridge=self.cfg.hessian_ridge)
-        opt = SegmentOptimizer(self.delta_, self.degree_, self.knots_, quad=quad, newton=self.cfg.newton,
-                            pspline_gamma=self.cfg.pspline_gamma, pspline_order=self.cfg.pspline_order)
+        quad = QuadratureConfig(
+            n_points=self.cfg.quad.n_points, ridge=self.cfg.hessian_ridge
+        )
+        opt = SegmentOptimizer(
+            self.delta_,
+            self.degree_,
+            self.knots_,
+            quad=quad,
+            newton=self.cfg.newton,
+            pspline_gamma=self.cfg.pspline_gamma,
+            pspline_order=self.cfg.pspline_order,
+        )
         _, _, I2 = opt._integrals(w)
 
-        RtR = p_spline_RtR(self.P_, order=self.cfg.pspline_order, gamma=self.cfg.pspline_gamma)
-        H = L * I2 + (self.cfg.hessian_ridge * np.eye(I2.shape[0], dtype=float)) + 2.0 * RtR
+        RtR = p_spline_RtR(
+            self.P_, order=self.cfg.pspline_order, gamma=self.cfg.pspline_gamma
+        )
+        H = (
+            L * I2
+            + (self.cfg.hessian_ridge * np.eye(I2.shape[0], dtype=float))
+            + 2.0 * RtR
+        )
 
         try:
             Sigma = np.linalg.inv(H)
         except np.linalg.LinAlgError:
             Sigma = np.linalg.pinv(H)
         return Sigma
-
 
     def intensity_with_bands(
         self,
@@ -322,7 +356,11 @@ class NHPPPELT:
         AIC_i(P) = 2P - 2*loglik_i(P),   loglik = - min cost with L=1.
         """
         type_check(len(days) > 0, "Need at least one day.")
-        all_ts = np.concatenate([np.asarray(d, float) for d in days]) if len(days) else np.array([], float)
+        all_ts = (
+            np.concatenate([np.asarray(d, float) for d in days])
+            if len(days)
+            else np.array([], float)
+        )
 
         def build_knots(P: int) -> Array1D:
             n_internal = P - degree - 1
@@ -338,7 +376,9 @@ class NHPPPELT:
                 elif knot_strategy == "equispaced":
                     internal = np.linspace(0.0, delta, n_internal + 2)[1:-1]
                 else:
-                    raise ValueError("knot_strategy must be 'quantile' or 'equispaced'.")
+                    raise ValueError(
+                        "knot_strategy must be 'quantile' or 'equispaced'."
+                    )
             return open_uniform_knots(delta, degree, P, internal)
 
         best_P, best_avg = None, np.inf

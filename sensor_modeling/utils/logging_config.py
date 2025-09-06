@@ -8,5 +8,4 @@ from typing import Optional
 
 def setup_logging(level: int = logging.INFO) -> None:
     """Configure basic logging for the package."""
-    logging.basicConfig(level=level,
-                        format='[%(levelname)s] %(name)s: %(message)s')
+    logging.basicConfig(level=level, format="[%(levelname)s] %(name)s: %(message)s")

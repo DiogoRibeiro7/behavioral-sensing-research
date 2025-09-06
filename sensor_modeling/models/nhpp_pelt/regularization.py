@@ -77,15 +77,27 @@ def sweep_gamma(
     out: List[Tuple[float, int, float]] = []
 
     for g in gammas:
-        cfg = NHPPConfig(**{**base_cfg.__dict__, "pspline_gamma": float(g), "pspline_order": int(order)})
+        cfg = NHPPConfig(
+            **{
+                **base_cfg.__dict__,
+                "pspline_gamma": float(g),
+                "pspline_order": int(order),
+            }
+        )
         model = NHPPPELT(cfg).fit(days)
 
         # re-accumulate the exact objective with the fitted weights
         total = 0.0
         quad = QuadratureConfig(n_points=cfg.quad.n_points, ridge=cfg.hessian_ridge)
-        opt = SegmentOptimizer(delta=model.delta_, degree=model.degree_, knots=model.knots_,
-                               quad=quad, newton=cfg.newton,
-                               pspline_gamma=cfg.pspline_gamma, pspline_order=cfg.pspline_order)
+        opt = SegmentOptimizer(
+            delta=model.delta_,
+            degree=model.degree_,
+            knots=model.knots_,
+            quad=quad,
+            newton=cfg.newton,
+            pspline_gamma=cfg.pspline_gamma,
+            pspline_order=cfg.pspline_order,
+        )
 
         for (i, j), w in zip(model.segments_, model.weights_):
             # sufficient stats s for [i..j]

@@ -14,6 +14,7 @@ Array1D = np.ndarray
 @dataclass(frozen=True)
 class PlotConfig:
     """Styling for the raster (top) and λ̂ curves (middle)."""
+
     figsize: Tuple[float, float] = (12.0, 8.5)
     dpi: int = 110
     raster_markersize: float = 4.0
@@ -27,13 +28,16 @@ class PlotConfig:
 @dataclass(frozen=True)
 class HistConfig:
     """Config for per-segment average histograms (bottom row)."""
-    bins: Union[int, str] = "fd"   # 'fd' | 'sqrt' | 'sturges' | int
-    density: bool = True           # True → average rate (events/day/unit-time)
+
+    bins: Union[int, str] = "fd"  # 'fd' | 'sqrt' | 'sturges' | int
+    density: bool = True  # True → average rate (events/day/unit-time)
     alpha: float = 0.5
     title: str = "Per-segment average histograms of event times"
 
 
-def _common_bin_edges(all_events: Array1D, delta: float, bins: Union[int, str]) -> Array1D:
+def _common_bin_edges(
+    all_events: Array1D, delta: float, bins: Union[int, str]
+) -> Array1D:
     type_check(delta > 0, "delta must be positive.")
     all_events = np.asarray(all_events, float)
     all_events = all_events[(all_events >= 0.0) & (all_events <= delta)]
@@ -76,7 +80,7 @@ def _avg_hist_per_segment(
     widths = np.diff(edges)
     avg_counts: List[Array1D] = []
 
-    for (i_start, i_end) in segments:
+    for i_start, i_end in segments:
         type_check(1 <= i_start <= i_end <= len(days), "segment indices out of range.")
         L = i_end - i_start + 1
 
@@ -115,7 +119,9 @@ def plot_segments_and_intensities_with_histograms(
     need = ["segments_", "knots_", "degree_", "delta_", "P_", "weights_"]
     missing = [a for a in need if not hasattr(model, a)]
     type_check(len(missing) == 0, f"Model is missing attributes: {missing}.")
-    type_check(hasattr(model, "intensity_on_grid"), "Model must implement intensity_on_grid().")
+    type_check(
+        hasattr(model, "intensity_on_grid"), "Model must implement intensity_on_grid()."
+    )
 
     n_days = len(days)
     segments: List[Tuple[int, int]] = list(getattr(model, "segments_"))
@@ -123,7 +129,11 @@ def plot_segments_and_intensities_with_histograms(
     n_segments = len(segments)
     type_check(n_segments >= 1, "Model has no segments.")
 
-    all_events = np.concatenate([np.asarray(d, float) for d in days]) if n_days else np.array([], float)
+    all_events = (
+        np.concatenate([np.asarray(d, float) for d in days])
+        if n_days
+        else np.array([], float)
+    )
     edges = _common_bin_edges(all_events, delta, hist.bins)
     widths = np.diff(edges)
     centers = edges[:-1] + 0.5 * widths
@@ -139,16 +149,25 @@ def plot_segments_and_intensities_with_histograms(
         y0, y1 = i_start - 0.5, i_end + 0.5
         if k % 2 == 0:
             ax_top.axhspan(y0, y1, alpha=config.band_alpha)
-        ax_top.text(delta * 1.002, (y0 + y1) / 2.0, f"Seg {k+1}\n({i_start}–{i_end})",
-                    va="center", ha="left", fontsize=9)
+        ax_top.text(
+            delta * 1.002,
+            (y0 + y1) / 2.0,
+            f"Seg {k+1}\n({i_start}–{i_end})",
+            va="center",
+            ha="left",
+            fontsize=9,
+        )
 
     for i, ev in enumerate(days, start=1):
         ev = np.asarray(ev, float)
         if ev.size:
             ax_top.plot(
-                ev, np.full_like(ev, i, float),
-                linestyle="None", marker="|",
-                markersize=config.raster_markersize, alpha=config.raster_alpha,
+                ev,
+                np.full_like(ev, i, float),
+                linestyle="None",
+                marker="|",
+                markersize=config.raster_markersize,
+                alpha=config.raster_alpha,
             )
 
     ax_top.set_xlim(0.0, delta)
@@ -180,7 +199,11 @@ def plot_segments_and_intensities_with_histograms(
         ax.bar(centers, avg_counts[k], width=widths, align="center", alpha=hist.alpha)
         ax.set_xlim(0.0, delta)
         if k == 0:
-            ax.set_ylabel("Avg rate\n(events/day/unit-time)" if hist.density else "Avg count/day/bin")
+            ax.set_ylabel(
+                "Avg rate\n(events/day/unit-time)"
+                if hist.density
+                else "Avg count/day/bin"
+            )
         ax.set_xlabel("Time within day")
         ax.set_title(f"Seg {k+1}: days {segments[k][0]}–{segments[k][1]}", fontsize=10)
         ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.5)

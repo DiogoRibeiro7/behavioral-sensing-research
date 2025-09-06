@@ -30,7 +30,13 @@ class EnergyEfficientCPD:
             raise ValueError("Model must be fitted before prediction")
         n = len(self.series)
         energies = [
-            np.sum((self.series[i : i + self.window] - self.series[i : i + self.window].mean()) ** 2)
+            np.sum(
+                (
+                    self.series[i : i + self.window]
+                    - self.series[i : i + self.window].mean()
+                )
+                ** 2
+            )
             for i in range(n - self.window)
         ]
         diffs = np.abs(np.diff(energies))

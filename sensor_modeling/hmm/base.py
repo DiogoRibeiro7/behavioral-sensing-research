@@ -16,7 +16,9 @@ class BaseHMM(BaseEstimator):
     AIC and BIC metrics.
     """
 
-    def __init__(self, n_states: int = 2, n_iter: int = 10, random_state: int | None = None):
+    def __init__(
+        self, n_states: int = 2, n_iter: int = 10, random_state: int | None = None
+    ):
         self.n_states = n_states
         self.n_iter = n_iter
         self.random_state = random_state
@@ -70,7 +72,9 @@ class BaseHMM(BaseEstimator):
                 self.means_[k] = (self.means_[k] + X[states == k].mean(axis=0)) / 2
         for i, j in zip(states[:-1], states[1:]):
             self.trans_mat_[i, j] += 1
-        self.trans_mat_ = self.trans_mat_ / np.maximum(self.trans_mat_.sum(axis=1, keepdims=True), 1)
+        self.trans_mat_ = self.trans_mat_ / np.maximum(
+            self.trans_mat_.sum(axis=1, keepdims=True), 1
+        )
         return self
 
     # ------------------------------------------------------------------

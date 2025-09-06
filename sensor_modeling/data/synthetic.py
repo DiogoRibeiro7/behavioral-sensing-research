@@ -41,9 +41,13 @@ def generate(config: SyntheticConfig) -> Tuple[SensorDataset, Dict[str, List[int
         if rng.random() < config.failure_rate:
             fail_start = rng.integers(0, config.n_steps // 2)
             data[fail_start:, s] = 0
-            logger.warning("Injected failure in sensor %s starting at %s", s, fail_start)
+            logger.warning(
+                "Injected failure in sensor %s starting at %s", s, fail_start
+            )
     index = pd.date_range("2024-01-01", periods=config.n_steps, freq="1min")
-    df = pd.DataFrame(data, index=index, columns=[f"sensor_{i}" for i in range(config.n_sensors)])
+    df = pd.DataFrame(
+        data, index=index, columns=[f"sensor_{i}" for i in range(config.n_sensors)]
+    )
     return SensorDataset(df), {"change_points": cps}
 
 
@@ -56,7 +60,11 @@ def export(dataset: SensorDataset, metadata: Dict, path: str, fmt: str = "csv") 
             with open(f"{path}.meta.json", "w") as f:
                 json.dump(metadata, f)
         elif fmt == "json":
-            records = df.reset_index().rename(columns={df.index.name or "index": "timestamp"}).to_dict(orient="records")
+            records = (
+                df.reset_index()
+                .rename(columns={df.index.name or "index": "timestamp"})
+                .to_dict(orient="records")
+            )
             with open(path, "w") as f:
                 json.dump({"data": records, "meta": metadata}, f)
         elif fmt == "hdf5":
