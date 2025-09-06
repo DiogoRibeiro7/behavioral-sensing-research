@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sensor_modeling"
+version = "0.1.0"
+description = "Unified sensor modeling and analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"}
+]
+dependencies = [
+  "numpy",
+  "pandas",
+  "matplotlib",
+  "seaborn",
+  "scipy",
+  "scikit-learn",
+  "networkx",
+  "h5py",
+  "plotly",
+  "bokeh",
+  "flask",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "hypothesis",
+  "pytest-benchmark",
+  "pre-commit",
+  "sphinx",
+  "sphinx-rtd-theme",
+  "nbsphinx",
+  "radon",
+]
+
+[project.urls]
+Homepage = "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
+Documentation = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/tree/main/docs"
+Repository = "https://github.com/DiogoRibeiro7/behavioral-sensing-research"

@@ -1,0 +1,3 @@
+include README.md LICENSE CITATION.cff CHANGELOG.md CONTRIBUTING.md CODE_OF_CONDUCT.md requirements.txt paper.md paper.bib
+recursive-include docs *
+recursive-include sensor_modeling/examples *

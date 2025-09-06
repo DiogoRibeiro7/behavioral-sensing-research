@@ -1,0 +1,11 @@
+numpy==1.26.4
+pandas==2.2.2
+matplotlib==3.8.4
+seaborn==0.13.2
+scipy==1.13.1
+scikit-learn==1.4.2
+networkx==3.3
+h5py==3.10.0
+plotly==5.22.0
+bokeh==3.4.1
+flask==3.0.2

@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Behavioral Sensing Research"
+authors:
+  - family-names: Ribeiro
+    given-names: Diogo
+    email: dfr@esmad.ipp.pt
+    affiliation: ESMAD - Instituto Politécnico do Porto
+    orcid: https://orcid.org/0009-0001-2022-7072

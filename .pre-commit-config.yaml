@@ -1,0 +1,25 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+        args: [--line-length=88]
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-docstrings]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        args: ["--ignore-missing-imports", "--follow-imports=skip"]
+        additional_dependencies: []
+        files: "^(benchmarking/|tests/|docs/conf.py|setup.py)"
+  - repo: local
+    hooks:
+      - id: radon
+        name: radon-complexity
+        entry: radon cc -nc
+        language: system
+        files: "\\.py$"
