@@ -37,12 +37,14 @@ def detect_outliers(dataset: SensorDataset, z_thresh: float = 3.0) -> pd.DataFra
     """Identify outlier readings using a z-score threshold."""
     df = dataset.to_dataframe()
     z = (df - df.mean()) / df.std(ddof=0)
-    outliers = (np.abs(z) > z_thresh)
+    outliers = np.abs(z) > z_thresh
     logger.debug("Outlier counts per sensor: %s", outliers.sum().to_dict())
     return outliers
 
 
-def align_sensors(datasets: List[SensorDataset], freq: str = "1min") -> List[SensorDataset]:
+def align_sensors(
+    datasets: List[SensorDataset], freq: str = "1min"
+) -> List[SensorDataset]:
     """Temporal alignment across multiple sensors/datasets."""
     if not datasets:
         raise ValueError("No datasets provided for alignment")

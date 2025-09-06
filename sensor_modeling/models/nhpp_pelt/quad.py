@@ -24,6 +24,7 @@ class QuadratureConfig:
     ridge : float
         Small diagonal ridge added to the Hessian to ensure positive definiteness.
     """
+
     n_points: int = 256
     ridge: float = 1e-8
 

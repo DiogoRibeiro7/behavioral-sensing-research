@@ -24,6 +24,12 @@ class HierarchicalHMM(BaseHMM):
         Random seed for initialization.
     """
 
-    def __init__(self, n_states: int = 3, levels: int = 2, n_iter: int = 10, random_state: int | None = None):
+    def __init__(
+        self,
+        n_states: int = 3,
+        levels: int = 2,
+        n_iter: int = 10,
+        random_state: int | None = None,
+    ):
         super().__init__(n_states=n_states, n_iter=n_iter, random_state=random_state)
         self.levels = levels

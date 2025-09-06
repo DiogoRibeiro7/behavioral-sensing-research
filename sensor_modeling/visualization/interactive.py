@@ -60,7 +60,9 @@ def export(fig: Any, path: str) -> None:
         fig.write_html(path)
     elif fig.__class__.__module__.startswith("bokeh"):
         html = file_html(fig, CDN, "export")
-        with open(path, "w", encoding="utf-8") as fh:  # pragma: no cover - simple file write
+        with open(
+            path, "w", encoding="utf-8"
+        ) as fh:  # pragma: no cover - simple file write
             fh.write(html)
     else:  # pragma: no cover - defensive fallback
         raise TypeError("Unsupported figure type")

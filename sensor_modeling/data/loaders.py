@@ -60,7 +60,9 @@ def load_json(path: str, timestamp_field: str = "timestamp") -> SensorDataset:
         logger.error("JSON structure invalid: %s", exc)
         raise ValueError("Invalid JSON structure for tabular data") from exc
     if timestamp_field not in df.columns:
-        raise ValueError(f"Timestamp field '{timestamp_field}' missing from JSON records")
+        raise ValueError(
+            f"Timestamp field '{timestamp_field}' missing from JSON records"
+        )
     df[timestamp_field] = pd.to_datetime(df[timestamp_field])
     df = df.set_index(timestamp_field).sort_index()
     logger.info("Loaded JSON with shape %s from %s", df.shape, path)

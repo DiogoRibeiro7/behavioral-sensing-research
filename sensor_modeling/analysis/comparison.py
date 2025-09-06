@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-def cross_validate(models: Dict[str, Any], data: SensorDataset | pd.DataFrame, n_splits: int = 3) -> Dict[str, float]:
+def cross_validate(
+    models: Dict[str, Any], data: SensorDataset | pd.DataFrame, n_splits: int = 3
+) -> Dict[str, float]:
     """Perform simple cross-validation across *models*.
 
     Parameters

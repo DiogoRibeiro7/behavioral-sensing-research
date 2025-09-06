@@ -10,7 +10,9 @@ Array1D = np.ndarray
 Array2D = np.ndarray
 
 
-def open_uniform_knots(delta: float, degree: int, n_basis: int, internal_knots: Optional[Array1D]) -> Array1D:
+def open_uniform_knots(
+    delta: float, degree: int, n_basis: int, internal_knots: Optional[Array1D]
+) -> Array1D:
     """
     Construct an open (clamped) knot vector on [0, delta].
 
@@ -27,9 +29,15 @@ def open_uniform_knots(delta: float, degree: int, n_basis: int, internal_knots: 
 
     if internal_knots is not None:
         internal_knots = np.asarray(internal_knots, dtype=float)
-        type_check(np.all((internal_knots > 0) & (internal_knots < delta)), "internal_knots must be in (0, delta).")
+        type_check(
+            np.all((internal_knots > 0) & (internal_knots < delta)),
+            "internal_knots must be in (0, delta).",
+        )
         expected = internal_knots.size + degree + 1
-        type_check(n_basis == expected, f"n_basis must equal len(internal_knots)+degree+1 = {expected}.")
+        type_check(
+            n_basis == expected,
+            f"n_basis must equal len(internal_knots)+degree+1 = {expected}.",
+        )
         breaks = np.r_[0.0, internal_knots, delta]
     else:
         n_internal = n_basis - degree - 1
@@ -53,7 +61,9 @@ def _basis_at_scalar(t: float, degree: int, knots: Array1D) -> Array1D:
 
     # degree 0
     for i in range(n_basis):
-        if knots[i] <= t < knots[i + 1] or (t == knots[-1] and knots[i] <= t <= knots[i + 1]):
+        if knots[i] <= t < knots[i + 1] or (
+            t == knots[-1] and knots[i] <= t <= knots[i + 1]
+        ):
             N[0, i] = 1.0
 
     # recursion
@@ -62,7 +72,13 @@ def _basis_at_scalar(t: float, degree: int, knots: Array1D) -> Array1D:
             left_den = knots[i + k] - knots[i]
             right_den = knots[i + k + 1] - knots[i + 1]
             left = 0.0 if left_den <= 0 else (t - knots[i]) / left_den * N[k - 1, i]
-            right = 0.0 if right_den <= 0 else (knots[i + k + 1] - t) / right_den * N[k - 1, i + 1] if i + 1 < n_basis else 0.0
+            right = (
+                0.0
+                if right_den <= 0
+                else (knots[i + k + 1] - t) / right_den * N[k - 1, i + 1]
+                if i + 1 < n_basis
+                else 0.0
+            )
             N[k, i] = left + right
 
     return N[degree, :]

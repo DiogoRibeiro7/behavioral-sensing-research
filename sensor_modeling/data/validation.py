@@ -25,7 +25,9 @@ def check_temporal_consistency(dataset: SensorDataset) -> bool:
     return True
 
 
-def validate_sensor_ranges(dataset: SensorDataset, min_val: float = 0.0, max_val: float = 1.0) -> bool:
+def validate_sensor_ranges(
+    dataset: SensorDataset, min_val: float = 0.0, max_val: float = 1.0
+) -> bool:
     """Ensure sensor readings fall within expected bounds."""
     df = dataset.to_dataframe()
     valid = df.apply(lambda c: c.between(min_val, max_val).all()).all()
@@ -34,14 +36,18 @@ def validate_sensor_ranges(dataset: SensorDataset, min_val: float = 0.0, max_val
     return bool(valid)
 
 
-def detect_sensor_failures(dataset: SensorDataset, window: int = 100) -> Dict[str, bool]:
+def detect_sensor_failures(
+    dataset: SensorDataset, window: int = 100
+) -> Dict[str, bool]:
     """Detect potential sensor failures using long constant stretches."""
     df = dataset.to_dataframe()
     failures: Dict[str, bool] = {}
     for col in df.columns:
         series = df[col]
         rolling = series.rolling(window=window, min_periods=window)
-        failures[col] = any(rolling.apply(lambda x: x.nunique() <= 1, raw=False).fillna(False))
+        failures[col] = any(
+            rolling.apply(lambda x: x.nunique() <= 1, raw=False).fillna(False)
+        )
         if failures[col]:
             logger.warning("Possible failure detected in sensor '%s'", col)
     return failures

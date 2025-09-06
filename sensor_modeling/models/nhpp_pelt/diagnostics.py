@@ -32,6 +32,7 @@ class DiagConfig:
     alpha : float
         Transparency for histograms and fills.
     """
+
     grid_points: int = 2000
     figsize: Tuple[float, float] = (12.0, 7.0)
     dpi: int = 110
@@ -39,7 +40,9 @@ class DiagConfig:
     alpha: float = 0.5
 
 
-def _lambda_grid(model: Any, seg_index: int, grid_points: int) -> Tuple[Array1D, Array1D]:
+def _lambda_grid(
+    model: Any, seg_index: int, grid_points: int
+) -> Tuple[Array1D, Array1D]:
     """Compute λ̂_k(t) on a uniform grid for segment k."""
     delta: float = float(getattr(model, "delta_"))
     grid = np.linspace(0.0, delta, grid_points)
@@ -54,7 +57,10 @@ def _cumulative_int(grid: Array1D, lam: Array1D) -> Array1D:
     Returns array of same length as grid with Λ(0)=0.
     """
     # Guard
-    _check(grid.ndim == 1 and lam.ndim == 1 and grid.size == lam.size, "grid/lam shape mismatch.")
+    _check(
+        grid.ndim == 1 and lam.ndim == 1 and grid.size == lam.size,
+        "grid/lam shape mismatch.",
+    )
     d = np.diff(grid)
     # trapezoid increments: ∫ lam ~ 0.5*(lam_i + lam_{i+1})*Δ
     incr = 0.5 * (lam[:-1] + lam[1:]) * d
@@ -156,21 +162,26 @@ def plot_time_rescaling_diagnostics(
     - No external stats deps; uniform line and exponential quantiles are computed analytically.
     - Uses Matplotlib defaults for colors.
     """
-    _check(hasattr(model, "segments_") and hasattr(model, "delta_"), "Model missing required attributes.")
+    _check(
+        hasattr(model, "segments_") and hasattr(model, "delta_"),
+        "Model missing required attributes.",
+    )
     segments: List[Tuple[int, int]] = list(getattr(model, "segments_"))
     n_segments = len(segments)
     _check(n_segments >= 1, "No segments found.")
 
     # Group events per segment
     seg_days: List[List[Array1D]] = []
-    for (i_start, i_end) in segments:
+    for i_start, i_end in segments:
         seg_days.append([np.asarray(d, float) for d in days[i_start - 1 : i_end]])
 
     # Precompute transformed values
     all_U: List[Array1D] = []
     all_dL: List[Array1D] = []
     for k, evs in enumerate(seg_days):
-        dL_list, U_list = time_rescale_events_for_segment(model, k, evs, grid_points=config.grid_points)
+        dL_list, U_list = time_rescale_events_for_segment(
+            model, k, evs, grid_points=config.grid_points
+        )
         all_U.append(np.concatenate(U_list) if U_list else np.array([], float))
         all_dL.append(np.concatenate(dL_list) if dL_list else np.array([], float))
 
@@ -183,7 +194,9 @@ def plot_time_rescaling_diagnostics(
         ax = fig.add_subplot(gs[0, k])
         u = all_U[k]
         # Histogram (counts normalized to density); no explicit color
-        ax.hist(u, bins=config.hist_bins, range=(0.0, 1.0), density=True, alpha=config.alpha)
+        ax.hist(
+            u, bins=config.hist_bins, range=(0.0, 1.0), density=True, alpha=config.alpha
+        )
         # Uniform(0,1) reference density = 1 on [0,1]
         ax.plot([0.0, 1.0], [1.0, 1.0])  # default color/style
         D = ks_stat_uniform(u)

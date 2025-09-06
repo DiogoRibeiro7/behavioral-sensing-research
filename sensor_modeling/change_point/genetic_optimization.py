@@ -55,7 +55,5 @@ class GeneticOptimizationCPD:
         cps = np.where(diffs > self.threshold_)[0] + 1
         if plot:
             plot_change_points(self.series, cps, title="GA Optimization CPD")
-        logger.info(
-            "GeneticOptimizationCPD detected %d change points", len(cps)
-        )
+        logger.info("GeneticOptimizationCPD detected %d change points", len(cps))
         return cps
