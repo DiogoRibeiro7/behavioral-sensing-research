@@ -1,0 +1,76 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'docs/**'
+      - 'sensor_modeling/**'
+      - '*.md'
+      - '.readthedocs.yaml'
+      - 'pyproject.toml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'sensor_modeling/**'
+      - '*.md'
+      - '.readthedocs.yaml'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    name: Test documentation build
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for proper versioning
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r docs/requirements.txt
+        pip install -e .
+    
+    - name: Build documentation
+      run: |
+        cd docs
+        make clean
+        make html SPHINXOPTS="-W --keep-going"
+        
+    - name: Check documentation build
+      run: |
+        # Check if HTML was generated
+        test -f docs/_build/html/index.html
+        echo "Documentation built successfully!"
+        
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation-html
+        path: docs/_build/html/
+        retention-days: 30
+    
+    - name: Check for broken links
+      run: |
+        cd docs
+        make linkcheck
+      continue-on-error: true  # Don't fail the build on broken external links
+    
+    # Test that Read the Docs build will work
+    - name: Test Read the Docs build compatibility
+      run: |
+        # Simulate RTD environment
+        export READTHEDOCS=True
+        cd docs
+        make clean
+        sphinx-build -b html . _build/html -W --keep-going
+        echo "Read the Docs compatibility test passed!"
