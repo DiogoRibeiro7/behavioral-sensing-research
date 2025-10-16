@@ -7,5 +7,5 @@ scikit-learn==1.5.0
 networkx==3.3
 h5py==3.10.0
 plotly==5.22.0
-bokeh==3.4.1
+bokeh==3.4.3
 flask==3.1.2
