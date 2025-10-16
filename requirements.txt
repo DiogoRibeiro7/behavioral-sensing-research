@@ -5,7 +5,7 @@ seaborn==0.13.2
 scipy==1.13.1
 scikit-learn==1.5.0
 networkx==3.3
-h5py==3.10.0
+h5py==3.14.0
 plotly==5.22.0
 bokeh==3.4.3
 flask==3.1.2
