@@ -8,4 +8,4 @@ networkx==3.3
 h5py==3.14.0
 plotly==6.5.0
 bokeh==3.8.2
-flask==3.1.2
+flask==3.1.3
