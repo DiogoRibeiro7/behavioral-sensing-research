@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from typing import Callable, List
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from sensor_modeling.models.nhpp_pelt import NHPPConfig, NHPPPELT
+from sensor_modeling.models.nhpp_pelt import NHPPPELT, NHPPConfig
 from sensor_modeling.models.nhpp_pelt.plotting import (
-    PlotConfig,
     HistConfig,
+    PlotConfig,
     plot_segments_and_intensities_with_histograms,
 )
-
 
 Array1D = np.ndarray
 

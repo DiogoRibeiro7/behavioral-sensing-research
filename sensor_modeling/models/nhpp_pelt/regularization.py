@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Iterable, List, Sequence, Tuple
+from collections.abc import Iterable, Sequence
+from typing import List, Tuple
+
 import numpy as np
 
 Array1D = np.ndarray
@@ -53,7 +55,7 @@ def p_spline_RtR(p: int, order: int = 2, gamma: float = 0.0) -> Array2D:
 
 def sweep_gamma(
     days: Sequence[np.ndarray],
-    base_cfg: "NHPPConfig",
+    base_cfg: NHPPConfig,
     gammas: Iterable[float],
     *,
     order: int = 2,
@@ -69,8 +71,8 @@ def sweep_gamma(
       + β per segment.
     """
     # local imports to avoid circular deps
-    from .model import NHPPConfig, NHPPPELT
     from .bspline import bspline_design_matrix
+    from .model import NHPPPELT, NHPPConfig
     from .optimizer import SegmentOptimizer
     from .quad import QuadratureConfig
 

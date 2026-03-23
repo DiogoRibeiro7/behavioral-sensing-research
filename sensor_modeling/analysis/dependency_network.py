@@ -5,14 +5,15 @@ This module builds and analyzes cross-sensor dependency networks
 using Granger causality and network analysis techniques.
 """
 
+import logging
+from typing import Dict, List, Tuple
+
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import mutual_info_score
-from typing import Dict, List, Tuple
-import logging
 
 from .granger_causality import GrangerCausalityTest
 

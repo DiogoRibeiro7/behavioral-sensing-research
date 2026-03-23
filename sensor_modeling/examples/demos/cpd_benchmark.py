@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import time
+
 import numpy as np
 
 from sensor_modeling.change_point import (
+    AdaptiveNormalizer,
     EmbeddingCPD,
     EnergyEfficientCPD,
-    AdaptiveNormalizer,
     GeneticOptimizationCPD,
 )
 from sensor_modeling.utils import plot_benchmark_results

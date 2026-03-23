@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from .utils import type_check
 
@@ -124,8 +125,8 @@ def plot_segments_and_intensities_with_histograms(
     )
 
     n_days = len(days)
-    segments: List[Tuple[int, int]] = list(getattr(model, "segments_"))
-    delta: float = float(getattr(model, "delta_"))
+    segments: List[Tuple[int, int]] = list(model.segments_)
+    delta: float = float(model.delta_)
     n_segments = len(segments)
     type_check(n_segments >= 1, "Model has no segments.")
 

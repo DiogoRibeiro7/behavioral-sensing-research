@@ -7,7 +7,8 @@ that they can run in environments without a full web server.
 """
 from __future__ import annotations
 
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import pandas as pd
 import plotly.express as px

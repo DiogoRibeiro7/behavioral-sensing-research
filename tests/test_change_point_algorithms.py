@@ -1,9 +1,9 @@
 import numpy as np
 
 from sensor_modeling.change_point import (
+    AdaptiveNormalizer,
     EmbeddingCPD,
     EnergyEfficientCPD,
-    AdaptiveNormalizer,
     GeneticOptimizationCPD,
 )
 

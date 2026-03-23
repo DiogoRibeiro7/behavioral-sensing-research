@@ -1,7 +1,7 @@
 import pandas as pd
 
+from sensor_modeling.analysis import behavioral_analysis, comparison, reporting
 from sensor_modeling.analysis.pipeline import AnalysisPipeline
-from sensor_modeling.analysis import comparison, behavioral_analysis, reporting
 from sensor_modeling.hmm.base import BaseHMM
 from sensor_modeling.utils.data_io import SensorDataset
 

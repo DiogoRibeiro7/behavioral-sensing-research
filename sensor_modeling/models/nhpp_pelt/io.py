@@ -3,7 +3,8 @@ from __future__ import annotations
 import csv
 import glob
 import os
-from typing import List, Sequence
+from collections.abc import Sequence
+from typing import List
 
 import numpy as np
 
@@ -36,7 +37,7 @@ def load_days_from_csv_folder(folder: str, column: str = "time") -> List[Array1D
     days: List[Array1D] = []
     for p in paths:
         vals: List[float] = []
-        with open(p, "r", newline="") as f:
+        with open(p, newline="") as f:
             reader = csv.DictReader(f)
             if reader.fieldnames is None or column not in reader.fieldnames:
                 raise ValueError(f"{p}: missing '{column}' column.")

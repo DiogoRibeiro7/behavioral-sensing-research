@@ -7,8 +7,8 @@ the next time step contains a change point.
 """
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 import numpy as np
 from sklearn.neural_network import MLPClassifier
@@ -44,7 +44,7 @@ class DeepChangePointDetector:
             y.append(label)
         return np.vstack(x), np.array(y)
 
-    def fit(self, seq: Sequence[float]) -> "DeepChangePointDetector":
+    def fit(self, seq: Sequence[float]) -> DeepChangePointDetector:
         """Train the underlying classifier on a sequence."""
         X, y = self._build_dataset(seq)
         if X.size:

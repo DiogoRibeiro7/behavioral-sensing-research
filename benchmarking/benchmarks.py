@@ -5,10 +5,10 @@ import time
 import tracemalloc
 from typing import Dict
 
-from sensor_modeling.utils.data_io import simulate_sensor_data
 from sensor_modeling.models.bernoulli_ar.base_model import (
     BernoulliAutoregressiveModel,
 )
+from sensor_modeling.utils.data_io import simulate_sensor_data
 
 
 def run_benchmark(n_days: int = 3, n_sensors: int = 3) -> Dict[str, float]:

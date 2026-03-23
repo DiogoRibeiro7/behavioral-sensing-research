@@ -20,17 +20,17 @@ single dictionary that can be further analysed or exported.
 
 from __future__ import annotations
 
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict
-import logging
 
 import pandas as pd
 
-from ..utils.data_io import SensorDataset
-from ..models.bernoulli_ar.base_model import BernoulliAutoregressiveModel
-from ..hmm.base import BaseHMM
 from ..change_point.embedding_cpd import EmbeddingCPD
+from ..hmm.base import BaseHMM
+from ..models.bernoulli_ar.base_model import BernoulliAutoregressiveModel
 from ..models.nhpp_pelt.model import NHPPPELT, NHPPConfig
+from ..utils.data_io import SensorDataset
 
 logger = logging.getLogger(__name__)
 
@@ -98,9 +98,9 @@ class AnalysisPipeline:
     def generate_report(self, results: Dict[str, Any], output_dir: str) -> None:
         """Generate LaTeX, HTML and FHIR reports for *results*."""
         from .reporting import (
-            generate_latex_report,
             create_html_dashboard,
             export_to_fhir,
+            generate_latex_report,
         )
 
         generate_latex_report(results, f"{output_dir}/analysis.tex")

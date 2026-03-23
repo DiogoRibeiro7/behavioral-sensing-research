@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Dict, Any, List
 import logging
+from typing import Any, Dict, List
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
 from scipy.stats import ttest_rel
-import matplotlib.pyplot as plt
+from sklearn.model_selection import KFold
 
 from ..utils.data_io import SensorDataset
 

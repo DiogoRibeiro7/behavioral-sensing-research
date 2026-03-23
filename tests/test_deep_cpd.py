@@ -1,8 +1,8 @@
 """Tests for deep learning change-point detector."""
 
 from sensor_modeling.models.change_point_detection import (
-    DeepCPDConfig,
     DeepChangePointDetector,
+    DeepCPDConfig,
 )
 
 

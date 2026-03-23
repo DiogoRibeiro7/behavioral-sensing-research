@@ -1,6 +1,7 @@
 """Property-based tests for simulation utilities."""
 
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from sensor_modeling.utils.data_io import simulate_sensor_data
 

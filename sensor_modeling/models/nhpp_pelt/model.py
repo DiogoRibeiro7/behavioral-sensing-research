@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, Sequence, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from ...utils.data_io import SensorDataset
 
+from ...utils.data_io import SensorDataset
 from .bspline import bspline_design_matrix, open_uniform_knots
-from .optimizer import SegmentOptimizer, NewtonConfig
+from .optimizer import NewtonConfig, SegmentOptimizer
 from .quad import QuadratureConfig
-from .utils import type_check, normal_ppf
+from .utils import normal_ppf, type_check
 
 Array1D = np.ndarray
 Array2D = np.ndarray
@@ -105,7 +106,7 @@ class NHPPPELT:
 
     def fit(
         self, data: Sequence[Array1D] | SensorDataset, sensor: str | None = None
-    ) -> "NHPPPELT":
+    ) -> NHPPPELT:
         """
         Fit the model. After fitting, attributes include:
           - changepoints_ : List[int] in 1..n-1

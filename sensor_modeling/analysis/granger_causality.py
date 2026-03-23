@@ -5,12 +5,13 @@ This module implements Granger causality tests specifically adapted
 for binary sensor time series data.
 """
 
+import logging
+from typing import Dict, List
+
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2
 from sklearn.linear_model import LogisticRegression
-from typing import Dict, List
-import logging
 
 logger = logging.getLogger(__name__)
 

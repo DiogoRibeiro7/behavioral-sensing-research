@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Dict, Any
 import json
 import logging
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 

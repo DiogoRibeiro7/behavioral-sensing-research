@@ -4,14 +4,16 @@ This module contains the core single-sensor model implementation
 based on Gillam et al. (2022).
 """
 
+import logging
+from typing import Dict, List
+
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 from scipy.signal import lfilter
 from scipy.stats import norm
-from typing import Dict, List
+
 from ...utils.data_io import SensorDataset
-import logging
 
 logger = logging.getLogger(__name__)
 

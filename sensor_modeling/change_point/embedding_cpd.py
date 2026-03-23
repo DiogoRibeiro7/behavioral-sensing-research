@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+
 import numpy as np
 
 from ..utils.plotting import plot_change_points
@@ -25,7 +26,7 @@ class EmbeddingCPD:
 
     window: int = 5
 
-    def fit(self, series: np.ndarray) -> "EmbeddingCPD":
+    def fit(self, series: np.ndarray) -> EmbeddingCPD:
         """Learn embeddings from the input series."""
         self.series = np.asarray(series)
         kernel = np.ones(self.window) / self.window

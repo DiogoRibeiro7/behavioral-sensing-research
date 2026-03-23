@@ -1,7 +1,7 @@
 """Change-point detection algorithms."""
 
-from .pelt import PELTChangePointDetector
 from .deep import DeepChangePointDetector, DeepCPDConfig
+from .pelt import PELTChangePointDetector
 
 __all__ = [
     "PELTChangePointDetector",

@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Iterable, Dict, Generator, Optional
+from collections.abc import Generator, Iterable
+from typing import Dict
 
 import pandas as pd
 
@@ -47,7 +48,7 @@ def load_csv(path: str, timestamp_col: str = "timestamp", **kwargs) -> SensorDat
 def load_json(path: str, timestamp_field: str = "timestamp") -> SensorDataset:
     """Load sensor event log data from a JSON file."""
     try:
-        with open(path, "r") as f:
+        with open(path) as f:
             records = json.load(f)
     except Exception as exc:
         logger.error("Failed to read JSON %s: %s", path, exc)

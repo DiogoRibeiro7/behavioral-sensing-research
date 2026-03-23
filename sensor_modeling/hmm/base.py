@@ -1,7 +1,8 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.base import BaseEstimator
 import logging
+
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.base import BaseEstimator
 
 logger = logging.getLogger(__name__)
 

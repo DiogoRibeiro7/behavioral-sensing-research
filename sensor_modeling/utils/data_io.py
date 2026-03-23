@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import List, Dict
 import logging
+from dataclasses import dataclass
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ class SensorDataset:
     data: pd.DataFrame
 
     @classmethod
-    def from_csv(cls, path: str) -> "SensorDataset":
+    def from_csv(cls, path: str) -> SensorDataset:
         """Load sensor data from a CSV file."""
         df = pd.read_csv(path, index_col=0, parse_dates=True)
         logger.info("Loaded %d rows from %s", len(df), path)

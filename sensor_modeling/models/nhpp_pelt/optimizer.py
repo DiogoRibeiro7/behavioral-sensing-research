@@ -8,8 +8,8 @@ import numpy as np
 
 from .bspline import bspline_design_matrix
 from .quad import QuadratureConfig, leggauss_on_interval
-from .utils import type_check
 from .regularization import p_spline_RtR  # <-- NEW
+from .utils import type_check
 
 Array1D = np.ndarray
 Array2D = np.ndarray

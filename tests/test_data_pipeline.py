@@ -1,9 +1,10 @@
 import json
+
 import numpy as np
 import pandas as pd
 import pytest
 
-from sensor_modeling.data import loaders, preprocessing, validation, synthetic
+from sensor_modeling.data import loaders, preprocessing, synthetic, validation
 from sensor_modeling.utils.data_io import SensorDataset
 
 

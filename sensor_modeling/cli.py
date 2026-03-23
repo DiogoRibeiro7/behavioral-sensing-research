@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from .utils.logging_config import setup_logging
 import argparse
 
-from .utils.data_io import SensorDataset
 from .models.bernoulli_ar.base_model import BernoulliAutoregressiveModel
 from .models.nhpp_pelt.model import NHPPPELT, NHPPConfig
+from .utils.data_io import SensorDataset
+from .utils.logging_config import setup_logging
 
 
 def main() -> None:

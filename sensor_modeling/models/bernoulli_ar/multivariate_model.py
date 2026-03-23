@@ -5,15 +5,15 @@ This module extends the single-sensor model to predict multiple
 sensors simultaneously while modeling their interactions.
 """
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple
 import logging
+from typing import Dict, List
 
-from .base_model import BernoulliAutoregressiveModel
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
 from ...analysis.dependency_network import SensorDependencyNetwork
+from .base_model import BernoulliAutoregressiveModel
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +228,7 @@ class MultivariateAutoregressiveModel:
 
         # Network overview
         net_stats = analysis["network_statistics"]
-        report.append(f"\nNETWORK OVERVIEW:")
+        report.append("\nNETWORK OVERVIEW:")
         report.append(f"Sensors analyzed: {net_stats['num_nodes']}")
         report.append(f"Causal relationships: {net_stats['num_edges']}")
         report.append(f"Network density: {net_stats['density']:.3f}")
@@ -236,7 +236,7 @@ class MultivariateAutoregressiveModel:
 
         # Sensor roles
         roles = analysis["sensor_roles"]
-        report.append(f"\nSENSOR ROLES:")
+        report.append("\nSENSOR ROLES:")
         for role, sensors in roles.items():
             if sensors:
                 report.append(f"{role.capitalize()}: {', '.join(sensors)}")
@@ -249,13 +249,13 @@ class MultivariateAutoregressiveModel:
         # Communities
         communities = analysis["communities"]
         if communities:
-            report.append(f"\nSENSOR COMMUNITIES:")
+            report.append("\nSENSOR COMMUNITIES:")
             for i, community in enumerate(communities, 1):
                 report.append(f"Community {i}: {', '.join(community)}")
 
         # Model comparison
         improvements = model_comparison["improvements"]
-        report.append(f"\nMODEL COMPARISON (BIC improvements):")
+        report.append("\nMODEL COMPARISON (BIC improvements):")
         report.append(
             f"Network-informed vs Independent: {improvements['network_vs_independent']:.2f}"
         )
@@ -271,7 +271,7 @@ class MultivariateAutoregressiveModel:
             analysis["causality_results"]["causality_detected"]
         ]
         if len(significant) > 0:
-            report.append(f"\nSIGNIFICANT CAUSAL RELATIONSHIPS:")
+            report.append("\nSIGNIFICANT CAUSAL RELATIONSHIPS:")
             for _, row in significant.head(10).iterrows():  # Show top 10
                 report.append(
                     f"{row['cause']} → {row['effect']} (p={row['p_value']:.4f})"

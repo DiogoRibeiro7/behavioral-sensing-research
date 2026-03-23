@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Dict
 import logging
+from typing import Dict
 
-from .data_io import SensorDataset
 import numpy as np
 import pandas as pd
 
+from .data_io import SensorDataset
 from .plotting import plot_quantile_intervals
 
 logger = logging.getLogger(__name__)
