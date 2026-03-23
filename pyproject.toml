@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Comprehensive research-grade toolkit for analyzing behavioral sensor data in smart environments"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.10,<3.13"
 
 authors = [
     {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"},
@@ -58,11 +58,9 @@ classifiers = [
     
     # Programming Language
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     
     # Operating System
@@ -239,7 +237,7 @@ exclude = ["tests*", "docs*", "examples*", "benchmarking*"]
 # Black configuration
 [tool.black]
 line-length = 88
-target-version = ['py39', 'py310', 'py311', 'py312']
+target-version = ['py310', 'py311', 'py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -269,7 +267,7 @@ known_third_party = [
 
 # mypy configuration
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -360,7 +358,7 @@ skips = ["B101", "B601"]
 
 # Ruff configuration (alternative to flake8)
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 select = [
     "E",  # pycodestyle errors
