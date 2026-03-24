@@ -2,5 +2,9 @@ __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
+.coverage
+.hypothesis/
+htmlcov/
+coverage.xml
 .ipynb_checkpoints/
 docs/_build/

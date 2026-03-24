@@ -7,7 +7,7 @@ from sensor_modeling.utils.data_io import SensorDataset
 
 
 def _sample_df():
-    idx = pd.date_range("2024-01-01", periods=10, freq="1H")
+    idx = pd.date_range("2024-01-01", periods=10, freq="1h")
     data = {"sensor_0": [0, 1] * 5, "sensor_1": [1, 0] * 5}
     return pd.DataFrame(data, index=idx)
 

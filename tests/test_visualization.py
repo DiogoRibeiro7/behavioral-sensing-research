@@ -17,7 +17,7 @@ def _sample_data():
     """Create a small synthetic dataset for tests."""
     return pd.DataFrame(
         {
-            "timestamp": pd.date_range("2024-01-01", periods=10, freq="H"),
+            "timestamp": pd.date_range("2024-01-01", periods=10, freq="h"),
             "sensor": ["a"] * 10,
             "value": range(10),
             "activity": ["walk"] * 10,

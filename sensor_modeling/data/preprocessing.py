@@ -24,7 +24,7 @@ def impute_missing(dataset: SensorDataset, strategy: str = "ffill") -> SensorDat
     """Impute missing values using the specified strategy."""
     df = dataset.to_dataframe().copy()
     if strategy == "ffill":
-        df = df.fillna(method="ffill").fillna(method="bfill")
+        df = df.ffill().bfill()
     elif strategy == "mean":
         df = df.fillna(df.mean())
     else:
