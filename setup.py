@@ -40,5 +40,5 @@ setup(
             "sensor-modeling=sensor_modeling.cli:main",
         ]
     },
-    python_requires=">=3.9",
+    python_requires=">=3.10,<3.13",
 )
