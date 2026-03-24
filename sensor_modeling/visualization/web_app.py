@@ -1,6 +1,7 @@
 """Lightweight Flask web interface for running analyses."""
 from __future__ import annotations
 
+import argparse
 import os
 from functools import wraps
 from pathlib import Path
@@ -93,3 +94,21 @@ def run():
 def create_app() -> Flask:
     """Create the Flask application."""
     return app
+
+
+def main() -> None:
+    """Run the Flask development server for the web app."""
+    parser = argparse.ArgumentParser(description="Run the sensor visualization app")
+    parser.add_argument("--host", default="127.0.0.1", help="Host interface to bind")
+    parser.add_argument("--port", type=int, default=5000, help="Port to bind")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Run the Flask development server in debug mode",
+    )
+    args = parser.parse_args()
+    create_app().run(host=args.host, port=args.port, debug=args.debug)
+
+
+if __name__ == "__main__":
+    main()

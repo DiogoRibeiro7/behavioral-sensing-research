@@ -28,6 +28,12 @@ def test_pipeline_and_reporting(tmp_path):
     assert html.exists()
     assert fhir.exists()
 
+    nested_output = tmp_path / "nested" / "reports"
+    pipe.generate_report(results, nested_output)
+    assert (nested_output / "analysis.tex").exists()
+    assert (nested_output / "dashboard.html").exists()
+    assert (nested_output / "analysis_fhir.json").exists()
+
 
 def test_comparison_and_behavioral():
     ds = SensorDataset(_sample_df())

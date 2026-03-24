@@ -1,6 +1,7 @@
 """Tests for visualization utilities and web app."""
 
 import os
+from unittest.mock import MagicMock
 
 import pandas as pd
 from flask import Flask
@@ -60,3 +61,14 @@ def test_web_app_factory():
         headers={"Authorization": "Basic dXNlcjpwYXNz"},
     )
     assert response.status_code == 200
+
+
+def test_web_app_main(monkeypatch):
+    """The web app CLI entry point starts the Flask app."""
+    fake_run = MagicMock()
+    monkeypatch.setattr(web_app.app, "run", fake_run)
+    monkeypatch.setattr("sys.argv", ["sensor-viz"])
+
+    web_app.main()
+
+    fake_run.assert_called_once_with(host="127.0.0.1", port=5000, debug=False)
