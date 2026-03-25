@@ -52,7 +52,7 @@ The **Sensor Modeling Research Toolkit** addresses the growing need for reproduc
 - Energy-efficient CPAM algorithm ([Cook et al., 2020](https://doi.org/10.3390/s20010310))
 - Adaptive normalization for non-stationary data
 - Genetic algorithm optimization for parameter tuning
-- PELT-based segmentation with various penalty functions
+- Univariate PELT-based segmentation with configurable penalty and L1/L2 costs
 
 #### **Non-Homogeneous Poisson Processes (NHPP)**
 
