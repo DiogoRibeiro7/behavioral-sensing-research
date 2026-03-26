@@ -4,6 +4,7 @@ import os
 from unittest.mock import MagicMock
 
 import pandas as pd
+from bokeh.models import Div, Slider
 from flask import Flask
 
 from sensor_modeling.visualization import (
@@ -33,6 +34,39 @@ def test_interactive_export(tmp_path):
     out = tmp_path / "fig.html"
     interactive.export(fig, out)
     assert out.exists()
+
+
+class _DummyTuningModel:
+    """Small model with a deterministic parameter score."""
+
+    def __init__(self):
+        self.penalty = 1.0
+
+    def score_parameter(self, param, value):
+        assert param == "penalty"
+        return -(value - 2.0) ** 2 + 4.0
+
+
+def test_parameter_tuning_returns_visible_diagnostic_layout():
+    """Parameter tuning should render a real plot and summary, not a stub."""
+    layout = interactive.parameter_tuning(
+        _DummyTuningModel(), "penalty", [0.5, 1.0, 2.0, 3.0]
+    )
+    assert isinstance(layout.children[0], Slider)
+    assert isinstance(layout.children[1], Div)
+    assert layout.children[2].height > 0
+    assert layout.children[2].title.text == "penalty diagnostic sweep"
+
+
+def test_parameter_tuning_export_supports_bokeh_layout(tmp_path):
+    """Bokeh parameter tuning layouts should export to standalone HTML."""
+    layout = interactive.parameter_tuning(
+        _DummyTuningModel(), "penalty", [0.5, 1.0, 2.0, 3.0]
+    )
+    out = tmp_path / "tuning.html"
+    interactive.export(layout, out)
+    assert out.exists()
+    assert "penalty diagnostic sweep" in out.read_text(encoding="utf-8")
 
 
 def test_clinical_alerts():

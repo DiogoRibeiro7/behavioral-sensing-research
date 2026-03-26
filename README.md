@@ -450,6 +450,30 @@ model.fit(df)
 print(model.predict(df))
 ```
 
+Interactive parameter diagnostics can be built by exposing a simple scoring
+hook on the model and passing candidate values to
+`sensor_modeling.visualization.interactive.parameter_tuning()`:
+
+```python
+from sensor_modeling.visualization import interactive
+
+
+class TunableModel:
+    def __init__(self):
+        self.penalty = 1.0
+
+    def score_parameter(self, param, value):
+        return -(value - 2.0) ** 2 + 4.0
+
+
+layout = interactive.parameter_tuning(
+    TunableModel(),
+    "penalty",
+    [0.5, 1.0, 2.0, 3.0],
+)
+interactive.export(layout, "parameter_tuning.html")
+```
+
 ## Roadmap Progress
 
 Feature                  | Status
