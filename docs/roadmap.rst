@@ -11,7 +11,7 @@ Roadmap Progress
    * - Deep-learning CPD
      - Planned
    * - Missing-data handling
-     - Planned
+     - Basic strategies implemented with imputation masks; advanced modeling-aware methods remain planned
    * - HMM variants
      - Implemented
    * - Sensor failure detection

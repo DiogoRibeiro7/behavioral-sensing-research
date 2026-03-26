@@ -258,7 +258,7 @@ Feature                             | Status     | Implementation
 **Change Point Detection**          | 🟡 Partial | 4 algorithms, expanding to deep learning
 **NHPP-PELT**                       | ✅ Complete | B-spline intensities, diagnostics
 **Causal Network Analysis**         | ✅ Complete | Granger tests, network metrics
-**Missing Data Handling**           | 🔵 Planned | Advanced imputation strategies
+**Missing Data Handling**           | 🟡 Partial | Gap-aware fill/interpolate/drop/flag workflows with masks
 **Deep Learning CPD**               | 🔵 Planned | Transformer and CNN-based approaches
 **Real-time Processing**            | 🔵 Planned | Streaming algorithms and online learning
 **Clinical Integration**            | 🟡 Partial | FHIR output, expanding to HL7
