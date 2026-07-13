@@ -121,7 +121,7 @@ dev = [
     "mypy>=1.0.0",
     "bandit>=1.7.0",
     "safety>=2.0.0",
-    "radon>=5.1.0",
+    "radon>=6.0.1",
     
     # Build and Release
     "build>=0.10.0",
