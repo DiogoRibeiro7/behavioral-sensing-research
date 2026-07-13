@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added GitHub issue templates, a pull request template, and CI coverage for pushes to `develop`.
 - Added security and support policy documents.
 - Added focused tests for shared data IO, synthetic exports, HDF5 loading, sensor failure detection, plotting helpers, and model validation utilities.
+- Added release metadata consistency tests for package, citation, Zenodo, and README metadata.
 
 ### Changed
 - Refactored data-layer typing, HDF5 import handling, synthetic data export behavior, and validation internals.
