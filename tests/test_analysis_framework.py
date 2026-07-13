@@ -44,6 +44,9 @@ def test_pipeline_and_reporting(tmp_path):
 
 def test_comparison_and_behavioral():
     ds = SensorDataset(_sample_df())
+    for train_idx, test_idx in comparison.time_series_splits(ds, n_splits=3):
+        assert train_idx.max() < test_idx.min()
+
     models = {"hmm": BaseHMM()}
     scores = comparison.cross_validate(models, ds)
     assert "hmm" in scores

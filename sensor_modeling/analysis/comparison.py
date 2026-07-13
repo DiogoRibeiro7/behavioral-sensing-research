@@ -3,41 +3,53 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import ttest_rel
-from sklearn.model_selection import KFold
+from sklearn.model_selection import TimeSeriesSplit
 
 from ..utils.data_io import SensorDataset
 
 logger = logging.getLogger(__name__)
 
 
+def time_series_splits(
+    data: SensorDataset | pd.DataFrame, n_splits: int = 3
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Return chronological train/test splits for sensor time series."""
+    dataset = data if isinstance(data, SensorDataset) else SensorDataset(data)
+    df = dataset.to_dataframe()
+    if len(df) < 2:
+        raise ValueError("At least two observations are required for cross-validation")
+    split_count = min(n_splits, len(df) - 1)
+    splitter = TimeSeriesSplit(n_splits=split_count)
+    return list(splitter.split(df))
+
+
 # ---------------------------------------------------------------------------
 def cross_validate(
-    models: Dict[str, Any], data: SensorDataset | pd.DataFrame, n_splits: int = 3
-) -> Dict[str, float]:
-    """Perform simple cross-validation across *models*.
+    models: dict[str, Any], data: SensorDataset | pd.DataFrame, n_splits: int = 3
+) -> dict[str, float]:
+    """Perform chronological cross-validation across *models*.
 
     Parameters
     ----------
-    models : Dict[str, Any]
+    models : dict[str, Any]
         Mapping from model name to model instance. Each model must implement a
         :py:meth:`fit` method and optionally :py:meth:`score` or
         :py:meth:`predict`.
     data : SensorDataset | pd.DataFrame
         Input dataset.
     n_splits : int
-        Number of folds.
+        Number of chronological folds.
     """
     dataset = data if isinstance(data, SensorDataset) else SensorDataset(data)
     df = dataset.to_dataframe()
-    kf = KFold(n_splits=min(n_splits, len(df)))
-    scores: Dict[str, List[float]] = {name: [] for name in models}
-    for train_idx, test_idx in kf.split(df):
+    scores: dict[str, list[float]] = {name: [] for name in models}
+    for train_idx, test_idx in time_series_splits(dataset, n_splits=n_splits):
         train_df = df.iloc[train_idx]
         test_df = df.iloc[test_idx]
         X_test = test_df.values
@@ -62,14 +74,14 @@ def cross_validate(
 
 
 # ---------------------------------------------------------------------------
-def significance_test(scores_a: List[float], scores_b: List[float]) -> float:
+def significance_test(scores_a: list[float], scores_b: list[float]) -> float:
     """Paired t-test returning the p-value."""
     _, pvalue = ttest_rel(scores_a, scores_b, nan_policy="omit")
     return float(pvalue)
 
 
 # ---------------------------------------------------------------------------
-def standardize_metrics(metrics: Dict[str, float]) -> Dict[str, float]:
+def standardize_metrics(metrics: dict[str, float]) -> dict[str, float]:
     """Scale metric values to the [0,1] range."""
     vals = np.array(list(metrics.values()), dtype=float)
     vmin = np.nanmin(vals)
@@ -79,7 +91,7 @@ def standardize_metrics(metrics: Dict[str, float]) -> Dict[str, float]:
 
 
 # ---------------------------------------------------------------------------
-def visualize_comparison(metrics: Dict[str, float], ax=None):
+def visualize_comparison(metrics: dict[str, float], ax=None):
     """Visualize model comparison scores as a bar chart."""
     if ax is None:
         _, ax = plt.subplots()
