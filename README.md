@@ -251,6 +251,10 @@ The toolkit is organized into four primary layers designed for modularity and ex
 
 ## 📈 Roadmap Progress
 
+The high-level status table below summarizes current capabilities. See the
+full roadmap in [`docs/roadmap.rst`](docs/roadmap.rst) for release milestones,
+quality gates, and longer-term priorities.
+
 Feature                             | Status     | Implementation
 ----------------------------------- | ---------- | -----------------------------------------
 **Bernoulli Autoregressive Models** | ✅ Complete | Single/multivariate, automatic selection
