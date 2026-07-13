@@ -2,17 +2,22 @@
 
 from __future__ import annotations
 
+import json
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
+from os import PathLike
 
 import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+FilePath = str | PathLike[str]
+
 
 def read_sensor_csv(
-    path: str, timestamp_col: str = "timestamp", **kwargs
+    path: FilePath, timestamp_col: str = "timestamp", **kwargs
 ) -> pd.DataFrame:
     """Read a sensor CSV using the public loader contract.
 
@@ -52,7 +57,7 @@ class SensorDataset:
 
     @classmethod
     def from_csv(
-        cls, path: str, timestamp_col: str = "timestamp", **kwargs
+        cls, path: FilePath, timestamp_col: str = "timestamp", **kwargs
     ) -> SensorDataset:
         """Load sensor data from a CSV file."""
         df = read_sensor_csv(path, timestamp_col=timestamp_col, **kwargs)
@@ -85,8 +90,14 @@ def simulate_sensor_data(
     interaction_strength: float = 0.3,
 ) -> SensorDataset:
     """Simulate realistic binary sensor activations."""
-    np.random.seed(seed)
+    if n_days < 1:
+        raise ValueError("n_days must be at least 1")
+    if n_sensors < 1:
+        raise ValueError("n_sensors must be at least 1")
+    if interaction_strength < 0:
+        raise ValueError("interaction_strength must be non-negative")
 
+    rng = np.random.default_rng(seed)
     n_intervals = n_days * 96
     time_index = pd.date_range("2024-01-01", periods=n_intervals, freq="15min")
     sensor_names = [f"sensor_{i}" for i in range(n_sensors)]
@@ -121,7 +132,7 @@ def simulate_sensor_data(
             day_probs[pattern["evening_start"] : evening_end] = pattern["evening_prob"]
             for t in range(96):
                 if day_start + t < n_intervals:
-                    base_activation = np.random.binomial(1, day_probs[t])
+                    base_activation = rng.binomial(1, day_probs[t])
                     sensor_data[day_start + t, sensor_idx] = base_activation
 
     if interaction_strength > 0:
@@ -154,7 +165,7 @@ def simulate_sensor_data(
                                             * 0.1
                                             * (0.8 ** (lag - 1))
                                         )
-                        if influence_prob > np.random.random():
+                        if influence_prob > rng.random():
                             sensor_data[global_t, target_sensor] = 1
 
     for i, sensor in enumerate(sensor_names):
@@ -164,14 +175,12 @@ def simulate_sensor_data(
 
 
 def export_analysis_results(
-    results: dict, filename: str = "sensor_analysis_results"
+    results: Mapping[str, object], filename: FilePath = "sensor_analysis_results"
 ) -> None:
     """Export analysis results to JSON/CSV files."""
     try:
-        import json
-
         json_filename = f"{filename}.json"
-        with open(json_filename, "w") as f:
+        with open(json_filename, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, default=str)
         logger.info("Results exported to %s", json_filename)
         if "causality_results" in results and isinstance(
@@ -180,7 +189,5 @@ def export_analysis_results(
             csv_filename = f"{filename}_causality.csv"
             results["causality_results"].to_csv(csv_filename, index=False)
             logger.info("Causality results exported to %s", csv_filename)
-    except ImportError:
-        logger.warning("JSON export not available")
     except Exception as e:
         logger.error("Export failed: %s", e)
