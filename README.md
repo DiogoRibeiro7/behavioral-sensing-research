@@ -400,6 +400,8 @@ Distributed under the [MIT License](LICENSE). This allows for both academic and 
 - **Institution**: ESMAD - Instituto Politécnico do Porto
 - **Issues**: Use GitHub Issues for bug reports and feature requests
 - **Discussions**: GitHub Discussions for questions and community support
+- **Security**: Follow [`SECURITY.md`](SECURITY.md) for private vulnerability reports
+- **Support**: See [`SUPPORT.md`](SUPPORT.md) for the right support channel
 
 ## 📖 Documentation
 

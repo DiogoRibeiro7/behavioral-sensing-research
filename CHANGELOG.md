@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a top-level `ROADMAP.md` with release milestones, quality gates, longer-term priorities, maintenance backlog, and release policy.
 - Added `RELEASE.md` with the main-only release checklist, tag verification steps, and Zenodo release verification.
 - Added GitHub issue templates, a pull request template, and CI coverage for pushes to `develop`.
+- Added security and support policy documents.
 - Added focused tests for shared data IO, synthetic exports, HDF5 loading, sensor failure detection, plotting helpers, and model validation utilities.
 
 ### Changed
