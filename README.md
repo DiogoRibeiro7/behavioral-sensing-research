@@ -412,7 +412,7 @@ If you use this software in your research, please cite it as:
   author={Ribeiro, Diogo},
   year={2026},
   url={https://github.com/DiogoRibeiro7/behavioral-sensing-research},
-  version={0.1.1},
+  version={0.1.2},
   doi={10.5281/zenodo.17070041}
 }
 ```

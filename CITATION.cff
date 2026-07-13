@@ -27,7 +27,7 @@ repository-code: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
 repository-artifact: "https://zenodo.org/records/17070041"
 url: "https://sensor-modeling.readthedocs.io"
 
-version: "0.1.1"
+version: "0.1.2"
 date-released: "2026-07-13"
 license: MIT
 license-url: "https://opensource.org/licenses/MIT"
@@ -135,7 +135,7 @@ preferred-citation:
       affiliation: "ESMAD - Instituto Politécnico do Porto"
       orcid: "https://orcid.org/0009-0001-2022-7072"
   year: 2026
-  version: "0.1.1"
+  version: "0.1.2"
   doi: "10.5281/zenodo.17070041"
   url: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
   abstract: "A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies multiple modeling paradigms including Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes into a single cohesive framework designed for ambient assisted living (AAL), digital health, and smart home research applications."

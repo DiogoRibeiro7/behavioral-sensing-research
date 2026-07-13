@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sensor-modeling"
-version = "0.1.1"
+version = "0.1.2"
 description = "Comprehensive research-grade toolkit for analyzing behavioral sensor data in smart environments"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
@@ -386,7 +386,7 @@ build-dir = "docs/_build"
 
 # Version bumping configuration
 [tool.bumpversion]
-current_version = "0.1.1"
+current_version = "0.1.2"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
