@@ -1,4 +1,5 @@
 import json
+import sys
 
 import numpy as np
 import pandas as pd
@@ -49,7 +50,7 @@ def test_loaders(tmp_path):
 
     try:
         import h5py
-    except Exception:
+    except ImportError:
         pytest.skip("h5py not installed")
     h5_path = tmp_path / "data.h5"
     with h5py.File(h5_path, "w") as h5:
@@ -96,3 +97,43 @@ def test_synthetic_generation_and_export(tmp_path):
     out_csv = tmp_path / "syn.csv"
     synthetic.export(ds, meta, out_csv, fmt="csv")
     assert out_csv.exists()
+
+    out_json = tmp_path / "syn.json"
+    synthetic.export(ds, meta, out_json, fmt="json")
+    payload = json.loads(out_json.read_text(encoding="utf-8"))
+    assert payload["meta"]["change_points"] == [20]
+    assert len(payload["data"]) == 50
+
+    with pytest.raises(ValueError, match="Unsupported export format"):
+        synthetic.export(ds, meta, tmp_path / "syn.unsupported", fmt="parquet")
+
+
+def test_hdf5_loader_reports_missing_dataset(tmp_path):
+    h5py = pytest.importorskip("h5py")
+
+    h5_path = tmp_path / "data.h5"
+    with h5py.File(h5_path, "w") as h5:
+        h5.create_dataset("other", data=np.array([[1, 0]]))
+
+    with pytest.raises(ValueError, match="Dataset 'data' not found"):
+        loaders.load_hdf5(h5_path)
+
+
+def test_hdf5_loader_requires_dependency(monkeypatch, tmp_path):
+    h5_path = tmp_path / "data.h5"
+
+    monkeypatch.setitem(sys.modules, "h5py", None)
+    with pytest.raises(ImportError, match="h5py is required"):
+        loaders.load_hdf5(h5_path)
+
+
+def test_detect_sensor_failures_flags_constant_stretches():
+    idx = pd.date_range("2024-01-01", periods=6, freq="1min")
+    df = pd.DataFrame(
+        {"stuck": [1, 1, 1, 1, 1, 1], "active": [0, 1, 0, 1, 0, 1]},
+        index=idx,
+    )
+
+    failures = validation.detect_sensor_failures(SensorDataset(df), window=3)
+
+    assert failures == {"stuck": True, "active": False}

@@ -5,20 +5,18 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Generator, Iterable
+from os import PathLike
 
 import pandas as pd
-
-try:
-    import h5py  # type: ignore
-except Exception:  # pragma: no cover - handled gracefully
-    h5py = None  # type: ignore
 
 from sensor_modeling.utils.data_io import SensorDataset, read_sensor_csv
 
 logger = logging.getLogger(__name__)
 
 
-def load_csv(path: str, timestamp_col: str = "timestamp", **kwargs) -> SensorDataset:
+def load_csv(
+    path: str | PathLike[str], timestamp_col: str = "timestamp", **kwargs
+) -> SensorDataset:
     """Load sensor readings from a CSV file.
 
     Parameters
@@ -44,7 +42,9 @@ def load_csv(path: str, timestamp_col: str = "timestamp", **kwargs) -> SensorDat
     return SensorDataset(df)
 
 
-def load_json(path: str, timestamp_field: str = "timestamp") -> SensorDataset:
+def load_json(
+    path: str | PathLike[str], timestamp_field: str = "timestamp"
+) -> SensorDataset:
     """Load sensor event log data from a JSON file."""
     try:
         with open(path) as f:
@@ -69,10 +69,13 @@ def load_json(path: str, timestamp_field: str = "timestamp") -> SensorDataset:
     return SensorDataset(df)
 
 
-def load_hdf5(path: str, key: str = "data") -> SensorDataset:
+def load_hdf5(path: str | PathLike[str], key: str = "data") -> SensorDataset:
     """Load sensor data from an HDF5 file."""
-    if h5py is None:
-        raise ImportError("h5py is required for HDF5 support")
+    try:
+        import h5py
+    except ImportError as exc:  # pragma: no cover - dependency is installed in CI
+        raise ImportError("h5py is required for HDF5 support") from exc
+
     try:
         with h5py.File(path, "r") as h5:
             if key not in h5:
@@ -81,7 +84,7 @@ def load_hdf5(path: str, key: str = "data") -> SensorDataset:
             if "timestamp" in h5[key].attrs:
                 ts = pd.to_datetime(h5[key].attrs["timestamp"])
                 data.index = ts
-    except Exception as exc:
+    except OSError as exc:
         logger.error("Failed to read HDF5 %s: %s", path, exc)
         raise ValueError(f"Unable to read HDF5 file: {path}") from exc
     logger.info("Loaded HDF5 dataset '%s' with shape %s from %s", key, data.shape, path)

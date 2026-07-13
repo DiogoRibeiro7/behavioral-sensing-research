@@ -1,8 +1,8 @@
 """Data validation utilities."""
+
 from __future__ import annotations
 
 import logging
-from typing import Dict
 
 import pandas as pd
 
@@ -37,16 +37,18 @@ def validate_sensor_ranges(
 
 def detect_sensor_failures(
     dataset: SensorDataset, window: int = 100
-) -> Dict[str, bool]:
+) -> dict[str, bool]:
     """Detect potential sensor failures using long constant stretches."""
     df = dataset.to_dataframe()
-    failures: Dict[str, bool] = {}
+    failures: dict[str, bool] = {}
     for col in df.columns:
         series = df[col]
         rolling = series.rolling(window=window, min_periods=window)
-        failures[col] = any(
-            rolling.apply(lambda x: x.nunique() <= 1, raw=False).fillna(False)
+        constant_windows = rolling.apply(
+            lambda x: x.nunique(dropna=False) <= 1,
+            raw=False,
         )
+        failures[col] = bool(constant_windows.fillna(0).astype(bool).any())
         if failures[col]:
             logger.warning("Possible failure detected in sensor '%s'", col)
     return failures

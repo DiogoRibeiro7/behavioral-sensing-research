@@ -1,18 +1,15 @@
 """Synthetic data generation utilities for benchmarking."""
+
 from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from os import PathLike
 
 import numpy as np
 import pandas as pd
-
-try:
-    import h5py  # type: ignore
-except Exception:  # pragma: no cover
-    h5py = None  # type: ignore
 
 from sensor_modeling.utils.data_io import SensorDataset
 
@@ -23,12 +20,12 @@ logger = logging.getLogger(__name__)
 class SyntheticConfig:
     n_steps: int = 1000
     n_sensors: int = 3
-    change_points: List[int] = None
+    change_points: list[int] | None = None
     failure_rate: float = 0.0
     seed: int = 0
 
 
-def generate(config: SyntheticConfig) -> Tuple[SensorDataset, Dict[str, List[int]]]:
+def generate(config: SyntheticConfig) -> tuple[SensorDataset, dict[str, list[int]]]:
     """Generate synthetic sensor data with ground truth change points."""
     rng = np.random.default_rng(config.seed)
     cps = config.change_points or [config.n_steps // 2]
@@ -51,25 +48,35 @@ def generate(config: SyntheticConfig) -> Tuple[SensorDataset, Dict[str, List[int
     return SensorDataset(df), {"change_points": cps}
 
 
-def export(dataset: SensorDataset, metadata: Dict, path: str, fmt: str = "csv") -> None:
+def export(
+    dataset: SensorDataset,
+    metadata: Mapping[str, object],
+    path: str | PathLike[str],
+    fmt: str = "csv",
+) -> None:
     """Export synthetic dataset and metadata in multiple formats."""
     df = dataset.to_dataframe()
     try:
         if fmt == "csv":
             df.to_csv(path)
-            with open(f"{path}.meta.json", "w") as f:
+            with open(f"{path}.meta.json", "w", encoding="utf-8") as f:
                 json.dump(metadata, f)
         elif fmt == "json":
-            records = (
-                df.reset_index()
-                .rename(columns={df.index.name or "index": "timestamp"})
-                .to_dict(orient="records")
+            records_df = df.reset_index().rename(
+                columns={df.index.name or "index": "timestamp"}
             )
-            with open(path, "w") as f:
+            records_df["timestamp"] = records_df["timestamp"].astype(str)
+            records = records_df.to_dict(orient="records")
+            with open(path, "w", encoding="utf-8") as f:
                 json.dump({"data": records, "meta": metadata}, f)
         elif fmt == "hdf5":
-            if h5py is None:
-                raise ImportError("h5py is required for HDF5 export")
+            try:
+                import h5py
+            except (
+                ImportError
+            ) as exc:  # pragma: no cover - dependency is installed in CI
+                raise ImportError("h5py is required for HDF5 export") from exc
+
             with h5py.File(path, "w") as h5:
                 dset = h5.create_dataset("data", data=df.values)
                 dset.attrs["timestamp"] = df.index.astype(str).to_list()

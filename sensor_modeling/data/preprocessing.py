@@ -1,8 +1,8 @@
 """Data cleaning and preparation routines for sensor data."""
+
 from __future__ import annotations
 
 import logging
-from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -46,8 +46,8 @@ def detect_outliers(dataset: SensorDataset, z_thresh: float = 3.0) -> pd.DataFra
 
 
 def align_sensors(
-    datasets: List[SensorDataset], freq: str = "1min"
-) -> List[SensorDataset]:
+    datasets: list[SensorDataset], freq: str = "1min"
+) -> list[SensorDataset]:
     """Temporal alignment across multiple sensors/datasets."""
     if not datasets:
         raise ValueError("No datasets provided for alignment")
@@ -64,7 +64,7 @@ def align_sensors(
     return aligned
 
 
-def data_quality_report(dataset: SensorDataset) -> Dict[str, float]:
+def data_quality_report(dataset: SensorDataset) -> dict[str, float]:
     """Compute simple data quality metrics."""
     df = dataset.to_dataframe()
     report = {
