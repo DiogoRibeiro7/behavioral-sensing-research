@@ -99,7 +99,7 @@ The **Sensor Modeling Research Toolkit** addresses the growing need for reproduc
 - Patient-friendly activity summaries and trend monitors
 - Alert generation based on configurable clinical thresholds
 - Comparison against normative population statistics
-- FHIR-compatible output for healthcare system integration
+- Minimal FHIR-style observation export for clinical workflow prototyping
 
 #### **Research Tools**
 
@@ -114,7 +114,7 @@ The **Sensor Modeling Research Toolkit** addresses the growing need for reproduc
 
 - Batch processing capabilities for large-scale experiments
 - Configurable analysis pipelines with JSON/YAML configuration
-- Automated report generation in multiple formats (LaTeX, HTML, FHIR)
+- Automated report generation in multiple formats (LaTeX, HTML, minimal FHIR-style JSON)
 - Integration with cluster computing environments
 
 #### **Web Application**
@@ -261,7 +261,7 @@ Feature                             | Status     | Implementation
 **Missing Data Handling**           | 🟡 Partial | Gap-aware fill/interpolate/drop/flag workflows with masks
 **Deep Learning CPD**               | 🔵 Planned | Transformer and CNN-based approaches
 **Real-time Processing**            | 🔵 Planned | Streaming algorithms and online learning
-**Clinical Integration**            | 🟡 Partial | FHIR output, expanding to HL7
+**Clinical Integration**            | 🟡 Partial | Minimal FHIR-style export, expanding toward validated HL7 profiles
 
 ## 📚 Research Foundation
 

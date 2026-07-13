@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 
 from sensor_modeling.analysis import behavioral_analysis, comparison, reporting
@@ -27,6 +29,11 @@ def test_pipeline_and_reporting(tmp_path):
     assert tex.exists()
     assert html.exists()
     assert fhir.exists()
+    fhir_payload = json.loads(fhir.read_text())
+    assert fhir_payload["resourceType"] == "Observation"
+    assert fhir_payload["code"]["text"] == "Sensor modeling analysis summary"
+    assert "valueString" not in fhir_payload
+    assert {item["code"]["text"] for item in fhir_payload["component"]} == set(results)
 
     nested_output = tmp_path / "nested" / "reports"
     pipe.generate_report(results, nested_output)
