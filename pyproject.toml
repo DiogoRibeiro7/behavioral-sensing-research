@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sensor-modeling"
-version = "0.1.0"
+version = "0.1.1"
 description = "Comprehensive research-grade toolkit for analyzing behavioral sensor data in smart environments"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
@@ -191,7 +191,7 @@ Repository = "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
 "Bug Tracker" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/issues"
 "Feature Requests" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/discussions"
 Changelog = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/main/CHANGELOG.md"
-"Zenodo DOI" = "https://doi.org/10.5281/zenodo.17070042"
+"Zenodo DOI" = "https://doi.org/10.5281/zenodo.17070041"
 "Citation" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/main/CITATION.cff"
 "Research Papers" = "https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/main/paper.bib"
 Funding = "https://github.com/sponsors/DiogoRibeiro7"
@@ -386,7 +386,7 @@ build-dir = "docs/_build"
 
 # Version bumping configuration
 [tool.bumpversion]
-current_version = "0.1.0"
+current_version = "0.1.1"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
