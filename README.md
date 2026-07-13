@@ -387,6 +387,8 @@ We welcome contributions from researchers and practitioners! The toolkit is desi
 - **Reproducibility**: Use fixed random seeds and provide example datasets
 
 See <CONTRIBUTING.md> for detailed guidelines and our [Code of Conduct](CODE_OF_CONDUCT.md).
+Maintainers should use [`RELEASE.md`](RELEASE.md) for the main-only release
+checklist.
 
 ## 📄 License
 

@@ -26,6 +26,8 @@ Thank you for considering contributing to **Sensor Modeling Research Toolkit**!
 - Provide clear descriptions of the problem and solution.
 - Include tests and documentation for new features.
 - Update the changelog in `CHANGELOG.md`.
+- For release work, follow [`RELEASE.md`](RELEASE.md). Releases are cut from
+  `main`, not `develop`.
 
 ## Reporting Issues
 
