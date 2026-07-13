@@ -44,7 +44,7 @@ class _DummyTuningModel:
 
     def score_parameter(self, param, value):
         assert param == "penalty"
-        return -(value - 2.0) ** 2 + 4.0
+        return -((value - 2.0) ** 2) + 4.0
 
 
 def test_parameter_tuning_returns_visible_diagnostic_layout():

@@ -21,9 +21,7 @@ def test_pelt_detects_single_mean_shift():
 
 def test_pelt_detects_multiple_mean_shifts():
     """Multiple piecewise-constant segments should be recovered."""
-    signal = np.concatenate(
-        [np.zeros(15), np.ones(20) * 4.0, np.ones(18) * -3.0]
-    )
+    signal = np.concatenate([np.zeros(15), np.ones(20) * 4.0, np.ones(18) * -3.0])
     detector = PELTChangePointDetector(penalty=1.0, min_segment_length=5)
     assert detector.detect(signal) == [15, 35]
 
@@ -40,7 +38,5 @@ def test_pelt_penalty_controls_segmentation_strength():
 def test_pelt_supports_l1_cost_for_robust_segmentation():
     """The alternate L1 cost path should also detect canonical changes."""
     signal = np.concatenate([np.zeros(12), np.ones(12) * 3.0, np.zeros(12)])
-    detector = PELTChangePointDetector(
-        penalty=0.5, min_segment_length=4, cost="l1"
-    )
+    detector = PELTChangePointDetector(penalty=0.5, min_segment_length=4, cost="l1")
     assert detector.detect(signal) == [12, 24]

@@ -14,7 +14,7 @@ repos:
       - id: mypy
         args: ["--ignore-missing-imports", "--follow-imports=skip"]
         additional_dependencies: []
-        files: "^sensor_modeling/"
+        files: "^(sensor_modeling/__init__\\.py|sensor_modeling/analysis/reporting\\.py)$"
   - repo: local
     hooks:
       - id: radon

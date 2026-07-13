@@ -47,9 +47,6 @@ class GrangerCausalityTest:
         if lags is None:
             lags = self._select_optimal_lags(x, y)
 
-        # Prepare data with lags
-        n_obs = len(y) - lags
-
         # Restricted model: Y ~ lags of Y
         y_lagged = self._create_lag_matrix(y, lags, include_current=False)
         y_current = y[lags:]

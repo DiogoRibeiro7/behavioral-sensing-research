@@ -66,7 +66,7 @@ def main() -> None:
     print("Changepoints:", model.changepoints_)
     print("Segments:", model.segments_)
 
-    fig = plot_segments_and_intensities_with_histograms(
+    plot_segments_and_intensities_with_histograms(
         days,
         model,
         config=PlotConfig(grid_points=500),

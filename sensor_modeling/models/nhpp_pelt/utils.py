@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable, Sequence
-from typing import List, Tuple
+from typing import TYPE_CHECKING, List, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from .model import NHPPPELT, NHPPConfig
 
 # ------------------------------- Types -------------------------------
 

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from typing import List, Tuple
+from typing import TYPE_CHECKING, List, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from .model import NHPPConfig
 
 Array1D = np.ndarray
 Array2D = np.ndarray
@@ -109,7 +112,7 @@ def sweep_gamma(
                 if ev.size:
                     s += bspline_design_matrix(ev, cfg.degree, model.knots_).sum(axis=0)
             # minimize with warm-start = fitted w to recover cost term
-            w_star, c = opt.minimize(L=j - i + 1, s=s, w0=w)
+            _, c = opt.minimize(L=j - i + 1, s=s, w0=w)
             total += float(c)
 
         total += len(model.segments_) * float(model.beta_)

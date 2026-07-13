@@ -97,7 +97,8 @@ class PELTChangePointDetector:
             valid_candidates = [
                 start
                 for start in candidates
-                if end - start >= self.min_segment_length and np.isfinite(best_cost[start])
+                if end - start >= self.min_segment_length
+                and np.isfinite(best_cost[start])
             ]
             if not valid_candidates:
                 continue

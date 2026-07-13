@@ -99,9 +99,7 @@ def parameter_tuning(model: Any, param: str, values: Iterable[float]):
         tools="pan,wheel_zoom,box_zoom,reset,save",
     )
     plot.line("x", "y", source=curve_source, line_width=2, color="#1f77b4")
-    plot.scatter(
-        "x", "y", source=curve_source, size=8, color="#1f77b4", alpha=0.85
-    )
+    plot.scatter("x", "y", source=curve_source, size=8, color="#1f77b4", alpha=0.85)
     plot.scatter(
         "x",
         "y",

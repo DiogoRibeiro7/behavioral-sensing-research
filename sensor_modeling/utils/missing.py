@@ -135,7 +135,9 @@ def handle_missing_data(
         data = data.ffill(limit=max_gap)
     elif strategy == "interpolate":
         data = _apply_numeric_interpolation(data, max_gap)
-        non_numeric = data.columns.difference(data.select_dtypes(include="number").columns)
+        non_numeric = data.columns.difference(
+            data.select_dtypes(include="number").columns
+        )
         if len(non_numeric) > 0:
             data.loc[:, non_numeric] = data.loc[:, non_numeric].ffill(limit=max_gap)
     elif strategy == "gap_aware":
@@ -166,7 +168,9 @@ def handle_missing_data(
 
     return MissingDataResult(
         data=data,
-        original_missing_mask=original_missing if strategy != "drop" else original_missing.loc[data.index],
+        original_missing_mask=original_missing
+        if strategy != "drop"
+        else original_missing.loc[data.index],
         imputed_mask=imputed_mask,
         remaining_missing_mask=remaining_missing,
         long_gap_mask=long_gap,

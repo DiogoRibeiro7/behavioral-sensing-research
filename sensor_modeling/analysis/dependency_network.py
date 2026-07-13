@@ -1,7 +1,7 @@
 """
 Sensor Dependency Network Analysis
 
-This module builds and analyzes cross-sensor dependency networks 
+This module builds and analyzes cross-sensor dependency networks
 using Granger causality and network analysis techniques.
 """
 
@@ -62,7 +62,7 @@ class SensorDependencyNetwork:
 
         # Add edges for significant causal relationships
         significant_results = self.causality_results[
-            self.causality_results["causality_detected"] == True
+            self.causality_results["causality_detected"]
         ]
 
         for _, row in significant_results.iterrows():
@@ -181,7 +181,6 @@ class SensorDependencyNetwork:
         if self.network is None:
             raise ValueError("Network must be built first")
 
-        original_connectivity = nx.is_weakly_connected(self.network)
         original_components = nx.number_weakly_connected_components(self.network)
 
         criticality_scores = {}
