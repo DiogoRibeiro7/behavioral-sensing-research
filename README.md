@@ -447,7 +447,7 @@ import pandas as pd
 df = pd.DataFrame({"a": [0, 1, 0], "b": [1, 0, 1]})
 model = BernoulliAutoregressiveModel(df.columns.tolist(), "a")
 model.fit(df)
-print(model.predict(df))
+print(model.predict_probabilities(df))
 ```
 
 Interactive parameter diagnostics can be built by exposing a simple scoring
