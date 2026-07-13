@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a top-level `ROADMAP.md` with release milestones, quality gates, longer-term priorities, maintenance backlog, and release policy.
 - Added `RELEASE.md` with the main-only release checklist, tag verification steps, and Zenodo release verification.
 - Added GitHub issue templates, a pull request template, and CI coverage for pushes to `develop`.
+- Added CI jobs for Sphinx documentation builds and package artifact validation.
 - Added security and support policy documents.
 - Added focused tests for shared data IO, synthetic exports, HDF5 loading, sensor failure detection, plotting helpers, and model validation utilities.
 - Added release metadata consistency tests for package, citation, Zenodo, and README metadata.
@@ -18,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored data-layer typing, HDF5 import handling, synthetic data export behavior, and validation internals.
 - Refactored sensor simulation to use local NumPy random generators instead of mutating global random state.
 - Refactored plotting helpers to return Matplotlib figures and support non-interactive `show=False` workflows.
+- Simplified legacy `setup.py` so package metadata is sourced from `pyproject.toml`.
+- Updated package metadata and source distribution exclusions for cleaner release artifacts.
 - Updated README and Sphinx roadmap documentation to point to the canonical roadmap.
 
 ### Fixed

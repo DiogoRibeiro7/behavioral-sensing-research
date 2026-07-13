@@ -1,3 +1,9 @@
 include README.md LICENSE CITATION.cff CHANGELOG.md CONTRIBUTING.md CODE_OF_CONDUCT.md requirements.txt paper.md paper.bib
 recursive-include docs *
 recursive-include sensor_modeling/examples *
+prune docs/_build
+prune build
+prune dist
+prune sensor_modeling.egg-info
+global-exclude __pycache__/*
+global-exclude *.py[cod]
