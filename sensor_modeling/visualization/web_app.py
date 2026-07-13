@@ -1,7 +1,9 @@
 """Lightweight Flask web interface for running analyses."""
 from __future__ import annotations
 
+import argparse
 import os
+import tempfile
 from functools import wraps
 from pathlib import Path
 from typing import Callable
@@ -10,14 +12,21 @@ from flask import (
     Flask,
     Response,
     abort,
+    current_app,
     render_template_string,
     request,
     send_file,
 )
 from werkzeug.utils import secure_filename
 
-UPLOAD_DIR = Path("/tmp/uploads")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = Path(tempfile.gettempdir()) / "sensor-modeling-uploads"
+
+
+def _configured_upload_dir() -> Path:
+    """Return the active upload directory, creating it if needed."""
+    upload_dir = Path(current_app.config["UPLOAD_DIR"]).expanduser().resolve()
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    return upload_dir
 
 
 def _check_auth(username: str, password: str) -> bool:
@@ -79,8 +88,9 @@ def run():
     filename = secure_filename(file.filename)
     if not filename:
         abort(400, "invalid filename")
-    path = (UPLOAD_DIR / filename).resolve()
-    if path.parent != UPLOAD_DIR.resolve():  # path traversal guard
+    upload_dir = _configured_upload_dir()
+    path = (upload_dir / filename).resolve()
+    if path.parent != upload_dir:  # path traversal guard
         abort(400, "invalid path")
     file.save(path)
     # Placeholder analysis step
@@ -90,6 +100,26 @@ def run():
     return send_file(result_path, as_attachment=True)
 
 
-def create_app() -> Flask:
+def create_app(upload_dir: str | os.PathLike[str] | None = None) -> Flask:
     """Create the Flask application."""
+    configured_dir = upload_dir or os.environ.get("SM_UPLOAD_DIR") or UPLOAD_DIR
+    app.config["UPLOAD_DIR"] = str(configured_dir)
     return app
+
+
+def main() -> None:
+    """Run the Flask development server for the web app."""
+    parser = argparse.ArgumentParser(description="Run the sensor visualization app")
+    parser.add_argument("--host", default="127.0.0.1", help="Host interface to bind")
+    parser.add_argument("--port", type=int, default=5000, help="Port to bind")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Run the Flask development server in debug mode",
+    )
+    args = parser.parse_args()
+    create_app().run(host=args.host, port=args.port, debug=args.debug)
+
+
+if __name__ == "__main__":
+    main()

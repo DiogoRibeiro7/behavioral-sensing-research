@@ -1,10 +1,10 @@
 """Package configuration for sensor_modeling."""
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="sensor_modeling",
-    version="0.1.0",
+    version="0.1.3",
     author="Diogo Ribeiro",
     author_email="diogo.debastos.ribeiro@gmail.com",
     description="Unified sensor modeling and analysis",
@@ -40,5 +40,5 @@ setup(
             "sensor-modeling=sensor_modeling.cli:main",
         ]
     },
-    python_requires=">=3.9",
+    python_requires=">=3.10,<3.13",
 )

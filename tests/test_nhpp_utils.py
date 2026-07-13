@@ -1,10 +1,10 @@
 """Tests for NHPP-PELT utilities."""
 import json
+
 import numpy as np
 import pytest
 
-from sensor_modeling.models.nhpp_pelt import NHPPConfig
-from sensor_modeling.models.nhpp_pelt import utils
+from sensor_modeling.models.nhpp_pelt import NHPPConfig, utils
 
 
 def test_normal_ppf_symmetry():

@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from typing import Callable, List
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from sensor_modeling.models.nhpp_pelt import NHPPConfig, NHPPPELT
+from sensor_modeling.models.nhpp_pelt import NHPPPELT, NHPPConfig
 from sensor_modeling.models.nhpp_pelt.plotting import (
-    PlotConfig,
     HistConfig,
+    PlotConfig,
     plot_segments_and_intensities_with_histograms,
 )
-
 
 Array1D = np.ndarray
 
@@ -67,7 +66,7 @@ def main() -> None:
     print("Changepoints:", model.changepoints_)
     print("Segments:", model.segments_)
 
-    fig = plot_segments_and_intensities_with_histograms(
+    plot_segments_and_intensities_with_histograms(
         days,
         model,
         config=PlotConfig(grid_points=500),

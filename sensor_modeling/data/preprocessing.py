@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Dict
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
 
 from sensor_modeling.utils.data_io import SensorDataset
+from sensor_modeling.utils.missing import handle_missing_data
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,9 @@ def impute_missing(dataset: SensorDataset, strategy: str = "ffill") -> SensorDat
     """Impute missing values using the specified strategy."""
     df = dataset.to_dataframe().copy()
     if strategy == "ffill":
-        df = df.fillna(method="ffill").fillna(method="bfill")
+        df = handle_missing_data(df, strategy="gap_aware").data
+    elif strategy == "interpolate":
+        df = handle_missing_data(df, strategy="interpolate").data
     elif strategy == "mean":
         df = df.fillna(df.mean())
     else:

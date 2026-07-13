@@ -3,20 +3,19 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from typing import List, Sequence
+from typing import List
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from .model import NHPPConfig, NHPPPELT
+from .diagnostics import DiagConfig, plot_time_rescaling_diagnostics
+from .model import NHPPPELT, NHPPConfig
 from .plotting import (
-    PlotConfig,
     HistConfig,
+    PlotConfig,
     plot_segments_and_intensities_with_histograms,
 )
 from .utils import save_results_json
-from .diagnostics import DiagConfig, plot_time_rescaling_diagnostics
-
 
 Array1D = np.ndarray
 
@@ -142,8 +141,8 @@ def cmd_sweep_beta(args: argparse.Namespace) -> None:
 
 
 def cmd_sweep_gamma(args: argparse.Namespace) -> None:
-    from .regularization import sweep_gamma
     from .model import NHPPConfig
+    from .regularization import sweep_gamma
 
     days = _load_npz_days(args.input)
     base_cfg = NHPPConfig(

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from sensor_modeling.models.bernoulli_ar import BernoulliAutoregressiveModel
 from sensor_modeling.change_point import EmbeddingCPD
-from sensor_modeling.utils import simulate_sensor_data, SensorDataset
+from sensor_modeling.models.bernoulli_ar import BernoulliAutoregressiveModel
+from sensor_modeling.utils import SensorDataset, simulate_sensor_data
 
 
 def main() -> None:

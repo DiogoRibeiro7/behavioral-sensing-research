@@ -1,7 +1,7 @@
 """Healthcare focused visualizations and summaries."""
 from __future__ import annotations
 
-from typing import Dict, Iterable
+from typing import Dict
 
 import pandas as pd
 import plotly.express as px

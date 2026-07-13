@@ -1,9 +1,10 @@
 """Example combining HMM state sequences with Granger causality analysis."""
 
 import pandas as pd
-from sensor_modeling.utils import simulate_sensor_data, SensorDataset
-from sensor_modeling.hmm import HierarchicalHMM
+
 from sensor_modeling.analysis import GrangerCausalityTest
+from sensor_modeling.hmm import HierarchicalHMM
+from sensor_modeling.utils import SensorDataset, simulate_sensor_data
 
 
 def main():

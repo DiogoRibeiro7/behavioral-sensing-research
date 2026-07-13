@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+
 import numpy as np
 
 from ..utils.plotting import plot_change_points
@@ -20,7 +21,7 @@ class AdaptiveNormalizer:
 
     window: int = 20
 
-    def fit(self, series: np.ndarray) -> "AdaptiveNormalizer":
+    def fit(self, series: np.ndarray) -> AdaptiveNormalizer:
         self.series = np.asarray(series)
         return self
 

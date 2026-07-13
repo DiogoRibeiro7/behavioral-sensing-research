@@ -18,5 +18,15 @@ footprint.
 
 Missing-Data Handling
 ---------------------
-Utility functions in :mod:`sensor_modeling.utils.missing` support forward-fill
-and linear interpolation strategies to cope with sensor dropouts.
+The :mod:`sensor_modeling.utils.missing` module now exposes a higher-level
+``handle_missing_data()`` API for common sensor-stream failure modes. It
+supports forward-fill, interpolation, gap-aware imputation that preserves long
+outages, row-drop policies, and flag-only workflows that append missingness
+indicators for downstream models. The returned ``MissingDataResult`` includes
+imputation masks and per-column gap summaries so uncertainty can be tracked
+explicitly.
+
+Use forward-fill for short stateful sensor dropouts, interpolation for smooth
+numeric channels, gap-aware handling when long outages should stay visible, and
+flag/drop policies when downstream models must reason about or reject missing
+observations explicitly.

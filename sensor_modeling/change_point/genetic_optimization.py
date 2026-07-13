@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+
 import numpy as np
 
 from ..utils.plotting import plot_change_points
@@ -21,7 +22,7 @@ class GeneticOptimizationCPD:
     population: int = 5
     generations: int = 5
 
-    def fit(self, series: np.ndarray) -> "GeneticOptimizationCPD":
+    def fit(self, series: np.ndarray) -> GeneticOptimizationCPD:
         self.series = np.asarray(series)
         self.threshold_ = self._ga_search()
         logger.debug("Optimized threshold to %.3f", self.threshold_)

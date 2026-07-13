@@ -1,25 +1,25 @@
 """Analysis routines for sensor data."""
 
-from .granger_causality import GrangerCausalityTest
-from .dependency_network import SensorDependencyNetwork
+from .behavioral_analysis import (
+    detect_trends,
+    health_indicators,
+    recognize_activity_patterns,
+    score_anomalies,
+)
 from .behavioral_metrics import calculate_behavioral_metrics
-from .pipeline import AnalysisPipeline
 from .comparison import (
     cross_validate,
     significance_test,
     standardize_metrics,
     visualize_comparison,
 )
-from .behavioral_analysis import (
-    recognize_activity_patterns,
-    score_anomalies,
-    detect_trends,
-    health_indicators,
-)
+from .dependency_network import SensorDependencyNetwork
+from .granger_causality import GrangerCausalityTest
+from .pipeline import AnalysisPipeline
 from .reporting import (
-    generate_latex_report,
     create_html_dashboard,
     export_to_fhir,
+    generate_latex_report,
     render_template,
 )
 

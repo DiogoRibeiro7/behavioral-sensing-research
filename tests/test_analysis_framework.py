@@ -1,13 +1,16 @@
-import pandas as pd
+import json
 
+import pandas as pd
+import pytest
+
+from sensor_modeling.analysis import behavioral_analysis, comparison, reporting
 from sensor_modeling.analysis.pipeline import AnalysisPipeline
-from sensor_modeling.analysis import comparison, behavioral_analysis, reporting
 from sensor_modeling.hmm.base import BaseHMM
 from sensor_modeling.utils.data_io import SensorDataset
 
 
 def _sample_df():
-    idx = pd.date_range("2024-01-01", periods=10, freq="1H")
+    idx = pd.date_range("2024-01-01", periods=10, freq="1h")
     data = {"sensor_0": [0, 1] * 5, "sensor_1": [1, 0] * 5}
     return pd.DataFrame(data, index=idx)
 
@@ -27,10 +30,24 @@ def test_pipeline_and_reporting(tmp_path):
     assert tex.exists()
     assert html.exists()
     assert fhir.exists()
+    fhir_payload = json.loads(fhir.read_text())
+    assert fhir_payload["resourceType"] == "Observation"
+    assert fhir_payload["code"]["text"] == "Sensor modeling analysis summary"
+    assert "valueString" not in fhir_payload
+    assert {item["code"]["text"] for item in fhir_payload["component"]} == set(results)
+
+    nested_output = tmp_path / "nested" / "reports"
+    pipe.generate_report(results, nested_output)
+    assert (nested_output / "analysis.tex").exists()
+    assert (nested_output / "dashboard.html").exists()
+    assert (nested_output / "analysis_fhir.json").exists()
 
 
 def test_comparison_and_behavioral():
     ds = SensorDataset(_sample_df())
+    for train_idx, test_idx in comparison.time_series_splits(ds, n_splits=3):
+        assert train_idx.max() < test_idx.min()
+
     models = {"hmm": BaseHMM()}
     scores = comparison.cross_validate(models, ds)
     assert "hmm" in scores
@@ -47,3 +64,35 @@ def test_comparison_and_behavioral():
     assert len(anomalies) == len(ds.to_dataframe())
     assert trends.shape[0] == ds.to_dataframe().shape[0]
     assert "overall_activity" in health
+
+
+class _PredictOnlyModel:
+    def fit(self, data):
+        return self
+
+    def predict(self, data):
+        return data[:, 0]
+
+
+def test_cross_validate_requires_explicit_scoring_contract():
+    ds = SensorDataset(_sample_df())
+
+    with pytest.raises(TypeError, match="explicit scorer"):
+        comparison.cross_validate({"predict_only": _PredictOnlyModel()}, ds)
+
+
+def test_cross_validate_accepts_explicit_model_scorer():
+    ds = SensorDataset(_sample_df())
+
+    def scorer(model, train_df, test_df):
+        assert isinstance(model, _PredictOnlyModel)
+        assert train_df.index.max() < test_df.index.min()
+        return 0.5
+
+    scores = comparison.cross_validate(
+        {"predict_only": _PredictOnlyModel()},
+        ds,
+        scorers={"predict_only": scorer},
+    )
+
+    assert scores["predict_only"] == 0.5

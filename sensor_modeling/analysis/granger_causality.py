@@ -5,12 +5,13 @@ This module implements Granger causality tests specifically adapted
 for binary sensor time series data.
 """
 
+import logging
+from typing import Dict, List
+
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2
 from sklearn.linear_model import LogisticRegression
-from typing import Dict, List
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +46,6 @@ class GrangerCausalityTest:
         """
         if lags is None:
             lags = self._select_optimal_lags(x, y)
-
-        # Prepare data with lags
-        n_obs = len(y) - lags
 
         # Restricted model: Y ~ lags of Y
         y_lagged = self._create_lag_matrix(y, lags, include_current=False)

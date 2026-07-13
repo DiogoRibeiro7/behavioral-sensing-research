@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, List, Optional, Tuple
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 Array1D = np.ndarray
 
@@ -44,7 +45,7 @@ def _lambda_grid(
     model: Any, seg_index: int, grid_points: int
 ) -> Tuple[Array1D, Array1D]:
     """Compute λ̂_k(t) on a uniform grid for segment k."""
-    delta: float = float(getattr(model, "delta_"))
+    delta: float = float(model.delta_)
     grid = np.linspace(0.0, delta, grid_points)
     lam = np.asarray(model.intensity_on_grid(seg_index, grid), float)
     _check(lam.shape == grid.shape, "intensity_on_grid must match grid shape.")
@@ -166,7 +167,7 @@ def plot_time_rescaling_diagnostics(
         hasattr(model, "segments_") and hasattr(model, "delta_"),
         "Model missing required attributes.",
     )
-    segments: List[Tuple[int, int]] = list(getattr(model, "segments_"))
+    segments: List[Tuple[int, int]] = list(model.segments_)
     n_segments = len(segments)
     _check(n_segments >= 1, "No segments found.")
 

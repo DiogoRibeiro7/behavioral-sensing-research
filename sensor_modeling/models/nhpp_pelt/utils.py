@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
-from typing import Iterable, List, Sequence, Tuple
+from collections.abc import Iterable, Sequence
+from typing import TYPE_CHECKING, List, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from .model import NHPPPELT, NHPPConfig
 
 # ------------------------------- Types -------------------------------
 
@@ -86,7 +89,7 @@ def normal_ppf(p: float) -> float:
 # --------------------------- JSON exporters --------------------------
 
 
-def to_jsonable(model: "NHPPPELT") -> dict:
+def to_jsonable(model: NHPPPELT) -> dict:
     """
     Convert a fitted model into a JSON-serializable dictionary.
     """
@@ -102,7 +105,7 @@ def to_jsonable(model: "NHPPPELT") -> dict:
     }
 
 
-def save_results_json(model: "NHPPPELT", path: str) -> None:
+def save_results_json(model: NHPPPELT, path: str) -> None:
     """
     Save fitted model parameters/results to a JSON file.
 
@@ -122,7 +125,7 @@ def save_results_json(model: "NHPPPELT", path: str) -> None:
 
 def sweep_beta(
     days: Sequence[Array1D],
-    base_cfg: "NHPPConfig",
+    base_cfg: NHPPConfig,
     betas: Iterable[float],
 ) -> List[Tuple[float, int, float]]:
     """
@@ -137,8 +140,8 @@ def sweep_beta(
       recompute exact segment costs for the reported total.
     """
     from .bspline import bspline_design_matrix
-    from .optimizer import SegmentOptimizer, QuadratureConfig
-    from .model import NHPPConfig, NHPPPELT
+    from .model import NHPPPELT, NHPPConfig
+    from .optimizer import QuadratureConfig, SegmentOptimizer
 
     results: List[Tuple[float, int, float]] = []
 

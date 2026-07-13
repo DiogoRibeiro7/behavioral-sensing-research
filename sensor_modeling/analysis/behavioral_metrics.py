@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Dict
 import logging
+from typing import Dict
 
 import pandas as pd
 

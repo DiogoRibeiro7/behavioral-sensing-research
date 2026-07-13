@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Dict
 import logging
-import pandas as pd
+from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 

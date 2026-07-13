@@ -1,0 +1,35 @@
+{
+  "title": "Sensor Modeling Research Toolkit",
+  "upload_type": "software",
+  "description": "A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes for ambient assisted living, digital health, and smart home research.",
+  "creators": [
+    {
+      "name": "Ribeiro, Diogo",
+      "orcid": "0009-0001-2022-7072",
+      "affiliation": "ESMAD - Instituto Politecnico do Porto"
+    }
+  ],
+  "access_right": "open",
+  "license": "mit",
+  "version": "0.1.3",
+  "language": "eng",
+  "keywords": [
+    "Python",
+    "sensor modeling",
+    "ambient assisted living",
+    "digital health",
+    "smart homes",
+    "time series analysis",
+    "change point detection",
+    "hidden markov models",
+    "behavioral monitoring",
+    "IoT sensors"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/DiogoRibeiro7/behavioral-sensing-research",
+      "relation": "isIdenticalTo",
+      "resource_type": "software"
+    }
+  ]
+}

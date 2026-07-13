@@ -1,10 +1,11 @@
 import numpy as np
+
 from sensor_modeling.hmm import (
-    HierarchicalHMM,
-    ScaledDirichletHMM,
-    HeterogeneousHMM,
     AdaptiveHMM,
     CircadianHMM,
+    HeterogeneousHMM,
+    HierarchicalHMM,
+    ScaledDirichletHMM,
 )
 
 

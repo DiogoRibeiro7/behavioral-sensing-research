@@ -5,29 +5,26 @@ This module demonstrates how to use all the sensor modeling components
 together and provides comprehensive testing examples.
 """
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import logging
-from typing import Dict, List
+
+from sensor_modeling.analysis import (
+    GrangerCausalityTest,
+    SensorDependencyNetwork,
+    calculate_behavioral_metrics,
+)
 
 # Import our modules
 from sensor_modeling.models.bernoulli_ar import (
     BernoulliAutoregressiveModel,
     MultivariateAutoregressiveModel,
 )
-from sensor_modeling.analysis import (
-    GrangerCausalityTest,
-    SensorDependencyNetwork,
-    calculate_behavioral_metrics,
-)
 from sensor_modeling.utils import (
-    simulate_sensor_data,
-    plot_quantile_intervals,
-    plot_sensor_activity_patterns,
-    validate_model_predictions,
     create_model_comparison_report,
     export_analysis_results,
+    plot_quantile_intervals,
+    plot_sensor_activity_patterns,
+    simulate_sensor_data,
+    validate_model_predictions,
 )
 
 # Set up logging
@@ -73,14 +70,14 @@ def run_single_sensor_example():
         validation = validate_model_predictions(model, test_data, target_sensor)
 
         if validation["validation_successful"]:
-            print(f"\nValidation Results:")
+            print("\nValidation Results:")
             print(
                 f"Points outside 95% interval: {validation['outside_interval_count']}/96"
             )
             print(
                 f"Outside percentage: {validation['outside_interval_percentage']:.1f}%"
             )
-            print(f"Expected: ~5.0%")
+            print("Expected: ~5.0%")
             print(f"Well calibrated: {validation['is_well_calibrated']}")
 
             # Plot results
@@ -130,7 +127,7 @@ def run_granger_causality_example():
     # Create summary
     summary = granger_test.create_causality_summary(causality_results)
 
-    print(f"\nCausality Summary:")
+    print("\nCausality Summary:")
     print(f"  Total pairs tested: {summary['total_pairs_tested']}")
     print(f"  Significant relationships: {summary['significant_relationships']}")
     print(f"  Causality rate: {summary['causality_rate']:.3f}")
@@ -163,7 +160,7 @@ def run_dependency_network_example():
 
     # Get network statistics
     net_stats = network_builder.get_network_statistics()
-    print(f"\nNetwork Statistics:")
+    print("\nNetwork Statistics:")
     print(f"  Nodes: {net_stats['num_nodes']}")
     print(f"  Edges: {net_stats['num_edges']}")
     print(f"  Density: {net_stats['density']:.4f}")
@@ -172,7 +169,7 @@ def run_dependency_network_example():
 
     # Identify sensor roles
     roles = network_builder.identify_sensor_roles()
-    print(f"\nSensor Roles:")
+    print("\nSensor Roles:")
     for role, sensors in roles.items():
         if sensors:
             print(f"  {role.capitalize()}: {sensors}")
@@ -180,7 +177,7 @@ def run_dependency_network_example():
     # Find communities
     communities = network_builder.detect_communities()
     if communities:
-        print(f"\nCommunities detected:")
+        print("\nCommunities detected:")
         for i, community in enumerate(communities, 1):
             print(f"  Community {i}: {community}")
 
@@ -285,7 +282,7 @@ def run_behavioral_analysis_example():
     print("Calculating behavioral metrics...")
     behavioral_metrics = calculate_behavioral_metrics(data)
 
-    print(f"\nOverall Behavioral Patterns:")
+    print("\nOverall Behavioral Patterns:")
     print(f"  Activity rate: {behavioral_metrics['overall_activity_rate']:.3f}")
     print(f"  Total activations: {behavioral_metrics['total_activations']}")
     print(f"  Peak activity hour: {behavioral_metrics['peak_activity_hour']}:00")
@@ -293,7 +290,7 @@ def run_behavioral_analysis_example():
     print(f"  Most active day: {behavioral_metrics['most_active_day']}")
     print(f"  Least active day: {behavioral_metrics['least_active_day']}")
 
-    print(f"\nSensor-Specific Patterns:")
+    print("\nSensor-Specific Patterns:")
     for sensor, metrics in behavioral_metrics["sensor_metrics"].items():
         print(f"  {sensor}:")
         print(f"    Activation rate: {metrics['activation_rate']:.3f}")

@@ -1,12 +1,11 @@
 """Research oriented plotting utilities."""
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 import pandas as pd
 import plotly.express as px
 import seaborn as sns
-from matplotlib import pyplot as plt
 
 
 def publication_figure(data: pd.DataFrame, x: str, y: str, hue: str | None = None):
