@@ -1,6 +1,7 @@
 import json
 
 import pandas as pd
+import pytest
 
 from sensor_modeling.analysis import behavioral_analysis, comparison, reporting
 from sensor_modeling.analysis.pipeline import AnalysisPipeline
@@ -63,3 +64,35 @@ def test_comparison_and_behavioral():
     assert len(anomalies) == len(ds.to_dataframe())
     assert trends.shape[0] == ds.to_dataframe().shape[0]
     assert "overall_activity" in health
+
+
+class _PredictOnlyModel:
+    def fit(self, data):
+        return self
+
+    def predict(self, data):
+        return data[:, 0]
+
+
+def test_cross_validate_requires_explicit_scoring_contract():
+    ds = SensorDataset(_sample_df())
+
+    with pytest.raises(TypeError, match="explicit scorer"):
+        comparison.cross_validate({"predict_only": _PredictOnlyModel()}, ds)
+
+
+def test_cross_validate_accepts_explicit_model_scorer():
+    ds = SensorDataset(_sample_df())
+
+    def scorer(model, train_df, test_df):
+        assert isinstance(model, _PredictOnlyModel)
+        assert train_df.index.max() < test_df.index.min()
+        return 0.5
+
+    scores = comparison.cross_validate(
+        {"predict_only": _PredictOnlyModel()},
+        ds,
+        scorers={"predict_only": scorer},
+    )
+
+    assert scores["predict_only"] == 0.5
