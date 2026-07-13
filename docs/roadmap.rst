@@ -1,6 +1,10 @@
 Project Roadmap
 ===============
 
+The canonical GitHub-facing roadmap is maintained in ``ROADMAP.md`` at the
+repository root. This documentation page mirrors that roadmap for the Sphinx
+site.
+
 This roadmap describes the planned direction for the Sensor Modeling Research
 Toolkit. It is intentionally release-oriented: items are grouped by the outcome
 they should unlock, not by implementation preference. The roadmap can change as
