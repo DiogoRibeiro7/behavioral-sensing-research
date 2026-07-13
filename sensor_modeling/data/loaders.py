@@ -1,10 +1,10 @@
 """Flexible data loaders for multiple sensor data formats."""
+
 from __future__ import annotations
 
 import json
 import logging
 from collections.abc import Generator, Iterable
-from typing import Dict
 
 import pandas as pd
 
@@ -13,7 +13,7 @@ try:
 except Exception:  # pragma: no cover - handled gracefully
     h5py = None  # type: ignore
 
-from sensor_modeling.utils.data_io import SensorDataset
+from sensor_modeling.utils.data_io import SensorDataset, read_sensor_csv
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,9 @@ def load_csv(path: str, timestamp_col: str = "timestamp", **kwargs) -> SensorDat
     path : str
         Path to the CSV file.
     timestamp_col : str, default="timestamp"
-        Column containing timestamp information.
+        Preferred timestamp column. If absent, an unnamed saved index is parsed
+        as datetimes when possible; otherwise the CSV is loaded as a plain
+        tabular sensor matrix.
 
     Returns
     -------
@@ -34,13 +36,10 @@ def load_csv(path: str, timestamp_col: str = "timestamp", **kwargs) -> SensorDat
         Dataset containing sensor readings indexed by timestamps.
     """
     try:
-        df = pd.read_csv(path, parse_dates=[timestamp_col], **kwargs)
+        df = read_sensor_csv(path, timestamp_col=timestamp_col, **kwargs)
     except Exception as exc:
         logger.error("Failed to read CSV %s: %s", path, exc)
         raise ValueError(f"Unable to read CSV file: {path}") from exc
-    if timestamp_col not in df.columns:
-        raise ValueError(f"Timestamp column '{timestamp_col}' missing from CSV")
-    df = df.set_index(timestamp_col).sort_index()
     logger.info("Loaded CSV with shape %s from %s", df.shape, path)
     return SensorDataset(df)
 
@@ -89,7 +88,7 @@ def load_hdf5(path: str, key: str = "data") -> SensorDataset:
     return SensorDataset(data)
 
 
-def stream_data(source: Iterable[Dict]) -> Generator[SensorDataset, None, None]:
+def stream_data(source: Iterable[dict]) -> Generator[SensorDataset, None, None]:
     """Yield datasets from a real-time streaming source.
 
     Parameters

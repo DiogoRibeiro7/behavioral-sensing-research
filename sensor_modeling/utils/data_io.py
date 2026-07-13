@@ -4,12 +4,38 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Dict, List
 
 import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+
+def read_sensor_csv(
+    path: str, timestamp_col: str = "timestamp", **kwargs
+) -> pd.DataFrame:
+    """Read a sensor CSV using the public loader contract.
+
+    Supported layouts are:
+
+    - a named timestamp column, by default ``timestamp``
+    - an unnamed first column created by ``DataFrame.to_csv(index=True)``
+    - a plain tabular sensor matrix with no timestamp index
+    """
+    df = pd.read_csv(path, **kwargs)
+    if timestamp_col in df.columns:
+        df[timestamp_col] = pd.to_datetime(df[timestamp_col])
+        return df.set_index(timestamp_col).sort_index()
+
+    first_col = df.columns[0] if len(df.columns) else None
+    if isinstance(first_col, str) and first_col.startswith("Unnamed:"):
+        parsed_index = pd.to_datetime(df[first_col], errors="coerce")
+        if parsed_index.notna().all():
+            df = df.drop(columns=[first_col])
+            df.index = parsed_index
+            return df.sort_index()
+
+    return df
 
 
 @dataclass
@@ -25,9 +51,11 @@ class SensorDataset:
     data: pd.DataFrame
 
     @classmethod
-    def from_csv(cls, path: str) -> SensorDataset:
+    def from_csv(
+        cls, path: str, timestamp_col: str = "timestamp", **kwargs
+    ) -> SensorDataset:
         """Load sensor data from a CSV file."""
-        df = pd.read_csv(path, index_col=0, parse_dates=True)
+        df = read_sensor_csv(path, timestamp_col=timestamp_col, **kwargs)
         logger.info("Loaded %d rows from %s", len(df), path)
         return cls(df)
 
@@ -35,13 +63,13 @@ class SensorDataset:
         """Return the underlying DataFrame."""
         return self.data
 
-    def to_event_sequences(self, sensor: str) -> List[np.ndarray]:
+    def to_event_sequences(self, sensor: str) -> list[np.ndarray]:
         """Convert binary activations for *sensor* into per-day event times."""
         if sensor not in self.data.columns:
             raise KeyError(f"Sensor '{sensor}' not found in dataset")
         df = self.data[self.data[sensor] > 0]
         grouped = df.groupby(df.index.date)
-        events: List[np.ndarray] = []
+        events: list[np.ndarray] = []
         for _, day_df in grouped:
             times = day_df.index
             events.append(
@@ -136,7 +164,7 @@ def simulate_sensor_data(
 
 
 def export_analysis_results(
-    results: Dict, filename: str = "sensor_analysis_results"
+    results: dict, filename: str = "sensor_analysis_results"
 ) -> None:
     """Export analysis results to JSON/CSV files."""
     try:

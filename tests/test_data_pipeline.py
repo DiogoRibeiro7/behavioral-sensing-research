@@ -23,6 +23,21 @@ def test_loaders(tmp_path):
     df.to_csv(csv_path)
     ds_csv = loaders.load_csv(csv_path)
     assert ds_csv.to_dataframe().shape == df.shape
+    ds_from_csv = SensorDataset.from_csv(csv_path)
+    pd.testing.assert_frame_equal(ds_from_csv.to_dataframe(), ds_csv.to_dataframe())
+
+    unnamed_index_path = tmp_path / "unnamed-index.csv"
+    df.rename_axis(None).to_csv(unnamed_index_path)
+    ds_unnamed = loaders.load_csv(unnamed_index_path)
+    assert ds_unnamed.to_dataframe().index.equals(df.index)
+    assert ds_unnamed.to_dataframe().shape == df.shape
+
+    plain_path = tmp_path / "plain.csv"
+    plain_df = df.reset_index(drop=True)
+    plain_df.to_csv(plain_path, index=False)
+    ds_plain = loaders.load_csv(plain_path)
+    assert isinstance(ds_plain.to_dataframe().index, pd.RangeIndex)
+    assert ds_plain.to_dataframe().shape == plain_df.shape
 
     json_path = tmp_path / "data.json"
     records = df.reset_index()
