@@ -14,6 +14,15 @@ from sklearn.linear_model import LogisticRegression
 
 logger = logging.getLogger(__name__)
 
+CAUSALITY_RESULT_COLUMNS = [
+    "cause",
+    "effect",
+    "test_statistic",
+    "p_value",
+    "causality_detected",
+    "lags_used",
+]
+
 
 class GrangerCausalityTest:
     """
@@ -29,6 +38,8 @@ class GrangerCausalityTest:
         Args:
             max_lags: Maximum number of lags to consider
         """
+        if max_lags < 1:
+            raise ValueError("max_lags must be at least 1")
         self.max_lags = max_lags
 
     def test(self, x: np.ndarray, y: np.ndarray, lags: int | None = None) -> dict:
@@ -221,7 +232,7 @@ class GrangerCausalityTest:
                             }
                         )
 
-        return pd.DataFrame(results)
+        return pd.DataFrame(results, columns=CAUSALITY_RESULT_COLUMNS)
 
     def create_causality_summary(self, causality_results: pd.DataFrame) -> dict:
         """
@@ -233,7 +244,9 @@ class GrangerCausalityTest:
         Returns:
             Dictionary with summary statistics
         """
-        significant = causality_results[causality_results["causality_detected"]]
+        significant = causality_results[
+            causality_results["causality_detected"].eq(True)
+        ]
 
         # Count relationships
         total_pairs = len(causality_results)
@@ -256,10 +269,8 @@ class GrangerCausalityTest:
             top_effects = {}
 
         # Average test statistics
-        avg_test_stat = causality_results["test_statistic"].mean()
-        avg_significant_stat = (
-            significant["test_statistic"].mean() if len(significant) > 0 else 0
-        )
+        avg_test_stat = self._finite_mean_or_zero(causality_results["test_statistic"])
+        avg_significant_stat = self._finite_mean_or_zero(significant["test_statistic"])
 
         return {
             "total_pairs_tested": total_pairs,
@@ -271,6 +282,16 @@ class GrangerCausalityTest:
             "top_effects": top_effects,
             "bidirectional_relationships": self._find_bidirectional(significant),
         }
+
+    def _finite_mean_or_zero(self, values: pd.Series) -> float:
+        """Return the finite mean of values, or zero when none are finite."""
+        finite_values = pd.to_numeric(values, errors="coerce").replace(
+            [np.inf, -np.inf], np.nan
+        )
+        mean = finite_values.mean()
+        if pd.isna(mean):
+            return 0.0
+        return float(mean)
 
     def _find_bidirectional(
         self, significant_results: pd.DataFrame

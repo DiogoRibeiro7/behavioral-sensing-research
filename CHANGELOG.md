@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Refactored data-layer typing, HDF5 import handling, synthetic data export behavior, and validation internals.
 - Refactored behavioral analysis helpers to validate sensor frames, ignore non-numeric columns, and avoid NaN metrics for constant or single-day data.
+- Refactored Granger causality summaries to validate lag configuration, keep empty result schemas stable, and ignore non-finite summary statistics.
 - Refactored Granger causality testing to validate binary inputs and align lagged design matrices correctly.
 - Refactored dependency network analysis to validate binary sensor frames, handle edgeless graphs, and return plot figures.
 - Refactored cross-validation helpers to validate split counts and narrow fold failure handling.
