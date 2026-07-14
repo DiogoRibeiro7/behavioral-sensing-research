@@ -1,4 +1,5 @@
 """Lightweight Flask web interface for running analyses."""
+
 from __future__ import annotations
 
 import argparse
@@ -17,6 +18,7 @@ from flask import (
     request,
     send_file,
 )
+from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 UPLOAD_DIR = Path(tempfile.gettempdir()) / "sensor-modeling-uploads"
@@ -45,6 +47,16 @@ def _auth_failed() -> Response:  # pragma: no cover - simple response
         401,
         {"WWW-Authenticate": 'Basic realm="Login"'},
     )
+
+
+def _uploaded_data_file() -> FileStorage:
+    """Return the uploaded data file or abort with a clear client error."""
+    if "data" not in request.files:
+        abort(400, "missing data file")
+    file = request.files["data"]
+    if not file.filename:
+        abort(400, "invalid filename")
+    return file
 
 
 def requires_auth(f: Callable) -> Callable:
@@ -83,7 +95,7 @@ def index():  # pragma: no cover - simple template
 @requires_auth
 def run():
     """Persist uploaded data and return a placeholder result."""
-    file = request.files["data"]
+    file = _uploaded_data_file()
     param = request.form.get("param", "")
     filename = secure_filename(file.filename)
     if not filename:
