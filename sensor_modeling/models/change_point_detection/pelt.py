@@ -20,6 +20,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from numbers import Integral
 from typing import List
 
 import numpy as np
@@ -37,11 +38,31 @@ class PELTChangePointDetector:
     min_segment_length: int = 2
     cost: str | SegmentCost = "l2"
 
+    def __post_init__(self) -> None:
+        """Validate detector configuration at construction time."""
+        try:
+            self.penalty = float(self.penalty)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("penalty must be positive and finite") from exc
+        if not np.isfinite(self.penalty) or self.penalty <= 0:
+            raise ValueError("penalty must be positive and finite")
+        if (
+            isinstance(self.min_segment_length, bool)
+            or not isinstance(self.min_segment_length, Integral)
+            or self.min_segment_length < 1
+        ):
+            raise ValueError("min_segment_length must be a positive integer")
+        self.min_segment_length = int(self.min_segment_length)
+        if not callable(self.cost) and self.cost not in {"l1", "l2"}:
+            raise ValueError("cost must be 'l1', 'l2', or a callable segment cost")
+
     def _validate_signal(self, signal: Sequence[float] | np.ndarray) -> np.ndarray:
         """Return *signal* as a finite 1D float array."""
         arr = np.asarray(signal, dtype=float)
         if arr.ndim != 1:
             raise ValueError("PELTChangePointDetector only supports 1D signals")
+        if arr.size == 0:
+            raise ValueError("signal must contain at least one observation")
         if not np.all(np.isfinite(arr)):
             raise ValueError("signal must contain only finite numeric values")
         return arr
@@ -49,7 +70,14 @@ class PELTChangePointDetector:
     def _cost_function(self, signal: np.ndarray) -> Callable[[int, int], float]:
         """Build a segment cost function over half-open intervals."""
         if callable(self.cost):
-            return lambda start, end: float(self.cost(signal[start:end]))
+
+            def custom_cost(start: int, end: int) -> float:
+                value = float(self.cost(signal[start:end]))
+                if not np.isfinite(value):
+                    raise ValueError("segment cost must return finite values")
+                return value
+
+            return custom_cost
 
         if self.cost == "l2":
             prefix_sum = np.concatenate(([0.0], np.cumsum(signal)))
@@ -67,7 +95,6 @@ class PELTChangePointDetector:
             return lambda start, end: float(
                 np.abs(signal[start:end] - np.median(signal[start:end])).sum()
             )
-
         raise ValueError("cost must be 'l1', 'l2', or a callable segment cost")
 
     def detect(self, signal: Sequence[float] | np.ndarray) -> List[int]:
@@ -77,11 +104,6 @@ class PELTChangePointDetector:
         ``len(signal)``. For example, ``[20, 35]`` means segments
         ``signal[:20]``, ``signal[20:35]``, and ``signal[35:]``.
         """
-        if self.penalty <= 0:
-            raise ValueError("penalty must be positive")
-        if self.min_segment_length < 1:
-            raise ValueError("min_segment_length must be at least 1")
-
         arr = self._validate_signal(signal)
         n_samples = len(arr)
         if n_samples < 2 * self.min_segment_length:
