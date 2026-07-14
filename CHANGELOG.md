@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Refactored data-layer typing, HDF5 import handling, synthetic data export behavior, and validation internals.
+- Refactored behavioral analysis helpers to validate sensor frames, ignore non-numeric columns, and avoid NaN metrics for constant or single-day data.
 - Refactored sensor simulation to use local NumPy random generators instead of mutating global random state.
 - Refactored plotting helpers to return Matplotlib figures and support non-interactive `show=False` workflows.
 - Simplified legacy `setup.py` so package metadata is sourced from `pyproject.toml`.
