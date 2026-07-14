@@ -73,16 +73,29 @@ def test_simulate_sensor_data_rejects_invalid_inputs(kwargs, message):
 
 
 def test_export_analysis_results_writes_json_and_dataframe_csv(tmp_path):
-    output_base = tmp_path / "analysis"
+    output_base = tmp_path / "nested" / "analysis"
     causality = pd.DataFrame({"source": ["a"], "target": ["b"], "score": [0.7]})
 
-    export_analysis_results(
+    output_paths = export_analysis_results(
         {"summary": {"ok": True}, "causality_results": causality},
         filename=output_base,
     )
 
-    payload = json.loads((tmp_path / "analysis.json").read_text(encoding="utf-8"))
-    exported_csv = pd.read_csv(tmp_path / "analysis_causality.csv")
+    payload = json.loads(output_paths["json"].read_text(encoding="utf-8"))
+    exported_csv = pd.read_csv(output_paths["causality_csv"])
 
+    assert output_paths["json"] == tmp_path / "nested" / "analysis.json"
+    assert (
+        output_paths["causality_csv"] == tmp_path / "nested" / "analysis_causality.csv"
+    )
     assert payload["summary"] == {"ok": True}
     pd.testing.assert_frame_equal(exported_csv, causality)
+
+
+def test_export_analysis_results_returns_only_json_without_causality(tmp_path):
+    output_paths = export_analysis_results({"summary": "ok"}, filename=tmp_path / "run")
+
+    assert output_paths == {"json": tmp_path / "run.json"}
+    assert json.loads(output_paths["json"].read_text(encoding="utf-8")) == {
+        "summary": "ok"
+    }

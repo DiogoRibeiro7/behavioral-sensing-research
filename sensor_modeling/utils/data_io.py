@@ -7,6 +7,7 @@ import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 from os import PathLike
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -176,18 +177,23 @@ def simulate_sensor_data(
 
 def export_analysis_results(
     results: Mapping[str, object], filename: FilePath = "sensor_analysis_results"
-) -> None:
-    """Export analysis results to JSON/CSV files."""
-    try:
-        json_filename = f"{filename}.json"
-        with open(json_filename, "w", encoding="utf-8") as f:
-            json.dump(results, f, indent=2, default=str)
-        logger.info("Results exported to %s", json_filename)
-        if "causality_results" in results and isinstance(
-            results["causality_results"], pd.DataFrame
-        ):
-            csv_filename = f"{filename}_causality.csv"
-            results["causality_results"].to_csv(csv_filename, index=False)
-            logger.info("Causality results exported to %s", csv_filename)
-    except Exception as e:
-        logger.error("Export failed: %s", e)
+) -> dict[str, Path]:
+    """Export analysis results to JSON/CSV files and return written paths."""
+    json_path = Path(f"{filename}.json")
+    json_path.parent.mkdir(parents=True, exist_ok=True)
+    json_path.write_text(
+        json.dumps(results, indent=2, default=str),
+        encoding="utf-8",
+    )
+    logger.info("Results exported to %s", json_path)
+
+    output_paths = {"json": json_path}
+    causality_results = results.get("causality_results")
+    if isinstance(causality_results, pd.DataFrame):
+        csv_path = Path(f"{filename}_causality.csv")
+        csv_path.parent.mkdir(parents=True, exist_ok=True)
+        causality_results.to_csv(csv_path, index=False)
+        output_paths["causality_csv"] = csv_path
+        logger.info("Causality results exported to %s", csv_path)
+
+    return output_paths
