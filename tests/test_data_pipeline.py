@@ -246,3 +246,44 @@ def test_detect_sensor_failures_flags_constant_stretches():
     failures = validation.detect_sensor_failures(SensorDataset(df), window=3)
 
     assert failures == {"stuck": True, "active": False}
+
+
+def test_temporal_consistency_rejects_invalid_indexes():
+    assert not validation.check_temporal_consistency(
+        SensorDataset(pd.DataFrame({"sensor_0": [0, 1]}))
+    )
+
+    duplicate_index = pd.to_datetime(["2024-01-01", "2024-01-01"])
+    assert not validation.check_temporal_consistency(
+        SensorDataset(pd.DataFrame({"sensor_0": [0, 1]}, index=duplicate_index))
+    )
+
+    irregular_index = pd.to_datetime(
+        ["2024-01-01 00:00:00", "2024-01-01 00:01:00", "2024-01-01 00:03:00"]
+    )
+    assert not validation.check_temporal_consistency(
+        SensorDataset(pd.DataFrame({"sensor_0": [0, 1, 0]}, index=irregular_index))
+    )
+
+
+def test_validate_sensor_ranges_handles_invalid_values():
+    valid_index = pd.date_range("2024-01-01", periods=2, freq="1min")
+
+    assert not validation.validate_sensor_ranges(
+        SensorDataset(pd.DataFrame({"sensor_0": ["off", "on"]}, index=valid_index))
+    )
+    assert not validation.validate_sensor_ranges(
+        SensorDataset(pd.DataFrame({"sensor_0": [0, 2]}, index=valid_index))
+    )
+
+    with pytest.raises(ValueError, match="min_val"):
+        validation.validate_sensor_ranges(
+            SensorDataset(pd.DataFrame({"sensor_0": [0, 1]}, index=valid_index)),
+            min_val=1,
+            max_val=0,
+        )
+
+
+def test_detect_sensor_failures_validates_window():
+    with pytest.raises(ValueError, match="window"):
+        validation.detect_sensor_failures(SensorDataset(_sample_df()), window=0)
