@@ -26,6 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Dict
 
+import numpy as np
 import pandas as pd
 
 from ..change_point.embedding_cpd import EmbeddingCPD
@@ -35,6 +36,14 @@ from ..models.nhpp_pelt.model import NHPPPELT, NHPPConfig
 from ..utils.data_io import SensorDataset
 
 logger = logging.getLogger(__name__)
+
+ModelRunError = (
+    AttributeError,
+    FloatingPointError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
 
 
 class AnalysisPipeline:
@@ -60,34 +69,54 @@ class AnalysisPipeline:
         }
 
     # ------------------------------------------------------------------
-    def run(self, data: pd.DataFrame | SensorDataset) -> Dict[str, Any]:
-        """Run all configured models on *data* in parallel."""
+    def _prepare_dataset(self, data: pd.DataFrame | SensorDataset) -> pd.DataFrame:
+        """Store and validate the input dataset for a pipeline run."""
         self.dataset = data if isinstance(data, SensorDataset) else SensorDataset(data)
         df = self.dataset.to_dataframe()
+        if len(df.columns) == 0:
+            raise ValueError("analysis pipeline requires at least one sensor column")
+        if len(df) == 0:
+            raise ValueError("analysis pipeline requires at least one row")
+        return df
+
+    # ------------------------------------------------------------------
+    def _run_model(
+        self,
+        name: str,
+        model: Any,
+        df: pd.DataFrame,
+        sensor_names: list[str],
+    ) -> Dict[str, Any]:
+        """Run one configured model and return serializable summary output."""
+        target_sensor = sensor_names[0]
+        if name == "nhpp":
+            model.fit(self.dataset, sensor=target_sensor)
+            return {"changepoints": getattr(model, "changepoints_", [])}
+        if name == "cpd":
+            model.fit(df[target_sensor].values)
+            return {"changepoints": model.predict()}
+        if name == "hmm":
+            x = df.values
+            model.fit(x)
+            return {"states": model.predict(x)}
+        if name == "ar":
+            model.fit(df)
+            probabilities = np.asarray(model.predict_probabilities(df))
+            return {"probabilities": probabilities[:5].tolist()}
+        return {"status": "skipped"}
+
+    # ------------------------------------------------------------------
+    def run(self, data: pd.DataFrame | SensorDataset) -> Dict[str, Any]:
+        """Run all configured models on *data* in parallel."""
+        df = self._prepare_dataset(data)
         sensor_names = list(df.columns)
         if not self.models:
             self.models = self._default_models(sensor_names)
 
         def _run(name: str, model: Any) -> Dict[str, Any]:
             try:
-                if name == "nhpp":
-                    model.fit(self.dataset, sensor=sensor_names[0])
-                    return {"changepoints": getattr(model, "changepoints_", [])}
-                if name == "cpd":
-                    series = df[sensor_names[0]].values
-                    model.fit(series)
-                    return {"changepoints": model.predict()}
-                if name == "hmm":
-                    X = df.values
-                    model.fit(X)
-                    states = model.predict(X)
-                    return {"states": states}
-                if name == "ar":
-                    model.fit(df)
-                    probs = model.predict_probabilities(df)
-                    return {"probabilities": probs.iloc[:5].to_dict("list")}
-                return {"status": "skipped"}
-            except Exception as exc:  # pragma: no cover - defensive
+                return self._run_model(name, model, df, sensor_names)
+            except ModelRunError as exc:
                 logger.error("Model %s failed: %s", name, exc)
                 return {"error": str(exc)}
 

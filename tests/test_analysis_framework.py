@@ -49,6 +49,45 @@ def test_pipeline_and_reporting(tmp_path):
     assert (nested_output / "analysis_fhir.json").exists()
 
 
+class _ArrayProbabilityModel:
+    def fit(self, data):
+        return self
+
+    def predict_probabilities(self, data):
+        return np.arange(10, dtype=float)
+
+
+class _FailingPipelineModel:
+    def fit(self, data):
+        raise ValueError("model cannot fit")
+
+
+def test_pipeline_formats_numpy_probability_outputs():
+    pipe = AnalysisPipeline(models={"ar": _ArrayProbabilityModel()})
+
+    results = pipe.run(SensorDataset(_sample_df()))
+
+    assert results == {"ar": {"probabilities": [0.0, 1.0, 2.0, 3.0, 4.0]}}
+
+
+def test_pipeline_records_expected_model_failures():
+    pipe = AnalysisPipeline(models={"hmm": _FailingPipelineModel()})
+
+    results = pipe.run(SensorDataset(_sample_df()))
+
+    assert results == {"hmm": {"error": "model cannot fit"}}
+
+
+def test_pipeline_validates_input_frame():
+    pipe = AnalysisPipeline(models={"unknown": object()})
+
+    with pytest.raises(ValueError, match="at least one row"):
+        pipe.run(pd.DataFrame(columns=["sensor_0"]))
+
+    with pytest.raises(ValueError, match="sensor column"):
+        pipe.run(pd.DataFrame(index=[pd.Timestamp("2024-01-01")]))
+
+
 def test_template_rendering_returns_original_on_format_errors():
     assert reporting.render_template("Hello {name}", {"name": "Ada"}) == "Hello Ada"
     assert reporting.render_template("Hello {missing}", {}) == "Hello {missing}"
