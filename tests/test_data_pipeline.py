@@ -287,3 +287,29 @@ def test_validate_sensor_ranges_handles_invalid_values():
 def test_detect_sensor_failures_validates_window():
     with pytest.raises(ValueError, match="window"):
         validation.detect_sensor_failures(SensorDataset(_sample_df()), window=0)
+
+
+def test_preprocessing_handles_mixed_dtype_outliers_and_mean_imputation():
+    idx = pd.date_range("2024-01-01", periods=4, freq="1min")
+    df = pd.DataFrame(
+        {
+            "sensor_0": [1.0, 1.0, 1.0, 1.0],
+            "sensor_1": [0.0, 0.0, 0.0, 10.0],
+            "label": ["ok", None, "ok", "alert"],
+        },
+        index=idx,
+    )
+
+    outliers = preprocessing.detect_outliers(SensorDataset(df), z_thresh=1.0)
+    imputed = preprocessing.impute_missing(SensorDataset(df), strategy="mean")
+
+    assert list(outliers.columns) == ["sensor_0", "sensor_1", "label"]
+    assert not outliers["sensor_0"].any()
+    assert not outliers["label"].any()
+    assert bool(outliers.loc[idx[-1], "sensor_1"])
+    assert pd.isna(imputed.to_dataframe().loc[idx[1], "label"])
+
+
+def test_preprocessing_validates_outlier_threshold():
+    with pytest.raises(ValueError, match="z_thresh"):
+        preprocessing.detect_outliers(SensorDataset(_sample_df()), z_thresh=0)
