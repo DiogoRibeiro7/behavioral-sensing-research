@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored JSON and streaming data loaders to validate timestamps explicitly and avoid broad malformed-record handling.
 - Refactored data validation helpers to reject non-timestamp indexes, duplicate timestamps, invalid range bounds, and invalid failure windows.
 - Refactored preprocessing outlier detection and mean imputation to handle mixed dtypes and constant numeric columns.
+- Refactored model comparison statistics to validate paired tests and scale finite metrics without NaN warnings.
 - Refactored analysis report writers to create output directories, return written paths, and narrow template formatting errors.
 - Refactored analysis pipeline model dispatch to validate input frames, format NumPy probability outputs, and narrow model failure handling.
 - Refactored Bernoulli autoregressive fitting to validate training frames and narrow optimizer failure handling.

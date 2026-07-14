@@ -112,18 +112,43 @@ def cross_validate(
 # ---------------------------------------------------------------------------
 def significance_test(scores_a: list[float], scores_b: list[float]) -> float:
     """Paired t-test returning the p-value."""
-    _, pvalue = ttest_rel(scores_a, scores_b, nan_policy="omit")
+    values_a = np.asarray(scores_a, dtype=float)
+    values_b = np.asarray(scores_b, dtype=float)
+    if values_a.shape != values_b.shape:
+        raise ValueError("scores_a and scores_b must have the same length")
+
+    valid_pairs = np.isfinite(values_a) & np.isfinite(values_b)
+    if np.count_nonzero(valid_pairs) < 2:
+        raise ValueError("at least two paired finite scores are required")
+
+    differences = values_a[valid_pairs] - values_b[valid_pairs]
+    if np.allclose(differences, 0.0):
+        return 1.0
+
+    _, pvalue = ttest_rel(values_a[valid_pairs], values_b[valid_pairs])
+    if not np.isfinite(pvalue):
+        return 1.0
     return float(pvalue)
 
 
 # ---------------------------------------------------------------------------
 def standardize_metrics(metrics: dict[str, float]) -> dict[str, float]:
     """Scale metric values to the [0,1] range."""
+    if not metrics:
+        return {}
+
     vals = np.array(list(metrics.values()), dtype=float)
-    vmin = np.nanmin(vals)
-    vmax = np.nanmax(vals)
+    finite_vals = vals[np.isfinite(vals)]
+    if finite_vals.size == 0:
+        return {name: float("nan") for name in metrics}
+
+    vmin = np.min(finite_vals)
+    vmax = np.max(finite_vals)
     rng = vmax - vmin if vmax != vmin else 1.0
-    return {k: (v - vmin) / rng for k, v in metrics.items()}
+    return {
+        name: float("nan") if not np.isfinite(value) else float((value - vmin) / rng)
+        for name, value in zip(metrics, vals)
+    }
 
 
 # ---------------------------------------------------------------------------

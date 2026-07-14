@@ -119,6 +119,32 @@ def test_comparison_and_behavioral():
     assert "overall_activity" in health
 
 
+def test_standardize_metrics_handles_empty_and_missing_values():
+    assert comparison.standardize_metrics({}) == {}
+    assert comparison.standardize_metrics({"a": 2.0, "b": 2.0}) == {
+        "a": 0.0,
+        "b": 0.0,
+    }
+
+    standardized = comparison.standardize_metrics(
+        {"low": 2.0, "missing": float("nan"), "high": 4.0}
+    )
+
+    assert standardized["low"] == 0.0
+    assert np.isnan(standardized["missing"])
+    assert standardized["high"] == 1.0
+
+
+def test_significance_test_validates_paired_scores():
+    assert comparison.significance_test([0.2, 0.3], [0.2, 0.3]) == 1.0
+
+    with pytest.raises(ValueError, match="same length"):
+        comparison.significance_test([0.1, 0.2], [0.1])
+
+    with pytest.raises(ValueError, match="at least two"):
+        comparison.significance_test([0.1, float("nan")], [0.1, 0.2])
+
+
 class _PredictOnlyModel:
     def fit(self, data):
         return self
