@@ -32,7 +32,7 @@ def test_interactive_export(tmp_path):
     """Export interactive visualization to HTML."""
     df = _sample_data()
     fig = interactive.real_time_display(df)
-    out = tmp_path / "fig.html"
+    out = tmp_path / "nested" / "fig.html"
     interactive.export(fig, out)
     assert out.exists()
 
@@ -46,6 +46,15 @@ class _DummyTuningModel:
     def score_parameter(self, param, value):
         assert param == "penalty"
         return -((value - 2.0) ** 2) + 4.0
+
+
+class _NonFiniteTuningModel:
+    """Small model that returns invalid parameter diagnostics."""
+
+    penalty = 1.0
+
+    def score_parameter(self, param, value):
+        return float("nan")
 
 
 def test_parameter_tuning_returns_visible_diagnostic_layout():
@@ -68,6 +77,31 @@ def test_parameter_tuning_export_supports_bokeh_layout(tmp_path):
     interactive.export(layout, out)
     assert out.exists()
     assert "penalty diagnostic sweep" in out.read_text(encoding="utf-8")
+
+
+def test_interactive_visualizations_validate_inputs():
+    """Interactive helpers should validate data schema and parameter sweeps."""
+    df = _sample_data()
+    changes = pd.DataFrame({"time": df["timestamp"], "score": range(len(df))})
+
+    assert interactive.drill_down(changes) is not None
+
+    with pytest.raises(ValueError, match="real_time_display requires columns"):
+        interactive.real_time_display(df.drop(columns=["sensor"]))
+
+    with pytest.raises(ValueError, match="drill_down requires columns"):
+        interactive.drill_down(changes.drop(columns=["score"]))
+
+    with pytest.raises(ValueError, match="finite candidates"):
+        interactive.parameter_tuning(
+            _DummyTuningModel(), "penalty", [1.0, float("inf")]
+        )
+
+    with pytest.raises(ValueError, match="parameter scores must be finite"):
+        interactive.parameter_tuning(_NonFiniteTuningModel(), "penalty", [1.0, 2.0])
+
+    with pytest.raises(TypeError, match="Unsupported figure type"):
+        interactive.export(object(), "unsupported.html")
 
 
 def test_clinical_alerts():
