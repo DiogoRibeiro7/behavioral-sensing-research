@@ -109,6 +109,36 @@ def test_research_publication_figure():
     assert fig is not None
 
 
+def test_research_visualizations_validate_inputs():
+    """Research plotting helpers should validate required schema and residuals."""
+    df = _sample_data()
+    scores = pd.DataFrame(
+        {"model": ["ar", "hmm"], "metric": ["auc", "auc"], "score": [0.7, 0.8]}
+    )
+    results = pd.DataFrame(
+        {"model": ["ar", "hmm"], "test": ["t-test", "t-test"], "pvalue": [0.2, 0.01]}
+    )
+
+    assert research.model_diagnostics([0.1, -0.2, 0.0]) is not None
+    assert research.performance_comparison(scores) is not None
+    assert research.statistical_tests(results) is not None
+
+    with pytest.raises(ValueError, match="publication_figure requires columns"):
+        research.publication_figure(df.drop(columns=["value"]), "timestamp", "value")
+
+    with pytest.raises(ValueError, match="at least one value"):
+        research.model_diagnostics([])
+
+    with pytest.raises(ValueError, match="finite values"):
+        research.model_diagnostics([0.1, float("nan")])
+
+    with pytest.raises(ValueError, match="performance_comparison requires columns"):
+        research.performance_comparison(scores.drop(columns=["metric"]))
+
+    with pytest.raises(ValueError, match="statistical_tests requires columns"):
+        research.statistical_tests(results.drop(columns=["pvalue"]))
+
+
 def test_web_app_factory():
     """Ensure web app requires credentials."""
     os.environ["SM_USER"] = "user"

@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored preprocessing outlier detection and mean imputation to handle mixed dtypes and constant numeric columns.
 - Refactored model comparison statistics to validate paired tests and scale finite metrics without NaN warnings.
 - Refactored clinical visualization helpers to validate required columns and rolling-window inputs.
+- Refactored research visualization helpers to validate plotting schemas and residual diagnostics.
 - Refactored analysis report writers to create output directories, return written paths, and narrow template formatting errors.
 - Refactored analysis pipeline model dispatch to validate input frames, format NumPy probability outputs, and narrow model failure handling.
 - Refactored Bernoulli autoregressive fitting to validate training frames and narrow optimizer failure handling.
