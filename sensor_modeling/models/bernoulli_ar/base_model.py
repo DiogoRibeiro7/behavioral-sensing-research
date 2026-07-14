@@ -120,6 +120,41 @@ class BernoulliAutoregressiveModel:
         except (OverflowError, ValueError, RuntimeWarning):
             return 1e10  # Return large value for invalid parameters
 
+    def _prepare_training_frame(
+        self, data: SensorDataset | pd.DataFrame
+    ) -> pd.DataFrame:
+        """Validate model input and return a numeric training frame."""
+        df = data.to_dataframe() if isinstance(data, SensorDataset) else data
+        if not isinstance(df, pd.DataFrame):
+            raise TypeError("data must be a pandas DataFrame or SensorDataset")
+        if df.empty:
+            raise ValueError("data must contain at least one observation")
+
+        missing = [sensor for sensor in self.sensor_names if sensor not in df.columns]
+        if missing:
+            raise ValueError(f"Missing sensor columns: {', '.join(missing)}")
+        if self.target_sensor not in self.sensor_names:
+            raise ValueError("target_sensor must be included in sensor_names")
+
+        sensor_frame = df[self.sensor_names]
+        try:
+            numeric_frame = sensor_frame.astype(float)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("sensor columns must be numeric") from exc
+        if numeric_frame.isna().any().any():
+            raise ValueError("sensor columns must not contain NaN values")
+
+        unique_values = set(np.unique(numeric_frame.to_numpy()))
+        if not unique_values <= {0.0, 1.0}:
+            raise ValueError("sensor columns must be binary with values 0 and 1")
+
+        return numeric_frame
+
+    def _set_training_arrays(self, df: pd.DataFrame) -> None:
+        """Cache target and predictor arrays for fitting."""
+        self.y = df[self.target_sensor].to_numpy(dtype=float)
+        self.X_other = df[self.other_sensors].to_numpy(dtype=float)
+
     def _vector_to_params(self, param_vector: np.ndarray) -> Dict:
         """Convert parameter vector to dictionary."""
         params = {}
@@ -176,8 +211,7 @@ class BernoulliAutoregressiveModel:
         """
         logger.info("Performing stepwise sensor selection...")
 
-        self.y = data[self.target_sensor].values
-        self.X_other = data[self.other_sensors].values
+        self._set_training_arrays(data)
 
         selected = []
         available = self.other_sensors.copy()
@@ -311,8 +345,8 @@ class BernoulliAutoregressiveModel:
             else:
                 return float("inf")
 
-        except Exception as e:
-            logger.warning(f"Error in model fitting: {e}")
+        except (FloatingPointError, RuntimeError, ValueError) as exc:
+            logger.warning("Error in model fitting: %s", exc)
             return float("inf")
 
     def fit(
@@ -333,9 +367,8 @@ class BernoulliAutoregressiveModel:
         logger.info(f"Fitting model for target sensor: {self.target_sensor}")
 
         # Prepare data
-        df = data.to_dataframe() if isinstance(data, SensorDataset) else data
-        self.y = df[self.target_sensor].values.astype(float)
-        self.X_other = df[self.other_sensors].values.astype(float)
+        df = self._prepare_training_frame(data)
+        self._set_training_arrays(df)
 
         # Perform sensor selection
         if perform_selection:
