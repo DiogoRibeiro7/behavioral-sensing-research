@@ -4,6 +4,7 @@ import os
 from unittest.mock import MagicMock
 
 import pandas as pd
+import pytest
 from bokeh.models import Div, Slider
 from flask import Flask
 
@@ -74,6 +75,31 @@ def test_clinical_alerts():
     df = _sample_data()
     alerts = clinical.clinical_alerts(df, {"a": 5})
     assert alerts["a"] is True
+
+
+def test_clinical_visualizations_validate_inputs():
+    """Clinical helpers should report missing columns and invalid windows clearly."""
+    df = _sample_data()
+    normative = df.copy()
+    activity_fig = clinical.activity_summary(df)
+    trend_fig = clinical.trend_monitor(df, window=2)
+    comparison_fig = clinical.compare_norms(df, normative)
+
+    assert activity_fig is not None
+    assert trend_fig is not None
+    assert comparison_fig is not None
+
+    with pytest.raises(ValueError, match="activity_summary requires columns"):
+        clinical.activity_summary(df.drop(columns=["activity"]))
+
+    with pytest.raises(ValueError, match="clinical_alerts requires columns"):
+        clinical.clinical_alerts(df.drop(columns=["value"]), {"a": 5})
+
+    with pytest.raises(ValueError, match="window must be at least 1"):
+        clinical.trend_monitor(df, window=0)
+
+    with pytest.raises(ValueError, match="normative data requires columns"):
+        clinical.compare_norms(df, normative.drop(columns=["value"]))
 
 
 def test_research_publication_figure():
