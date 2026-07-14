@@ -97,7 +97,9 @@ class AnalysisPipeline:
         return self.results
 
     # ------------------------------------------------------------------
-    def generate_report(self, results: Dict[str, Any], output_dir: str) -> None:
+    def generate_report(
+        self, results: Dict[str, Any], output_dir: str
+    ) -> Dict[str, Path]:
         """Generate LaTeX, HTML and FHIR reports for *results*."""
         from .reporting import (
             create_html_dashboard,
@@ -107,9 +109,11 @@ class AnalysisPipeline:
 
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        generate_latex_report(results, str(out_dir / "analysis.tex"))
-        create_html_dashboard(results, str(out_dir / "dashboard.html"))
-        export_to_fhir(results, str(out_dir / "analysis_fhir.json"))
+        return {
+            "latex": generate_latex_report(results, out_dir / "analysis.tex"),
+            "html": create_html_dashboard(results, out_dir / "dashboard.html"),
+            "fhir": export_to_fhir(results, out_dir / "analysis_fhir.json"),
+        }
 
 
 def main() -> None:

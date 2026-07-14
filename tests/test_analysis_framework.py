@@ -21,26 +21,39 @@ def test_pipeline_and_reporting(tmp_path):
     results = pipe.run(ds)
     assert {"ar", "hmm", "cpd", "nhpp"} <= results.keys()
 
-    tex = tmp_path / "report.tex"
-    html = tmp_path / "dashboard.html"
-    fhir = tmp_path / "fhir.json"
-    reporting.generate_latex_report(results, tex)
-    reporting.create_html_dashboard(results, html)
-    reporting.export_to_fhir(results, fhir)
+    tex = tmp_path / "direct" / "report.tex"
+    html = tmp_path / "direct" / "dashboard.html"
+    fhir = tmp_path / "direct" / "fhir.json"
+    assert reporting.generate_latex_report(results, tex) == tex
+    assert reporting.create_html_dashboard(results, html) == html
+    assert reporting.export_to_fhir(results, fhir) == fhir
     assert tex.exists()
     assert html.exists()
     assert fhir.exists()
-    fhir_payload = json.loads(fhir.read_text())
+    fhir_payload = json.loads(fhir.read_text(encoding="utf-8"))
     assert fhir_payload["resourceType"] == "Observation"
     assert fhir_payload["code"]["text"] == "Sensor modeling analysis summary"
     assert "valueString" not in fhir_payload
     assert {item["code"]["text"] for item in fhir_payload["component"]} == set(results)
 
     nested_output = tmp_path / "nested" / "reports"
-    pipe.generate_report(results, nested_output)
+    report_paths = pipe.generate_report(results, nested_output)
+    assert report_paths == {
+        "latex": nested_output / "analysis.tex",
+        "html": nested_output / "dashboard.html",
+        "fhir": nested_output / "analysis_fhir.json",
+    }
     assert (nested_output / "analysis.tex").exists()
     assert (nested_output / "dashboard.html").exists()
     assert (nested_output / "analysis_fhir.json").exists()
+
+
+def test_template_rendering_returns_original_on_format_errors():
+    assert reporting.render_template("Hello {name}", {"name": "Ada"}) == "Hello Ada"
+    assert reporting.render_template("Hello {missing}", {}) == "Hello {missing}"
+    assert (
+        reporting.render_template("Value {name!z}", {"name": "Ada"}) == "Value {name!z}"
+    )
 
 
 def test_comparison_and_behavioral():

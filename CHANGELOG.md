@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added security and support policy documents.
 - Added focused tests for shared data IO, synthetic exports, HDF5 loading, sensor failure detection, plotting helpers, and model validation utilities.
 - Added release metadata consistency tests for package, citation, Zenodo, and README metadata.
+- Added a non-interactive Matplotlib backend guard for the pytest suite.
 
 ### Changed
 - Refactored data-layer typing, HDF5 import handling, synthetic data export behavior, and validation internals.
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored dependency network analysis to validate binary sensor frames, handle edgeless graphs, and return plot figures.
 - Refactored analysis result exports to create parent directories, return written paths, and propagate write failures.
 - Refactored JSON and streaming data loaders to validate timestamps explicitly and avoid broad malformed-record handling.
+- Refactored analysis report writers to create output directories, return written paths, and narrow template formatting errors.
 - Refactored synthetic data generation to validate configs, bound generated probabilities, and report export paths.
 - Refactored sensor simulation to use local NumPy random generators instead of mutating global random state.
 - Refactored plotting helpers to return Matplotlib figures and support non-interactive `show=False` workflows.
