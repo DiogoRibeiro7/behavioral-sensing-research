@@ -11,6 +11,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from ..utils.plotting import plot_change_points
+from ._validation import validate_positive_int, validate_series
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,12 @@ class GeneticOptimizationCPD:
     population: int = 5
     generations: int = 5
 
+    def __post_init__(self) -> None:
+        validate_positive_int(self.population, "population")
+        validate_positive_int(self.generations, "generations")
+
     def fit(self, series: np.ndarray) -> GeneticOptimizationCPD:
-        self.series = np.asarray(series)
+        self.series = validate_series(series)
         self.threshold_ = self._ga_search()
         logger.debug("Optimized threshold to %.3f", self.threshold_)
         return self

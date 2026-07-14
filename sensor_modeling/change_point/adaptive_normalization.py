@@ -11,6 +11,11 @@ from dataclasses import dataclass
 import numpy as np
 
 from ..utils.plotting import plot_change_points
+from ._validation import (
+    validate_positive_int,
+    validate_positive_threshold,
+    validate_series,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +26,11 @@ class AdaptiveNormalizer:
 
     window: int = 20
 
+    def __post_init__(self) -> None:
+        validate_positive_int(self.window, "window")
+
     def fit(self, series: np.ndarray) -> AdaptiveNormalizer:
-        self.series = np.asarray(series)
+        self.series = validate_series(series)
         return self
 
     def _normalize(self) -> np.ndarray:
@@ -37,6 +45,7 @@ class AdaptiveNormalizer:
         """Detect change points after adaptive normalization."""
         if not hasattr(self, "series"):
             raise ValueError("Model must be fitted before prediction")
+        threshold = validate_positive_threshold(threshold)
         normed = self._normalize()
         diffs = np.abs(np.diff(normed))
         cps = np.where(diffs > threshold)[0] + 1

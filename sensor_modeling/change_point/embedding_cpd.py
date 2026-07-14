@@ -11,6 +11,11 @@ from dataclasses import dataclass
 import numpy as np
 
 from ..utils.plotting import plot_change_points
+from ._validation import (
+    validate_positive_int,
+    validate_positive_threshold,
+    validate_series,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +31,12 @@ class EmbeddingCPD:
 
     window: int = 5
 
+    def __post_init__(self) -> None:
+        validate_positive_int(self.window, "window")
+
     def fit(self, series: np.ndarray) -> EmbeddingCPD:
         """Learn embeddings from the input series."""
-        self.series = np.asarray(series)
+        self.series = validate_series(series)
         kernel = np.ones(self.window) / self.window
         self.embeddings = np.convolve(self.series, kernel, mode="valid")
         logger.debug("Computed embeddings of length %d", len(self.embeddings))
@@ -43,6 +51,7 @@ class EmbeddingCPD:
         """
         if not hasattr(self, "embeddings"):
             raise ValueError("Model must be fitted before prediction")
+        threshold = validate_positive_threshold(threshold)
         diffs = np.abs(np.diff(self.embeddings))
         cps = np.where(diffs > threshold)[0] + 1
         if plot:

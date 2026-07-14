@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored research visualization helpers to validate plotting schemas and residual diagnostics.
 - Refactored interactive visualization helpers to validate plotting schemas, finite parameter sweeps, and export paths.
 - Refactored the visualization web app upload endpoint to return explicit client errors for malformed uploads.
+- Refactored lightweight change-point detectors to share validation for configuration, input series, and thresholds.
 - Refactored analysis report writers to create output directories, return written paths, and narrow template formatting errors.
 - Refactored analysis pipeline model dispatch to validate input frames, format NumPy probability outputs, and narrow model failure handling.
 - Refactored Bernoulli autoregressive fitting to validate training frames and narrow optimizer failure handling.
