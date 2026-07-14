@@ -6,7 +6,6 @@ for binary sensor time series data.
 """
 
 import logging
-from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -32,7 +31,7 @@ class GrangerCausalityTest:
         """
         self.max_lags = max_lags
 
-    def test(self, x: np.ndarray, y: np.ndarray, lags: int = None) -> Dict:
+    def test(self, x: np.ndarray, y: np.ndarray, lags: int | None = None) -> dict:
         """
         Perform Granger causality test.
 
@@ -44,8 +43,10 @@ class GrangerCausalityTest:
         Returns:
             Dictionary with test results
         """
+        x, y = self._validate_series(x, y)
         if lags is None:
             lags = self._select_optimal_lags(x, y)
+        self._validate_lags(lags, len(y))
 
         # Restricted model: Y ~ lags of Y
         y_lagged = self._create_lag_matrix(y, lags, include_current=False)
@@ -55,15 +56,15 @@ class GrangerCausalityTest:
         x_lagged = self._create_lag_matrix(x, lags, include_current=False)
 
         # Fit restricted model (Y predicted by its own lags only)
-        restricted_ll = self._fit_binary_regression(y_lagged[lags:], y_current)
+        restricted_ll = self._fit_binary_regression(y_lagged, y_current)
 
         # Fit unrestricted model (Y predicted by its own lags + X lags)
-        combined_features = np.column_stack([y_lagged[lags:], x_lagged[lags:]])
+        combined_features = np.column_stack([y_lagged, x_lagged])
         unrestricted_ll = self._fit_binary_regression(combined_features, y_current)
 
         # Likelihood ratio test
-        lr_stat = 2 * (unrestricted_ll - restricted_ll)
-        p_value = 1 - chi2.cdf(lr_stat, df=lags)
+        lr_stat = max(0.0, float(2 * (unrestricted_ll - restricted_ll)))
+        p_value = float(1 - chi2.cdf(lr_stat, df=lags))
 
         return {
             "test_statistic": lr_stat,
@@ -74,24 +75,55 @@ class GrangerCausalityTest:
             "unrestricted_ll": unrestricted_ll,
         }
 
+    def _validate_series(
+        self, x: np.ndarray, y: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Validate and normalize input series."""
+        x_array = np.asarray(x, dtype=float).ravel()
+        y_array = np.asarray(y, dtype=float).ravel()
+        if len(x_array) != len(y_array):
+            raise ValueError("x and y must have the same length")
+        if len(x_array) < 3:
+            raise ValueError("x and y must contain at least 3 observations")
+        if np.isnan(x_array).any() or np.isnan(y_array).any():
+            raise ValueError("x and y must not contain NaN values")
+        for name, values in {"x": x_array, "y": y_array}.items():
+            unique = set(np.unique(values))
+            if not unique <= {0.0, 1.0}:
+                raise ValueError(f"{name} must be binary with values 0 and 1")
+        return x_array, y_array
+
+    def _validate_lags(self, lags: int, n_obs: int) -> None:
+        """Validate requested lag count."""
+        if lags < 1:
+            raise ValueError("lags must be at least 1")
+        if lags >= n_obs:
+            raise ValueError("lags must be smaller than the number of observations")
+
     def _create_lag_matrix(
         self, series: np.ndarray, lags: int, include_current: bool = False
     ) -> np.ndarray:
         """Create matrix of lagged variables."""
         n = len(series)
-        start_col = 0 if include_current else 1
         lag_matrix = np.zeros((n - lags, lags + (1 if include_current else 0)))
 
-        for i in range(lags + (1 if include_current else 0)):
-            lag_matrix[:, i] = series[
-                lags - i - start_col : -i - start_col if i > 0 else None
-            ]
+        for row, t in enumerate(range(lags, n)):
+            col = 0
+            if include_current:
+                lag_matrix[row, col] = series[t]
+                col += 1
+            for lag in range(1, lags + 1):
+                lag_matrix[row, col] = series[t - lag]
+                col += 1
 
         return lag_matrix
 
     def _fit_binary_regression(self, X: np.ndarray, y: np.ndarray) -> float:
         """Fit logistic regression and return log-likelihood."""
         try:
+            if len(np.unique(y)) < 2:
+                return self._constant_log_likelihood(y)
+
             # Add intercept
             X_with_intercept = np.column_stack([np.ones(X.shape[0]), X])
 
@@ -109,9 +141,14 @@ class GrangerCausalityTest:
             log_likelihood = np.sum(y * np.log(probs) + (1 - y) * np.log(1 - probs))
             return log_likelihood
 
-        except Exception as e:
-            logger.warning(f"Error in binary regression: {e}")
+        except (FloatingPointError, ValueError) as e:
+            logger.warning("Error in binary regression: %s", e)
             return -np.inf
+
+    def _constant_log_likelihood(self, y: np.ndarray) -> float:
+        """Return Bernoulli log-likelihood for a constant target."""
+        p = float(np.clip(y.mean(), 1e-15, 1 - 1e-15))
+        return float(np.sum(y * np.log(p) + (1 - y) * np.log(1 - p)))
 
     def _select_optimal_lags(self, x: np.ndarray, y: np.ndarray) -> int:
         """Select optimal number of lags using BIC."""
@@ -125,7 +162,7 @@ class GrangerCausalityTest:
                 x_lagged = self._create_lag_matrix(x, lags, include_current=False)
                 y_current = y[lags:]
 
-                combined_features = np.column_stack([y_lagged[lags:], x_lagged[lags:]])
+                combined_features = np.column_stack([y_lagged, x_lagged])
                 log_likelihood = self._fit_binary_regression(
                     combined_features, y_current
                 )
@@ -138,7 +175,7 @@ class GrangerCausalityTest:
                     best_bic = bic
                     best_lags = lags
 
-            except Exception:
+            except (FloatingPointError, ValueError):
                 continue
 
         return best_lags
@@ -171,8 +208,8 @@ class GrangerCausalityTest:
                                 "lags_used": result["lags_used"],
                             }
                         )
-                    except Exception as e:
-                        logger.warning(f"Error testing {cause} -> {effect}: {e}")
+                    except (FloatingPointError, ValueError) as e:
+                        logger.warning("Error testing %s -> %s: %s", cause, effect, e)
                         results.append(
                             {
                                 "cause": cause,
@@ -186,7 +223,7 @@ class GrangerCausalityTest:
 
         return pd.DataFrame(results)
 
-    def create_causality_summary(self, causality_results: pd.DataFrame) -> Dict:
+    def create_causality_summary(self, causality_results: pd.DataFrame) -> dict:
         """
         Create summary statistics from causality test results.
 
@@ -235,7 +272,9 @@ class GrangerCausalityTest:
             "bidirectional_relationships": self._find_bidirectional(significant),
         }
 
-    def _find_bidirectional(self, significant_results: pd.DataFrame) -> List[tuple]:
+    def _find_bidirectional(
+        self, significant_results: pd.DataFrame
+    ) -> list[tuple[str, str]]:
         """Find bidirectional causal relationships."""
         bidirectional = []
 
