@@ -94,18 +94,76 @@ def test_synthetic_generation_and_export(tmp_path):
     )
     ds, meta = synthetic.generate(cfg)
     assert 20 in meta["change_points"]
-    out_csv = tmp_path / "syn.csv"
-    synthetic.export(ds, meta, out_csv, fmt="csv")
-    assert out_csv.exists()
+    out_csv = tmp_path / "nested" / "syn.csv"
+    csv_paths = synthetic.export(ds, meta, out_csv, fmt="csv")
+    assert csv_paths == {
+        "data": tmp_path / "nested" / "syn.csv",
+        "metadata": tmp_path / "nested" / "syn.csv.meta.json",
+    }
+    assert csv_paths["data"].exists()
+    assert csv_paths["metadata"].exists()
 
-    out_json = tmp_path / "syn.json"
-    synthetic.export(ds, meta, out_json, fmt="json")
-    payload = json.loads(out_json.read_text(encoding="utf-8"))
+    out_json = tmp_path / "nested" / "syn.json"
+    json_paths = synthetic.export(ds, meta, out_json, fmt="json")
+    assert json_paths == {"data": tmp_path / "nested" / "syn.json"}
+    payload = json.loads(json_paths["data"].read_text(encoding="utf-8"))
     assert payload["meta"]["change_points"] == [20]
     assert len(payload["data"]) == 50
 
+    unsupported_path = tmp_path / "unsupported" / "syn.unsupported"
     with pytest.raises(ValueError, match="Unsupported export format"):
-        synthetic.export(ds, meta, tmp_path / "syn.unsupported", fmt="parquet")
+        synthetic.export(ds, meta, unsupported_path, fmt="parquet")
+    assert not unsupported_path.parent.exists()
+
+
+def test_synthetic_generation_validates_config():
+    invalid_configs = [
+        (synthetic.SyntheticConfig(n_steps=0), "n_steps"),
+        (synthetic.SyntheticConfig(n_sensors=0), "n_sensors"),
+        (synthetic.SyntheticConfig(failure_rate=-0.1), "failure_rate"),
+        (synthetic.SyntheticConfig(failure_rate=1.1), "failure_rate"),
+        (
+            synthetic.SyntheticConfig(n_steps=10, change_points=[10]),
+            "change_points",
+        ),
+        (synthetic.SyntheticConfig(change_points=[True]), "change_points"),
+    ]
+
+    for config, message in invalid_configs:
+        with pytest.raises(ValueError, match=message):
+            synthetic.generate(config)
+
+
+def test_synthetic_generation_handles_single_step_failure_config():
+    dataset, meta = synthetic.generate(
+        synthetic.SyntheticConfig(n_steps=1, n_sensors=1, failure_rate=1.0)
+    )
+
+    assert dataset.to_dataframe().shape == (1, 1)
+    assert meta == {"change_points": [0]}
+
+
+def test_synthetic_generation_bounds_multiple_change_points():
+    dataset, meta = synthetic.generate(
+        synthetic.SyntheticConfig(n_steps=5, n_sensors=2, change_points=[0, 1, 2])
+    )
+
+    assert dataset.to_dataframe().shape == (5, 2)
+    assert meta == {"change_points": [0, 1, 2]}
+
+
+def test_synthetic_hdf5_export_returns_path(tmp_path):
+    h5py = pytest.importorskip("h5py")
+    dataset, meta = synthetic.generate(synthetic.SyntheticConfig(n_steps=5))
+
+    output_paths = synthetic.export(
+        dataset, meta, tmp_path / "nested" / "syn.h5", "hdf5"
+    )
+
+    assert output_paths == {"data": tmp_path / "nested" / "syn.h5"}
+    with h5py.File(output_paths["data"], "r") as h5:
+        assert "data" in h5
+        assert "meta" in h5
 
 
 def test_hdf5_loader_reports_missing_dataset(tmp_path):
