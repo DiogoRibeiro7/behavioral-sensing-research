@@ -67,6 +67,57 @@ def test_loaders(tmp_path):
     assert list(first.to_dataframe().columns) == ["sensor_0", "sensor_1"]
 
 
+def test_load_json_reports_invalid_payloads(tmp_path):
+    invalid_cases = [
+        ("object.json", {"timestamp": "2024-01-01", "sensor_0": 1}, "list"),
+        ("missing-timestamp.json", [{"sensor_0": 1}], "Timestamp field"),
+        (
+            "invalid-timestamp.json",
+            [{"timestamp": "not-a-date", "sensor_0": 1}],
+            "invalid timestamps",
+        ),
+        ("scalar-list.json", [1, 2, 3], "Invalid JSON structure"),
+    ]
+
+    for filename, payload, message in invalid_cases:
+        path = tmp_path / filename
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        with pytest.raises(ValueError, match=message):
+            loaders.load_json(path)
+
+
+def test_loaders_report_unreadable_files(tmp_path):
+    with pytest.raises(ValueError, match="Unable to read CSV file"):
+        loaders.load_csv(tmp_path / "missing.csv")
+
+    malformed_json = tmp_path / "malformed.json"
+    malformed_json.write_text("{not valid json", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Unable to read JSON file"):
+        loaders.load_json(malformed_json)
+
+
+def test_stream_data_skips_malformed_items():
+    stream = [
+        {"timestamp": "2024-01-01 00:00:00", "sensor_0": 1},
+        {"sensor_0": 0},
+        {"timestamp": "not-a-date", "sensor_0": 1},
+        ["not", "a", "mapping"],
+        {"timestamp": "2024-01-01 00:01:00", "sensor_0": 0},
+    ]
+
+    datasets = list(loaders.stream_data(stream))
+
+    assert [dataset.to_dataframe()["sensor_0"].iloc[0] for dataset in datasets] == [
+        1,
+        0,
+    ]
+    assert [dataset.to_dataframe().index[0] for dataset in datasets] == [
+        pd.Timestamp("2024-01-01 00:00:00"),
+        pd.Timestamp("2024-01-01 00:01:00"),
+    ]
+
+
 def test_preprocessing_and_validation():
     ds = SensorDataset(_sample_df())
     miss = preprocessing.detect_missing(ds)

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored Granger causality testing to validate binary inputs and align lagged design matrices correctly.
 - Refactored dependency network analysis to validate binary sensor frames, handle edgeless graphs, and return plot figures.
 - Refactored analysis result exports to create parent directories, return written paths, and propagate write failures.
+- Refactored JSON and streaming data loaders to validate timestamps explicitly and avoid broad malformed-record handling.
 - Refactored synthetic data generation to validate configs, bound generated probabilities, and report export paths.
 - Refactored sensor simulation to use local NumPy random generators instead of mutating global random state.
 - Refactored plotting helpers to return Matplotlib figures and support non-interactive `show=False` workflows.
