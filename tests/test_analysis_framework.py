@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -109,3 +110,24 @@ def test_cross_validate_accepts_explicit_model_scorer():
     )
 
     assert scores["predict_only"] == 0.5
+
+
+class _FailingScoreModel:
+    def fit(self, data):
+        return self
+
+    def score(self, data):
+        raise ValueError("cannot score this fold")
+
+
+def test_cross_validate_records_nan_for_expected_fold_failures():
+    ds = SensorDataset(_sample_df())
+
+    scores = comparison.cross_validate({"failing": _FailingScoreModel()}, ds)
+
+    assert np.isnan(scores["failing"])
+
+
+def test_time_series_splits_requires_positive_split_count():
+    with pytest.raises(ValueError, match="n_splits"):
+        comparison.time_series_splits(_sample_df(), n_splits=0)

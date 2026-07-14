@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored behavioral analysis helpers to validate sensor frames, ignore non-numeric columns, and avoid NaN metrics for constant or single-day data.
 - Refactored Granger causality testing to validate binary inputs and align lagged design matrices correctly.
 - Refactored dependency network analysis to validate binary sensor frames, handle edgeless graphs, and return plot figures.
+- Refactored cross-validation helpers to validate split counts and narrow fold failure handling.
 - Refactored analysis result exports to create parent directories, return written paths, and propagate write failures.
 - Refactored JSON and streaming data loaders to validate timestamps explicitly and avoid broad malformed-record handling.
 - Refactored analysis report writers to create output directories, return written paths, and narrow template formatting errors.

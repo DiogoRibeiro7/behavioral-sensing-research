@@ -17,12 +17,15 @@ from ..utils.data_io import SensorDataset
 logger = logging.getLogger(__name__)
 
 ModelScorer = Callable[[Any, pd.DataFrame, pd.DataFrame], float]
+FoldError = (AttributeError, FloatingPointError, RuntimeError, TypeError, ValueError)
 
 
 def time_series_splits(
     data: SensorDataset | pd.DataFrame, n_splits: int = 3
 ) -> list[tuple[np.ndarray, np.ndarray]]:
     """Return chronological train/test splits for sensor time series."""
+    if n_splits < 1:
+        raise ValueError("n_splits must be at least 1")
     dataset = data if isinstance(data, SensorDataset) else SensorDataset(data)
     df = dataset.to_dataframe()
     if len(df) < 2:
@@ -30,6 +33,28 @@ def time_series_splits(
     split_count = min(n_splits, len(df) - 1)
     splitter = TimeSeriesSplit(n_splits=split_count)
     return list(splitter.split(df))
+
+
+def _fit_and_score_model(
+    name: str,
+    model: Any,
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    scorers: dict[str, ModelScorer],
+) -> float:
+    """Fit one model on a fold and return its score."""
+    model.fit(train_df.values if name == "hmm" else train_df)
+    if name in scorers:
+        return float(scorers[name](model, train_df, test_df))
+    return float(model.score(test_df.values))
+
+
+def _mean_score(values: list[float]) -> float:
+    """Return the mean of valid fold scores, or NaN when every fold failed."""
+    finite_scores = [score for score in values if not np.isnan(score)]
+    if not finite_scores:
+        return float("nan")
+    return float(np.mean(finite_scores))
 
 
 # ---------------------------------------------------------------------------
@@ -74,19 +99,14 @@ def cross_validate(
     for train_idx, test_idx in time_series_splits(dataset, n_splits=n_splits):
         train_df = df.iloc[train_idx]
         test_df = df.iloc[test_idx]
-        X_test = test_df.values
         for name, model in models.items():
             try:
-                model.fit(train_df.values if name == "hmm" else train_df)
-                if name in scorers:
-                    score = float(scorers[name](model, train_df, test_df))
-                else:
-                    score = float(model.score(X_test))
+                score = _fit_and_score_model(name, model, train_df, test_df, scorers)
                 scores[name].append(score)
-            except Exception as exc:  # pragma: no cover - defensive
+            except FoldError as exc:
                 logger.error("Failed fold for %s: %s", name, exc)
                 scores[name].append(float("nan"))
-    return {name: float(np.nanmean(vals)) for name, vals in scores.items()}
+    return {name: _mean_score(vals) for name, vals in scores.items()}
 
 
 # ---------------------------------------------------------------------------
