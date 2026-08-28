@@ -5,6 +5,7 @@ partially missing observations, and reports the answer together with the
 evidence that produced it.
 """
 
+from .defaults import EmissionDefaults, default_emission_for, default_emissions
 from .emissions import (
     BernoulliEmission,
     BetaEmission,
@@ -27,6 +28,7 @@ from .filter import (
 __all__ = [
     "BernoulliEmission",
     "BetaEmission",
+    "EmissionDefaults",
     "EmissionModel",
     "EvidenceContribution",
     "FusionConfig",
@@ -36,5 +38,7 @@ __all__ = [
     "PoissonEventEmission",
     "StateEstimate",
     "belief_from_mapping",
+    "default_emission_for",
+    "default_emissions",
     "belief_matrix",
 ]
