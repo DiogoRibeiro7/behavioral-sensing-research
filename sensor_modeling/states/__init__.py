@@ -1,5 +1,6 @@
 """Configurable ontology of latent behavioural states."""
 
+from .markov import build_generator, stationary_distribution, transition_matrix
 from .ontology import (
     DEFAULT_DWELL,
     DEFAULT_JUMPS,
@@ -16,4 +17,7 @@ __all__ = [
     "DEFAULT_STATES",
     "BehaviouralState",
     "StateOntology",
+    "build_generator",
+    "stationary_distribution",
+    "transition_matrix",
 ]

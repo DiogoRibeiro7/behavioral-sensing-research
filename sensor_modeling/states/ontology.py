@@ -21,10 +21,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import Enum
-from functools import lru_cache
 
 import numpy as np
-from scipy.linalg import expm
+
+from .markov import build_generator, stationary_distribution, transition_matrix
 
 
 class BehaviouralState(str, Enum):
@@ -198,25 +198,19 @@ class StateOntology:
         """Build the continuous-time transition rate matrix.
 
         A state with mean dwell ``d`` leaves at total rate ``1/d``, split
-        evenly across its permitted destinations. Rates are expressed per
-        second so that any observation interval can be handled directly.
+        evenly across its permitted destinations.
         """
         size = self.size
-        generator = np.zeros((size, size), dtype=float)
+        rates = np.array(
+            [1.0 / self.dwell[state].total_seconds() for state in self.states],
+            dtype=float,
+        )
+        jumps = np.zeros((size, size), dtype=float)
         for row, state in enumerate(self.states):
-            rate = 1.0 / self.dwell[state].total_seconds()
-            destinations = [
-                self.index(target)
-                for target in self.jumps.get(state, self.states)
-                if target in self.states and target is not state
-            ]
-            if not destinations:
-                destinations = [i for i in range(size) if i != row]
-            share = rate / len(destinations)
-            for column in destinations:
-                generator[row, column] = share
-            generator[row, row] = -rate
-        return generator
+            for target in self.jumps.get(state, self.states):
+                if target in self.states and target is not state:
+                    jumps[row, self.index(target)] = 1.0
+        return build_generator(rates, jumps)
 
     @property
     def generator(self) -> np.ndarray:
@@ -224,17 +218,8 @@ class StateOntology:
         return np.asarray(object.__getattribute__(self, "_generator"))
 
     def transition(self, elapsed: timedelta) -> np.ndarray:
-        """Return ``P(Z_{t+elapsed} | Z_t)`` as a row-stochastic matrix.
-
-        A non-positive interval yields the identity, so repeated updates at
-        the same instant leave the belief untouched.
-        """
-        seconds = elapsed.total_seconds()
-        if seconds <= 0.0:
-            return np.eye(self.size)
-        return _transition_matrix(
-            self.generator.tobytes(), self.size, round(seconds, 3)
-        )
+        """Return ``P(Z_{t+elapsed} | Z_t)`` as a row-stochastic matrix."""
+        return transition_matrix(self.generator, elapsed.total_seconds())
 
     def stationary(self) -> np.ndarray:
         """Return the stationary distribution implied by the generator.
@@ -242,17 +227,7 @@ class StateOntology:
         Used as the default prior: before any evidence arrives, the most
         defensible belief is the long-run behaviour of the declared dynamics.
         """
-        size = self.size
-        system = np.vstack([self.generator.T, np.ones(size)])
-        target = np.zeros(size + 1)
-        target[-1] = 1.0
-        solution, *_ = np.linalg.lstsq(system, target, rcond=None)
-        distribution = np.clip(solution, 0.0, None)
-        total = distribution.sum()
-        if total <= 0.0:
-            return np.full(size, 1.0 / size)
-        normalised: np.ndarray = distribution / total
-        return normalised
+        return stationary_distribution(self.generator)
 
     def uniform(self) -> np.ndarray:
         """Return a uniform belief over the latent states."""
@@ -261,18 +236,3 @@ class StateOntology:
     def labels(self) -> list[str]:
         """Return the state names in vector order."""
         return [state.value for state in self.states]
-
-
-@lru_cache(maxsize=512)
-def _transition_matrix(generator_bytes: bytes, size: int, seconds: float) -> np.ndarray:
-    """Return ``expm(Q * seconds)`` with caching on the rounded interval.
-
-    Ambient streams produce the same handful of intervals over and over, so
-    caching keeps the matrix exponential off the hot path of online updates.
-    """
-    generator = np.frombuffer(generator_bytes, dtype=float).reshape(size, size)
-    matrix = np.asarray(expm(generator * seconds), dtype=float)
-    matrix = np.clip(matrix, 0.0, None)
-    row_sums = matrix.sum(axis=1, keepdims=True)
-    stochastic: np.ndarray = matrix / np.where(row_sums > 0.0, row_sums, 1.0)
-    return stochastic
