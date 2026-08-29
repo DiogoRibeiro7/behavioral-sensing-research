@@ -37,6 +37,10 @@ has not been validated against real sensor data. See `docs/limitations.md`.
 - Added pseudonymisation and export redaction with salt-keyed, study-scoped identifiers.
 - Added `sensor_modeling.observations.SensorSpec.redundancy_group` so correlated sensors are not counted as independent evidence.
 - Added detection of sensors that keep reporting while delivering below their declared cadence.
+- Added `docs/SIMULATION_PROTOCOLS.md`, specifying replication counts derived from Monte Carlo standard error and separating the shipped smoke-test seeds from the counts a reported result needs.
+- Added guard tests importing every module and rejecting shared container defaults on dataclass fields, so a version-specific failure of this kind fails on any interpreter.
+- Added `git_commit`, `git_dirty`, `schema_version` and a snapshot of resolved algorithm defaults to experiment provenance, so a record identifies the exact code and model specification behind it rather than only a package version.
+- Added a `gate` job aggregating lint, test, docs and package into a single required check.
 - Added `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`, `docs/EVALUATION_DESIGN.md`, `docs/ADVERSARIAL_REVIEW.md`, `docs/RELEASE_READINESS.md` and `docs/multimodal_ingestion.md`.
 - Added backwards-compatibility tests exercising the original models, data layer and public surface.
 - Added `docs/ambient_architecture.md`, `docs/inference.md`, `docs/evaluation.md`, and `docs/limitations.md`.
@@ -81,6 +85,10 @@ has not been validated against real sensor data. See `docs/limitations.md`.
 - Updated README and roadmap documentation to point to the canonical roadmap.
 
 ### Fixed
+- Fixed `Observation` using a `mappingproxy` as a dataclass field default, which Python 3.11 rejects at class-definition time. Python 3.10 accepts it under its older `isinstance` check and 3.12 onwards accepts it because `mappingproxy` became hashable, so the failure was confined to 3.11, where 21 test files could not be collected and every subsystem depending on `Observation` failed to import.
+- Fixed `DetectionStudy.summary()` reporting the mean of each seed's median delay while documenting the value as a median of delays. Delays are now pooled across seeds before the median is taken, `mean_seed_median_delay_days` reports the per-seed view under its own name, and `detected_changes` records the sample size behind both.
+- Fixed `research_identifier()` scoping a study by its visible prefix only. The HMAC ignored the study, so two studies sharing a salt produced identical digests for the same subject and their records stayed trivially linkable. The study now derives a subkey.
+- Fixed `pytest.ini` overriding the stricter configuration in `pyproject.toml`, which silently disabled `--strict-markers`, `--strict-config` and the warning policy the project appeared to enforce.
 - Fixed the analysis pipeline defaulting to `NHPPConfig(n_basis=3)`, which violates the model's own `n_basis >= degree+1` constraint for the cubic default. Every NHPP fit raised and the pipeline recorded an error in place of a result, so that arm had never worked while appearing present in the output.
 - Fixed redundant sensors being counted as independent evidence, which drove the posterior toward certainty it had not earned.
 - Fixed a sensor delivering only part of its promised record being rated healthy, which biases inference toward inactivity when loss correlates with activity.
