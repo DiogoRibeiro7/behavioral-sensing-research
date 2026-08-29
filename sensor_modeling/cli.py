@@ -77,6 +77,75 @@ def _add_ablation_parser(sub: argparse._SubParsersAction) -> None:
     )
 
 
+def _add_attribution_parser(sub: argparse._SubParsersAction) -> None:
+    """Register the attribution comparison experiment."""
+    study = sub.add_parser(
+        "attribution",
+        help="Compare naive against occupancy-aware activity attribution",
+        description=(
+            "Run the same simulated households twice -- once attributing all "
+            "ambient activity to the resident, once discounting it by the "
+            "probability the resident generated it -- and report the difference."
+        ),
+    )
+    study.add_argument("--days", type=int, default=10, help="Days per scenario")
+    study.add_argument("--seed", type=int, default=4242, help="Random seed")
+    study.add_argument(
+        "--step-minutes", type=int, default=15, help="Inference step in minutes"
+    )
+    study.add_argument(
+        "--output", type=Path, default=None, help="Write structured results as JSON"
+    )
+
+
+def _run_attribution(args: argparse.Namespace) -> None:
+    """Dispatch the attribution comparison experiment."""
+    from .evaluation.attribution import run_attribution_study, standard_scenarios
+
+    study = run_attribution_study(
+        standard_scenarios(days=args.days, seed=args.seed),
+        step=timedelta(minutes=args.step_minutes),
+    )
+
+    print("\nNaive against occupancy-aware attribution")
+    print("Both arms see identical households, visitors and sensor records.\n")
+    print(
+        f"{'scenario':<28}{'contam':>8}{'naive':>8}{'aware':>8}"
+        f"{'gain':>8}{'calib':>8}{'visF1':>7}"
+    )
+    for comparison in study.comparisons:
+        print(
+            f"{comparison.scenario:<28}"
+            f"{comparison.contaminated_fraction:>8.3f}"
+            f"{comparison.naive.states.balanced_accuracy:>8.3f}"
+            f"{comparison.occupancy_aware.states.balanced_accuracy:>8.3f}"
+            f"{comparison.balanced_accuracy_gain:>+8.3f}"
+            f"{comparison.calibration_gain:>+8.3f}"
+            f"{comparison.visitor_detection.f1:>7.2f}"
+        )
+
+    contaminated = study.contaminated
+    if contaminated:
+        mean_gain = sum(c.balanced_accuracy_gain for c in contaminated) / len(
+            contaminated
+        )
+        print(
+            "\nMean balanced-accuracy gain where another person was present: "
+            f"{mean_gain:+.4f}"
+        )
+    print(
+        "\nA gain of zero in an uncontaminated scenario is the expected result: "
+        "attribution should be a no-op when nobody else is in the home."
+    )
+
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(study.to_dict(), indent=2, default=str), encoding="utf-8"
+        )
+        print(f"Structured results written to {args.output}")
+
+
 def _run_demo(args: argparse.Namespace) -> None:
     """Dispatch the end-to-end demonstration."""
     from .examples.demos.ambient_pipeline_demo import run_demo
@@ -205,6 +274,7 @@ def main() -> None:
     _add_model_parsers(sub)
     _add_demo_parser(sub)
     _add_ablation_parser(sub)
+    _add_attribution_parser(sub)
 
     args = parser.parse_args()
     setup_logging()
@@ -214,6 +284,8 @@ def main() -> None:
         _run_demo(args)
     elif args.model == "ablate":
         _run_ablation(args)
+    elif args.model == "attribution":
+        _run_attribution(args)
     else:
         _run_model(args, parser)
 

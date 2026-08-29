@@ -79,6 +79,13 @@ class PipelineConfig:
         Behavioural states whose daily hours get an adaptive baseline.
     min_day_coverage, min_day_observed
         Quality a day must reach before it may inform the baseline.
+    attribute_activity
+        Whether ambient evidence is discounted by the probability that the
+        monitored resident generated it. Setting this false makes the
+        pipeline attribute every ambient event to the resident, which is the
+        naive behaviour most ambient monitoring assumes. It exists so that
+        assumption can be *measured* against the occupancy-aware default
+        rather than argued about.
     """
 
     tz: tzinfo | None = None
@@ -92,6 +99,7 @@ class PipelineConfig:
     )
     min_day_coverage: float = 0.5
     min_day_observed: float = 0.6
+    attribute_activity: bool = True
 
     def __post_init__(self) -> None:
         """Validate the pipeline configuration."""
@@ -280,7 +288,11 @@ class BehaviouralSensingPipeline:
 
         context = self.context.update(moment, batch, reliabilities=reliabilities)
         self._last_context = context
-        attribution = self.context.attribution(context)
+        attribution = (
+            self.context.attribution(context)
+            if self.config.attribute_activity
+            else None
+        )
 
         estimate = self.filter.update(
             moment, batch, reliabilities=reliabilities, attribution=attribution
