@@ -53,6 +53,13 @@ class SensorSpec:
     attributable
         Whether an activation identifies *who* generated it. True only for
         person-bound sensing such as a worn device or a personal beacon.
+    redundancy_group
+        Name shared by sensors observing substantially the same thing. The
+        fusion layer treats sensors as conditionally independent given the
+        state, so several views of one event would otherwise be counted as
+        several independent pieces of evidence and drive the posterior to
+        false certainty. Declaring a group divides the evidence weight
+        across it.
     description
         Human-readable note recording the precise semantics of the value.
     """
@@ -66,6 +73,7 @@ class SensorSpec:
     value_range: tuple[float, float] | None = None
     prior_reliability: float = 0.99
     attributable: bool = False
+    redundancy_group: str | None = None
     description: str = ""
 
     def __post_init__(self) -> None:
@@ -247,6 +255,7 @@ class SensorRegistry:
                 "value_range": list(spec.value_range) if spec.value_range else None,
                 "prior_reliability": spec.prior_reliability,
                 "attributable": spec.attributable,
+                "redundancy_group": spec.redundancy_group,
                 "description": spec.description,
             }
             for spec in self.specs.values()

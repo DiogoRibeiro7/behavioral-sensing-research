@@ -169,6 +169,13 @@ class HealthConfig:
         Fraction of the sensors that *can* be checked for silence which must
         be failing before the silence of the sensors that cannot be checked
         is also distrusted. See :meth:`SensorHealthMonitor.report`.
+    delivery_floor
+        Fraction of its promised reporting rate a sensor must sustain before
+        it is called degraded. Catches a sensor that keeps reporting but
+        drops a share of its records -- no single gap is long enough to look
+        like a dropout, yet a large part of the evidence never arrives.
+    delivery_window
+        Inter-arrival samples retained for the delivery-rate estimate.
     """
 
     degraded_after: float = 2.0
@@ -184,6 +191,8 @@ class HealthConfig:
     drift_floor: float = 0.0
     out_of_range_tolerance: int = 2
     outage_canary_fraction: float = 0.6
+    delivery_floor: float = 0.6
+    delivery_window: int = 32
 
     def __post_init__(self) -> None:
         """Validate threshold configuration."""
@@ -210,6 +219,10 @@ class HealthConfig:
             raise ValueError("out_of_range_tolerance must be at least 1")
         if not 0.0 < self.outage_canary_fraction <= 1.0:
             raise ValueError("outage_canary_fraction must lie in (0, 1]")
+        if not 0.0 < self.delivery_floor <= 1.0:
+            raise ValueError("delivery_floor must lie in (0, 1]")
+        if self.delivery_window < 2:
+            raise ValueError("delivery_window must be at least 2")
 
 
 @dataclass
@@ -224,6 +237,7 @@ class _SensorState:
     repeats: int = 0
     repeat_since: datetime | None = None
     out_of_range_run: int = 0
+    intervals: deque[float] = field(default_factory=deque)
     reference: deque[float] = field(default_factory=deque)
     recent: deque[float] = field(default_factory=deque)
 
@@ -251,6 +265,7 @@ class SensorHealthMonitor:
                 quality=spec.prior_reliability,
                 reference=deque(maxlen=self.config.drift_reference),
                 recent=deque(maxlen=self.config.drift_recent),
+                intervals=deque(maxlen=self.config.delivery_window),
             )
             for spec in registry
         }
@@ -268,6 +283,10 @@ class SensorHealthMonitor:
 
         state.observations += 1
         if state.last_seen is None or observation.timestamp > state.last_seen:
+            if state.last_seen is not None:
+                gap = (observation.timestamp - state.last_seen).total_seconds()
+                if gap > 0:
+                    state.intervals.append(gap)
             state.last_seen = observation.timestamp
 
         smoothing = self.config.quality_smoothing
@@ -325,6 +344,39 @@ class SensorHealthMonitor:
             return SensorStatus.DEGRADED, f"silent for {elapsed:.1f} expected intervals"
         return None
 
+    def _under_delivering(self, state: _SensorState) -> tuple[SensorStatus, str] | None:
+        """Detect a sensor that keeps reporting but drops part of its record.
+
+        Silence-based checks look at the gap since the last observation, so a
+        sensor delivering only a fraction of its promised samples slips
+        through: every individual gap is short, yet most of the evidence
+        never arrives.
+
+        This matters more than it sounds. Losing records at random costs
+        accuracy roughly in proportion; losing them *when the resident is
+        active* -- a radio contended by movement, a battery sagging under
+        load -- biases inference toward inactivity, which is the exact
+        conclusion this platform must never reach by accident. Detecting the
+        shortfall does not repair the bias, but it stops the sensor being
+        weighted as though it were healthy.
+        """
+        interval = state.spec.expected_interval
+        if (
+            interval is None
+            or len(state.intervals) < max(state.intervals.maxlen or 2, 2) // 2
+        ):
+            return None
+        typical = statistics.median(state.intervals)
+        if typical <= 0:
+            return None
+        delivered = interval.total_seconds() / typical
+        if delivered >= self.config.delivery_floor:
+            return None
+        return (
+            SensorStatus.DEGRADED,
+            f"delivering about {delivered:.0%} of its promised reporting rate",
+        )
+
     def _drift(self, state: _SensorState) -> tuple[SensorStatus, str] | None:
         """Compare the recent calibration of a sampled sensor to its own past."""
         reference, recent = state.reference, state.recent
@@ -350,6 +402,9 @@ class SensorHealthMonitor:
                 SensorStatus.OUT_OF_RANGE,
                 f"{state.out_of_range_run} consecutive implausible readings",
             )
+        under = self._under_delivering(state)
+        if under is not None:
+            return under
         # Repeated identical readings mean different things per kind. An
         # event sensor reports the same value on every activation, and a
         # state sensor reports an unchanged level for as long as the level is
@@ -494,6 +549,7 @@ class SensorHealthMonitor:
                     state.repeat_since.isoformat() if state.repeat_since else None
                 ),
                 "out_of_range_run": state.out_of_range_run,
+                "intervals": list(state.intervals),
                 "reference": list(state.reference),
                 "recent": list(state.recent),
             }
@@ -520,6 +576,10 @@ class SensorHealthMonitor:
                 datetime.fromisoformat(str(repeat_since)) if repeat_since else None
             )
             state.out_of_range_run = int(payload.get("out_of_range_run", 0))
+            state.intervals = deque(
+                (float(v) for v in payload.get("intervals", ()) or ()),
+                maxlen=self.config.delivery_window,
+            )
             state.reference = deque(
                 (float(v) for v in payload.get("reference", ()) or ()),
                 maxlen=self.config.drift_reference,

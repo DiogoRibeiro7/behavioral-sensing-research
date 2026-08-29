@@ -258,17 +258,37 @@ def default_emission_for(
     return None
 
 
+def _group_sizes(registry: SensorRegistry) -> dict[str, int]:
+    """Count how many sensors share each declared redundancy group."""
+    sizes: dict[str, int] = {}
+    for spec in registry:
+        if spec.redundancy_group:
+            sizes[spec.redundancy_group] = sizes.get(spec.redundancy_group, 0) + 1
+    return sizes
+
+
 def default_emissions(
     registry: SensorRegistry,
     ontology: StateOntology,
     defaults: EmissionDefaults | None = None,
 ) -> list[EmissionModel]:
-    """Build default observation models for every sensor that has one."""
-    models = [
-        model
-        for spec in registry
-        if (model := default_emission_for(spec, ontology, defaults)) is not None
-    ]
+    """Build default observation models for every sensor that has one.
+
+    Sensors sharing a ``redundancy_group`` have their evidence weight divided
+    across the group. The filter combines sensors as conditionally
+    independent given the state, so without this, several views of the same
+    physical event accumulate as several independent observations and drive
+    the posterior toward certainty it has not earned.
+    """
+    sizes = _group_sizes(registry)
+    models: list[EmissionModel] = []
+    for spec in registry:
+        model = default_emission_for(spec, ontology, defaults)
+        if model is None:
+            continue
+        if spec.redundancy_group:
+            model.weight /= sizes[spec.redundancy_group]
+        models.append(model)
     if not models:
         raise ValueError(
             "no sensor in the registry carries information about behavioural state"
