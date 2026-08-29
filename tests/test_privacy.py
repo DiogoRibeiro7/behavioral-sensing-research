@@ -80,11 +80,38 @@ class TestPseudonyms:
         assert len(set(mapping.values())) == 3
 
     def test_study_scoping_prevents_joining_across_studies(self) -> None:
-        """The same person must not be linkable between two studies."""
+        """The same person must not be linkable between two studies.
+
+        Comparing the whole identifier is not enough: the study name is part of
+        the visible text, so two identifiers differ even when their digests are
+        the same. The digest is what an attacker joins on, so assert on that.
+        """
         first = research_identifier("sleepstudy", "patient_7", salt=SALT)
         second = research_identifier("mobilitystudy", "patient_7", salt=SALT)
-        assert first != second
+
         assert first.startswith("sleepstudy-")
+        assert second.startswith("mobilitystudy-")
+        assert first.split("-", 1)[1] != second.split("-", 1)[1]
+
+    def test_study_identifiers_are_reproducible(self) -> None:
+        """Domain separation must not cost longitudinal linkage within a study."""
+        assert research_identifier("sleepstudy", "patient_7", salt=SALT) == (
+            research_identifier("sleepstudy", "patient_7", salt=SALT)
+        )
+
+    def test_a_study_must_be_named(self) -> None:
+        """An empty study would silently fall back to the undivided namespace."""
+        for study in ("", "   "):
+            with pytest.raises(ValueError):
+                research_identifier(study, "patient_7", salt=SALT)
+
+    def test_a_domain_changes_the_digest_not_only_the_label(self) -> None:
+        """The separation lives in the key, so the prefix can stay identical."""
+        plain = Pseudonymiser(salt=SALT).pseudonym("patient_7")
+        scoped = Pseudonymiser(salt=SALT, domain="trial-b").pseudonym("patient_7")
+
+        assert plain.split("-", 1)[0] == scoped.split("-", 1)[0]
+        assert plain.split("-", 1)[1] != scoped.split("-", 1)[1]
 
 
 class TestRedaction:

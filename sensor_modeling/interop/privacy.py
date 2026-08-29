@@ -63,7 +63,13 @@ class Pseudonymiser:
         the exported data: together, they reverse the pseudonymisation for
         anyone who can enumerate candidate identifiers.
     prefix
-        Prepended to each pseudonym so its kind stays legible.
+        Prepended to each pseudonym so its kind stays legible. The prefix is
+        cosmetic and provides no separation on its own.
+    domain
+        Optional separation label. Two pseudonymisers sharing a salt but
+        differing in *domain* produce unrelated digests for the same
+        identifier, because the domain is mixed into the key rather than into
+        the visible text. Leave empty to keep a single global namespace.
     length
         Hexadecimal characters retained. The default gives a collision
         probability far below one in a billion for study-sized cohorts while
@@ -79,6 +85,7 @@ class Pseudonymiser:
     salt: str
     prefix: str = "subj"
     length: int = 16
+    domain: str = ""
 
     def __post_init__(self) -> None:
         """Reject a salt too weak to be worth having."""
@@ -91,12 +98,27 @@ class Pseudonymiser:
         if not 8 <= self.length <= 64:
             raise ValueError("length must lie between 8 and 64 characters")
 
+    def _key(self) -> bytes:
+        """Return the HMAC key, separated by domain when one is set.
+
+        Deriving a subkey is what makes the domain meaningful. Mixing it into
+        the pseudonym text instead would leave the digest unchanged, so records
+        for one subject would stay joinable across domains by comparing the
+        part after the prefix.
+        """
+        key = self.salt.encode("utf-8")
+        if self.domain:
+            key = hmac.new(
+                key, b"domain:" + self.domain.encode("utf-8"), hashlib.sha256
+            ).digest()
+        return key
+
     def pseudonym(self, identifier: str) -> str:
         """Return the stable pseudonym for *identifier*."""
         if not isinstance(identifier, str) or not identifier.strip():
             raise ValueError("identifier must be a non-empty string")
         digest = hmac.new(
-            self.salt.encode("utf-8"), identifier.encode("utf-8"), hashlib.sha256
+            self._key(), identifier.encode("utf-8"), hashlib.sha256
         ).hexdigest()
         return f"{self.prefix}-{digest[: self.length]}"
 
@@ -114,9 +136,13 @@ def research_identifier(study: str, subject: str, *, salt: str) -> str:
 
     Scoping by study means the same person carries different identifiers in
     different studies, so records cannot be joined across them by identifier
-    alone.
+    alone. The study is used to derive a study-specific key, not merely as a
+    label: sharing a salt across studies would otherwise leave every digest
+    identical and the records trivially linkable.
     """
-    return Pseudonymiser(salt=salt, prefix=f"{study}").pseudonym(subject)
+    if not isinstance(study, str) or not study.strip():
+        raise ValueError("study must be a non-empty string")
+    return Pseudonymiser(salt=salt, prefix=study, domain=study).pseudonym(subject)
 
 
 @dataclass
