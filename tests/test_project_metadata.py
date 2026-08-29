@@ -57,6 +57,29 @@ def test_zenodo_concept_doi_is_referenced_consistently():
     assert citation["preferred-citation"]["doi"] == CONCEPT_DOI
 
 
+def test_zenodo_notes_disclaim_medical_device_status():
+    """The archive must carry the disclaimer, not only the repository.
+
+    A Zenodo record is often the only thing a downstream reader sees, so the
+    scope limit has to travel with it rather than living solely in the README.
+    """
+    zenodo = json.loads(_read(".zenodo.json"))
+
+    notes = zenodo.get("notes", "")
+    assert "not a medical device" in notes.lower()
+    assert "simulator" in notes.lower()
+
+
+def test_zenodo_and_citation_describe_the_same_software():
+    """A description that drifts from the citation misleads whoever cites it."""
+    zenodo = json.loads(_read(".zenodo.json"))
+    citation = yaml.safe_load(_read("CITATION.cff"))
+
+    for text in (zenodo["description"], citation["abstract"]):
+        assert "ambient" in text.lower()
+        assert "not a medical device" in text.lower()
+
+
 def test_zenodo_metadata_has_required_repository_linkage():
     zenodo = json.loads(_read(".zenodo.json"))
 

@@ -13,7 +13,7 @@ See ``docs/ambient_architecture.md`` for the architecture and
 ``docs/limitations.md`` for what the platform does not establish.
 """
 
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 
 #: Subpackages of the original modelling core.
 CORE_MODULES = (

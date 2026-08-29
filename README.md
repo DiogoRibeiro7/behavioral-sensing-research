@@ -1,12 +1,26 @@
 # Sensor Modeling Research Toolkit
 
-A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies multiple modeling paradigms including Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes into a single cohesive framework designed for ambient assisted living (AAL), digital health, and smart home research.
+A research-grade Python toolkit for **interpretable, probabilistic,
+privacy-preserving** analysis of behavioural sensor data, and for multimodal
+ambient sensing in ambient assisted living (AAL), digital health and smart-home
+research.
+
+It provides an end-to-end pipeline from heterogeneous sensor observations to
+explained alerts, alongside an established modelling core of Bernoulli
+autoregressive models, hidden Markov models, change-point detection and
+non-homogeneous Poisson processes.
+
+> **This is a research toolkit, not a medical device.** Nothing it produces is
+> a diagnosis, and no claim of clinical effectiveness is made or supported.
+> Every quantitative result quoted here comes from the bundled simulator and
+> has **not** been validated against real sensor data.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.10--3.12-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/sensor-modeling/badge/?version=latest)](https://sensor-modeling.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17070041.svg)](https://doi.org/10.5281/zenodo.17070041)
+[![Version](https://img.shields.io/badge/version-0.2.0-informational.svg)](CHANGELOG.md)
 
 ## 🎯 Overview
 
@@ -544,7 +558,7 @@ If you use this software in your research, please cite it as:
   author={Ribeiro, Diogo},
   year={2026},
   url={https://github.com/DiogoRibeiro7/behavioral-sensing-research},
-  version={0.1.3},
+  version={0.2.0},
   doi={10.5281/zenodo.17070041}
 }
 ```

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sensor-modeling"
-version = "0.1.3"
-description = "Comprehensive research-grade toolkit for analyzing behavioral sensor data in smart environments"
+version = "0.2.0"
+description = "Interpretable, probabilistic, privacy-preserving multimodal ambient sensing for behavioural research"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "MIT"
 license-files = ["LICENSE"]
@@ -379,7 +379,7 @@ ignore = [
 
 # Version bumping configuration
 [tool.bumpversion]
-current_version = "0.1.3"
+current_version = "0.2.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
@@ -406,6 +406,6 @@ search = "version: \"{current_version}\""
 replace = "version: \"{new_version}\""
 
 [[tool.bumpversion.files]]
-filename = "docs/conf.py"
-search = "version = \"{current_version}\""
-replace = "version = \"{new_version}\""
+filename = ".zenodo.json"
+search = "\"version\": \"{current_version}\""
+replace = "\"version\": \"{new_version}\""

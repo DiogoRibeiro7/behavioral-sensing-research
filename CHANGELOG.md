@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.2.0] - 2026-08-29
+
+Extends the toolkit into a multimodal ambient-sensing research platform. The
+work is additive: no public symbol was removed or changed, and a user of
+`0.1.3` can upgrade and ignore the new packages entirely.
+
+Every quantitative result quoted below comes from the bundled simulator and
+has not been validated against real sensor data. See `docs/limitations.md`.
+
 ### Added
 - Added `sensor_modeling.observations`: a canonical, hardware-neutral observation model with timezone-aware validation, unit conversion with dimension checking, a declarative sensor registry, boundary ingestion with duplicate collapse, out-of-order and late-arrival flagging, and minimum-latency clock-drift correction.
 - Added `sensor_modeling.health`: online per-sensor reliability estimation emitting an evidence weight, with silence treated as failure only for sensors that declared a reporting cadence.
@@ -30,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`, `docs/EVALUATION_DESIGN.md`, `docs/ADVERSARIAL_REVIEW.md`, `docs/RELEASE_READINESS.md` and `docs/multimodal_ingestion.md`.
 - Added backwards-compatibility tests exercising the original models, data layer and public surface.
 - Added `docs/ambient_architecture.md`, `docs/inference.md`, `docs/evaluation.md`, and `docs/limitations.md`.
+- Moved documentation from Sphinx to MkDocs with the Material theme, mkdocstrings API reference covering every package, and a `--strict` build in CI.
 - Added 327 tests covering the new packages, including DST transitions in both directions, out-of-order and duplicate delivery, sensor dropout, wearable non-adherence, visitor contamination, snapshot/restore, and end-to-end recovery against ground truth.
 - Added a top-level `ROADMAP.md` with release milestones, quality gates, longer-term priorities, maintenance backlog, and release policy.
 - Added `RELEASE.md` with the main-only release checklist, tag verification steps, and Zenodo release verification.

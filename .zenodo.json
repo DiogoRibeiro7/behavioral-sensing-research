@@ -1,7 +1,7 @@
 {
   "title": "Sensor Modeling Research Toolkit",
   "upload_type": "software",
-  "description": "A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes for ambient assisted living, digital health, and smart home research.",
+  "description": "A research-grade Python toolkit for interpretable, probabilistic, privacy-preserving analysis of behavioural sensor data, and for multimodal ambient sensing in assisted-living and digital-health research. Alongside its established modelling core -- Bernoulli autoregressive models, hidden Markov models, change-point detection and non-homogeneous Poisson processes -- it provides an end-to-end pipeline from heterogeneous sensor observations to explained alerts: a canonical hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and person attribution from anonymous evidence, continuous-time multimodal fusion into latent behavioural states with explicit abstention, adaptive non-stationary personal baselines, restrained alerting, a synthetic household simulator with controlled ground truth, and a paired sensor-ablation framework. The design treats sensor failure, missing data, visitors and uncertainty as first-class modelling concerns rather than operational afterthoughts: a missing observation is never read as evidence of inactivity, and ambient activity is never automatically attributed to the monitored resident. No cameras, microphones or biometric identification are used anywhere in the design. This is a research toolkit and not a medical device; no claim of clinical effectiveness is made or supported.",
   "creators": [
     {
       "name": "Ribeiro, Diogo",
@@ -11,18 +11,24 @@
   ],
   "access_right": "open",
   "license": "mit",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "language": "eng",
   "keywords": [
     "Python",
-    "sensor modeling",
     "ambient assisted living",
+    "ambient sensing",
+    "multimodal sensor fusion",
+    "behavioral monitoring",
     "digital health",
     "smart homes",
-    "time series analysis",
-    "change point detection",
+    "probabilistic modeling",
+    "uncertainty quantification",
     "hidden markov models",
-    "behavioral monitoring",
+    "change point detection",
+    "time series analysis",
+    "sensor reliability",
+    "privacy-preserving sensing",
+    "reproducible research",
     "IoT sensors"
   ],
   "related_identifiers": [
@@ -30,6 +36,12 @@
       "identifier": "https://github.com/DiogoRibeiro7/behavioral-sensing-research",
       "relation": "isIdenticalTo",
       "resource_type": "software"
+    },
+    {
+      "identifier": "10.5281/zenodo.17070041",
+      "relation": "isVersionOf",
+      "resource_type": "software"
     }
-  ]
+  ],
+  "notes": "Research software. Not a medical device. Quantitative results reported with this release are produced by the bundled simulator and have not been validated against real sensor data."
 }
