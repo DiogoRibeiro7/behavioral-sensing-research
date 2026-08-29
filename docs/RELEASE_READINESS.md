@@ -150,6 +150,12 @@ The achieved MCSE of 0.0005 on the headline comparison is the precision the
 protocol specified for n = 100, so the replication count did what it was chosen
 to do.
 
+The artefact for this run is stamped `git_dirty: true`, because it was produced
+while the working tree still held the changes being reviewed. The numbers are
+sound and the seeds reproduce them, but a run intended to be cited should be
+made from a clean checkout so the commit alone identifies the code. That the
+stamp is there, and says so, is the provenance working.
+
 **This supersedes the four-seed pilot, which overstated the effect.** The pilot
 reported the eight-sensor gap as 0.012 with a nominal interval of
 [+0.004, +0.020]. At n = 100 it is 0.0073 with an interval roughly six times
