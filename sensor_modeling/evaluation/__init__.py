@@ -16,6 +16,15 @@ from .ablation import (
     named_subsets,
     run_ablation,
 )
+from .attribution import (
+    ArmResult,
+    AttributionStudy,
+    Scenario,
+    ScenarioComparison,
+    compare_scenario,
+    run_attribution_study,
+    standard_scenarios,
+)
 from .metrics import (
     BinaryMetrics,
     DetectionMetrics,
@@ -32,20 +41,27 @@ from .metrics import (
 
 __all__ = [
     "AblationReport",
+    "ArmResult",
+    "AttributionStudy",
     "AblationRun",
     "BinaryMetrics",
     "DetectionMetrics",
     "PairedDifference",
+    "Scenario",
+    "ScenarioComparison",
     "SensorConfiguration",
     "StateMetrics",
     "TimingMetrics",
     "binary_metrics",
+    "compare_scenario",
     "detection_metrics",
     "evaluate_configuration",
     "leave_one_out",
     "named_subsets",
     "paired_difference",
     "run_ablation",
+    "run_attribution_study",
+    "standard_scenarios",
     "state_metrics",
     "summarise",
     "transition_timing",
