@@ -205,6 +205,7 @@ this biases inference toward inactivity — measured at kitchen recall 0.705 →
 | Risk | Severity |
 | --- | --- |
 | Simulator-only validation | **High** |
+| Small-sample pilots reported as though they were studies | High, addressed |
 | Declared rather than fitted parameters | **High** |
 | Shared evidence between occupancy and state layers | High |
 | Undetectable partial loss on event sensors | Medium |
@@ -241,3 +242,59 @@ microphones or biometric identification anywhere in the design.
 
 **This is a research toolkit. It is not a medical device, and no claim of
 clinical effectiveness is made or supported anywhere in this repository.**
+
+---
+
+## 11. Pre-release correction pass
+
+Applied in response to an external review of this branch. Each item was a
+defect in the work as it stood, not a refinement.
+
+### Blockers
+
+| Was | Now |
+| --- | --- |
+| `Observation` used `MappingProxyType({})` as a dataclass default, which Python 3.11 rejects at class-definition time. 21 test files could not be collected; the CI matrix had been red on 3.11 for the entire series | `default_factory=dict`. `__post_init__` rebuilt the mapping regardless, so the default was always discarded. Verified by importing under 3.11 directly |
+| Nothing caught it, because the local suite ran on one interpreter | Two guards: every module is imported as a test, and every dataclass field default is checked against an allowlist of genuinely immutable types. The second fails on any interpreter, including ones where dataclasses would accept the value |
+| `pytest.ini` contained only coverage flags and silently overrode the far stricter `[tool.pytest.ini_options]`, so `--strict-markers`, `--strict-config` and the warning policy were never applied | `pytest.ini` deleted; the pyproject configuration is now the only one |
+| This document asserted that all gates passed | The assertion is replaced by a pointer to Actions, and a `gate` job aggregates every required job into one check that branch protection can require |
+| `main` held documentation infrastructure `develop` lacked | `main` merged in. The Sphinx workflow it carried was dropped rather than restored, see below |
+
+### Scientific and reporting
+
+| Was | Now |
+| --- | --- |
+| `DetectionStudy.summary()` reported `float(np.mean(delays))` over per-seed medians while the provenance definition promised a median of delays | Delays are pooled before the median. `mean_seed_median_delay_days` is reported separately and named for what it is, and `detected_changes` records the sample size behind it |
+| Four-seed and one-seed results were described as "real but small" | Labelled pilots and demonstrations, with replication counts derived from Monte Carlo standard error in [Simulation protocols](SIMULATION_PROTOCOLS.md). A study needs at least 100 paired trajectories; these ran 4 and 1 |
+| "Two runs of the same command produce byte-identical output", contradicted by the `recorded_at` stamp the implementation deliberately adds | The guarantee is stated over results, not files: same seed, same commit, same resolved configuration produce the same scientific results |
+| Provenance recorded the package version, which stays fixed across many commits | Adds `git_commit`, `git_dirty`, `schema_version`, and a snapshot of the resolved algorithm defaults, so a record cannot be confused with one produced after a default changed |
+| `research_identifier()` claimed studies were unlinkable, but scoped only the visible prefix; the HMAC stayed `HMAC(salt, subject)`, leaving identical digests across studies | The study derives a subkey, so digests are unrelated. The test that should have caught this compared whole identifiers, which differ by prefix alone; it now compares digests |
+
+### On the documentation stack
+
+The review recommended standardising on Sphinx, on the basis that no MkDocs
+configuration existed. That was true of the snapshot reviewed but is no longer
+true of `develop`: the migration completed in #71. There is no `docs/conf.py`,
+no `.rst` source, and the documentation extra installs MkDocs only.
+
+Reverting would mean recreating a Sphinx tree to replace a working one, and
+reinstating the Pandoc dependency whose absence was failing the old
+documentation job. The requirement behind the recommendation — one stack,
+consistently configured, enforced in CI — is met by keeping MkDocs:
+
+- `mkdocs build --strict` is the gate, warnings included;
+- the built site is uploaded as an artifact;
+- link checking runs as a separate, non-blocking step, so an external site
+  going down does not fail a release;
+- `.readthedocs.yaml` points at `mkdocs.yml`, and the Sphinx workflow inherited
+  from `main` is removed rather than left to fail.
+
+### Still outstanding
+
+- **Branch protection is a repository setting, not a file.** The `gate` job
+  exists, but requiring it is a change to repository configuration that has not
+  been made here.
+- **The production-scale runs have not been executed.** The protocols are
+  specified; the numbers in section 5 are still the pilots.
+- Real-data validation remains the next milestone, and is unaffected by any of
+  the above.
