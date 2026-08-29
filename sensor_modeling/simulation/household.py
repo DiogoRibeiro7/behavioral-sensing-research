@@ -193,21 +193,39 @@ class BehaviourShift:
         Additional expected night-time bathroom trips per night.
     outing_probability_delta
         Change in the probability of going out on a given day.
+    ramp_days
+        Days over which the change phases in linearly. Zero produces a step
+        on ``start_day``; a positive value produces a gradual decline, which
+        is a different detection problem: a step is visible in a single day's
+        deviation, whereas a slow trend never is and can only be found by
+        looking across a window.
     """
 
     start_day: int
     sleep_delta_hours: float = 0.0
     night_bathroom_extra: float = 0.0
     outing_probability_delta: float = 0.0
+    ramp_days: int = 0
 
     def __post_init__(self) -> None:
         """Validate the injected shift."""
         if self.start_day < 0:
             raise ValueError("start_day must be non-negative")
+        if self.ramp_days < 0:
+            raise ValueError("ramp_days must be non-negative")
 
     def active_on(self, day_index: int) -> bool:
         """Whether the shift applies on the given simulation day."""
         return day_index >= self.start_day
+
+    def strength_on(self, day_index: int) -> float:
+        """Return how far the change has taken effect, in ``[0, 1]``."""
+        if day_index < self.start_day:
+            return 0.0
+        if self.ramp_days <= 0:
+            return 1.0
+        elapsed = day_index - self.start_day
+        return min(elapsed / self.ramp_days, 1.0)
 
 
 @dataclass
@@ -407,17 +425,19 @@ def _plan_day(
     zone = config.tz
     jitter = config.timing_jitter_minutes / 60.0
     shift = config.shift
-    active = shift is not None and shift.active_on(day_index)
+    # How far the injected change has taken effect today. A step shift is
+    # fully on from its start day; a ramped one phases in.
+    strength = shift.strength_on(day_index) if shift is not None else 0.0
 
     weekend = day.weekday() >= 5
     wake_hour = config.wake_hour + (1.2 if weekend else 0.0)
     wake_hour += rng.normal(0.0, jitter)
     sleep_hour = config.sleep_hour + rng.normal(0.0, jitter)
-    if active and shift is not None:
+    if strength > 0.0 and shift is not None:
         # Less sleep is taken from the front of the night: the resident wakes
         # earlier rather than going to bed later, which is the pattern most
         # often reported in the ambient-monitoring literature.
-        wake_hour -= shift.sleep_delta_hours
+        wake_hour -= shift.sleep_delta_hours * strength
 
     wake = _localise(day, wake_hour, zone)
     bedtime = _localise(day, sleep_hour, zone)
@@ -427,7 +447,7 @@ def _plan_day(
 
     # --- night: sleeping, interrupted by bathroom trips ---------------
     night_rate = config.night_bathroom_rate + (
-        shift.night_bathroom_extra if active and shift is not None else 0.0
+        shift.night_bathroom_extra * strength if shift is not None else 0.0
     )
     trips = int(rng.poisson(max(night_rate, 0.0)))
     trip_starts = sorted(
@@ -457,7 +477,7 @@ def _plan_day(
     episodes.append(Episode(cursor, breakfast_end, S.KITCHEN_ACTIVITY, "kitchen"))
     cursor = breakfast_end
 
-    daytime, cursor = _plan_daytime(day, cursor, bedtime, config, rng, zone, active)
+    daytime, cursor = _plan_daytime(day, cursor, bedtime, config, rng, zone, strength)
     episodes.extend(daytime)
 
     next_midnight = _localise(day + timedelta(days=1), 0.0, zone)
@@ -474,7 +494,7 @@ def _plan_daytime(
     config: HouseholdConfig,
     rng: np.random.Generator,
     zone: tzinfo,
-    shift_active: bool,
+    shift_strength: float,
 ) -> tuple[list[Episode], datetime]:
     """Generate the waking day from after breakfast until bedtime.
 
@@ -486,7 +506,7 @@ def _plan_daytime(
     shift = config.shift
 
     outing_probability = config.outing_probability + (
-        shift.outing_probability_delta if shift_active and shift is not None else 0.0
+        shift.outing_probability_delta * shift_strength if shift is not None else 0.0
     )
     if rng.random() < min(max(outing_probability, 0.0), 1.0):
         out_start = cursor + timedelta(minutes=float(rng.uniform(30, 150)))
