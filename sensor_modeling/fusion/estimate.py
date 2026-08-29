@@ -94,6 +94,70 @@ class EvidenceContribution:
 
 
 @dataclass(frozen=True)
+class Explanation:
+    """Why an estimate reached its conclusion, as addressable parts.
+
+    Four fields carry information that a bare probability cannot, and each
+    answers a question a reader would otherwise have to guess at:
+
+    ``supporting`` / ``contradicting``
+        Which sensors agreed and which pointed elsewhere. Disagreement is
+        surfaced rather than averaged away.
+    ``silent``
+        Trusted sensors that reported nothing. Their silence *did* inform the
+        posterior -- under a Poisson model it penalises the states that would
+        have triggered them.
+    ``missing``
+        Sensors discounted to zero reliability. These contributed nothing at
+        all, and the distinction from ``silent`` is the difference between a
+        quiet room and a broken sensor.
+    """
+
+    at: datetime
+    state: BehaviouralState
+    probability: float
+    abstained: bool
+    reason: str | None
+    supporting: tuple[str, ...]
+    contradicting: tuple[str, ...]
+    silent: tuple[str, ...]
+    missing: tuple[str, ...]
+    completeness: float
+
+    def render(self) -> str:
+        """Render the explanation as an indented, human-readable block."""
+        lines = [
+            f"State:                 {self.state.value}",
+            f"Probability:           {self.probability:.2f}",
+            f"Sensor coverage:       {self.completeness:.2f}",
+        ]
+        if self.abstained and self.reason:
+            lines.append(f"Declined because:      {self.reason}")
+        lines.append(f"Supporting evidence:   {', '.join(self.supporting) or 'none'}")
+        lines.append(
+            f"Contradictory:         {', '.join(self.contradicting) or 'none'}"
+        )
+        lines.append(f"Quiet but working:     {', '.join(self.silent) or 'none'}")
+        lines.append(f"No evidence from:      {', '.join(self.missing) or 'none'}")
+        return "\n".join(lines)
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a serialisable form of the explanation."""
+        return {
+            "at": self.at.isoformat(),
+            "state": self.state.value,
+            "probability": self.probability,
+            "abstained": self.abstained,
+            "reason": self.reason,
+            "supporting": list(self.supporting),
+            "contradicting": list(self.contradicting),
+            "silent": list(self.silent),
+            "missing": list(self.missing),
+            "completeness": self.completeness,
+        }
+
+
+@dataclass(frozen=True)
 class StateEstimate:
     """A posterior over latent behavioural states, with its justification."""
 
@@ -207,6 +271,35 @@ class StateEstimate:
             c.sensor_id for c in self.evidence if c.informative and not c.reported
         )
 
+    def explanation(self, limit: int = 3) -> Explanation:
+        """Return the justification for this estimate as structured data.
+
+        Separate from :meth:`explain` because the two have different
+        consumers: a report renders the sentence, while an interface or an
+        export needs the parts addressable. Both are built from the same
+        evidence, so they cannot drift apart.
+        """
+        return Explanation(
+            at=self.at,
+            state=self.state,
+            probability=self.confidence,
+            abstained=self.abstained,
+            reason=(
+                None
+                if not self.abstained
+                else (
+                    "insufficient sensor coverage"
+                    if self.completeness < self.min_completeness
+                    else "no state was clearly indicated"
+                )
+            ),
+            supporting=tuple(c.sensor_id for c in self.supporting[:limit]),
+            contradicting=tuple(c.sensor_id for c in self.contradicting[:limit]),
+            silent=self.silent,
+            missing=self.missing,
+            completeness=self.completeness,
+        )
+
     def explain(self, limit: int = 3) -> str:
         """Return a short human-readable justification for the estimate.
 
@@ -261,6 +354,7 @@ class StateEstimate:
             "evidence": [c.to_dict() for c in self.evidence],
             "missing": list(self.missing),
             "silent": list(self.silent),
+            "explanation_parts": self.explanation().to_dict(),
             "explanation": self.explain(),
         }
 
