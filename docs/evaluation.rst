@@ -160,66 +160,82 @@ inference step, scoring balanced accuracy:
      - Calib. error
    * - all modalities
      - 10
-     - 0.794
-     - 0.784
-     - 1.022
-     - 0.080
+     - 0.814
+     - 0.789
+     - 0.988
+     - 0.084
    * - objects + wearable
      - 8
-     - 0.791
-     - 0.784
-     - 1.028
-     - 0.083
+     - 0.802
+     - 0.790
+     - 1.026
+     - 0.081
+   * - radar + door + bed + wearable
+     - 5
+     - 0.651
+     - 0.645
+     - 0.676
+     - 0.034
    * - object sensors only
      - 6
      - 0.641
      - 0.646
      - 1.054
      - 0.114
-   * - radar + door + bed + wearable
-     - 5
-     - 0.632
-     - 0.640
-     - 0.700
-     - 0.051
    * - radar + door + bed
      - 3
-     - 0.317
-     - 0.297
-     - 1.042
-     - 0.132
+     - 0.323
+     - 0.302
+     - 0.973
+     - 0.134
    * - door + bed only
      - 2
-     - 0.286
-     - 0.253
-     - 1.101
-     - 0.131
+     - 0.289
+     - 0.257
+     - 0.992
+     - 0.169
 
 Paired differences against the full deployment:
 
 .. code-block:: text
 
-    all - objects_plus_wearable    +0.003  95% CI [-0.015, +0.019]  not distinguishable
-    all - object_sensors_only      +0.153  95% CI [+0.122, +0.188]  clear
-    all - radar_door_bed_wearable  +0.162  95% CI [+0.134, +0.193]  clear
-    all - radar_door_bed           +0.477  95% CI [+0.466, +0.492]  clear
-    all - minimal_door_bed         +0.508  95% CI [+0.486, +0.529]  clear
+    all - objects_plus_wearable    +0.012  95% CI [+0.004, +0.020]  clear
+    all - radar_door_bed_wearable  +0.163  95% CI [+0.142, +0.181]  clear
+    all - object_sensors_only      +0.173  95% CI [+0.140, +0.201]  clear
+    all - radar_door_bed           +0.491  95% CI [+0.476, +0.512]  clear
+    all - minimal_door_bed         +0.526  95% CI [+0.513, +0.538]  clear
 
-Three findings, stated with their caveats:
+Four findings, stated with their caveats:
 
-1. **Adding a person-bound wearable to six object sensors recovers essentially
-   all of the full deployment's accuracy.** The eight-sensor configuration is
-   not distinguishable from the ten-sensor one at four seeds.
+1. **Adding a person-bound wearable to six object sensors recovers most, but
+   not quite all, of the full deployment's accuracy.** The eight-sensor
+   configuration loses 0.012 balanced accuracy, and the interval excludes
+   zero, so the gap is real rather than noise. Whether roughly one point of
+   balanced accuracy justifies two further sensors is a deployment decision,
+   not a statistical one.
+
+   This is also a worked illustration of the caveat in
+   :doc:`limitations`: pairing removes between-household variance, which
+   makes small differences detectable that an unpaired field study of the
+   same size would not resolve. A detectable difference is not automatically
+   an important one.
 
 2. **The wearable is the single most valuable addition to a sparse
    deployment**, roughly doubling balanced accuracy over radar + door + bed
-   alone.
+   alone (0.323 to 0.651) for two extra person-bound sensors.
 
 3. **Fewer, better-attributed sensors can be better calibrated even when less
-   accurate.** The five-sensor configuration has the best log loss (0.700) and
-   calibration error (0.051) of any configuration despite lower balanced
-   accuracy -- exactly the kind of trade-off an accuracy-only evaluation would
-   hide.
+   accurate.** The five-sensor configuration has the best log loss (0.676)
+   and by far the best calibration error (0.034) of any configuration,
+   despite balanced accuracy well below the full deployment. An
+   accuracy-only evaluation would hide this entirely, and for a system whose
+   output is meant to be a probability it is arguably the more important
+   property.
+
+4. **Very sparse ambient-only configurations are genuinely poor.** Door and
+   bed sensors alone reach 0.289 balanced accuracy with the worst
+   calibration in the sweep. This is reported because it is true, not
+   because it flatters the framework.
 
 These numbers are properties of *this simulator* under *these defaults*. They
 are a demonstration that the framework produces interpretable comparisons, not

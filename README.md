@@ -99,10 +99,12 @@ sensor-modeling ablate --days 14 --seeds 11 22 33 44
 
 Every configuration is evaluated on identical simulated households, so the
 comparison measures sensing rather than residents. On a four-seed sweep, adding
-a person-bound wearable to six object sensors was **not distinguishable** from
-the full ten-sensor deployment (paired difference +0.003, 95% CI
-[−0.015, +0.019]), while removing it cost 0.153 balanced accuracy
-(95% CI [+0.122, +0.188]). See [`docs/evaluation.rst`](docs/evaluation.rst).
+a person-bound wearable to six object sensors recovered most of the full
+ten-sensor deployment's accuracy — the remaining gap is 0.012 balanced accuracy
+(95% CI [+0.004, +0.020]), real but small — while removing the wearable cost
+0.173 (95% CI [+0.140, +0.201]). A five-sensor configuration was the *best
+calibrated* of all despite lower accuracy, which an accuracy-only evaluation
+would have hidden. See [`docs/evaluation.rst`](docs/evaluation.rst).
 
 > These numbers describe behaviour on the bundled simulator under its default
 > parameters. They are not estimates of field performance. Nothing here has
