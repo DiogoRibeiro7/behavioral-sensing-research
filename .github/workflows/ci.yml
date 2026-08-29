@@ -108,11 +108,11 @@ jobs:
     steps:
       - name: Fail if any required job did not succeed
         run: |
-          echo "lint=${{ needs.lint.result }}"
-          echo "test=${{ needs.test.result }}"
-          echo "docs=${{ needs.docs.result }}"
-          echo "package=${{ needs.package.result }}"
-          if [ "${{ needs.lint.result }}" != "success" ]             || [ "${{ needs.test.result }}" != "success" ]             || [ "${{ needs.docs.result }}" != "success" ]             || [ "${{ needs.package.result }}" != "success" ]; then
-            echo "::error::a required job failed; this branch is not mergeable"
-            exit 1
-          fi
+          results="${{ needs.lint.result }} ${{ needs.test.result }} ${{ needs.docs.result }} ${{ needs.package.result }}"
+          echo "lint test docs package -> $results"
+          for result in $results; do
+            if [ "$result" != "success" ]; then
+              echo "::error::a required job did not succeed; this branch is not mergeable"
+              exit 1
+            fi
+          done
