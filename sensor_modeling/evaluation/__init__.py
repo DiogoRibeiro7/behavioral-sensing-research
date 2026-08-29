@@ -25,6 +25,13 @@ from .attribution import (
     run_attribution_study,
     standard_scenarios,
 )
+from .detection import (
+    ArmOutcome,
+    ChangeArm,
+    DetectionStudy,
+    run_detection_study,
+    standard_arms,
+)
 from .metrics import (
     BinaryMetrics,
     DetectionMetrics,
@@ -41,11 +48,14 @@ from .metrics import (
 
 __all__ = [
     "AblationReport",
+    "ArmOutcome",
     "ArmResult",
     "AttributionStudy",
     "AblationRun",
     "BinaryMetrics",
+    "ChangeArm",
     "DetectionMetrics",
+    "DetectionStudy",
     "PairedDifference",
     "Scenario",
     "ScenarioComparison",
@@ -61,6 +71,8 @@ __all__ = [
     "paired_difference",
     "run_ablation",
     "run_attribution_study",
+    "run_detection_study",
+    "standard_arms",
     "standard_scenarios",
     "state_metrics",
     "summarise",
