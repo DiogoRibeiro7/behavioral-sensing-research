@@ -23,17 +23,35 @@ from .fhir import (
     state_resource,
     summarise_provenance,
 )
+from .privacy import (
+    DEFAULT_REDACTED_KEYS,
+    Pseudonymiser,
+    RedactionPolicy,
+    SaltError,
+    identifiers_in,
+    redact,
+    redact_bundle,
+    research_identifier,
+)
 
 __all__ = [
     "CODE_SYSTEM",
+    "DEFAULT_REDACTED_KEYS",
     "PROVENANCE_DERIVED_FEATURE",
     "PROVENANCE_INFERRED",
     "PROVENANCE_MEASURED",
     "RESEARCH_NOTE",
+    "Pseudonymiser",
+    "RedactionPolicy",
+    "SaltError",
     "alert_resource",
     "bundle",
+    "identifiers_in",
     "measured_only",
     "observation_resource",
+    "redact",
+    "redact_bundle",
+    "research_identifier",
     "state_resource",
     "summarise_provenance",
 ]

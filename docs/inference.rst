@@ -373,3 +373,49 @@ reasonably fill the gaps with zeros.
    server, and its codes come from a project-local code system rather than
    LOINC or SNOMED. Its output must not be presented as clinically validated
    data.
+
+Privacy helpers for export
+--------------------------
+
+:mod:`sensor_modeling.interop.privacy` provides pseudonymisation and redaction
+for data leaving a research environment. Two things it deliberately does not
+claim:
+
+**Pseudonymisation is not anonymisation.** Replacing an identifier removes the
+name, not the person. A behavioural record is a detailed account of when
+somebody sleeps, eats and leaves the house, and anyone with a little side
+information can often re-identify it. Pseudonymised exports remain personal
+data. Bundles are tagged to say so.
+
+**A hash is not a pseudonym.** Hashing a short identifier such as
+``patient_7`` protects nothing, because an attacker hashes every plausible
+identifier and matches. Pseudonyms are therefore keyed with a secret salt of
+at least sixteen characters, which must be supplied and kept separately from
+the data.
+
+Pseudonyms are deterministic across runs and machines, so a longitudinal study
+can link a subject's records without holding their identity, and are scoped by
+study, so the same person carries different identifiers in different studies
+and records cannot be joined across them.
+
+.. code-block:: python
+
+    from sensor_modeling.interop import identifiers_in, redact_bundle
+
+    # See what would leave before it leaves.
+    identifiers_in(exported)
+
+    safe = redact_bundle(
+        exported,
+        salt=study_salt,
+        subjects=["Patient/mrs-silva"],
+        sensors=["kitchen_motion"],
+    )
+
+Redaction strips free-form metadata and scrubs anything resembling contact
+details from remaining text, while preserving the measurements, their
+timestamps and their provenance -- a reader of a redacted bundle can still
+tell a measurement from an inference. Where a pseudonym is supplied, the field
+carrying the identifier is kept and its value replaced rather than dropped;
+dropping it would be stronger but would destroy the ability to link records at
+all, which is the point of pseudonymising rather than deleting.
