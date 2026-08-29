@@ -457,21 +457,47 @@ def _plan_day(
     episodes.append(Episode(cursor, breakfast_end, S.KITCHEN_ACTIVITY, "kitchen"))
     cursor = breakfast_end
 
-    # --- daytime blocks -----------------------------------------------
+    daytime, cursor = _plan_daytime(day, cursor, bedtime, config, rng, zone, active)
+    episodes.extend(daytime)
+
+    next_midnight = _localise(day + timedelta(days=1), 0.0, zone)
+    if next_midnight > cursor:
+        episodes.append(Episode(cursor, next_midnight, S.SLEEPING, "bedroom"))
+
+    return episodes, _plan_visitors(day, config, rng, zone)
+
+
+def _plan_daytime(
+    day: date,
+    start: datetime,
+    bedtime: datetime,
+    config: HouseholdConfig,
+    rng: np.random.Generator,
+    zone: tzinfo,
+    shift_active: bool,
+) -> tuple[list[Episode], datetime]:
+    """Generate the waking day from after breakfast until bedtime.
+
+    Returns the episodes and the moment the day's routine finishes, which is
+    normally bedtime but can be earlier if the day was compressed.
+    """
+    episodes: list[Episode] = []
+    cursor = start
+    shift = config.shift
+
     outing_probability = config.outing_probability + (
-        shift.outing_probability_delta if active and shift is not None else 0.0
+        shift.outing_probability_delta if shift_active and shift is not None else 0.0
     )
-    goes_out = rng.random() < min(max(outing_probability, 0.0), 1.0)
-    if goes_out:
+    if rng.random() < min(max(outing_probability, 0.0), 1.0):
         out_start = cursor + timedelta(minutes=float(rng.uniform(30, 150)))
         episodes.append(Episode(cursor, out_start, S.HOME_INACTIVE, "living"))
-        out_end = out_start + timedelta(hours=float(rng.uniform(1.0, 4.0)))
-        out_end = min(out_end, bedtime - timedelta(hours=1))
+        out_end = min(
+            out_start + timedelta(hours=float(rng.uniform(1.0, 4.0))),
+            bedtime - timedelta(hours=1),
+        )
         if out_end > out_start:
             episodes.append(Episode(out_start, out_end, S.AWAY, None))
-            cursor = out_end
-        else:
-            cursor = out_start
+        cursor = max(out_end, out_start)
 
     lunch_start = max(cursor, _localise(day, 12.5 + rng.normal(0, 0.4), zone))
     if lunch_start > cursor:
@@ -485,8 +511,7 @@ def _plan_day(
         bedtime - timedelta(hours=1.5),
     )
     if afternoon_end > cursor:
-        blocks = _alternate(cursor, afternoon_end, rng)
-        episodes.extend(blocks)
+        episodes.extend(_alternate(cursor, afternoon_end, rng))
         cursor = afternoon_end
 
     dinner_end = min(cursor + timedelta(minutes=float(rng.uniform(30, 60))), bedtime)
@@ -498,11 +523,7 @@ def _plan_day(
         episodes.extend(_alternate(cursor, bedtime, rng))
         cursor = bedtime
 
-    next_midnight = _localise(day + timedelta(days=1), 0.0, zone)
-    if next_midnight > cursor:
-        episodes.append(Episode(cursor, next_midnight, S.SLEEPING, "bedroom"))
-
-    return episodes, _plan_visitors(day, config, rng, zone)
+    return episodes, cursor
 
 
 def _alternate(
