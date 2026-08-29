@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 from datetime import timedelta
 from pathlib import Path
@@ -77,6 +76,26 @@ def _add_ablation_parser(sub: argparse._SubParsersAction) -> None:
     )
 
 
+def _record(
+    experiment: str,
+    *,
+    configuration: dict[str, object],
+    seeds: list[int],
+    results: dict[str, object],
+    notes: list[str] | None = None,
+) -> object:
+    """Wrap a result in the provenance needed to interpret it later."""
+    from .evaluation.provenance import ExperimentRecord
+
+    return ExperimentRecord(
+        experiment=experiment,
+        configuration=configuration,
+        seeds=seeds,
+        results=results,
+        notes=notes or [],
+    )
+
+
 def _add_attribution_parser(sub: argparse._SubParsersAction) -> None:
     """Register the attribution comparison experiment."""
     study = sub.add_parser(
@@ -139,10 +158,22 @@ def _run_attribution(args: argparse.Namespace) -> None:
     )
 
     if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(
-            json.dumps(study.to_dict(), indent=2, default=str), encoding="utf-8"
-        )
+        _record(
+            "attribution_comparison",
+            configuration={
+                "days": args.days,
+                "step_minutes": args.step_minutes,
+                "scenarios": [s.scenario for s in study.comparisons],
+            },
+            seeds=[args.seed],
+            results=study.to_dict(),
+            notes=[
+                "Both arms see identical households, visitors and sensor "
+                "records, so any difference is attributable to attribution.",
+            ],
+        ).write(
+            args.output
+        )  # type: ignore[attr-defined]
         print(f"Structured results written to {args.output}")
 
 
@@ -246,11 +277,24 @@ def _run_ablation(args: argparse.Namespace) -> None:
         "simulated households, so these compare sensing rather than residents."
     )
     if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(
-            json.dumps(report.to_dict(args.metric), indent=2, default=str),
-            encoding="utf-8",
-        )
+        _record(
+            "sensor_ablation",
+            configuration={
+                "days": args.days,
+                "step_minutes": args.step_minutes,
+                "metric": args.metric,
+                "subsets": {k: list(v) for k, v in ABLATION_SUBSETS.items()},
+            },
+            seeds=report.seeds,
+            results=report.to_dict(args.metric),
+            notes=[
+                "Configurations are evaluated on identical simulated "
+                "households, so differences compare sensing rather than "
+                "residents.",
+            ],
+        ).write(
+            args.output
+        )  # type: ignore[attr-defined]
         print(f"Structured results written to {args.output}")
 
 

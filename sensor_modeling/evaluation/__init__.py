@@ -45,8 +45,17 @@ from .metrics import (
     summarise,
     transition_timing,
 )
+from .provenance import (
+    METRIC_DEFINITIONS,
+    RESULTS_DIR,
+    ExperimentRecord,
+    environment,
+    load_record,
+)
 
 __all__ = [
+    "METRIC_DEFINITIONS",
+    "RESULTS_DIR",
     "AblationReport",
     "ArmOutcome",
     "ArmResult",
@@ -56,6 +65,7 @@ __all__ = [
     "ChangeArm",
     "DetectionMetrics",
     "DetectionStudy",
+    "ExperimentRecord",
     "PairedDifference",
     "Scenario",
     "ScenarioComparison",
@@ -65,8 +75,10 @@ __all__ = [
     "binary_metrics",
     "compare_scenario",
     "detection_metrics",
+    "environment",
     "evaluate_configuration",
     "leave_one_out",
+    "load_record",
     "named_subsets",
     "paired_difference",
     "run_ablation",
