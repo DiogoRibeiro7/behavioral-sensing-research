@@ -92,13 +92,15 @@ Attribution is a weight, not an identity
     resident's. Per-event attribution would need evidence the platform
     deliberately does not collect.
 
-Visitor recall is low
-    On the demonstration scenario the occupancy layer achieves high precision
-    (~0.81) but low recall (~0.32) for visitor presence. Short visits are
-    frequently missed. The model is conservative by construction -- the
-    correlation discount and a prior favouring living alone both pull against
-    declaring a visitor -- so it under-detects rather than over-detects. That
-    is the safer direction for attribution, but it means visitor contamination
+Visitor recall is moderate
+    On the 90-day demonstration the occupancy layer reaches precision 0.71 and
+    recall 0.48 for visitor presence, with a calibration error of 0.012. Around
+    half of visit time is still missed, mostly short visits. The model is
+    conservative by construction -- the correlation discount on presence
+    samples and a prior favouring living alone both pull against declaring a
+    visitor -- so it under-detects rather than over-detects. That is the safer
+    direction for attribution, since a false "visitor present" would wrongly
+    discount the resident's own activity, but it means visitor contamination
     is only partially removed.
 
 Fixed, hand-specified parameters
@@ -109,11 +111,13 @@ Fixed, hand-specified parameters
     as good as its declarations.
 
 Drift detection is noisy
-    The trend detector fires on a minority of stable periods. On the 75-day
-    demonstration it produced roughly 0.07 unmatched behavioural alerts per
-    person-day (about one per fifteen days) alongside correctly detecting the
-    injected change with a seven-day delay. That burden is low but not zero,
-    and the threshold trades directly against detection delay.
+    The trend detector fires on a minority of stable periods. On the 90-day
+    demonstration it produced three unmatched behavioural alerts -- roughly
+    0.033 per person-day, about one per month -- alongside correctly detecting
+    the injected change with a six-day delay. That burden is low but not zero,
+    and the threshold trades directly against detection delay. Whether one
+    spurious alert per month is acceptable is a question for the people who
+    would receive them, not one the metrics can settle.
 
 Sensor drift versus environmental change
     The health monitor cannot distinguish a drifting temperature sensor from a
@@ -147,9 +151,9 @@ Snapshots are not versioned
     a migration.
 
 Performance is adequate, not optimised
-    The pipeline processes roughly 450,000 observations over 75 simulated days
-    in a couple of minutes on a laptop. Nothing has been profiled or
-    vectorised for scale, and the ablation sweep is serial.
+    The pipeline processes roughly 530,000 observations over 90 simulated days
+    in a few minutes on a laptop. Nothing has been profiled or vectorised for
+    scale, and the ablation sweep is serial.
 
 Pre-existing type-checking debt
     The ten packages added for ambient sensing pass ``mypy`` under the
