@@ -36,11 +36,22 @@ Implemented or substantially available:
 - Flask-based visualization app with authenticated upload workflow.
 - Zenodo, citation, and release metadata.
 
-## Delivered: Multimodal Ambient Sensing Platform
+## Capability Status by Theme
 
-The toolkit has been extended into a multimodal ambient-sensing platform on
-top of the existing modelling core. The following are implemented, tested and
-documented:
+Work is grouped by the outcome it unlocks. Each theme states what exists now
+and what is outstanding.
+
+### Existing capability (pre-multimodal core)
+
+Retained unchanged and still supported: CSV/JSON/HDF5 loading, gap-aware
+missing-data handling, Bernoulli autoregressive models, HMM variants,
+NHPP-PELT segmentation, change-point detectors, Granger and dependency-network
+analysis, LaTeX/HTML reporting, the Flask visualisation app, and the original
+CLI subcommands.
+
+### Foundation work
+
+Delivered:
 
 - A canonical, hardware-neutral observation model with boundary validation,
   unit conversion, duplicate collapse, out-of-order handling, late-arrival
@@ -50,28 +61,70 @@ documented:
   Inference reads declarations rather than sensor names.
 - Online sensor health estimation emitting a per-sensor evidence weight, with
   silence only treated as failure where a sensor promised to report.
+
+### Multimodal sensing
+
+Delivered:
+
 - A configurable continuous-time behavioural state ontology and a recursive
   multimodal Bayes filter over asynchronous, partially missing evidence, with
   explicit abstention.
 - Probabilistic occupancy estimation and uncertainty-aware attribution of
   ambient activity, using anonymous evidence only.
+
+### State inference
+
+Delivered: a configurable state ontology whose semantic claims stop where the
+evidence stops, with explicit abstention when confidence or sensor coverage is
+insufficient.
+
+### Personalisation
+
+Delivered:
+
 - Adaptive, robust, weekday-aware personal baselines distinguishing ordinary
   variability, weekly rhythm, temporary disturbance, persistent change,
   gradual drift, abrupt change, and insufficient data.
 - Restrained alerting with deduplication, rate limiting, explicit caveats, and
   a strict separation between system-health and behavioural findings.
+
+### Evaluation
+
+Delivered:
+
 - A synthetic household simulator with controlled ground truth, generatively
   independent of the inference model, plus separate fault injection.
 - Problem-appropriate evaluation metrics and a paired sensor-ablation
   framework reporting effect sizes and bootstrap intervals.
-- An incremental, snapshot-able pipeline suitable for edge deployment.
+
+### Online and edge processing
+
+Delivered: an incremental, bounded-memory, snapshot-able pipeline with a
+lateness buffer for stream reordering, independent of any UI or storage.
+
+### Clinical interoperability
+
+Delivered: a FHIR-style export that keeps measurements, derived features,
+inferred states and algorithmic alerts distinguishable through explicit
+provenance. Not a validated profile; see `docs/limitations.rst`.
+
+### Reproducible research
+
+Delivered:
+
 - A reproducible end-to-end command-line demonstration and ablation
   experiment.
 
-See `docs/ambient_architecture.rst`, `docs/inference.rst`,
-`docs/evaluation.rst` and `docs/limitations.rst`.
+User documentation: `docs/ambient_architecture.rst`, `docs/inference.rst`,
+`docs/evaluation.rst`, `docs/limitations.rst`.
 
-### Next priorities for this work
+Design record: `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`,
+`docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`,
+`docs/EVALUATION_DESIGN.md`.
+
+### Longer-term research
+
+Outstanding, in priority order
 
 The single most important outstanding item is **validation against real
 annotated sensor data**. Every quantitative result currently comes from the
