@@ -171,7 +171,7 @@ class ExperimentRecord:
             "notes": [
                 *self.notes,
                 "Generated from the bundled simulator. Not validated against "
-                "real sensor data; see docs/limitations.rst.",
+                "real sensor data; see docs/limitations.md.",
             ],
         }
 

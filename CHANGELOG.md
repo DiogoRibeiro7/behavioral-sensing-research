@@ -27,14 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added pseudonymisation and export redaction with salt-keyed, study-scoped identifiers.
 - Added `sensor_modeling.observations.SensorSpec.redundancy_group` so correlated sensors are not counted as independent evidence.
 - Added detection of sensors that keep reporting while delivering below their declared cadence.
-- Added `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`, `docs/EVALUATION_DESIGN.md`, `docs/ADVERSARIAL_REVIEW.md`, `docs/RELEASE_READINESS.md` and `docs/multimodal_ingestion.rst`.
+- Added `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`, `docs/EVALUATION_DESIGN.md`, `docs/ADVERSARIAL_REVIEW.md`, `docs/RELEASE_READINESS.md` and `docs/multimodal_ingestion.md`.
 - Added backwards-compatibility tests exercising the original models, data layer and public surface.
-- Added `docs/ambient_architecture.rst`, `docs/inference.rst`, `docs/evaluation.rst`, and `docs/limitations.rst`.
+- Added `docs/ambient_architecture.md`, `docs/inference.md`, `docs/evaluation.md`, and `docs/limitations.md`.
 - Added 327 tests covering the new packages, including DST transitions in both directions, out-of-order and duplicate delivery, sensor dropout, wearable non-adherence, visitor contamination, snapshot/restore, and end-to-end recovery against ground truth.
 - Added a top-level `ROADMAP.md` with release milestones, quality gates, longer-term priorities, maintenance backlog, and release policy.
 - Added `RELEASE.md` with the main-only release checklist, tag verification steps, and Zenodo release verification.
 - Added GitHub issue templates, a pull request template, and CI coverage for pushes to `develop`.
-- Added CI jobs for Sphinx documentation builds and package artifact validation.
+- Added CI jobs for documentation builds and package artifact validation.
 - Added security and support policy documents.
 - Added focused tests for shared data IO, synthetic exports, HDF5 loading, sensor failure detection, plotting helpers, and model validation utilities.
 - Added release metadata consistency tests for package, citation, Zenodo, and README metadata.
@@ -67,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored plotting helpers to return Matplotlib figures and support non-interactive `show=False` workflows.
 - Simplified legacy `setup.py` so package metadata is sourced from `pyproject.toml`.
 - Updated package metadata and source distribution exclusions for cleaner release artifacts.
-- Updated README and Sphinx roadmap documentation to point to the canonical roadmap.
+- Updated README and roadmap documentation to point to the canonical roadmap.
 
 ### Fixed
 - Fixed the analysis pipeline defaulting to `NHPPConfig(n_basis=3)`, which violates the model's own `n_basis >= degree+1` constraint for the cubic default. Every NHPP fit raised and the pipeline recorded an error in place of a result, so that arm had never worked while appearing present in the output.

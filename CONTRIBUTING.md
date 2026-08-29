@@ -17,7 +17,7 @@ Thank you for considering contributing to **Sensor Modeling Research Toolkit**!
    ```bash
    pre-commit run --files <changed_files>
    pytest
-   sphinx-build -b html docs docs/_build/html
+   mkdocs build --strict
    ```
 
 ## Pull Requests

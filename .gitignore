@@ -10,5 +10,6 @@ htmlcov/
 coverage.xml
 .tmp/
 .ipynb_checkpoints/
-docs/_build/
+site/
 results/
+papers/

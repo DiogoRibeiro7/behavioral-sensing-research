@@ -1,3 +1,4 @@
-sphinx>=6.0
-sphinx-rtd-theme>=1.2
-nbsphinx>=0.9
+mkdocs>=1.6.0
+mkdocs-material>=9.5.0
+mkdocstrings[python]>=0.24.0
+mkdocs-jupyter>=0.24.0

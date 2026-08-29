@@ -132,12 +132,12 @@ ten-sensor deployment's accuracy — the remaining gap is 0.012 balanced accurac
 (95% CI [+0.004, +0.020]), real but small — while removing the wearable cost
 0.173 (95% CI [+0.140, +0.201]). A five-sensor configuration was the *best
 calibrated* of all despite lower accuracy, which an accuracy-only evaluation
-would have hidden. See [`docs/evaluation.rst`](docs/evaluation.rst).
+would have hidden. See [`docs/evaluation.md`](docs/evaluation.md).
 
 > These numbers describe behaviour on the bundled simulator under its default
 > parameters. They are not estimates of field performance. Nothing here has
 > been validated against real sensor data — see
-> [`docs/limitations.rst`](docs/limitations.rst).
+> [`docs/limitations.md`](docs/limitations.md).
 
 ## ✨ Features
 
@@ -492,7 +492,7 @@ We welcome contributions from researchers and practitioners! The toolkit is desi
 
   ```bash
   pytest tests/test_my_new_algorithm.py
-  sphinx-build -b html docs docs/_build/html
+  mkdocs build --strict
   ```
 
 5. **Submit a pull request** with:

@@ -39,7 +39,7 @@ sensor failure. Both are measured, precisely because accuracy alone would hide
 them.
 
 **Known threat.** The result depends on the simulator's assumed activity
-levels and sensor rates. See `limitations.rst`.
+levels and sensor rates. See `limitations.md`.
 
 ## RQ2 — Can a system fail safely rather than fail silently?
 

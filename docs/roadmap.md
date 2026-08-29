@@ -1,8 +1,7 @@
-Project Roadmap
-===============
+# Project Roadmap
 
-The canonical GitHub-facing roadmap is maintained in ``ROADMAP.md`` at the
-repository root. This documentation page mirrors that roadmap for the Sphinx
+The canonical GitHub-facing roadmap is maintained in `ROADMAP.md` at the
+repository root. This documentation page mirrors that roadmap for the rendered
 site.
 
 This roadmap describes the planned direction for the Sensor Modeling Research
@@ -10,8 +9,7 @@ Toolkit. It is intentionally release-oriented: items are grouped by the outcome
 they should unlock, not by implementation preference. The roadmap can change as
 research needs, user feedback, and maintenance constraints evolve.
 
-Guiding Principles
-------------------
+## Guiding Principles
 
 The project should remain useful for reproducible behavioral sensing research.
 New work should therefore prioritize:
@@ -23,10 +21,9 @@ New work should therefore prioritize:
 * tests and examples that make research workflows reproducible;
 * lightweight deployment paths for local, clinical, and edge environments.
 
-Current Baseline
-----------------
+## Current Baseline
 
-The current ``0.1.x`` series provides the foundation for data loading,
+The current `0.1.x` series provides the foundation for data loading,
 preprocessing, simulation, model fitting, change-point detection, analysis,
 visualization, and report generation.
 
@@ -43,11 +40,9 @@ Implemented or substantially available:
 * Flask-based visualization app with authenticated upload workflow.
 * Zenodo, citation, and release metadata.
 
-Near-Term Roadmap
------------------
+## Near-Term Roadmap
 
-0.2.0: API Stabilization and Documentation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 0.2.0: API Stabilization and Documentation
 
 Goal:
   Make the toolkit easier to adopt by researchers who are not already familiar
@@ -55,25 +50,24 @@ Goal:
 
 Planned work:
 
-* Define public API boundaries for ``data``, ``utils``, ``analysis``,
-  ``models``, ``change_point``, ``hmm``, and ``visualization`` modules.
+* Define public API boundaries for `data`, `utils`, `analysis`,
+  `models`, `change_point`, `hmm`, and `visualization` modules.
 * Add docstring coverage for public classes and functions.
 * Expand quickstart examples into complete workflows: load data, validate data,
   fit model, evaluate model, export report.
 * Document supported input data schemas and timestamp handling.
 * Add migration notes for any renamed or clarified APIs.
-* Add a release checklist covering ``develop`` to ``main`` merge, tag creation,
+* Add a release checklist covering `develop` to `main` merge, tag creation,
   GitHub release, Zenodo metadata, and documentation build.
 
 Quality gates:
 
 * Full test suite passes.
 * Pre-commit passes.
-* Sphinx documentation builds without warnings for changed pages.
+* Documentation builds without warnings (`mkdocs build --strict`).
 * Public API changes are documented in the changelog.
 
-0.3.0: Data Quality and Validation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 0.3.0: Data Quality and Validation
 
 Goal:
   Make data problems visible before they affect model results.
@@ -94,8 +88,7 @@ Quality gates:
 * Failure modes raise actionable exceptions or warnings.
 * Validation utilities have focused unit tests and integration examples.
 
-0.4.0: Model Evaluation and Comparison
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 0.4.0: Model Evaluation and Comparison
 
 Goal:
   Provide consistent evaluation across modeling approaches.
@@ -115,8 +108,7 @@ Quality gates:
 * Metrics are documented with expected input and output shapes.
 * Benchmarks are reproducible from the command line.
 
-0.5.0: Clinical and Interoperability Workflows
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 0.5.0: Clinical and Interoperability Workflows
 
 Goal:
   Improve reporting and integration paths for clinical and applied research
@@ -137,43 +129,37 @@ Quality gates:
 * Report examples avoid exposing sensitive identifiers.
 * Clinical documentation distinguishes supported behavior from future work.
 
-Longer-Term Roadmap
--------------------
+## Longer-Term Roadmap
 
 These items are valuable but should follow the stabilization work above.
 
-Deep Learning Change-Point Detection
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Deep Learning Change-Point Detection
 
 * Add transformer, CNN, or autoencoder-based CPD only after baseline evaluation
   utilities are stable.
 * Provide simple training examples and clear dataset requirements.
 * Compare deep approaches against existing interpretable baselines.
 
-Online and Real-Time Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Online and Real-Time Processing
 
 * Add incremental preprocessing and validation utilities.
 * Add online change-point detection interfaces.
 * Support streaming report updates and bounded-memory operation.
 
-Packaging and Distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Packaging and Distribution
 
 * Publish stable package artifacts when the public API is ready.
 * Add compatibility checks for supported Python versions.
 * Document optional dependency groups by workflow.
 
-Performance and Scalability
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Performance and Scalability
 
 * Profile slow model-fitting and analysis paths.
 * Add benchmark tracking for core algorithms.
 * Evaluate vectorization and optional acceleration where it reduces real
   runtime without making the code harder to maintain.
 
-Maintenance Backlog
--------------------
+## Maintenance Backlog
 
 The following work can be handled continuously across releases:
 
@@ -181,24 +167,22 @@ The following work can be handled continuously across releases:
 * Reduce broad exception handling where errors can be handled specifically.
 * Improve coverage for analysis and visualization modules.
 * Keep examples synchronized with public APIs.
-* Expand changelog entries for every release after ``0.1.0``.
+* Expand changelog entries for every release after `0.1.0`.
 * Keep Zenodo, citation, and package metadata aligned before each release.
 
-Release Policy
---------------
+## Release Policy
 
-Development work happens on ``develop``. Releases are cut from ``main`` only.
+Development work happens on `develop`. Releases are cut from `main` only.
 The release flow is:
 
-1. Finish and validate work on ``develop``.
-2. Merge ``develop`` into ``main``.
-3. Tag the release on the ``main`` commit.
+1. Finish and validate work on `develop`.
+2. Merge `develop` into `main`.
+3. Tag the release on the `main` commit.
 4. Publish the GitHub release from that tag.
 5. Confirm Zenodo metadata and DOI linkage.
 6. Update the changelog and documentation as needed.
 
-Out of Scope for Now
---------------------
+## Out of Scope for Now
 
 The following are not immediate priorities:
 

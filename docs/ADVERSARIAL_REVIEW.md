@@ -134,7 +134,7 @@ correlation.
 
 Not fixed. A correct treatment needs a joint or hierarchical formulation, which
 is a research change rather than a repair. Recorded in
-`docs/limitations.rst` and in the roadmap.
+`docs/limitations.md` and in the roadmap.
 
 ---
 
