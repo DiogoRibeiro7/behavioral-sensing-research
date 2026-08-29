@@ -29,7 +29,7 @@ import logging
 import statistics
 from collections import deque
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 
 from ..observations.observation import Observation
@@ -142,7 +142,14 @@ class HealthConfig:
     missing_after
         Multiple after which the sensor is treated as supplying no evidence.
     stuck_samples
-        Consecutive identical readings that indicate a stuck sampled sensor.
+        Consecutive identical readings that indicate a stuck *sampled*
+        sensor. Not applied to state sensors: reporting an unchanged level is
+        what a state sensor is for, and a bed that reads occupied for eight
+        hours is a sleeping resident, not a fault.
+    stuck_state_hours
+        How long a *state* sensor may report one unchanged level before it is
+        suspected of being stuck. Set well beyond any plausible real
+        duration of the states being reported.
     quality_floor
         Smoothed device-reported quality below which a sensor is degraded.
     quality_smoothing
@@ -158,12 +165,17 @@ class HealthConfig:
         Prevents a very stable sensor from being flagged for trivial moves.
     out_of_range_tolerance
         Consecutive implausible readings tolerated before flagging.
+    outage_canary_fraction
+        Fraction of the sensors that *can* be checked for silence which must
+        be failing before the silence of the sensors that cannot be checked
+        is also distrusted. See :meth:`SensorHealthMonitor.report`.
     """
 
     degraded_after: float = 2.0
     dropout_after: float = 5.0
     missing_after: float = 20.0
     stuck_samples: int = 12
+    stuck_state_hours: float = 36.0
     quality_floor: float = 0.5
     quality_smoothing: float = 0.2
     drift_reference: int = 64
@@ -171,6 +183,7 @@ class HealthConfig:
     drift_sigma: float = 6.0
     drift_floor: float = 0.0
     out_of_range_tolerance: int = 2
+    outage_canary_fraction: float = 0.6
 
     def __post_init__(self) -> None:
         """Validate threshold configuration."""
@@ -181,6 +194,8 @@ class HealthConfig:
             )
         if self.stuck_samples < 2:
             raise ValueError("stuck_samples must be at least 2")
+        if self.stuck_state_hours <= 0:
+            raise ValueError("stuck_state_hours must be positive")
         if not 0.0 <= self.quality_floor <= 1.0:
             raise ValueError("quality_floor must lie in [0, 1]")
         if not 0.0 < self.quality_smoothing <= 1.0:
@@ -193,6 +208,8 @@ class HealthConfig:
             raise ValueError("drift_floor must be non-negative")
         if self.out_of_range_tolerance < 1:
             raise ValueError("out_of_range_tolerance must be at least 1")
+        if not 0.0 < self.outage_canary_fraction <= 1.0:
+            raise ValueError("outage_canary_fraction must lie in (0, 1]")
 
 
 @dataclass
@@ -205,6 +222,7 @@ class _SensorState:
     last_seen: datetime | None = None
     last_value: float | None = None
     repeats: int = 0
+    repeat_since: datetime | None = None
     out_of_range_run: int = 0
     reference: deque[float] = field(default_factory=deque)
     recent: deque[float] = field(default_factory=deque)
@@ -261,6 +279,7 @@ class SensorHealthMonitor:
             state.repeats += 1
         else:
             state.repeats = 1
+            state.repeat_since = observation.timestamp
         state.last_value = observation.value
 
         if state.spec.contains(observation.value):
@@ -331,17 +350,33 @@ class SensorHealthMonitor:
                 SensorStatus.OUT_OF_RANGE,
                 f"{state.out_of_range_run} consecutive implausible readings",
             )
-        # Repeated identical readings are normal for an event sensor -- every
-        # activation reports the same value -- so only sampled and state
-        # sensors can be judged stuck.
+        # Repeated identical readings mean different things per kind. An
+        # event sensor reports the same value on every activation, and a
+        # state sensor reports an unchanged level for as long as the level is
+        # unchanged; neither is a fault. Only a sampled sensor, which is
+        # supposed to track a varying quantity, is suspicious when it stops
+        # moving.
         if (
-            state.spec.kind is not ObservationKind.EVENT
+            state.spec.kind is ObservationKind.SAMPLE
             and state.repeats >= self.config.stuck_samples
         ):
             return (
                 SensorStatus.STUCK,
                 f"{state.repeats} identical readings of {state.last_value}",
             )
+        # A state sensor is only stuck once its level has persisted beyond
+        # any plausible real duration.
+        if (
+            state.spec.kind is ObservationKind.STATE
+            and state.repeat_since is not None
+            and state.last_seen is not None
+        ):
+            held = state.last_seen - state.repeat_since
+            if held >= timedelta(hours=self.config.stuck_state_hours):
+                return (
+                    SensorStatus.STUCK,
+                    f"held {state.last_value} for {held.total_seconds() / 3600:.0f} h",
+                )
         return self._drift(state)
 
     def report_for(self, sensor_id: str, now: datetime) -> SensorHealthReport:
@@ -376,11 +411,70 @@ class SensorHealthMonitor:
         )
 
     def report(self, now: datetime) -> SystemHealthReport:
-        """Return the deployment-wide health verdict as of *now*."""
-        return SystemHealthReport(
-            at=now,
-            sensors={sid: self.report_for(sid, now) for sid in self._states},
-        )
+        """Return the deployment-wide health verdict as of *now*.
+
+        Individual verdicts are then corrected for one failure mode no single
+        sensor can detect on its own. A purely event-driven sensor makes no
+        promise to report, so its silence is normally uninformative about its
+        health -- but if every sensor that *did* promise has simultaneously
+        gone missing, the most likely explanation is that the pathway
+        carrying all of them has failed, not that the resident stopped using
+        every room at once.
+
+        The sensors with a declared cadence therefore act as canaries for the
+        whole delivery path. When enough of them fail, event sensors that
+        have been silent for the same period are downgraded to ``DROPOUT``,
+        so their silence stops being read as observed inactivity.
+        """
+        reports = {sid: self.report_for(sid, now) for sid in self._states}
+
+        verifiable = [
+            sid
+            for sid, state in self._states.items()
+            if state.spec.expected_interval is not None
+        ]
+        if not verifiable:
+            return SystemHealthReport(at=now, sensors=reports)
+
+        # Only *silence* indicates a broken delivery path. A stuck or
+        # out-of-range sensor is still delivering records, so it says nothing
+        # about whether other sensors' records are getting through.
+        failing = [
+            sid
+            for sid in verifiable
+            if reports[sid].status in (SensorStatus.DROPOUT, SensorStatus.MISSING)
+        ]
+        # One dead canary is more likely a dead canary than a dead mine.
+        if len(failing) < 2 or len(failing) < self.config.outage_canary_fraction * len(
+            verifiable
+        ):
+            return SystemHealthReport(at=now, sensors=reports)
+
+        # The outage can only have begun after the last canary still speaking.
+        last_heard: list[datetime] = [
+            seen for sid in failing if (seen := reports[sid].last_seen) is not None
+        ]
+        if not last_heard:
+            return SystemHealthReport(at=now, sensors=reports)
+        outage_since = max(last_heard)
+
+        for sid, state in self._states.items():
+            if state.spec.expected_interval is not None:
+                continue
+            if state.last_seen is not None and state.last_seen > outage_since:
+                continue
+            reports[sid] = replace(
+                reports[sid],
+                status=SensorStatus.DROPOUT,
+                reliability=state.spec.prior_reliability
+                * state.quality
+                * status_reliability(SensorStatus.DROPOUT),
+                detail=(
+                    "silent throughout a deployment-wide outage; its silence "
+                    "cannot be read as an absence of activity"
+                ),
+            )
+        return SystemHealthReport(at=now, sensors=reports)
 
     def reliabilities(self, now: datetime) -> dict[str, float]:
         """Return per-sensor evidence weights, the fusion layer's input."""
@@ -396,6 +490,9 @@ class SensorHealthMonitor:
                 "last_seen": (state.last_seen.isoformat() if state.last_seen else None),
                 "last_value": state.last_value,
                 "repeats": state.repeats,
+                "repeat_since": (
+                    state.repeat_since.isoformat() if state.repeat_since else None
+                ),
                 "out_of_range_run": state.out_of_range_run,
                 "reference": list(state.reference),
                 "recent": list(state.recent),
@@ -418,6 +515,10 @@ class SensorHealthMonitor:
             last_value = payload.get("last_value")
             state.last_value = None if last_value is None else float(last_value)
             state.repeats = int(payload.get("repeats", 0))
+            repeat_since = payload.get("repeat_since")
+            state.repeat_since = (
+                datetime.fromisoformat(str(repeat_since)) if repeat_since else None
+            )
             state.out_of_range_run = int(payload.get("out_of_range_run", 0))
             state.reference = deque(
                 (float(v) for v in payload.get("reference", ()) or ()),
