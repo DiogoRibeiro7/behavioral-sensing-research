@@ -31,7 +31,7 @@ sensors whose paired difference from the full deployment is small in
 
 **Current state.** Adding a wearable and beacon to six object sensors closes
 most of the gap: the remaining paired difference is 0.012 balanced accuracy
-(95% CI [+0.004, +0.020]). The gap is real but small.
+(nominal 95% CI [+0.004, +0.020]). This is a four-seed pilot: the direction is consistent, the magnitude is not established. See [Simulation protocols](SIMULATION_PROTOCOLS.md).
 
 **What would falsify it.** A configuration that looks equivalent on balanced
 accuracy but is materially worse calibrated, or that degrades sharply under

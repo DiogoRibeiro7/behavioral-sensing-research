@@ -64,6 +64,19 @@ jobs:
       - name: Build documentation
         run: |
           mkdocs build --strict
+      - name: Upload built documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-html
+          path: site/
+          retention-days: 7
+      # Kept separate from the strict build, and non-blocking: an external site
+      # going down is not a reason to fail a release.
+      - name: Check links
+        continue-on-error: true
+        run: |
+          pip install linkchecker
+          linkchecker --no-warnings --ignore-url='^(?!file://)' site/index.html
 
   package:
     runs-on: ubuntu-latest
@@ -83,3 +96,23 @@ jobs:
       - name: Check package artifacts
         run: |
           python -m twine check dist/*
+
+  # A single required check. Branch protection points at this one job, so a
+  # failure anywhere in the matrix blocks the merge rather than needing every
+  # job to be listed and kept in sync.
+  gate:
+    name: all checks passed
+    runs-on: ubuntu-latest
+    needs: [lint, test, docs, package]
+    if: always()
+    steps:
+      - name: Fail if any required job did not succeed
+        run: |
+          results="${{ needs.lint.result }} ${{ needs.test.result }} ${{ needs.docs.result }} ${{ needs.package.result }}"
+          echo "lint test docs package -> $results"
+          for result in $results; do
+            if [ "$result" != "success" ]; then
+              echo "::error::a required job did not succeed; this branch is not mergeable"
+              exit 1
+            fi
+          done

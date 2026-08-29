@@ -109,7 +109,12 @@ class DetectionStudy:
         outcomes = self.for_arm(arm)
         if not outcomes:
             raise KeyError(f"no outcomes for arm '{arm}'")
-        delays = [
+        # Pool the individual delays rather than averaging each seed's median.
+        # A mean of medians is not a median, it weights a seed that detected one
+        # change as heavily as a seed that detected twenty, and it is not the
+        # quantity the provenance record defines "median_delay_days" to be.
+        delays = [delay for o in outcomes for delay in o.metrics.delays_days]
+        seed_medians = [
             o.metrics.median_delay_days
             for o in outcomes
             if not np.isnan(o.metrics.median_delay_days)
@@ -117,7 +122,11 @@ class DetectionStudy:
         return {
             "seeds": float(len(outcomes)),
             "recall": float(np.mean([o.metrics.recall for o in outcomes])),
-            "median_delay_days": float(np.mean(delays)) if delays else float("nan"),
+            "median_delay_days": float(np.median(delays)) if delays else float("nan"),
+            "mean_seed_median_delay_days": (
+                float(np.mean(seed_medians)) if seed_medians else float("nan")
+            ),
+            "detected_changes": float(len(delays)),
             "alerts_per_person_day": float(
                 np.mean([o.alerts_per_person_day for o in outcomes])
             ),

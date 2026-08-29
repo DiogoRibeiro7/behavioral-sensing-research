@@ -23,8 +23,6 @@ from typing import Any
 from .types import EVENT_LIKE_MODALITIES, Modality, ObservationFlag, ObservationKind
 from .units import Unit, to_canonical
 
-_EMPTY_CONTEXT: Mapping[str, str] = MappingProxyType({})
-
 
 def require_aware(value: Any, name: str) -> datetime:
     """Return *value* as a timezone-aware :class:`datetime`.
@@ -106,7 +104,7 @@ class Observation:
     sampling_interval: timedelta | None = None
     received_at: datetime | None = None
     flags: frozenset[ObservationFlag] = frozenset()
-    context: Mapping[str, str] = field(default=_EMPTY_CONTEXT, hash=False)
+    context: Mapping[str, str] = field(default_factory=dict, hash=False)
 
     def __post_init__(self) -> None:
         """Validate and normalise the record at the system boundary."""

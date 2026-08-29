@@ -3,10 +3,25 @@
 Final integration review of the multimodal ambient-sensing work. Written for a
 human reviewer deciding whether the diff is ready for a version bump.
 
-**Recommendation: `0.2.0`.** The work is additive and backwards-compatible, so
-a minor bump is correct; the scope is far too large for a patch.
+**Recommendation: `0.2.0` as a research-platform release, after the correction
+pass below.** The work is additive and backwards-compatible, so a minor bump is
+correct; the scope is far too large for a patch.
 
 Nothing has been merged to `main`, tagged, or published.
+
+> **How to read the gate table.** An earlier revision of this document asserted
+> that all gates passed. They did not. The suite was green on one developer
+> machine running Python 3.13, while the CI matrix had been failing on Python
+> 3.11 for every merge in the series: `Observation` used a `mappingproxy` as a
+> dataclass field default, which 3.10 accepts under its older `isinstance`
+> check and 3.12+ accepts because `mappingproxy` became hashable, but which
+> 3.11 rejects at class-definition time. Twenty-one test files could not be
+> collected. Nothing in the local workflow could see it.
+>
+> The lesson is procedural, not technical: **a gate status written by hand is a
+> claim, not a measurement.** Read the status of the latest run on `develop`
+> in GitHub Actions rather than trusting the table below, and treat any
+> hand-written figure here as provenance for when it was taken, not as current.
 
 ---
 
@@ -39,9 +54,13 @@ Four reproducible commands: `demo`, `ablate`, `attribution`, plus the original
 
 ## 2. Quality gates
 
+Figures below were taken at the commit named in the footer. **Verify against
+Actions before releasing.**
+
 | Gate | Status |
 | --- | --- |
-| Test suite | **654 passing**, 0 failing |
+| CI matrix (3.10, 3.11, 3.12) | Must be green on `develop`; check Actions, not this table |
+| Test suite | Local run, single interpreter — necessary, never sufficient |
 | Coverage | 86% overall; 95% across the eleven new packages |
 | `mypy` (strict) | **0 errors in all new packages**; 168 pre-existing in 32 older files |
 | `ruff` | Clean |
@@ -111,18 +130,34 @@ clock drift:
 **Robustness**, 0–40% record loss: balanced accuracy 0.858 → 0.748, calibration
 error 0.046 → 0.079. No cliff.
 
-**Sensor ablation**, four paired seeds: adding a wearable to six object sensors
-leaves a gap of 0.012 balanced accuracy against the full ten-sensor deployment
-(95% CI [+0.004, +0.020]) — real but small. A five-sensor configuration was the
-best calibrated of all despite lower accuracy.
+> **These are pilots, not simulation studies.** The ablation runs four paired
+> seeds, attribution one, and change detection three. A bootstrap interval over
+> four differences is resampling four numbers: it describes the arithmetic of
+> that sample, not the expected effect. The intervals below should be read as
+> *this ran, and produced this*, not as estimates with the precision their
+> width suggests. Replication counts adequate for inference are specified in
+> [Simulation protocols](SIMULATION_PROTOCOLS.md) and have not yet been run.
 
-**Attribution**: no effect when nobody else is present, largest gain (+0.032)
-during a carer round.
+**Sensor ablation** (pilot, n = 4 paired seeds): adding a wearable to six
+object sensors left a gap of 0.012 balanced accuracy against the full
+ten-sensor deployment, nominal 95% CI [+0.004, +0.020]. The direction is
+consistent across the four seeds; the magnitude is not established. A
+five-sensor configuration was the best calibrated of all despite lower
+accuracy, which is worth following up at scale rather than reporting as a
+finding.
 
-**Change detection**, three seeds: a step change detected at 5.0 days with
-0.010 false alerts per person-day on a stable record. Losing 30% of records did
-not raise the false-alert rate; detection delay rose to 7.7 days. Gradual
-change is harder — recall 0.67, delay 12.5 days.
+**Attribution** (demonstration, n = 1 seed): no effect when nobody else was
+present, largest gain +0.032 during a carer round. One generated household. It
+shows the mechanism behaves as designed and supports no estimate of expected
+benefit. Visitor recall in this configuration is about 0.48.
+
+**Change detection** (pilot, n = 3 seeds): a step change detected at 5.0 days
+with 0.010 false alerts per person-day on a stable record. Losing 30% of
+records did not raise the false-alert rate; detection delay rose to 7.7 days.
+Gradual change is harder — recall 0.67, delay 12.5 days. Delay figures are now
+pooled medians over detections; an earlier revision averaged each seed's
+median, which is not a median and weighted a seed detecting one change equally
+with a seed detecting twenty.
 
 **Performance**: 19,345 observations/second, step latency p95 3.8 ms, snapshot
 6.5 KB. Once past the baseline history cap, retained state grows 1.01× for a 3×
@@ -170,6 +205,7 @@ this biases inference toward inactivity — measured at kitchen recall 0.705 →
 | Risk | Severity |
 | --- | --- |
 | Simulator-only validation | **High** |
+| Small-sample pilots reported as though they were studies | High, addressed |
 | Declared rather than fitted parameters | **High** |
 | Shared evidence between occupancy and state layers | High |
 | Undetectable partial loss on event sensors | Medium |
@@ -206,3 +242,59 @@ microphones or biometric identification anywhere in the design.
 
 **This is a research toolkit. It is not a medical device, and no claim of
 clinical effectiveness is made or supported anywhere in this repository.**
+
+---
+
+## 11. Pre-release correction pass
+
+Applied in response to an external review of this branch. Each item was a
+defect in the work as it stood, not a refinement.
+
+### Blockers
+
+| Was | Now |
+| --- | --- |
+| `Observation` used `MappingProxyType({})` as a dataclass default, which Python 3.11 rejects at class-definition time. 21 test files could not be collected; the CI matrix had been red on 3.11 for the entire series | `default_factory=dict`. `__post_init__` rebuilt the mapping regardless, so the default was always discarded. Verified by importing under 3.11 directly |
+| Nothing caught it, because the local suite ran on one interpreter | Two guards: every module is imported as a test, and every dataclass field default is checked against an allowlist of genuinely immutable types. The second fails on any interpreter, including ones where dataclasses would accept the value |
+| `pytest.ini` contained only coverage flags and silently overrode the far stricter `[tool.pytest.ini_options]`, so `--strict-markers`, `--strict-config` and the warning policy were never applied | `pytest.ini` deleted; the pyproject configuration is now the only one |
+| This document asserted that all gates passed | The assertion is replaced by a pointer to Actions, and a `gate` job aggregates every required job into one check that branch protection can require |
+| `main` held documentation infrastructure `develop` lacked | `main` merged in. The Sphinx workflow it carried was dropped rather than restored, see below |
+
+### Scientific and reporting
+
+| Was | Now |
+| --- | --- |
+| `DetectionStudy.summary()` reported `float(np.mean(delays))` over per-seed medians while the provenance definition promised a median of delays | Delays are pooled before the median. `mean_seed_median_delay_days` is reported separately and named for what it is, and `detected_changes` records the sample size behind it |
+| Four-seed and one-seed results were described as "real but small" | Labelled pilots and demonstrations, with replication counts derived from Monte Carlo standard error in [Simulation protocols](SIMULATION_PROTOCOLS.md). A study needs at least 100 paired trajectories; these ran 4 and 1 |
+| "Two runs of the same command produce byte-identical output", contradicted by the `recorded_at` stamp the implementation deliberately adds | The guarantee is stated over results, not files: same seed, same commit, same resolved configuration produce the same scientific results |
+| Provenance recorded the package version, which stays fixed across many commits | Adds `git_commit`, `git_dirty`, `schema_version`, and a snapshot of the resolved algorithm defaults, so a record cannot be confused with one produced after a default changed |
+| `research_identifier()` claimed studies were unlinkable, but scoped only the visible prefix; the HMAC stayed `HMAC(salt, subject)`, leaving identical digests across studies | The study derives a subkey, so digests are unrelated. The test that should have caught this compared whole identifiers, which differ by prefix alone; it now compares digests |
+
+### On the documentation stack
+
+The review recommended standardising on Sphinx, on the basis that no MkDocs
+configuration existed. That was true of the snapshot reviewed but is no longer
+true of `develop`: the migration completed in #71. There is no `docs/conf.py`,
+no `.rst` source, and the documentation extra installs MkDocs only.
+
+Reverting would mean recreating a Sphinx tree to replace a working one, and
+reinstating the Pandoc dependency whose absence was failing the old
+documentation job. The requirement behind the recommendation — one stack,
+consistently configured, enforced in CI — is met by keeping MkDocs:
+
+- `mkdocs build --strict` is the gate, warnings included;
+- the built site is uploaded as an artifact;
+- link checking runs as a separate, non-blocking step, so an external site
+  going down does not fail a release;
+- `.readthedocs.yaml` points at `mkdocs.yml`, and the Sphinx workflow inherited
+  from `main` is removed rather than left to fail.
+
+### Still outstanding
+
+- **Branch protection is a repository setting, not a file.** The `gate` job
+  exists, but requiring it is a change to repository configuration that has not
+  been made here.
+- **The production-scale runs have not been executed.** The protocols are
+  specified; the numbers in section 5 are still the pilots.
+- Real-data validation remains the next milestone, and is unaffected by any of
+  the above.

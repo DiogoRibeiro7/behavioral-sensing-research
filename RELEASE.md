@@ -15,7 +15,18 @@ Do not publish a release from `develop`.
 
 ## Before Merging to Main
 
-Run these checks on `develop`:
+**First, read the status of the latest CI run on `develop`.**
+
+```bash
+gh run list --branch develop --limit 1
+```
+
+The `all checks passed` job must be green. A local run is not a substitute:
+these checks execute on one interpreter, and the 3.11 import failure that held
+up `0.2.0` was invisible to every local run while the matrix was red. If the
+local suite passes and Actions is red, Actions is right.
+
+Then run these on `develop` as a fast pre-check:
 
 ```bash
 pre-commit run --all-files

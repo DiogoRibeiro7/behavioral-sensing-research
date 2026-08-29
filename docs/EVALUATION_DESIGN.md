@@ -159,9 +159,22 @@ conditionally essential.
 
 ## Reproducibility requirements
 
-Every experimental result records configuration, seed, sensor subset, metric
-definitions and the software version. Two runs of the same command produce
-byte-identical output; this is asserted by test, not merely intended.
+Every experimental result records configuration, resolved algorithm defaults,
+seed, sensor subset, metric definitions, the software version, and the git
+commit the code came from together with whether the working tree was dirty.
+
+The guarantee is:
+
+> the same seed, the same commit and the same resolved configuration produce
+> the same scientific results.
+
+Not byte-identical files. Each artefact carries a `recorded_at` stamp and the
+environment it ran in, so two writes of the same record differ in that envelope
+while the `results` they contain are identical. The results equality is what
+reproducibility needs and is what the tests assert.
+
+A run made from a dirty working tree is marked `git_dirty: true` and is not
+reproducible from its commit alone.
 
 Generated datasets are not committed. Experiments regenerate from their seed.
 
