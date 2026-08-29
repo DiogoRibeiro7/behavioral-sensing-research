@@ -106,7 +106,7 @@ lateness buffer for stream reordering, independent of any UI or storage.
 
 Delivered: a FHIR-style export that keeps measurements, derived features,
 inferred states and algorithmic alerts distinguishable through explicit
-provenance. Not a validated profile; see `docs/limitations.rst`.
+provenance. Not a validated profile; see `docs/limitations.md`.
 
 ### Reproducible research
 
@@ -115,8 +115,8 @@ Delivered:
 - A reproducible end-to-end command-line demonstration and ablation
   experiment.
 
-User documentation: `docs/ambient_architecture.rst`, `docs/inference.rst`,
-`docs/evaluation.rst`, `docs/limitations.rst`.
+User documentation: `docs/ambient_architecture.md`, `docs/inference.md`,
+`docs/evaluation.md`, `docs/limitations.md`.
 
 Design record: `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`,
 `docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`,
@@ -169,7 +169,7 @@ Quality gates:
 
 - Full test suite passes.
 - Pre-commit passes.
-- Sphinx documentation builds without warnings for changed pages.
+- Documentation builds without warnings (`mkdocs build --strict`).
 - Public API changes are documented in the changelog.
 
 ### 0.3.0: Data Quality and Validation

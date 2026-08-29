@@ -14,7 +14,7 @@
 
 - [ ] `pre-commit run --all-files`
 - [ ] `pytest -q`
-- [ ] `sphinx-build -b html docs docs/_build/html`
+- [ ] `mkdocs build --strict`
 
 ## Release Impact
 

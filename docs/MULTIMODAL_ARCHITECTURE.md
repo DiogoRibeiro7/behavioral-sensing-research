@@ -5,8 +5,8 @@ core. This document states what was audited, what the target architecture is,
 what the contracts between layers are, and what would count as each stage
 being finished.
 
-User-facing documentation lives in `ambient_architecture.rst`, `inference.rst`,
-`evaluation.rst` and `limitations.rst`. This file records the *decisions*.
+User-facing documentation lives in `ambient_architecture.md`, `inference.md`,
+`evaluation.md` and `limitations.md`. This file records the *decisions*.
 
 ## 1. Audit of the pre-existing repository
 
@@ -160,7 +160,7 @@ ignore the new packages entirely.
 
 | Risk | Severity | Mitigation |
 | --- | --- | --- |
-| Occupancy and state layers share radar/beacon evidence, so their errors are correlated | **High** | Documented in `limitations.rst`. Not modelled. Would require a joint or hierarchical formulation. |
+| Occupancy and state layers share radar/beacon evidence, so their errors are correlated | **High** | Documented in `limitations.md`. Not modelled. Would require a joint or hierarchical formulation. |
 | Emission parameters are declared, not fitted | **High** | Defaults derived from registry declarations and documented as starting points. Fitting is the top roadmap item after real-data validation. |
 | Simulator encodes the project's own beliefs about behaviour | **High** | Generative process deliberately differs from the estimator; two guard tests prevent convergence. Does not eliminate the risk. |
 | Presence samples are correlated but combined as independent | Medium | Explicit, inspectable `sample_weight` discount rather than an independence claim. |

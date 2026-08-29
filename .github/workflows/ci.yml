@@ -63,7 +63,7 @@ jobs:
           pip install -e .[docs]
       - name: Build documentation
         run: |
-          sphinx-build -b html docs docs/_build/html
+          mkdocs build --strict
 
   package:
     runs-on: ubuntu-latest

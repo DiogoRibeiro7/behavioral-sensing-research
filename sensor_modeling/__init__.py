@@ -9,8 +9,8 @@ traffic to an explained alert:
 
     observations -> health -> context -> fusion -> baseline -> alerts
 
-See ``docs/ambient_architecture.rst`` for the architecture and
-``docs/limitations.rst`` for what the platform does not establish.
+See ``docs/ambient_architecture.md`` for the architecture and
+``docs/limitations.md`` for what the platform does not establish.
 """
 
 __version__ = "0.1.3"

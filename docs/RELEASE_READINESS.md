@@ -47,7 +47,7 @@ Four reproducible commands: `demo`, `ablate`, `attribution`, plus the original
 | `ruff` | Clean |
 | `black` | Clean on every file touched |
 | `bandit` | No issues identified across 14,969 lines |
-| Sphinx | Builds with no warnings |
+| `mkdocs build --strict` | Builds with no warnings |
 | `python -m build` + `twine check` | Passing; all packages ship in the wheel |
 | Worked example | Runs from the command line, deterministic for a fixed seed |
 
@@ -145,7 +145,7 @@ Stated so a reviewer can disagree with them:
 
 ## 7. Known limitations
 
-Full list in `docs/limitations.rst`. The three that matter most:
+Full list in `docs/limitations.md`. The three that matter most:
 
 **Everything comes from a simulator.** No component has been validated against
 real sensor data. The simulator was written by this project; its generative
