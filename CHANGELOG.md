@@ -37,6 +37,8 @@ has not been validated against real sensor data. See `docs/limitations.md`.
 - Added pseudonymisation and export redaction with salt-keyed, study-scoped identifiers.
 - Added `sensor_modeling.observations.SensorSpec.redundancy_group` so correlated sensors are not counted as independent evidence.
 - Added detection of sensors that keep reporting while delivering below their declared cadence.
+- Added `sensor-modeling attribution --seeds`, replicating the attribution comparison across independent paired households and reporting bootstrap intervals for balanced-accuracy gain, calibration gain and visitor detection. The replicated study refuses fewer than two seeds, and refuses repeated ones, so a demonstration cannot be presented as an estimate.
+- Added Monte Carlo standard error to `PairedDifference`, so a narrow interval from few replications can be told apart from a narrow interval from many.
 - Added `docs/SIMULATION_PROTOCOLS.md`, specifying replication counts derived from Monte Carlo standard error and separating the shipped smoke-test seeds from the counts a reported result needs.
 - Added guard tests importing every module and rejecting shared container defaults on dataclass fields, so a version-specific failure of this kind fails on any interpreter.
 - Added `git_commit`, `git_dirty`, `schema_version` and a snapshot of resolved algorithm defaults to experiment provenance, so a record identifies the exact code and model specification behind it rather than only a package version.

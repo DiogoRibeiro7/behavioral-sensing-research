@@ -72,6 +72,9 @@ Re-estimate `s_D` from the first 20–30 trajectories of the real run and adjust
 `n` upwards if it exceeds the pilot value. Report the achieved MCSE alongside
 the effect; an interval without one is not interpretable.
 
+`PairedDifference.mcse` carries it, so every paired comparison in this package
+reports the precision its replication count bought.
+
 ### Applying it to attribution
 
 Attribution needs a scenario factor as well as replications, because its whole
@@ -81,7 +84,11 @@ purpose is to behave differently when someone else is present:
 scenario x paired seeds
 ```
 
-with at least 100 paired seeds **per scenario**, and intervals reported for each
+`sensor-modeling attribution --seeds ...` runs this form; a single `--seed`
+still runs the one-household demonstration, and the replicated study refuses
+fewer than two seeds so a demonstration cannot be mistaken for an estimate.
+
+Use at least 100 paired seeds **per scenario**, and report intervals for each
 of:
 
 - balanced-accuracy gain;
