@@ -210,5 +210,7 @@ judged faulty and for how long, the baseline's verdicts, detection delay,
 unmatched alert burden per person-day, and a worked explanation of one alert
 and one individual inference.
 
-`--output results.json` writes the same content as structured JSON. Two runs
-of the same command produce byte-identical results.
+`--output results.json` writes the same content as structured JSON. Two runs of
+the same command at the same commit produce identical `results`; the surrounding
+provenance envelope carries a `recorded_at` timestamp, so the files themselves
+are not byte-identical.

@@ -60,6 +60,7 @@ nav:
       - Sensor data model: SENSOR_DATA_MODEL.md
       - Uncertainty model: UNCERTAINTY_MODEL.md
       - Evaluation design: EVALUATION_DESIGN.md
+      - Simulation protocols: SIMULATION_PROTOCOLS.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:
