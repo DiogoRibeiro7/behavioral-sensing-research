@@ -15,6 +15,7 @@ from .emissions import (
 )
 from .estimate import (
     EvidenceContribution,
+    Explanation,
     StateEstimate,
     belief_from_mapping,
     belief_matrix,
@@ -31,6 +32,7 @@ __all__ = [
     "EmissionDefaults",
     "EmissionModel",
     "EvidenceContribution",
+    "Explanation",
     "FusionConfig",
     "GaussianEmission",
     "MultimodalBayesFilter",
