@@ -92,6 +92,10 @@ After GitHub publishes the release:
 - Confirm the Zenodo record links back to this repository.
 - Confirm repository metadata links to the DOI.
 - Confirm `.zenodo.json`, `CITATION.cff`, and README citation details agree.
+  `pytest tests/test_project_metadata.py` checks this mechanically, so run it
+  rather than reading the files.
+- Replace the pending row in `ZENODO.md` with the new version DOI once the
+  record exists.
 
 ## After Release
 
