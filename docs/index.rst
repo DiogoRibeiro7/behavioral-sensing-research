@@ -10,6 +10,7 @@ The Sensor Modeling Research Toolkit provides utilities for analyzing, modeling,
    clinical_examples
    architecture
    ambient_architecture
+   multimodal_ingestion
    inference
    evaluation
    limitations

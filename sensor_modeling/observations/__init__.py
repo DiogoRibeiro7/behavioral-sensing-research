@@ -7,6 +7,13 @@ measured in, the reliability attached to it, and the provenance of any repair
 applied during ingestion, so that later stages can weight it honestly.
 """
 
+from .adapters import (
+    LegacyConversionError,
+    naive_utc,
+    observations_from_dataset,
+    observations_from_frame,
+    observations_from_records,
+)
 from .ingest import (
     ClockOffsetEstimator,
     IngestionReport,
@@ -28,6 +35,7 @@ __all__ = [
     "ClockOffsetEstimator",
     "Gap",
     "IngestionReport",
+    "LegacyConversionError",
     "Modality",
     "Observation",
     "ObservationFlag",
@@ -42,6 +50,10 @@ __all__ = [
     "UnknownSensorError",
     "convert",
     "default_kind",
+    "naive_utc",
+    "observations_from_dataset",
+    "observations_from_frame",
+    "observations_from_records",
     "require_aware",
     "to_canonical",
 ]
