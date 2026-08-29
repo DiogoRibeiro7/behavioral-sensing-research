@@ -66,9 +66,28 @@ such promise, and its silence is genuinely ambiguous between "broken" and
 "nobody opened the cupboard". For those sensors the monitor declines to call a
 failure.
 
-**Repetition is only suspicious where variation is expected.** Every contact
-activation reports the same value, so an event sensor is never called stuck;
-only sampled and state sensors can be.
+**Repetition is only suspicious where variation is expected.** The three
+observation kinds repeat for different reasons. An event sensor reports the
+same value on every activation, and a state sensor reports an unchanged level
+for as long as the level is unchanged; neither is a fault. Only a *sampled*
+sensor, which is supposed to track a varying quantity, is judged stuck by
+consecutive identical readings. A state sensor is judged stuck only once its
+level has persisted beyond any plausible real duration.
+
+This distinction is load-bearing rather than pedantic. Treating a repeated
+level as a fault flagged the bed sensor as stuck through every night of
+sleep, discounting the strongest evidence for sleep precisely when it
+mattered; correcting it raised clean-record balanced accuracy from 0.805 to
+0.858.
+
+**A silent deployment is not a silent resident.** Event sensors make no
+promise to report, so their silence cannot normally be called a failure -- but
+when every sensor that *did* promise has gone missing at once, the likely
+explanation is that the pathway carrying all of them failed. Sensors with a
+declared cadence therefore act as canaries: when enough of them fall silent,
+event sensors silent over the same period are downgraded too, so their silence
+stops being read as observed inactivity. Only silence counts as a canary
+signal, since a stuck sensor is still delivering records.
 
 **Drift is reported, never corrected.** Without redundant sensing the monitor
 cannot separate sensor drift from genuine environmental change, so it flags
@@ -296,3 +315,61 @@ must never surface as a finding about a person.
 
 Alert text is phrased as observation, never diagnosis. The platform is a
 research toolkit and is not a medical device.
+
+Interoperability
+----------------
+
+:mod:`sensor_modeling.interop` exports the pipeline's output in a FHIR-style
+form that keeps the four kinds distinguishable on the way out.
+
+The hazard is specific: once a behavioural conclusion is written into a
+clinical record it looks like every other entry there, and a reader has no way
+to tell that ``sleeping`` was inferred by a Markov filter rather than
+measured. Exporting inferences as observations is how a research prototype
+ends up quoted as a clinical fact.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Kind
+     - Exported as
+   * - Measured observation
+     - ``Observation``, ``status: final``, provenance ``measured``.
+   * - Derived feature
+     - ``Observation``, ``status: final``, provenance ``derived-feature``,
+       carrying the upstream device's own confidence.
+   * - Inferred state
+     - ``Observation``, ``status: preliminary``, provenance ``inferred``, an
+       explicit ``method``, the **whole posterior** as components, and
+       ``derivedFrom`` listing the contributing sensors.
+   * - Algorithmic alert
+     - ``DetectedIssue`` -- never an ``Observation``, because an alert is a
+       judgement rather than a record of anything observed.
+
+Every resource carries a provenance extension recording how it was produced.
+:func:`~sensor_modeling.interop.summarise_provenance` counts them, and
+:func:`~sensor_modeling.interop.measured_only` returns just the genuine
+measurements, so a consumer can assert in one line that it has not been handed
+inferences dressed as measurements.
+
+Two further protections:
+
+* An **abstaining** estimate exports a ``dataAbsentReason`` rather than a
+  value, which is the correct idiom for "we do not know" and stops ``unknown``
+  from being read as a behavioural finding.
+* A **system-health** alert is not attached to a patient at all. A failing
+  sensor is equipment maintenance, and attaching it to a person would make it
+  look like a clinical finding.
+
+Event-kind observations carry an explicit note that absence of a record is
+absence of evidence rather than an observation of zero, so a consumer cannot
+reasonably fill the gaps with zeros.
+
+.. warning::
+
+   This is a FHIR-*style* export for interoperability prototyping. It is not a
+   validated FHIR profile, has not been conformance-tested against a FHIR
+   server, and its codes come from a project-local code system rather than
+   LOINC or SNOMED. Its output must not be presented as clinically validated
+   data.
