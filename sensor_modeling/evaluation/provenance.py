@@ -141,6 +141,7 @@ def git_state() -> dict[str, str]:
     Returns ``"unknown"`` when git is unavailable or the package was installed
     from a distribution rather than a checkout, which is not an error.
     """
+
     def _run(*args: str) -> str | None:
         try:
             completed = subprocess.run(
