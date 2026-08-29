@@ -441,6 +441,13 @@ class PairedDifference:
     effect_size: float
     wins: int
     losses: int
+    mcse: float = 0.0
+    """Monte Carlo standard error of the mean difference.
+
+    The precision the replication count bought. An interval without one cannot
+    be told apart from an interval that is narrow only because the sample was
+    small; see docs/SIMULATION_PROTOCOLS.md for choosing n from a target MCSE.
+    """
 
     @property
     def excludes_zero(self) -> bool:
@@ -457,6 +464,7 @@ class PairedDifference:
             "effect_size": self.effect_size,
             "wins": self.wins,
             "losses": self.losses,
+            "mcse": self.mcse,
             "excludes_zero": self.excludes_zero,
         }
 
@@ -514,6 +522,7 @@ def paired_difference(
         ),
         wins=int((differences > 0).sum()),
         losses=int((differences < 0).sum()),
+        mcse=float(spread / math.sqrt(differences.size)) if spread > 0 else 0.0,
     )
 
 
