@@ -19,10 +19,13 @@ With `n = 4` the interval is also badly behaved: the bootstrap cannot see tail
 behaviour it never sampled, and a single unusual household moves the whole
 interval.
 
-Attribution is more exploratory still. It runs one seed. A statement such as
-"largest gain +0.032 during a carer round" describes one generated household.
-It is a demonstration that the mechanism behaves as designed, and it supports
-no estimate of expected benefit.
+Attribution was more exploratory still: it ran one seed. A statement such as
+"largest gain +0.032 during a carer round" describes one generated household,
+and at 100 seeds that figure turned out to be +0.0065 -- out by a factor of
+five. Worse, the single seed hid a harm larger than any of the gains: without
+the wearable, attribution costs 0.0118 balanced accuracy. One household could
+not have shown that, and the demonstration read as though it had established
+the opposite.
 
 | Purpose | Replications | Appropriate claim |
 | --- | --- | --- |
@@ -66,11 +69,31 @@ magnitude and round up rather than down:
 
 **A study should therefore use at least 100 paired trajectories**, not four. The
 simulator is cheap and the arms are independent, so this is a matter of
-scheduling rather than feasibility.
+scheduling rather than feasibility: the run below takes roughly 45 minutes on
+one machine.
+
+```bash
+python -c "import numpy as np;   s = np.random.SeedSequence(20260829).generate_state(100, dtype=np.uint32) % 1000000;   print(' '.join(map(str, sorted(set(int(x) for x in s)))))" > seeds.txt
+
+sensor-modeling ablate --days 14 --step-minutes 10   --seeds $(cat seeds.txt) --output results/ablation_study_n100.json
+```
+
+Seeds are derived from a recorded root rather than typed, so the set is
+reproducible from the root alone. The artefact records the root's seeds, the
+git commit and the resolved defaults.
+
+This run has been done. It found the four-seed pilot had overstated the
+headline effect by roughly 60%, with the study estimate falling outside the
+pilot's interval; see [Release readiness](RELEASE_READINESS.md). Four seeds
+were not simply imprecise, they were wrong, which is the practical case for
+this page.
 
 Re-estimate `s_D` from the first 20–30 trajectories of the real run and adjust
 `n` upwards if it exceeds the pilot value. Report the achieved MCSE alongside
 the effect; an interval without one is not interpretable.
+
+`PairedDifference.mcse` carries it, so every paired comparison in this package
+reports the precision its replication count bought.
 
 ### Applying it to attribution
 
@@ -81,7 +104,11 @@ purpose is to behave differently when someone else is present:
 scenario x paired seeds
 ```
 
-with at least 100 paired seeds **per scenario**, and intervals reported for each
+`sensor-modeling attribution --seeds ...` runs this form; a single `--seed`
+still runs the one-household demonstration, and the replicated study refuses
+fewer than two seeds so a demonstration cannot be mistaken for an estimate.
+
+Use at least 100 paired seeds **per scenario**, and report intervals for each
 of:
 
 - balanced-accuracy gain;
@@ -116,6 +143,13 @@ Because delay is skewed, 100 trajectories is a floor rather than a target.
 
 - Seeds must be independent and disjoint across arms of a factorial design.
   Reusing a seed across scenarios reintroduces the correlation pairing removes.
+- **Space them.** The attribution scenarios derive degradation seeds from
+  `seed + 1` to `seed + 3`, so consecutive study seeds would give two
+  supposedly independent replications identical record loss and identical
+  stuck sensors. `11 12 13` is the obvious thing to type and is wrong; the
+  replicated study refuses seeds closer than four apart rather than leaving it
+  to the caller to know. Seeds drawn from a `SeedSequence` are spread widely
+  enough that this never binds.
 - Record every seed in the artefact. `ExperimentRecord` does this.
 - Derive study seeds from a single recorded root rather than typing them, so the
   set is reproducible and auditable.

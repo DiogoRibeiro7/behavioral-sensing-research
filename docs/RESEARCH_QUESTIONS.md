@@ -30,13 +30,24 @@ sensors whose paired difference from the full deployment is small in
 *magnitude*, not merely statistically indistinguishable.
 
 **Current state.** Adding a wearable and beacon to six object sensors closes
-most of the gap: the remaining paired difference is 0.012 balanced accuracy
-(nominal 95% CI [+0.004, +0.020]). This is a four-seed pilot: the direction is consistent, the magnitude is not established. See [Simulation protocols](SIMULATION_PROTOCOLS.md).
+most of the gap. Over 100 paired seeds the remaining difference is 0.0073
+balanced accuracy, 95% CI [+0.0063, +0.0083], MCSE 0.0005: eight sensors
+recover all but three quarters of a point from ten. An earlier four-seed pilot
+put this at 0.012 with an interval six times wider, and the study estimate
+falls outside that interval, so the pilot is superseded rather than refined.
+See [Simulation protocols](SIMULATION_PROTOCOLS.md).
 
 **What would falsify it.** A configuration that looks equivalent on balanced
 accuracy but is materially worse calibrated, or that degrades sharply under
 sensor failure. Both are measured, precisely because accuracy alone would hide
 them.
+
+So far the evidence runs the other way. The five-sensor configuration is the
+*best* calibrated of any tested, at 0.0332 expected calibration error against
+0.0839 for the full ten-sensor deployment, while giving up 0.171 balanced
+accuracy. Fewer sensors cost accuracy and bought honesty about uncertainty.
+Which of those matters more depends on what the output is used for, and that
+is a question this repository can pose but not settle from simulation.
 
 **Known threat.** The result depends on the simulator's assumed activity
 levels and sensor rates. See `limitations.md`.

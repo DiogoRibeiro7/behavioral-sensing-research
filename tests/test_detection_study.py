@@ -8,6 +8,8 @@ from datetime import timedelta
 import pytest
 
 from sensor_modeling.evaluation import ChangeArm, run_detection_study, standard_arms
+from sensor_modeling.evaluation.detection import ArmOutcome, DetectionStudy
+from sensor_modeling.evaluation.metrics import DetectionMetrics
 from sensor_modeling.simulation import BehaviourShift, HouseholdConfig, simulate
 from sensor_modeling.states import BehaviouralState as S
 
@@ -138,3 +140,69 @@ class TestStudyMechanics:
     def test_an_empty_study_is_rejected(self) -> None:
         with pytest.raises(ValueError, match="at least one arm"):
             run_detection_study([], seeds=SEEDS)
+
+
+class TestDelayAggregation:
+    """A mean of per-seed medians is not a median.
+
+    The provenance record defines ``median_delay_days`` as the median days
+    between a change occurring and being reported. Averaging each seed's own
+    median silently reports something else, and weights a seed that detected
+    one change as heavily as a seed that detected twenty.
+    """
+
+    @staticmethod
+    def _outcome(arm: str, seed: int, delays: tuple[float, ...]) -> ArmOutcome:
+        return ArmOutcome(
+            arm=arm,
+            seed=seed,
+            metrics=DetectionMetrics(
+                true_changes=len(delays),
+                detected=len(delays),
+                false_positives=0,
+                person_days=30.0,
+                delays_days=delays,
+            ),
+            behavioural_alerts=len(delays),
+            person_days=30.0,
+            mean_alert_confidence=0.5,
+        )
+
+    def test_delays_are_pooled_rather_than_averaged_per_seed(self) -> None:
+        """One seed detecting many changes must not be outvoted by one that did not.
+
+        Seed A detects a single very late change; seed B detects five prompt
+        ones. Pooling gives the median of all six delays, which is prompt. A
+        mean of the two seed medians would sit halfway to the outlier and
+        report a delay no detection actually had.
+        """
+        study = DetectionStudy(
+            outcomes=[
+                self._outcome("changed", 1, (40.0,)),
+                self._outcome("changed", 2, (2.0, 2.0, 3.0, 3.0, 4.0)),
+            ]
+        )
+
+        summary = study.summary("changed")
+
+        assert summary["median_delay_days"] == pytest.approx(3.0)
+        assert summary["mean_seed_median_delay_days"] == pytest.approx(21.5)
+        assert summary["detected_changes"] == pytest.approx(6.0)
+
+    def test_the_sample_size_behind_the_median_is_reported(self) -> None:
+        """An interval-free median still needs its n to be interpretable."""
+        study = DetectionStudy(
+            outcomes=[
+                self._outcome("changed", 1, (5.0, 7.0)),
+                self._outcome("changed", 2, (6.0,)),
+            ]
+        )
+
+        assert study.summary("changed")["detected_changes"] == pytest.approx(3.0)
+
+    def test_an_arm_that_detected_nothing_reports_no_delay(self) -> None:
+        study = DetectionStudy(outcomes=[self._outcome("stable", 1, ())])
+        summary = study.summary("stable")
+
+        assert math.isnan(summary["median_delay_days"])
+        assert summary["detected_changes"] == pytest.approx(0.0)

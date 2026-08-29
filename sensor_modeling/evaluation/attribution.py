@@ -297,3 +297,178 @@ def run_attribution_study(
     return AttributionStudy(
         comparisons=[compare_scenario(s, step=step) for s in selected]
     )
+
+
+#: Minimum distance between study seeds.
+#:
+#: ``standard_scenarios`` offsets degradation seeds by up to three, so seeds
+#: closer than this would share simulated faults between replications.
+SEED_SPACING = 4
+
+
+def _bootstrap_mean(
+    values: Sequence[float],
+    *,
+    confidence: float = 0.95,
+    resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, float]:
+    """Summarise a single-arm quantity across replications.
+
+    Reports the Monte Carlo standard error alongside the interval, because a
+    narrow interval from few replications looks identical to a narrow interval
+    from many.
+    """
+    finite = np.asarray([v for v in values if np.isfinite(v)], dtype=float)
+    if finite.size == 0:
+        return {"n": 0.0, "mean": float("nan"), "mcse": float("nan")}
+    if finite.size == 1:
+        return {"n": 1.0, "mean": float(finite[0]), "mcse": float("nan")}
+
+    rng = np.random.default_rng(seed)
+    draws = rng.choice(finite, size=(resamples, finite.size), replace=True)
+    means = draws.mean(axis=1)
+    tail = (1.0 - confidence) / 2.0
+    spread = float(finite.std(ddof=1))
+    return {
+        "n": float(finite.size),
+        "mean": float(finite.mean()),
+        "sd": spread,
+        "mcse": spread / float(np.sqrt(finite.size)),
+        "ci_low": float(np.quantile(means, tail)),
+        "ci_high": float(np.quantile(means, 1.0 - tail)),
+    }
+
+
+@dataclass(frozen=True)
+class ScenarioAggregate:
+    """One scenario's attribution effect estimated across many seeds.
+
+    The single-seed comparison shows that the mechanism behaves as designed.
+    This estimates how much it is worth, which needs replication: see
+    ``docs/SIMULATION_PROTOCOLS.md`` for choosing the replication count.
+    """
+
+    scenario: str
+    description: str
+    seeds: tuple[int, ...]
+    balanced_accuracy_gain: Any
+    calibration_gain: Any
+    visitor_precision: dict[str, float]
+    visitor_recall: dict[str, float]
+    visitor_f1: dict[str, float]
+    contaminated_fraction: dict[str, float]
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a serialisable form of the aggregate."""
+        return {
+            "scenario": self.scenario,
+            "description": self.description,
+            "seeds": list(self.seeds),
+            "balanced_accuracy_gain": self.balanced_accuracy_gain.to_dict(),
+            "calibration_gain": self.calibration_gain.to_dict(),
+            "visitor_precision": self.visitor_precision,
+            "visitor_recall": self.visitor_recall,
+            "visitor_f1": self.visitor_f1,
+            "contaminated_fraction": self.contaminated_fraction,
+        }
+
+
+@dataclass
+class ReplicatedAttributionStudy:
+    """Attribution measured across scenarios and independent seeds."""
+
+    seeds: tuple[int, ...] = ()
+    aggregates: list[ScenarioAggregate] = field(default_factory=list)
+
+    def by_name(self, name: str) -> ScenarioAggregate:
+        """Return the aggregate for one scenario."""
+        for aggregate in self.aggregates:
+            if aggregate.scenario == name:
+                return aggregate
+        raise KeyError(f"no scenario named '{name}'")
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a serialisable form of the study."""
+        return {
+            "seeds": list(self.seeds),
+            "replications": len(self.seeds),
+            "scenarios": [a.to_dict() for a in self.aggregates],
+        }
+
+
+def run_replicated_attribution_study(
+    seeds: Sequence[int],
+    *,
+    days: int = 10,
+    step: timedelta = timedelta(minutes=10),
+) -> ReplicatedAttributionStudy:
+    """Estimate attribution's effect across independent simulated households.
+
+    Every seed produces a fresh household for each scenario, and both arms of a
+    seed share that household, so the comparison stays paired while the
+    replication count grows.
+    """
+    from .metrics import paired_difference
+
+    ordered = [int(s) for s in seeds]
+    if len(ordered) < 2:
+        raise ValueError(
+            "a replicated study needs at least two seeds; use "
+            "run_attribution_study for a single-seed demonstration"
+        )
+    if len(set(ordered)) != len(ordered):
+        raise ValueError("seeds must be distinct, or replications are not independent")
+    # standard_scenarios derives degradation seeds as seed + 1 .. seed + 3, so
+    # neighbouring study seeds would hand two supposedly independent
+    # replications the same record loss. Adjacent seeds are the natural thing
+    # for a caller to type, which is exactly why this has to be refused rather
+    # than documented.
+    spacing = min(
+        (b - a for a, b in zip(sorted(ordered), sorted(ordered)[1:])),
+        default=SEED_SPACING,
+    )
+    if spacing < SEED_SPACING:
+        raise ValueError(
+            f"seeds must differ by at least {SEED_SPACING}; scenarios derive "
+            "degradation seeds from neighbouring values, so closer seeds share "
+            "sensor faults between replications"
+        )
+
+    by_scenario: dict[str, list[ScenarioComparison]] = {}
+    for seed in ordered:
+        for scenario in standard_scenarios(days=days, seed=seed):
+            comparison = compare_scenario(scenario, step=step)
+            by_scenario.setdefault(scenario.name, []).append(comparison)
+
+    aggregates: list[ScenarioAggregate] = []
+    for name, comparisons in by_scenario.items():
+        aware = [c.occupancy_aware.states.balanced_accuracy for c in comparisons]
+        naive = [c.naive.states.balanced_accuracy for c in comparisons]
+        # Calibration error is better when lower, so the gain is control minus
+        # treatment; passing it the other way round would silently invert the
+        # sign of every reported calibration effect.
+        naive_error = [c.naive.states.calibration_error for c in comparisons]
+        aware_error = [c.occupancy_aware.states.calibration_error for c in comparisons]
+        aggregates.append(
+            ScenarioAggregate(
+                scenario=name,
+                description=comparisons[0].description,
+                seeds=tuple(ordered),
+                balanced_accuracy_gain=paired_difference(aware, naive),
+                calibration_gain=paired_difference(naive_error, aware_error),
+                visitor_precision=_bootstrap_mean(
+                    [c.visitor_detection.precision for c in comparisons]
+                ),
+                visitor_recall=_bootstrap_mean(
+                    [c.visitor_detection.recall for c in comparisons]
+                ),
+                visitor_f1=_bootstrap_mean(
+                    [c.visitor_detection.f1 for c in comparisons]
+                ),
+                contaminated_fraction=_bootstrap_mean(
+                    [c.contaminated_fraction for c in comparisons]
+                ),
+            )
+        )
+    return ReplicatedAttributionStudy(seeds=tuple(ordered), aggregates=aggregates)
