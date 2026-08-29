@@ -117,7 +117,8 @@ All figures come from the bundled simulator. See section 7.
 
 **State inference**, 90-day demonstration with visitors, a bed-sensor dropout,
 five days of wearable non-adherence, 3% loss, duplicates, late arrival and
-clock drift:
+clock drift. Re-run at the head of this branch and reproduces exactly, so
+unlike the ablation figures these did not drift:
 
 | Metric | Value |
 | --- | --- |
