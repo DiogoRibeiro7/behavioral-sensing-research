@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Added `sensor_modeling.observations`: a canonical, hardware-neutral observation model with timezone-aware validation, unit conversion with dimension checking, a declarative sensor registry, boundary ingestion with duplicate collapse, out-of-order and late-arrival flagging, and minimum-latency clock-drift correction.
+- Added `sensor_modeling.health`: online per-sensor reliability estimation emitting an evidence weight, with silence treated as failure only for sensors that declared a reporting cadence.
+- Added `sensor_modeling.states` and `sensor_modeling.fusion`: a configurable continuous-time behavioural state ontology and a recursive multimodal Bayes filter computing `P(Z_t | O_1:t)` over asynchronous, heterogeneous, partially missing evidence, with per-sensor supporting and contradicting evidence and explicit abstention.
+- Added `sensor_modeling.context`: probabilistic occupancy estimation over four household contexts and uncertainty-aware attribution of ambient activity, using anonymous evidence only.
+- Added `sensor_modeling.baseline`: adaptive, robust, weekday-aware personal baselines over non-stationary behaviour, distinguishing ordinary variability, weekly rhythm, temporary disturbance, persistent change, gradual drift, abrupt change, and insufficient data.
+- Added `sensor_modeling.alerts`: restrained alerting with joint magnitude/duration grading, coverage and attribution gates, explicit caveats, deduplication, rate limiting, and a strict separation between system-health and behavioural findings.
+- Added `sensor_modeling.simulation`: synthetic households with schedule-driven ground truth generatively independent of the inference model, plus separate injection of dropout, stuck sensors, random loss, wearable non-adherence, late arrival, duplication, and clock drift.
+- Added `sensor_modeling.evaluation`: problem-appropriate metrics (balanced accuracy, macro F1, log loss, Brier, calibration error, transition timing, detection delay, false positives per person-day) and a paired sensor-ablation framework reporting bootstrap intervals and effect sizes.
+- Added `sensor_modeling.online`: an incremental, bounded-memory, snapshot-able pipeline orchestrating the full chain with a lateness buffer for stream reordering.
+- Added `sensor-modeling demo` and `sensor-modeling ablate` commands, both reproducible from a fixed seed.
+- Added `docs/ambient_architecture.rst`, `docs/inference.rst`, `docs/evaluation.rst`, and `docs/limitations.rst`.
+- Added 327 tests covering the new packages, including DST transitions in both directions, out-of-order and duplicate delivery, sensor dropout, wearable non-adherence, visitor contamination, snapshot/restore, and end-to-end recovery against ground truth.
 - Added a top-level `ROADMAP.md` with release milestones, quality gates, longer-term priorities, maintenance backlog, and release policy.
 - Added `RELEASE.md` with the main-only release checklist, tag verification steps, and Zenodo release verification.
 - Added GitHub issue templates, a pull request template, and CI coverage for pushes to `develop`.
@@ -46,6 +58,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated README and Sphinx roadmap documentation to point to the canonical roadmap.
 
 ### Fixed
+- Fixed default emission rates conflating a state's location with its activity level, which made a bedroom motion sensor's silence argue against `sleeping` as hard as the bed sensor argued for it. End-to-end state accuracy rose from 0.585 to 0.918 and sleep recall from 0.00 to 0.96.
+- Fixed gradual drift being permanently unalertable: it has no deviation streak by construction, so grading it on magnitude and duration scored every slow decline at zero.
+- Fixed a drift's reported direction being read from the day rather than the trend, which allowed a verdict to announce a decrease while reporting a rising slope.
+- Fixed the default trend threshold firing on noise; across a four-week window the Theil-Sen slope of a stable series already accumulates more than one robust standard deviation of apparent movement.
 - Fixed synthetic JSON export by serializing timestamp values before writing JSON.
 - Fixed model validation calibration output to return plain Python booleans.
 

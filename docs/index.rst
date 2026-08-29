@@ -9,6 +9,10 @@ The Sensor Modeling Research Toolkit provides utilities for analyzing, modeling,
    background
    clinical_examples
    architecture
+   ambient_architecture
+   inference
+   evaluation
+   limitations
    usage
    modules
    roadmap

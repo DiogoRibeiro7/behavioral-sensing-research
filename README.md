@@ -20,6 +20,95 @@ The **Sensor Modeling Research Toolkit** addresses the growing need for reproduc
 - **Lightweight Deployment**: Minimal dependencies and efficient implementations suitable for edge computing and real-time applications
 - **Extensible Architecture**: Modular design allows researchers to easily add new algorithms and extend existing functionality
 
+## 🧭 Observation, state, change, alert
+
+The platform keeps five kinds of thing strictly distinct, and most of its
+design follows from refusing to collapse them:
+
+| Kind | What it is | Example |
+| --- | --- | --- |
+| **Measured observation** | A sensor reported a value at an instant | The fridge contact closed at 08:14 |
+| **Derived feature** | A value an upstream device computed, carrying its own confidence | The radar reports 2 tracked people |
+| **Inferred state** | A posterior over what the resident was probably doing | `P(kitchen_activity) = 0.81` |
+| **Behavioural change** | A shift against the resident's own history | Sleep has trended down for three weeks |
+| **Alert** | A judgement that a person should look at something | An `attention` alert, with its caveats |
+
+A sensor event is not a behaviour:
+
+```text
+fridge opening      != eating
+tap activation      != drinking
+toilet event        != confirmed toileting
+chair activity      != sedentary behaviour
+door event          != resident movement
+missing observation != inactivity
+```
+
+The state ontology therefore stops at `kitchen_activity` and makes no claim
+about food intake. Two rules are enforced mechanically rather than by
+convention:
+
+- **A missing observation is missing evidence, never negative evidence.**
+  Sensor reliability enters the fusion likelihood as a tempering weight, so a
+  failed sensor contributes a flat likelihood and cannot look like a quiet
+  resident.
+- **Ambient activity is not automatically the resident's.** Occupancy
+  estimation produces `P(activity was the resident's)`, which discounts
+  evidence while a visitor or carer may be present.
+
+The system can also return `unknown`. Abstention is a first-class output, not
+a failure.
+
+## 🏠 Multimodal ambient sensing pipeline
+
+```text
+heterogeneous observations -> validation -> sensor health -> occupancy context
+    -> multimodal fusion -> behavioural state -> adaptive baseline
+    -> change detection -> restrained alerts -> evaluation
+```
+
+| Package | Responsibility |
+| --- | --- |
+| `sensor_modeling.observations` | Canonical hardware-neutral observation model, sensor registry, boundary validation, clock-drift correction |
+| `sensor_modeling.health` | Online per-sensor reliability, emitted as an evidence weight |
+| `sensor_modeling.context` | Occupancy contexts and uncertainty-aware attribution, from anonymous evidence only |
+| `sensor_modeling.states` / `sensor_modeling.fusion` | Continuous-time state ontology and the recursive multimodal filter |
+| `sensor_modeling.baseline` | Adaptive, weekday-aware, non-stationary personal baselines |
+| `sensor_modeling.alerts` | Restrained, explained alerting with deduplication and rate limiting |
+| `sensor_modeling.simulation` | Synthetic households with controlled ground truth |
+| `sensor_modeling.evaluation` | Problem-appropriate metrics and paired sensor-ablation studies |
+| `sensor_modeling.online` | Incremental, snapshot-able orchestration |
+
+### Reproducible end-to-end example
+
+```bash
+sensor-modeling demo --days 90 --seed 20240304 --step-minutes 10
+```
+
+Simulates a household with a carer and visitors, injects a three-day bed-sensor
+dropout and five days of wearable non-adherence, loses, duplicates, delays and
+clock-skews the record, introduces a genuine change in sleep on a known day,
+then runs the whole pipeline and reports what it did and did not recover —
+including its own false-alert burden. Two runs produce identical numbers.
+
+### Sensor-ablation experiment
+
+```bash
+sensor-modeling ablate --days 14 --seeds 11 22 33 44
+```
+
+Every configuration is evaluated on identical simulated households, so the
+comparison measures sensing rather than residents. On a four-seed sweep, adding
+a person-bound wearable to six object sensors was **not distinguishable** from
+the full ten-sensor deployment (paired difference +0.003, 95% CI
+[−0.015, +0.019]), while removing it cost 0.153 balanced accuracy
+(95% CI [+0.122, +0.188]). See [`docs/evaluation.rst`](docs/evaluation.rst).
+
+> These numbers describe behaviour on the bundled simulator under its default
+> parameters. They are not estimates of field performance. Nothing here has
+> been validated against real sensor data — see
+> [`docs/limitations.rst`](docs/limitations.rst).
+
 ## ✨ Features
 
 ### 🔧 **Comprehensive Data Pipeline**
@@ -262,9 +351,14 @@ Feature                             | Status     | Implementation
 **Change Point Detection**          | 🟡 Partial | 4 algorithms, expanding to deep learning
 **NHPP-PELT**                       | ✅ Complete | B-spline intensities, diagnostics
 **Causal Network Analysis**         | ✅ Complete | Granger tests, network metrics
-**Missing Data Handling**           | 🟡 Partial | Gap-aware fill/interpolate/drop/flag workflows with masks
+**Missing Data Handling**           | ✅ Complete | Gap-aware workflows plus reliability-tempered fusion
+**Multimodal Fusion**               | ✅ Complete | Continuous-time filter over asynchronous modalities
+**Sensor Health Modelling**         | ✅ Complete | Online reliability feeding the inference layer
+**Occupancy & Attribution**         | ✅ Complete | Probabilistic visitor/resident attribution
+**Adaptive Baselines**              | ✅ Complete | Robust, weekday-aware, non-stationary
+**Sensor Ablation Studies**         | ✅ Complete | Paired designs with effect sizes
 **Deep Learning CPD**               | 🔵 Planned | Transformer and CNN-based approaches
-**Real-time Processing**            | 🔵 Planned | Streaming algorithms and online learning
+**Real-time Processing**            | ✅ Complete | Incremental pipeline, bounded memory, snapshot/restore
 **Clinical Integration**            | 🟡 Partial | Minimal FHIR-style export, expanding toward validated HL7 profiles
 
 ## 📚 Research Foundation

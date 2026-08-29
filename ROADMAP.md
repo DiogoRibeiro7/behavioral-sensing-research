@@ -36,6 +36,63 @@ Implemented or substantially available:
 - Flask-based visualization app with authenticated upload workflow.
 - Zenodo, citation, and release metadata.
 
+## Delivered: Multimodal Ambient Sensing Platform
+
+The toolkit has been extended into a multimodal ambient-sensing platform on
+top of the existing modelling core. The following are implemented, tested and
+documented:
+
+- A canonical, hardware-neutral observation model with boundary validation,
+  unit conversion, duplicate collapse, out-of-order handling, late-arrival
+  flagging, and per-source clock-drift correction.
+- A sensor registry that declares each sensor's modality, semantics, room,
+  expected cadence, and whether its activations are attributable to a person.
+  Inference reads declarations rather than sensor names.
+- Online sensor health estimation emitting a per-sensor evidence weight, with
+  silence only treated as failure where a sensor promised to report.
+- A configurable continuous-time behavioural state ontology and a recursive
+  multimodal Bayes filter over asynchronous, partially missing evidence, with
+  explicit abstention.
+- Probabilistic occupancy estimation and uncertainty-aware attribution of
+  ambient activity, using anonymous evidence only.
+- Adaptive, robust, weekday-aware personal baselines distinguishing ordinary
+  variability, weekly rhythm, temporary disturbance, persistent change,
+  gradual drift, abrupt change, and insufficient data.
+- Restrained alerting with deduplication, rate limiting, explicit caveats, and
+  a strict separation between system-health and behavioural findings.
+- A synthetic household simulator with controlled ground truth, generatively
+  independent of the inference model, plus separate fault injection.
+- Problem-appropriate evaluation metrics and a paired sensor-ablation
+  framework reporting effect sizes and bootstrap intervals.
+- An incremental, snapshot-able pipeline suitable for edge deployment.
+- A reproducible end-to-end command-line demonstration and ablation
+  experiment.
+
+See `docs/ambient_architecture.rst`, `docs/inference.rst`,
+`docs/evaluation.rst` and `docs/limitations.rst`.
+
+### Next priorities for this work
+
+The single most important outstanding item is **validation against real
+annotated sensor data**. Every quantitative result currently comes from the
+bundled simulator, and until that changes the numbers demonstrate that the
+framework behaves sensibly rather than saying anything about real deployments.
+
+In priority order:
+
+1. Evaluate against a public annotated smart-home dataset (CASAS, ARAS,
+   MARBLE) using the same metrics.
+2. Fit emission and dwell parameters from data rather than declaring them, and
+   compare the fitted values against the documented defaults.
+3. Model the dependency between the occupancy and state layers, which
+   currently share radar and beacon evidence and therefore have correlated
+   errors that the reported uncertainty does not reflect.
+4. Improve visitor recall, which is conservative by construction and currently
+   misses most short visits.
+5. Assess calibration across households rather than only within one.
+6. Reduce the pre-existing type-checking debt in the older modules and widen
+   the CI `mypy` gate beyond its current two files.
+
 ## Near-Term Roadmap
 
 ### 0.2.0: API Stabilization and Documentation

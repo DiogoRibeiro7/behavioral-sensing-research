@@ -364,18 +364,23 @@ def render(payload: dict[str, Any], steps: Sequence[PipelineStep]) -> str:
         None,
     )
     if explained is not None:
-        evidence = explained.evidence.get("change", {})
+        evidence: dict[str, Any] = dict(explained.evidence)
+        change_detail: dict[str, Any] = dict(evidence.get("change") or {})
+        reference: dict[str, Any] = dict(change_detail.get("reference") or {})
         lines += [
             "",
             "WORKED EXPLANATION OF THE FIRST BEHAVIOURAL ALERT",
             f"  {explained.summary}",
-            f"  feature       {evidence.get('feature')}",
-            f"  observed      {evidence.get('value'):.2f} h",
-            f"  reference     {evidence.get('reference', {}).get('centre'):.2f} h "
-            f"(robust scale {evidence.get('reference', {}).get('scale'):.2f})",
-            f"  deviation     {evidence.get('deviation'):+.2f} robust SD",
-            f"  held for      {evidence.get('duration_days')} days",
-            f"  weekday-aware {evidence.get('reference', {}).get('weekday_aware')}",
+            f"  feature       {change_detail.get('feature')}",
+            f"  observed      {change_detail.get('value', float('nan')):.2f} h",
+            f"  reference     {reference.get('centre', float('nan')):.2f} h "
+            f"(robust scale {reference.get('scale', float('nan')):.2f})",
+            f"  deviation     {change_detail.get('deviation', float('nan')):+.2f} "
+            "robust SD",
+            f"  trend         {change_detail.get('slope_per_day', float('nan')):+.3f} "
+            "per day",
+            f"  held for      {change_detail.get('duration_days')} days",
+            f"  weekday-aware {reference.get('weekday_aware')}",
         ]
 
     sample = steps[len(steps) // 2]
