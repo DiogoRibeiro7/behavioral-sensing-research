@@ -18,6 +18,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `sensor_modeling.online`: an incremental, bounded-memory, snapshot-able pipeline orchestrating the full chain with a lateness buffer for stream reordering.
 - Added `sensor-modeling demo` and `sensor-modeling ablate` commands, both reproducible from a fixed seed.
 - Added `sensor_modeling.interop`: a FHIR-style export that keeps measurements, derived features, inferred states and algorithmic alerts distinguishable, with explicit provenance on every resource, inferences marked `preliminary` with their full posterior and method, abstentions exported as `dataAbsentReason`, and alerts exported as `DetectedIssue` rather than `Observation`.
+- Added legacy adapters converting wide frames, datasets and long-format records into canonical observations, plus property-based tests for observation and stream invariants.
+- Added structured `Explanation` output alongside the one-line form, and calibration tests for state inference.
+- Added an attribution comparison measuring naive against occupancy-aware activity attribution across nine occupancy situations, with a `sensor-modeling attribution` command.
+- Added a change-detection study measuring delay against alert burden, and a ramped behaviour shift so gradual decline can be injected.
+- Added experiment provenance recording configuration, seeds, library versions and written metric definitions with every result.
+- Added online pipeline benchmarks for throughput, latency, snapshot size and bounded retained state.
+- Added pseudonymisation and export redaction with salt-keyed, study-scoped identifiers.
+- Added `sensor_modeling.observations.SensorSpec.redundancy_group` so correlated sensors are not counted as independent evidence.
+- Added detection of sensors that keep reporting while delivering below their declared cadence.
+- Added `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`, `docs/EVALUATION_DESIGN.md`, `docs/ADVERSARIAL_REVIEW.md`, `docs/RELEASE_READINESS.md` and `docs/multimodal_ingestion.rst`.
+- Added backwards-compatibility tests exercising the original models, data layer and public surface.
 - Added `docs/ambient_architecture.rst`, `docs/inference.rst`, `docs/evaluation.rst`, and `docs/limitations.rst`.
 - Added 327 tests covering the new packages, including DST transitions in both directions, out-of-order and duplicate delivery, sensor dropout, wearable non-adherence, visitor contamination, snapshot/restore, and end-to-end recovery against ground truth.
 - Added a top-level `ROADMAP.md` with release milestones, quality gates, longer-term priorities, maintenance backlog, and release policy.
@@ -59,6 +70,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated README and Sphinx roadmap documentation to point to the canonical roadmap.
 
 ### Fixed
+- Fixed the analysis pipeline defaulting to `NHPPConfig(n_basis=3)`, which violates the model's own `n_basis >= degree+1` constraint for the cubic default. Every NHPP fit raised and the pipeline recorded an error in place of a result, so that arm had never worked while appearing present in the output.
+- Fixed redundant sensors being counted as independent evidence, which drove the posterior toward certainty it had not earned.
+- Fixed a sensor delivering only part of its promised record being rated healthy, which biases inference toward inactivity when loss correlates with activity.
 - Fixed default emission rates conflating a state's location with its activity level, which made a bedroom motion sensor's silence argue against `sleeping` as hard as the bed sensor argued for it. End-to-end state accuracy rose from 0.585 to 0.918 and sleep recall from 0.00 to 0.96.
 - Fixed gradual drift being permanently unalertable: it has no deviation streak by construction, so grading it on magnitude and duration scored every slow decline at zero.
 - Fixed a drift's reported direction being read from the day rather than the trend, which allowed a verdict to announce a decrease while reporting a rising slope.

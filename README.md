@@ -59,6 +59,34 @@ convention:
 The system can also return `unknown`. Abstention is a first-class output, not
 a failure.
 
+### Supported and unsupported claims
+
+The distinction the platform is built to hold. The left column is what the
+evidence supports; the right is what it does **not**, however tempting the
+inference.
+
+| Supported | Not supported |
+| --- | --- |
+| Evidence of kitchen activity | Food consumption |
+| Evidence of bathroom activity | Confirmed toileting |
+| Bed occupancy with sustained low movement | Clinically defined sleep, or a sleep disorder |
+| A door was crossed | The resident left the house |
+| A sustained change against the resident's own history | A cause, a prognosis, or a diagnosis |
+| Reduced room-to-room transitions | Deterioration in mobility as a clinical finding |
+| Sensor coverage has fallen | The resident has become less active |
+| `P(resident generated this activity) = 0.5` | Identification of who did it |
+
+Two of these deserve spelling out.
+
+**`kitchen_activity` is not eating.** A fridge contact records a door opening.
+Turning that into a meal requires evidence the sensor cannot supply, so the
+ontology stops where the evidence stops.
+
+**`sleeping` is not sleep.** It is bed occupancy accompanied by sustained low
+movement. It has no relationship to polysomnography, and mapping it to a
+clinical sleep concept is a further inferential step this platform does not
+take.
+
 ## 🏠 Multimodal ambient sensing pipeline
 
 ```text

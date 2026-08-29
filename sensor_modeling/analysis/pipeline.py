@@ -60,7 +60,10 @@ class AnalysisPipeline:
         ar_model = BernoulliAutoregressiveModel(sensor_names, sensor_names[0])
         hmm_model = BaseHMM()
         cpd_model = EmbeddingCPD()
-        nhpp_model = NHPPPELT(NHPPConfig(n_basis=3, min_seg_len=1))
+        # n_basis must be at least degree+1; the cubic default needs four
+        # basis functions. Below that the model raises on every fit and the
+        # pipeline silently records an error instead of a result.
+        nhpp_model = NHPPPELT(NHPPConfig(n_basis=4, min_seg_len=1))
         return {
             "ar": ar_model,
             "hmm": hmm_model,

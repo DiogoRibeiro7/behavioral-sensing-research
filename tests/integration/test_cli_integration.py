@@ -114,7 +114,35 @@ def test_ablation_command_reports_paired_differences(tmp_path: Path) -> None:
     assert "Paired sensor ablation" in stdout
     assert "95% CI" in stdout
 
+    # The artefact wraps the findings in provenance: results sit under
+    # "results", with configuration, seeds, environment and metric
+    # definitions alongside them.
     payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["experiment"] == "sensor_ablation"
     assert payload["seeds"] == [1, 2]
-    assert "all_modalities" in payload["summary"]
-    assert payload["summary"]["minimal_door_bed"]["n_sensors"] == 2
+    assert payload["environment"]["python"]
+    assert payload["metric_definitions"]["balanced_accuracy"]
+
+    results = payload["results"]
+    assert "all_modalities" in results["summary"]
+    assert results["summary"]["minimal_door_bed"]["n_sensors"] == 2
+
+
+def test_attribution_command_writes_a_provenance_record(tmp_path: Path) -> None:
+    """Regression: wrapping results in provenance changed the artefact shape."""
+    output = tmp_path / "attribution.json"
+    _run_cli(
+        "attribution",
+        "--days",
+        "3",
+        "--seed",
+        "5",
+        "--step-minutes",
+        "60",
+        "--output",
+        str(output),
+    )
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["experiment"] == "attribution_comparison"
+    assert payload["seeds"] == [5]
+    assert "scenarios" in payload["results"]
