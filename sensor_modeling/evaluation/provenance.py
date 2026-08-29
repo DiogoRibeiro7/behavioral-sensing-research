@@ -18,9 +18,11 @@ committed, so the repository does not accumulate large generated files.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import logging
 import platform
+import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -32,6 +34,15 @@ logger = logging.getLogger(__name__)
 
 #: Default location for generated artefacts. Excluded from version control.
 RESULTS_DIR = Path("results")
+
+#: Version of the artefact layout itself.
+#:
+#: A reader that understands this schema knows which fields to expect. Bump it
+#: when a field changes meaning, not merely when one is added.
+SCHEMA_VERSION = "1.0"
+
+#: Repository root, used to ask git which commit the code came from.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 #: Written definitions of every metric this package reports.
 #:
@@ -79,7 +90,18 @@ METRIC_DEFINITIONS: dict[str, str] = {
     "median_delay_days": (
         "Median days between a true change occurring and an alert being "
         "delivered for it. A detection counts only if it falls at or after "
-        "the change and within max_delay_days."
+        "the change and within max_delay_days. Where an arm aggregates several "
+        "seeds, the individual delays are pooled before taking the median, so "
+        "this is a median over detections and not a mean of per-seed medians."
+    ),
+    "mean_seed_median_delay_days": (
+        "Mean across seeds of each seed's own median delay. Reported alongside "
+        "median_delay_days because it weights every seed equally regardless of "
+        "how many changes it detected; it is not a median."
+    ),
+    "detected_changes": (
+        "Number of true changes detected across the seeds in an arm, which is "
+        "the sample size behind median_delay_days."
     ),
     "false_positives_per_person_day": (
         "Delivered alerts not matched to a true change, divided by monitored "
@@ -106,6 +128,76 @@ METRIC_DEFINITIONS: dict[str, str] = {
 }
 
 
+def git_state() -> dict[str, str]:
+    """Return the commit the code came from, and whether it was modified.
+
+    The package version is not enough to identify code. A version stays fixed
+    across many commits during development, so two materially different
+    implementations can produce records that claim the same provenance. The
+    commit resolves that; ``git_dirty`` records whether the working tree had
+    uncommitted changes, because a dirty run is not reproducible from the
+    commit alone.
+
+    Returns ``"unknown"`` when git is unavailable or the package was installed
+    from a distribution rather than a checkout, which is not an error.
+    """
+    def _run(*args: str) -> str | None:
+        try:
+            completed = subprocess.run(
+                ["git", *args],
+                cwd=_REPO_ROOT,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if completed.returncode != 0:
+            return None
+        return completed.stdout.strip()
+
+    commit = _run("rev-parse", "HEAD")
+    if commit is None:
+        return {"git_commit": "unknown", "git_dirty": "unknown"}
+    status = _run("status", "--porcelain")
+    return {
+        "git_commit": commit,
+        "git_dirty": "unknown" if status is None else str(bool(status)).lower(),
+    }
+
+
+def resolved_defaults() -> dict[str, Any]:
+    """Snapshot the algorithm defaults an experiment actually ran under.
+
+    Recording only the options a user typed is not enough to interpret a result
+    later. Most of what determines the outcome lives in configuration defaults,
+    so a record that omits them cannot be distinguished from one produced after
+    those defaults changed. Capturing the resolved values freezes the model
+    specification alongside the numbers.
+    """
+    from ..baseline.adaptive import BaselineConfig
+    from ..context.occupancy import ContextConfig
+    from ..health.monitor import HealthConfig
+    from ..online.pipeline import PipelineConfig
+    from ..simulation.household import HouseholdConfig
+
+    snapshot: dict[str, Any] = {}
+    for name, factory in (
+        ("pipeline", PipelineConfig),
+        ("baseline", BaselineConfig),
+        ("context", ContextConfig),
+        ("health", HealthConfig),
+        ("household", HouseholdConfig),
+    ):
+        try:
+            snapshot[name] = dataclasses.asdict(factory())
+        except Exception:  # pragma: no cover - a config needing arguments
+            logger.debug("could not snapshot %s defaults", name, exc_info=True)
+            snapshot[name] = "unavailable"
+    return snapshot
+
+
 def environment() -> dict[str, str]:
     """Capture the software environment a result was produced in."""
     versions: dict[str, str] = {
@@ -118,6 +210,7 @@ def environment() -> dict[str, str]:
             versions[name] = str(getattr(module, "__version__", "unknown"))
         except ImportError:  # pragma: no cover - all are hard dependencies
             versions[name] = "not installed"
+    versions.update(git_state())
     return versions
 
 
@@ -159,9 +252,11 @@ class ExperimentRecord:
         """Return the full artefact, results and provenance together."""
         return {
             "experiment": self.experiment,
+            "schema_version": SCHEMA_VERSION,
             "recorded_at": datetime.now(timezone.utc).isoformat(),
             "environment": environment(),
             "configuration": dict(self.configuration),
+            "resolved_defaults": resolved_defaults(),
             "seeds": list(self.seeds),
             "sensor_subset": (
                 list(self.sensor_subset) if self.sensor_subset is not None else None
@@ -196,7 +291,13 @@ def load_record(path: Path) -> dict[str, Any]:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     missing = [
         key
-        for key in ("experiment", "environment", "configuration", "metric_definitions")
+        for key in (
+            "experiment",
+            "schema_version",
+            "environment",
+            "configuration",
+            "metric_definitions",
+        )
         if key not in payload
     ]
     if missing:
