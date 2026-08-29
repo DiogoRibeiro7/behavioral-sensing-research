@@ -350,6 +350,7 @@ class BehaviouralSensingPipeline:
             coverage=summary.coverage,
             attribution=context.ambient_attribution(),
             deviation_threshold=self._baseline_config.deviation_threshold,
+            trend_threshold=self._baseline_config.trend_threshold,
         )
         return summary, tuple(changes), tuple(alerts)
 

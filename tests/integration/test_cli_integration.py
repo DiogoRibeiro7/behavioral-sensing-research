@@ -1,5 +1,6 @@
 """Integration tests for the command line interface."""
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -40,3 +41,80 @@ def test_analysis_pipeline_cli_runs(tmp_path: Path) -> None:
     assert (out_dir / "analysis.tex").exists()
     assert (out_dir / "dashboard.html").exists()
     assert (out_dir / "analysis_fhir.json").exists()
+
+
+def _run_cli(*args: str) -> str:
+    """Run the CLI and return its stdout."""
+    return subprocess.check_output(
+        [sys.executable, "-m", "sensor_modeling.cli", *args],
+        text=True,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def test_demo_runs_end_to_end_and_writes_structured_output(tmp_path: Path) -> None:
+    """The worked example runs from the command line with a fixed seed."""
+    output = tmp_path / "demo.json"
+    stdout = _run_cli(
+        "demo",
+        "--days",
+        "24",
+        "--seed",
+        "7",
+        "--step-minutes",
+        "30",
+        "--output",
+        str(output),
+    )
+    assert "END-TO-END DEMONSTRATION" in stdout
+    assert "STATE INFERENCE" in stdout
+    assert "no part of this system is a medical device" in stdout
+
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["scenario"]["seed"] == 7
+    assert payload["scenario"]["faults"]
+    assert 0.0 <= payload["state_inference"]["balanced_accuracy"] <= 1.0
+    assert "sensor_health" in payload
+
+
+def test_demo_is_reproducible_from_its_seed(tmp_path: Path) -> None:
+    """Two runs of the same command must produce identical numbers."""
+    first = tmp_path / "a.json"
+    second = tmp_path / "b.json"
+    for path in (first, second):
+        _run_cli(
+            "demo",
+            "--days",
+            "20",
+            "--seed",
+            "3",
+            "--step-minutes",
+            "60",
+            "--output",
+            str(path),
+        )
+    assert first.read_text(encoding="utf-8") == second.read_text(encoding="utf-8")
+
+
+def test_ablation_command_reports_paired_differences(tmp_path: Path) -> None:
+    """The ablation experiment runs and reports paired comparisons."""
+    output = tmp_path / "ablation.json"
+    stdout = _run_cli(
+        "ablate",
+        "--days",
+        "4",
+        "--seeds",
+        "1",
+        "2",
+        "--step-minutes",
+        "60",
+        "--output",
+        str(output),
+    )
+    assert "Paired sensor ablation" in stdout
+    assert "95% CI" in stdout
+
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["seeds"] == [1, 2]
+    assert "all_modalities" in payload["summary"]
+    assert payload["summary"]["minimal_door_bed"]["n_sensors"] == 2

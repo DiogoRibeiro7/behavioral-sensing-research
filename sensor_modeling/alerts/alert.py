@@ -211,13 +211,36 @@ class AlertEngine:
         self._storm_notified: datetime | None = None
 
     # ------------------------------------------------------------------
-    def _grade(self, change: BehaviouralChange, deviation_threshold: float) -> float:
-        """Score a behavioural change on magnitude and duration.
+    def _grade(
+        self,
+        change: BehaviouralChange,
+        deviation_threshold: float,
+        trend_threshold: float,
+    ) -> float:
+        """Score a behavioural change on how large it is and how long it held.
 
         Both matter and neither is sufficient: a huge one-day excursion is a
         disturbance, and a marginal shift that holds for a fortnight is worth
         more attention than its size alone suggests.
+
+        A gradual drift is graded differently, because it has no deviation
+        streak to measure -- that is precisely what distinguishes it from a
+        step. Grading it on the same axes would score every slow decline at
+        zero and make the most clinically interesting pattern in ambient
+        monitoring permanently unalertable. Its magnitude is the movement
+        that identified it, and it carries a duration credit by
+        construction, since a drift is only ever declared across a whole
+        trend window.
+
+        The offset is set so that a drift which has only just crossed the
+        baseline's threshold lands in the middle band rather than the top
+        one: qualifying as a drift is a low bar, and a slow decline that has
+        only just become visible does not warrant the same response as one
+        moving twice as fast.
         """
+        if change.kind is ChangeKind.GRADUAL_DRIFT:
+            magnitude = min(change.trend_strength / (2.0 * trend_threshold), 1.0)
+            return 0.35 + 0.5 * magnitude
         magnitude = min(abs(change.deviation) / (2.0 * deviation_threshold), 1.0)
         duration = min(change.duration_days / 7.0, 1.0)
         return 0.5 * magnitude + 0.5 * duration
@@ -258,6 +281,7 @@ class AlertEngine:
         coverage: float = 1.0,
         attribution: float = 1.0,
         deviation_threshold: float = 3.0,
+        trend_threshold: float = 3.5,
     ) -> Alert | None:
         """Decide whether a behavioural change warrants an alert.
 
@@ -274,6 +298,8 @@ class AlertEngine:
             rather than a visitor's, in ``[0, 1]``.
         deviation_threshold
             The baseline's deviation threshold, used to scale magnitude.
+        trend_threshold
+            The baseline's trend threshold, used to scale a drift.
 
         Returns
         -------
@@ -286,7 +312,10 @@ class AlertEngine:
         confidence = float(coverage) * float(attribution)
         importance = float(self.policy.importance.get(change.feature, 1.0))
         score = min(
-            importance * confidence * self._grade(change, deviation_threshold), 1.0
+            importance
+            * confidence
+            * self._grade(change, deviation_threshold, trend_threshold),
+            1.0,
         )
 
         if confidence < self.policy.min_confidence:
@@ -325,12 +354,7 @@ class AlertEngine:
                 kind=AlertKind.BEHAVIOURAL_CHANGE,
                 severity=severity,
                 subject=change.feature,
-                summary=(
-                    f"Sustained {change.direction} in {change.feature}: "
-                    f"{change.value:.2f} against a personal reference of "
-                    f"{change.reference.centre:.2f}, held for "
-                    f"{change.duration_days} day(s)"
-                ),
+                summary=_summarise(change),
                 score=score,
                 confidence=confidence,
                 evidence={
@@ -417,6 +441,7 @@ class AlertEngine:
         coverage: float = 1.0,
         attribution: float = 1.0,
         deviation_threshold: float = 3.0,
+        trend_threshold: float = 3.5,
     ) -> list[Alert]:
         """Consider several changes at once, returning the alerts raised."""
         raised = []
@@ -427,6 +452,7 @@ class AlertEngine:
                 coverage=coverage,
                 attribution=attribution,
                 deviation_threshold=deviation_threshold,
+                trend_threshold=trend_threshold,
             )
             if alert is not None:
                 raised.append(alert)
@@ -470,6 +496,26 @@ class AlertEngine:
         self._storm_notified = (
             datetime.fromisoformat(str(notified)) if notified else None
         )
+
+
+def _summarise(change: BehaviouralChange) -> str:
+    """Phrase a change as an observation about sensor-derived behaviour.
+
+    Deliberately descriptive: it reports what was measured against what the
+    resident's own history predicted, and offers no explanation for it.
+    """
+    if change.kind is ChangeKind.GRADUAL_DRIFT:
+        return (
+            f"Gradual {change.direction} in {change.feature}: trending "
+            f"{change.slope_per_day:+.3f} per day, {change.trend_strength:.1f} "
+            f"robust SD of movement against a personal reference of "
+            f"{change.reference.centre:.2f}"
+        )
+    return (
+        f"Sustained {change.direction} in {change.feature}: {change.value:.2f} "
+        f"against a personal reference of {change.reference.centre:.2f}, held "
+        f"for {change.duration_days} day(s)"
+    )
 
 
 def _severity_rank(severity: AlertSeverity) -> int:

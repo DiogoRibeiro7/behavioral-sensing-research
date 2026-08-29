@@ -250,6 +250,50 @@ class TestAdaptiveBaseline:
         verdicts = feed(baseline, [8.0 - 0.06 * day for day in range(40)])
         assert any(v.kind is ChangeKind.GRADUAL_DRIFT for v in verdicts[-10:])
 
+    def test_a_drift_reports_the_direction_of_its_trend(self) -> None:
+        """Regression: direction was read off the day, not the trend.
+
+        A single day inside a slow decline can sit above the reference, so
+        deriving the direction from the day let a verdict announce a decrease
+        while reporting a rising slope.
+        """
+        config = BaselineConfig(
+            min_samples=10,
+            weekday_min_samples=99,
+            trend_window=28,
+            trend_threshold=1.5,
+            deviation_threshold=8.0,
+            min_scale=0.1,
+        )
+
+        def drift_verdicts(slope: float) -> list:
+            baseline = AdaptiveBaseline("sleep_hours", config)
+            verdicts = feed(baseline, [8.0 + slope * day for day in range(40)])
+            return [v for v in verdicts if v.kind is ChangeKind.GRADUAL_DRIFT]
+
+        falling = drift_verdicts(-0.06)
+        rising = drift_verdicts(+0.06)
+        assert falling and rising
+        assert falling[-1].slope_per_day < 0
+        assert falling[-1].direction == "decrease"
+        assert rising[-1].slope_per_day > 0
+        assert rising[-1].direction == "increase"
+
+    def test_a_drift_carries_the_movement_that_identified_it(self) -> None:
+        config = BaselineConfig(
+            min_samples=10,
+            weekday_min_samples=99,
+            trend_window=28,
+            trend_threshold=1.5,
+            deviation_threshold=8.0,
+            min_scale=0.1,
+        )
+        baseline = AdaptiveBaseline("sleep_hours", config)
+        verdicts = feed(baseline, [8.0 - 0.06 * day for day in range(40)])
+        drifts = [v for v in verdicts if v.kind is ChangeKind.GRADUAL_DRIFT]
+        assert drifts
+        assert drifts[-1].trend_strength >= config.trend_threshold
+
     def test_weekly_rhythm_is_not_reported_as_change(self) -> None:
         """Sundays are compared against Sundays, not against the working week."""
         config = BaselineConfig(

@@ -26,6 +26,8 @@ def change(
     duration_days: int = 5,
     feature: str = "sleep_hours",
     weekday_aware: bool = True,
+    slope_per_day: float = 0.0,
+    trend_strength: float = 0.0,
 ) -> BehaviouralChange:
     """Build a behavioural change verdict."""
     return BehaviouralChange(
@@ -42,7 +44,8 @@ def change(
         ),
         deviation=deviation,
         duration_days=duration_days,
-        slope_per_day=0.0,
+        slope_per_day=slope_per_day,
+        trend_strength=trend_strength,
         change_point=None,
         detail="test change",
     )
@@ -110,6 +113,68 @@ class TestRestraint:
         alert = engine.consider(change(), at=T0, coverage=0.6)
         assert alert is not None
         assert any("coverage" in caveat for caveat in alert.caveats)
+
+    def test_a_gradual_drift_can_alert_despite_having_no_deviation_streak(
+        self,
+    ) -> None:
+        """A slow decline is the pattern that matters most in this domain.
+
+        It has no deviation streak by construction -- that is what makes it a
+        drift rather than a step -- so grading it on the same axes as a step
+        would leave it permanently unalertable.
+        """
+        engine = AlertEngine()
+        drift = change(
+            kind=ChangeKind.GRADUAL_DRIFT,
+            deviation=0.4,
+            duration_days=0,
+            slope_per_day=-0.05,
+            trend_strength=5.0,
+        )
+        alert = engine.consider(drift, at=T0, trend_threshold=3.5)
+        assert alert is not None
+        assert "Gradual" in alert.summary
+        assert "per day" in alert.summary
+
+    def test_a_just_qualifying_drift_asks_for_attention_not_urgency(self) -> None:
+        """Qualifying as a drift is a low bar; it should not top the scale."""
+        engine = AlertEngine()
+        alert = engine.consider(
+            change(
+                kind=ChangeKind.GRADUAL_DRIFT,
+                deviation=0.2,
+                duration_days=0,
+                slope_per_day=-0.02,
+                trend_strength=3.5,
+            ),
+            at=T0,
+            trend_threshold=3.5,
+        )
+        assert alert is not None
+        assert alert.severity is AlertSeverity.ATTENTION
+
+    def test_a_fast_drift_escalates_to_urgent(self) -> None:
+        engine = AlertEngine()
+        alert = engine.consider(
+            change(
+                kind=ChangeKind.GRADUAL_DRIFT,
+                deviation=0.2,
+                duration_days=0,
+                slope_per_day=-0.08,
+                trend_strength=7.0,
+            ),
+            at=T0,
+            trend_threshold=3.5,
+        )
+        assert alert is not None
+        assert alert.severity is AlertSeverity.URGENT
+
+    def test_a_drift_seen_through_poor_attribution_still_does_not_alert(self) -> None:
+        engine = AlertEngine()
+        drift = change(
+            kind=ChangeKind.GRADUAL_DRIFT, duration_days=0, trend_strength=7.0
+        )
+        assert engine.consider(drift, at=T0, attribution=0.2) is None
 
     def test_a_pooled_reference_is_recorded_as_a_caveat(self) -> None:
         engine = AlertEngine()

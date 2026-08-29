@@ -122,6 +122,11 @@ class BehaviouralChange:
         Consecutive well-observed days the deviation has held.
     slope_per_day
         Robust trend estimate over the recent window, in units per day.
+    trend_strength
+        Total movement across the trend window, in robust standard
+        deviations. This is what identifies a gradual drift, and it is
+        carried on the verdict so that alerting can grade a drift without
+        re-deriving it.
     change_point
         Day a step change was located at, when one was found.
     detail
@@ -136,6 +141,7 @@ class BehaviouralChange:
     deviation: float
     duration_days: int
     slope_per_day: float
+    trend_strength: float
     change_point: date | None
     detail: str
 
@@ -150,10 +156,22 @@ class BehaviouralChange:
 
     @property
     def direction(self) -> str:
-        """Whether the day sits above or below the personal reference."""
-        if self.deviation > 0:
+        """Which way the behaviour moved.
+
+        For a drift this is the sign of the trend, not of the day: a drift is
+        identified by its slope, and a single day inside a slow decline can
+        easily sit on the other side of the reference. Reading the direction
+        off the day would let a verdict announce a decrease while reporting a
+        rising slope.
+        """
+        signal = (
+            self.slope_per_day
+            if self.kind is ChangeKind.GRADUAL_DRIFT
+            else self.deviation
+        )
+        if signal > 0:
             return "increase"
-        return "decrease" if self.deviation < 0 else "none"
+        return "decrease" if signal < 0 else "none"
 
     def to_dict(self) -> dict[str, object]:
         """Return a serialisable form of the verdict."""
@@ -166,6 +184,7 @@ class BehaviouralChange:
             "direction": self.direction,
             "duration_days": self.duration_days,
             "slope_per_day": self.slope_per_day,
+            "trend_strength": self.trend_strength,
             "change_point": (
                 self.change_point.isoformat() if self.change_point else None
             ),
@@ -198,8 +217,11 @@ class BaselineConfig:
     trend_window
         Days examined for a gradual trend.
     trend_threshold
-        Robust z-scores of total movement across the trend window that count
-        as drift.
+        Robust standard deviations of total movement across the trend window
+        that count as drift. Kept well above one: the Theil-Sen slope of a
+        stable but noisy series still accumulates more than a standard
+        deviation of apparent movement across four weeks, so a lower
+        threshold reports noise as decline.
     change_point_penalty
         Penalty passed to PELT when locating a step change.
     min_scale
@@ -214,7 +236,7 @@ class BaselineConfig:
     deviation_threshold: float = 3.0
     persistence_days: int = 3
     trend_window: int = 28
-    trend_threshold: float = 2.0
+    trend_threshold: float = 3.5
     change_point_penalty: float = 8.0
     min_scale: float = 0.25
 
@@ -380,6 +402,11 @@ class AdaptiveBaseline:
     ) -> BehaviouralChange:
         """Decide how a day's deviation should be read."""
         slope = self._slope()
+        movement = (
+            abs(slope) * self.config.trend_window / reference.scale
+            if reference.scale > 0
+            else 0.0
+        )
         change_point = None
         kind = ChangeKind.ORDINARY
         detail = "within the personal band"
@@ -408,14 +435,14 @@ class AdaptiveBaseline:
                 f"{self._streak} day(s), not yet persistent"
             )
         else:
-            movement = abs(slope) * self.config.trend_window / reference.scale
             if len(self._values) >= self.config.trend_window and (
                 movement >= self.config.trend_threshold
             ):
                 kind = ChangeKind.GRADUAL_DRIFT
                 detail = (
                     f"trend of {slope:+.3f} per day over "
-                    f"{self.config.trend_window} days"
+                    f"{self.config.trend_window} days "
+                    f"({movement:.1f} robust SD of movement)"
                 )
 
         return BehaviouralChange(
@@ -427,6 +454,7 @@ class AdaptiveBaseline:
             deviation=deviation,
             duration_days=self._streak,
             slope_per_day=slope,
+            trend_strength=movement,
             change_point=change_point,
             detail=detail,
         )
@@ -451,6 +479,7 @@ class AdaptiveBaseline:
             deviation=0.0,
             duration_days=self._streak,
             slope_per_day=0.0,
+            trend_strength=0.0,
             change_point=None,
             detail=reason,
         )
