@@ -143,24 +143,27 @@ def _run_replicated_attribution(args: argparse.Namespace) -> None:
     print("Intervals are bootstrap; mcse is the Monte Carlo standard error.")
     print()
     print(
-        f"{'scenario':<28}{'contam':>8}{'gain':>9}{'mcse':>8}"
-        f"{'95% CI':>20}{'visRec':>8}"
+        f"{'scenario':<28}{'contam':>8}{'acc gain':>10}"
+        f"{'95% CI':>20}{'calib gain':>12}{'visRec':>8}"
     )
     for aggregate in study.aggregates:
         gain = aggregate.balanced_accuracy_gain
+        calibration = aggregate.calibration_gain
         interval = f"[{gain.ci_low:+.4f},{gain.ci_high:+.4f}]"
         print(
             f"{aggregate.scenario:<28}"
             f"{aggregate.contaminated_fraction['mean']:>8.2f}"
-            f"{gain.mean_difference:>+9.4f}"
-            f"{gain.mcse:>8.4f}"
+            f"{gain.mean_difference:>+10.4f}"
             f"{interval:>20}"
+            f"{calibration.mean_difference:>+12.4f}"
             f"{aggregate.visitor_recall['mean']:>8.2f}"
         )
     print()
     print(
-        "A gain of zero in an uncontaminated scenario is the expected result: "
-        "attribution should be a no-op when nobody else is in the home."
+        "Attribution is not free. Discounting ambient evidence costs accuracy "
+        "wherever the discount is wrong, and over 100 seeds the cost is "
+        "measurable even in an empty home. Read the calibration column with "
+        "the accuracy one: the two do not move together."
     )
 
     if args.output is not None:

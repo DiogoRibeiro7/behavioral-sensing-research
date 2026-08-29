@@ -19,10 +19,13 @@ With `n = 4` the interval is also badly behaved: the bootstrap cannot see tail
 behaviour it never sampled, and a single unusual household moves the whole
 interval.
 
-Attribution is more exploratory still. It runs one seed. A statement such as
-"largest gain +0.032 during a carer round" describes one generated household.
-It is a demonstration that the mechanism behaves as designed, and it supports
-no estimate of expected benefit.
+Attribution was more exploratory still: it ran one seed. A statement such as
+"largest gain +0.032 during a carer round" describes one generated household,
+and at 100 seeds that figure turned out to be +0.0065 -- out by a factor of
+five. Worse, the single seed hid a harm larger than any of the gains: without
+the wearable, attribution costs 0.0118 balanced accuracy. One household could
+not have shown that, and the demonstration read as though it had established
+the opposite.
 
 | Purpose | Replications | Appropriate claim |
 | --- | --- | --- |

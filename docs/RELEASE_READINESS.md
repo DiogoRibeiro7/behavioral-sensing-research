@@ -185,10 +185,52 @@ preferable to a denser one that is confidently wrong. Note the caveat that
 applies to all of it -- the states being scored come from the same simulator,
 so this establishes a property of the inference model, not of any home.
 
-**Attribution** (pilot, n = 1 seed; `--seeds` now runs the replicated form): no effect when nobody else was
-present, largest gain +0.032 during a carer round. One generated household. It
-shows the mechanism behaves as designed and supports no estimate of expected
-benefit. Visitor recall in this configuration is about 0.48.
+**Attribution** (study, n = 100 paired seeds per scenario, 10 days, seed root
+`20260830`). **This supersedes the one-seed demonstration and contradicts it.**
+
+| Scenario | Contam. | Accuracy gain | 95% CI | Calibration gain | Visitor recall |
+| --- | --- | --- | --- | --- | --- |
+| resident_alone | 0.00 | -0.0004 | [-0.0007, -0.0001] | +0.0006 | 0.00 |
+| resident_goes_out | 0.00 | -0.0006 | [-0.0011, -0.0003] | +0.0010 | 0.00 |
+| short_visitor | 0.04 | +0.0003 | [-0.0003, +0.0008] | +0.0014 | 0.61 |
+| prolonged_visitor | 0.08 | +0.0007 | [+0.0000, +0.0014] | +0.0027 | 0.60 |
+| carer_visits | 0.03 | +0.0065 | [+0.0055, +0.0074] | +0.0034 | 0.28 |
+| visitor_and_carer | 0.08 | +0.0063 | [+0.0053, +0.0074] | +0.0040 | 0.49 |
+| **resident_without_wearable** | 0.04 | **-0.0118** | [-0.0136, -0.0102] | +0.0043 | 0.31 |
+| no_radar | 0.04 | +0.0064 | [+0.0053, +0.0075] | +0.0037 | 0.15 |
+| sparse_coverage | 0.04 | +0.0048 | [+0.0037, +0.0060] | +0.0032 | 0.28 |
+
+Three claims in the previous revision do not survive replication.
+
+**"No effect when nobody else is present" is false.** Both uncontaminated
+scenarios show a small but statistically clear *loss*, with intervals excluding
+zero. The effect is tiny -- four to six ten-thousandths of balanced accuracy --
+but it is a cost, not a no-op, and the command said otherwise.
+
+**"Largest gain +0.032 during a carer round" is out by a factor of five.** At
+100 seeds a carer round gives +0.0065.
+
+**The largest effect attribution has is a harm.** When the resident is not
+wearing the wearable, attribution costs 0.0118 balanced accuracy, an order of
+magnitude larger than any gain it produces anywhere. The mechanism is
+consistent with the design: with no wearable to place the resident, ambient
+activity that really was theirs gets discounted as possibly a visitor's. The
+guard against attributing a visitor's activity to the resident becomes, in the
+absence of the evidence it depends on, a way of discarding the resident's own.
+
+**Calibration improves in every scenario, including those where accuracy
+falls.** All nine intervals exclude zero. This is the coherent reading of the
+whole table: discounting ambient evidence makes the estimate less confident.
+Where the discount is correct, accuracy rises too. Where it is wrong, accuracy
+falls but the model hedges rather than committing confidently to the wrong
+state. Whether that trade is worth making depends on what consumes the output,
+which is not a question simulation can settle.
+
+**Visitor detection is weaker than the single seed suggested.** The quoted 0.48
+recall was approximately the `visitor_and_carer` case. Across scenarios recall
+runs from 0.15 (`no_radar`) to 0.61 (`short_visitor`), with precision from 0.37
+to 0.77. Attribution's benefit is bounded by this: the component whose value is
+being measured detects a minority of the visits it keys on.
 
 **Change detection** (pilot, n = 3 seeds): a step change detected at 5.0 days
 with 0.010 false alerts per person-day on a stable record. Losing 30% of
@@ -245,10 +287,12 @@ this biases inference toward inactivity — measured at kitchen recall 0.705 →
 | --- | --- |
 | Simulator-only validation | **High** |
 | Small-sample pilots reported as though they were studies | High, addressed |
+| Attribution's value overstated by a single-seed demonstration | High, addressed |
 | Declared rather than fitted parameters | **High** |
 | Shared evidence between occupancy and state layers | High |
 | Undetectable partial loss on event sensors | Medium |
-| Visitor recall of 0.48; short visits missed | Medium |
+| Attribution costs accuracy when the wearable is absent (-0.0118) | High |
+| Visitor recall 0.15-0.61 by scenario, weakest without radar | Medium |
 | 168 pre-existing type errors; CI gates `mypy` on two files | Medium |
 | No smoothing or backfill; late records dropped past tolerance | Medium |
 | Unversioned snapshots | Low |
