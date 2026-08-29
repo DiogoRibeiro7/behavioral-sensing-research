@@ -299,6 +299,13 @@ def run_attribution_study(
     )
 
 
+#: Minimum distance between study seeds.
+#:
+#: ``standard_scenarios`` offsets degradation seeds by up to three, so seeds
+#: closer than this would share simulated faults between replications.
+SEED_SPACING = 4
+
+
 def _bootstrap_mean(
     values: Sequence[float],
     *,
@@ -412,6 +419,21 @@ def run_replicated_attribution_study(
         )
     if len(set(ordered)) != len(ordered):
         raise ValueError("seeds must be distinct, or replications are not independent")
+    # standard_scenarios derives degradation seeds as seed + 1 .. seed + 3, so
+    # neighbouring study seeds would hand two supposedly independent
+    # replications the same record loss. Adjacent seeds are the natural thing
+    # for a caller to type, which is exactly why this has to be refused rather
+    # than documented.
+    spacing = min(
+        (b - a for a, b in zip(sorted(ordered), sorted(ordered)[1:])),
+        default=SEED_SPACING,
+    )
+    if spacing < SEED_SPACING:
+        raise ValueError(
+            f"seeds must differ by at least {SEED_SPACING}; scenarios derive "
+            "degradation seeds from neighbouring values, so closer seeds share "
+            "sensor faults between replications"
+        )
 
     by_scenario: dict[str, list[ScenarioComparison]] = {}
     for seed in ordered:

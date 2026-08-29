@@ -31,6 +31,22 @@ class TestReplicationCount:
         with pytest.raises(ValueError, match="distinct"):
             run_replicated_attribution_study([11, 11, 22], **FAST)
 
+    def test_seeds_that_would_share_simulated_faults_are_refused(self) -> None:
+        """Adjacent seeds are the obvious thing to type, and are wrong here.
+
+        ``standard_scenarios`` derives degradation seeds as ``seed + 1`` to
+        ``seed + 3``, so consecutive study seeds would hand two supposedly
+        independent replications the same record loss and the same stuck
+        sensors. Nothing downstream could detect that, so it is refused at the
+        boundary.
+        """
+        with pytest.raises(ValueError, match="differ by at least"):
+            run_replicated_attribution_study([11, 12, 13], **FAST)
+
+    def test_widely_spaced_seeds_are_accepted(self) -> None:
+        study = run_replicated_attribution_study([11, 33, 55], **FAST)
+        assert study.seeds == (11, 33, 55)
+
     def test_every_scenario_is_estimated_over_every_seed(self) -> None:
         seeds = [11, 22, 33]
         study = run_replicated_attribution_study(seeds, **FAST)

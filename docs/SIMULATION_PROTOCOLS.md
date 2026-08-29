@@ -140,6 +140,13 @@ Because delay is skewed, 100 trajectories is a floor rather than a target.
 
 - Seeds must be independent and disjoint across arms of a factorial design.
   Reusing a seed across scenarios reintroduces the correlation pairing removes.
+- **Space them.** The attribution scenarios derive degradation seeds from
+  `seed + 1` to `seed + 3`, so consecutive study seeds would give two
+  supposedly independent replications identical record loss and identical
+  stuck sensors. `11 12 13` is the obvious thing to type and is wrong; the
+  replicated study refuses seeds closer than four apart rather than leaving it
+  to the caller to know. Seeds drawn from a `SeedSequence` are spread widely
+  enough that this never binds.
 - Record every seed in the artefact. `ExperimentRecord` does this.
 - Derive study seeds from a single recorded root rather than typing them, so the
   set is reproducible and auditable.
