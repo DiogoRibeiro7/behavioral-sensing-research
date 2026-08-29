@@ -66,7 +66,24 @@ magnitude and round up rather than down:
 
 **A study should therefore use at least 100 paired trajectories**, not four. The
 simulator is cheap and the arms are independent, so this is a matter of
-scheduling rather than feasibility.
+scheduling rather than feasibility: the run below takes roughly 45 minutes on
+one machine.
+
+```bash
+python -c "import numpy as np;   s = np.random.SeedSequence(20260829).generate_state(100, dtype=np.uint32) % 1000000;   print(' '.join(map(str, sorted(set(int(x) for x in s)))))" > seeds.txt
+
+sensor-modeling ablate --days 14 --step-minutes 10   --seeds $(cat seeds.txt) --output results/ablation_study_n100.json
+```
+
+Seeds are derived from a recorded root rather than typed, so the set is
+reproducible from the root alone. The artefact records the root's seeds, the
+git commit and the resolved defaults.
+
+This run has been done. It found the four-seed pilot had overstated the
+headline effect by roughly 60%, with the study estimate falling outside the
+pilot's interval; see [Release readiness](RELEASE_READINESS.md). Four seeds
+were not simply imprecise, they were wrong, which is the practical case for
+this page.
 
 Re-estimate `s_D` from the first 20–30 trajectories of the real run and adjust
 `n` upwards if it exceeds the pilot value. Report the achieved MCSE alongside

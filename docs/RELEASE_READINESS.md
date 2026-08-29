@@ -130,23 +130,55 @@ clock drift:
 **Robustness**, 0–40% record loss: balanced accuracy 0.858 → 0.748, calibration
 error 0.046 → 0.079. No cliff.
 
-> **These are pilots, not simulation studies.** The ablation runs four paired
-> seeds, attribution one, and change detection three. A bootstrap interval over
-> four differences is resampling four numbers: it describes the arithmetic of
-> that sample, not the expected effect. The intervals below should be read as
-> *this ran, and produced this*, not as estimates with the precision their
-> width suggests. Replication counts adequate for inference are specified in
-> [Simulation protocols](SIMULATION_PROTOCOLS.md) and have not yet been run.
+> **Replication counts differ by experiment.** The ablation has been run at
+> study scale. Attribution and change detection have not, and are marked as
+> pilots below. Counts adequate for inference are derived in
+> [Simulation protocols](SIMULATION_PROTOCOLS.md).
 
-**Sensor ablation** (pilot, n = 4 paired seeds): adding a wearable to six
-object sensors left a gap of 0.012 balanced accuracy against the full
-ten-sensor deployment, nominal 95% CI [+0.004, +0.020]. The direction is
-consistent across the four seeds; the magnitude is not established. A
-five-sensor configuration was the best calibrated of all despite lower
-accuracy, which is worth following up at scale rather than reporting as a
-finding.
+**Sensor ablation** (study, n = 100 paired seeds, 14 days, seeds derived from
+root `20260829`):
 
-**Attribution** (demonstration, n = 1 seed): no effect when nobody else was
+| Comparison against all ten sensors | Difference | MCSE | 95% CI | dz |
+| --- | --- | --- | --- | --- |
+| objects_plus_wearable (8) | +0.0073 | 0.0005 | [+0.0063, +0.0083] | 1.44 |
+| radar_door_bed_wearable (5) | +0.1707 | 0.0025 | [+0.1657, +0.1755] | 6.70 |
+| object_sensors_only (6) | +0.1878 | 0.0025 | [+0.1828, +0.1928] | 7.41 |
+| radar_door_bed (3) | +0.4775 | 0.0025 | [+0.4727, +0.4824] | 19.35 |
+| minimal_door_bed (2) | +0.5264 | 0.0019 | [+0.5226, +0.5303] | 27.30 |
+
+The achieved MCSE of 0.0005 on the headline comparison is the precision the
+protocol specified for n = 100, so the replication count did what it was chosen
+to do.
+
+**This supersedes the four-seed pilot, which overstated the effect.** The pilot
+reported the eight-sensor gap as 0.012 with a nominal interval of
+[+0.004, +0.020]. At n = 100 it is 0.0073 with an interval roughly six times
+narrower, and the pilot's point estimate falls outside it. Four seeds were not
+merely imprecise; they were misleading, which is the concrete argument for the
+protocol.
+
+**Calibration does not follow accuracy.** The five-sensor configuration is by
+some distance the best calibrated, at 0.0332 expected calibration error
+(MCSE 0.0008) against 0.0839 (MCSE 0.0005) for the full ten-sensor deployment,
+while scoring 0.171 lower in balanced accuracy:
+
+| Configuration | Sensors | Calibration error | MCSE |
+| --- | --- | --- | --- |
+| radar_door_bed_wearable | 5 | 0.0332 | 0.0008 |
+| objects_plus_wearable | 8 | 0.0829 | 0.0006 |
+| all_modalities | 10 | 0.0839 | 0.0005 |
+| object_sensors_only | 6 | 0.1240 | 0.0013 |
+| radar_door_bed | 3 | 0.1309 | 0.0009 |
+| minimal_door_bed | 2 | 0.1792 | 0.0012 |
+
+At four seeds this looked like a curiosity worth following up. At a hundred it
+is a large, well-resolved effect, and it bears directly on the project's
+central question: a sparser deployment that knows when it does not know may be
+preferable to a denser one that is confidently wrong. Note the caveat that
+applies to all of it -- the states being scored come from the same simulator,
+so this establishes a property of the inference model, not of any home.
+
+**Attribution** (pilot, n = 1 seed; `--seeds` now runs the replicated form): no effect when nobody else was
 present, largest gain +0.032 during a carer round. One generated household. It
 shows the mechanism behaves as designed and supports no estimate of expected
 benefit. Visitor recall in this configuration is about 0.48.
