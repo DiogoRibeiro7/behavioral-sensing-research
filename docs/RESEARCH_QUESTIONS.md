@@ -1,0 +1,141 @@
+# Research Questions
+
+What this platform is built to investigate, what would answer each question,
+and what would falsify the answer. Questions are stated so that a negative
+result is publishable and recognisable.
+
+## Central question
+
+> Can multimodal ambient sensing recover useful behavioural state using fewer
+> physical sensors, while explicitly representing uncertainty, sensor failure,
+> missingness, visitors, and person attribution?
+
+"Useful" is deliberately not "accurate". A system that is 90% accurate and
+badly calibrated is less useful for longitudinal monitoring than one that is
+80% accurate and knows when it is guessing, because the second can abstain and
+the first cannot.
+
+## RQ1 — Does modality substitute for count?
+
+**Question.** Does adding a small number of information-rich, person-bound
+sensors recover the behavioural information lost by removing several ambient
+sensors?
+
+**How it is answered.** `sensor-modeling ablate` evaluates named sensor
+subsets on identical simulated households and reports paired differences with
+bootstrap intervals.
+
+**What would answer it affirmatively.** A configuration with materially fewer
+sensors whose paired difference from the full deployment is small in
+*magnitude*, not merely statistically indistinguishable.
+
+**Current state.** Adding a wearable and beacon to six object sensors closes
+most of the gap: the remaining paired difference is 0.012 balanced accuracy
+(95% CI [+0.004, +0.020]). The gap is real but small.
+
+**What would falsify it.** A configuration that looks equivalent on balanced
+accuracy but is materially worse calibrated, or that degrades sharply under
+sensor failure. Both are measured, precisely because accuracy alone would hide
+them.
+
+**Known threat.** The result depends on the simulator's assumed activity
+levels and sensor rates. See `limitations.rst`.
+
+## RQ2 — Can a system fail safely rather than fail silently?
+
+**Question.** When sensors break, does behavioural inference degrade visibly
+and gracefully, or does it produce confident nonsense?
+
+**How it is answered.** Reliability sweeps at 5/10/20/40% missingness,
+injected dropouts, stuck sensors, wearable non-adherence, and total blackout,
+all scored with calibration alongside accuracy.
+
+**What would answer it affirmatively.** Accuracy declining smoothly while
+calibration error stays bounded, and abstention rising when evidence
+genuinely disappears.
+
+**Current state.** Balanced accuracy 0.858 → 0.748 across 0–40% loss with
+calibration error 0.046 → 0.079. Under total blackout the system abstains.
+
+**What would falsify it.** Any regime where confidence stays high while
+accuracy collapses. This is the failure mode the platform exists to prevent,
+and it is tested adversarially rather than assumed.
+
+## RQ3 — How much does person attribution matter?
+
+**Question.** How much does visitor and carer activity distort behavioural
+conclusions if ambient events are attributed to the resident by default?
+
+**How it is answered.** Synthetic households include a weekday carer and
+occasional visitors who trip the same ambient sensors. Naive attribution can
+be compared against occupancy-aware attribution on identical trajectories.
+
+**What would answer it affirmatively.** A measurable difference in state
+inference or in the behavioural-change verdicts between the two, in the
+direction of fewer spurious findings under occupancy-aware attribution.
+
+**What would falsify it.** Attribution making no measurable difference, which
+would mean either that contamination is negligible in this simulator or that
+the occupancy model is too weak to exploit it. Both are worth knowing, and
+visitor recall of roughly 0.48 means the second is a live possibility.
+
+## RQ4 — Can a personal baseline be adaptive without being amnesic?
+
+**Question.** Can a baseline track genuine long-run change in a person's
+routine while still detecting a decline, rather than absorbing the decline as
+the new normal?
+
+**How it is answered.** Injecting a known persistent change on a known day and
+measuring detection delay, alongside the unmatched alert burden per
+person-day during stable periods.
+
+**What would answer it affirmatively.** Detection within a clinically
+plausible window at an alert burden a carer would tolerate.
+
+**Current state.** Detection at six days, roughly 0.033 unmatched behavioural
+alerts per person-day.
+
+**What would falsify it.** A regime where lowering the threshold enough to
+detect real change floods the recipient. The threshold trades directly against
+delay, and that trade-off is a property of the method, not a tuning accident.
+
+## RQ5 — What is the cost of honesty?
+
+**Question.** What does a system give up by abstaining, by discounting
+unattributable evidence, and by refusing to fill gaps?
+
+**How it is answered.** Selective accuracy and abstention rate are reported
+alongside accuracy, so the accuracy sacrificed to abstention is visible.
+
+**Why it matters.** Every safety property in this platform has a cost in
+apparent performance. Reporting only the headline number would hide the price
+and make the conservative system look worse than a reckless one.
+
+## Explicit non-questions
+
+These are out of scope, and results here should not be read as bearing on
+them.
+
+- **Clinical effectiveness.** Nothing in this repository supports a claim that
+  monitoring improves any health outcome.
+- **Diagnosis.** No state maps to a clinical condition. `sleeping` is bed
+  occupancy with low movement, not polysomnographic sleep.
+- **Identity.** Attribution is a probability derived from anonymous evidence,
+  never a biometric identification.
+- **Multi-resident state tracking.** The ontology models one person; others
+  are detected but not tracked.
+- **Real-world performance.** Every quantitative result here comes from a
+  simulator written by this project.
+
+## What would make these answers trustworthy
+
+In priority order, and until the first is done, all answers above are
+conditional on the simulator:
+
+1. Evaluation on a public annotated smart-home dataset (CASAS, ARAS, MARBLE).
+2. Emission and dwell parameters fitted from data rather than declared.
+3. A second, independently written simulator with different structural
+   assumptions.
+4. Calibration assessed across households, not only within one.
+5. Prospective assessment of alert burden with people who would act on the
+   alerts.
