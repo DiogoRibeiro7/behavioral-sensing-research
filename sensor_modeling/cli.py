@@ -110,6 +110,17 @@ def _add_attribution_parser(sub: argparse._SubParsersAction) -> None:
     study.add_argument("--days", type=int, default=10, help="Days per scenario")
     study.add_argument("--seed", type=int, default=4242, help="Random seed")
     study.add_argument(
+        "--seeds",
+        type=int,
+        nargs="+",
+        default=None,
+        help=(
+            "Two or more seeds to replicate over. A single seed demonstrates "
+            "the mechanism; estimating the effect needs replication, see "
+            "docs/SIMULATION_PROTOCOLS.md"
+        ),
+    )
+    study.add_argument(
         "--step-minutes", type=int, default=15, help="Inference step in minutes"
     )
     study.add_argument(
@@ -117,9 +128,73 @@ def _add_attribution_parser(sub: argparse._SubParsersAction) -> None:
     )
 
 
+def _run_replicated_attribution(args: argparse.Namespace) -> None:
+    """Estimate attribution's effect across independent seeds."""
+    from .evaluation.attribution import run_replicated_attribution_study
+
+    study = run_replicated_attribution_study(
+        args.seeds,
+        days=args.days,
+        step=timedelta(minutes=args.step_minutes),
+    )
+
+    print()
+    print(f"Attribution across {len(study.seeds)} paired seeds per scenario")
+    print("Intervals are bootstrap; mcse is the Monte Carlo standard error.")
+    print()
+    print(
+        f"{'scenario':<28}{'contam':>8}{'gain':>9}{'mcse':>8}"
+        f"{'95% CI':>20}{'visRec':>8}"
+    )
+    for aggregate in study.aggregates:
+        gain = aggregate.balanced_accuracy_gain
+        interval = f"[{gain.ci_low:+.4f},{gain.ci_high:+.4f}]"
+        print(
+            f"{aggregate.scenario:<28}"
+            f"{aggregate.contaminated_fraction['mean']:>8.2f}"
+            f"{gain.mean_difference:>+9.4f}"
+            f"{gain.mcse:>8.4f}"
+            f"{interval:>20}"
+            f"{aggregate.visitor_recall['mean']:>8.2f}"
+        )
+    print()
+    print(
+        "A gain of zero in an uncontaminated scenario is the expected result: "
+        "attribution should be a no-op when nobody else is in the home."
+    )
+
+    if args.output is not None:
+        _record(
+            "attribution_replicated",
+            configuration={
+                "days": args.days,
+                "step_minutes": args.step_minutes,
+                "replications": len(study.seeds),
+                "scenarios": [a.scenario for a in study.aggregates],
+            },
+            seeds=list(study.seeds),
+            results=study.to_dict(),
+            notes=[
+                "Both arms see identical households, visitors and sensor "
+                "records, so any difference is attributable to attribution.",
+                "Report the MCSE with any effect quoted from this artefact.",
+            ],
+        ).write(
+            args.output
+        )  # type: ignore[attr-defined]
+        print(f"Structured results written to {args.output}")
+
+
 def _run_attribution(args: argparse.Namespace) -> None:
     """Dispatch the attribution comparison experiment."""
     from .evaluation.attribution import run_attribution_study, standard_scenarios
+
+    if getattr(args, "seeds", None):
+        if len(args.seeds) == 1:
+            args.seed = args.seeds[0]
+        else:
+            _run_replicated_attribution(args)
+            return
 
     study = run_attribution_study(
         standard_scenarios(days=args.days, seed=args.seed),
