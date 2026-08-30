@@ -1,0 +1,76 @@
+name: Paper experiment smoke
+
+on:
+  pull_request:
+    paths:
+      - 'papers/failure-aware-multimodal-behavioural-sensing/experiments/**'
+      - '.github/workflows/paper-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install runtime dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .
+      - name: Validate frozen experiment specification
+        run: |
+          python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py \
+            --validate-only \
+            --replications 2
+      - name: Run two-household smoke study
+        run: |
+          python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py \
+            --replications 2 \
+            --output paper-smoke-results
+      - name: Assert smoke outputs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('paper-smoke-results')
+          required = {
+              'confirmatory_results.json',
+              'h1.csv',
+              'h2.csv',
+              'h3.csv',
+              'h4.csv',
+              'h5.csv',
+              'generated_results.tex',
+          }
+          missing = sorted(name for name in required if not (root / name).is_file())
+          if missing:
+              raise SystemExit(f'missing smoke outputs: {missing}')
+
+          artifact = json.loads((root / 'confirmatory_results.json').read_text())
+          if artifact['status'] != 'pilot-or-incomplete':
+              raise SystemExit(
+                  f"two-household smoke run must not be confirmatory: {artifact['status']}"
+              )
+          if len(artifact['seeds']) != 2:
+              raise SystemExit('smoke run did not use exactly two household seeds')
+          if artifact['git']['dirty'] is not False:
+              raise SystemExit(f"smoke run provenance is dirty: {artifact['git']}")
+          if artifact['git']['commit'] == 'unknown':
+              raise SystemExit('smoke run did not record a Git commit')
+
+          for hypothesis in ('h1', 'h2', 'h3', 'h4', 'h5'):
+              if not artifact['results']['raw'][hypothesis]:
+                  raise SystemExit(f'{hypothesis} produced no rows')
+          PY
+      - name: Upload smoke outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-experiment-smoke
+          path: paper-smoke-results/
+          retention-days: 14
