@@ -382,6 +382,40 @@ whose parameters are declared rather than fitted throughout.
 It also rules out one of the three candidates for the accuracy gap, and it
 means the bathroom failure is not caused by excessive stickiness.
 
+### Smoothing: the one way a filter can use more context
+
+The history term cannot be fed back into the filter, but it can be conditioned
+on from the other direction. A filter reports ``P(Z_t | O_1:t)``; a smoother
+reports ``P(Z_t | O_1:t+k)``, using evidence that arrived *after* the estimate
+and which the belief has therefore not already absorbed. No observation is read
+twice.
+
+Measured on the 11 held-out homes:
+
+| Lag | Latency | Balanced accuracy |
+| --- | --- | --- |
+| 0 | live | 0.449 |
+| **1** | **5 min** | **0.463** |
+| 3 | 15 min | 0.459 |
+| 6 | 30 min | 0.455 |
+| 12 | 60 min | 0.456 |
+| 48 | 4 hours | 0.464 |
+
+**Essentially all of it arrives at one step.** Four hours of lag scores the same
+as five minutes, and the variation in between is noise across eleven homes. That
+makes the gain cheap: five minutes of latency rather than an offline pass.
+
+`smooth_estimates` ships for this. It belongs on the evaluation, baseline and
+reporting paths. **It must not go on an alerting path**, where the delay is the
+entire cost and the filtered estimate is the correct input.
+
+An earlier version of this measurement was wrong in a way worth recording. The
+backward pass started each correction from an already-smoothed value, which
+chains information back through the whole sequence: every lag returned
+identical numbers, and what was actually full offline smoothing would have been
+published as a five-minute result. Identical figures across three lag settings
+were the only symptom.
+
 ### A note on the remaining candidate
 
 The ablation valued recent history at about +0.140, and the obvious response —
@@ -391,9 +425,15 @@ lagged observations would count evidence it has already absorbed a second time,
 producing exactly the overconfidence the calibration work just removed. A
 discriminative classifier can use lags because it is not recursive.
 
-So the third candidate is not simply unimplemented. It may not be reachable in
-this architecture without a different formulation, and that is the open question
-rather than a task waiting to be done.
+So the third candidate is not reachable by giving the filter more past. Reached
+from the other side, through smoothing, it yields +0.014 -- again roughly a
+tenth of what the ablation attributed to it.
+
+That repetition is itself the finding. Both principled mechanisms tried here,
+a circadian prior and a smoother, recover about a tenth of what a discriminative
+model extracts from the same information. The remaining signal appears not to be
+accessible to this generative, recursive formulation through incremental
+additions to it.
 
 ### Explanations tested and rejected
 
