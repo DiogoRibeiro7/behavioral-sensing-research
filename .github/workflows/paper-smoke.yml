@@ -5,6 +5,11 @@ on:
     paths:
       - 'papers/failure-aware-multimodal-behavioural-sensing/experiments/**'
       - '.github/workflows/paper-smoke.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'papers/failure-aware-multimodal-behavioural-sensing/experiments/**'
+      - '.github/workflows/paper-smoke.yml'
   workflow_dispatch:
 
 jobs:
@@ -27,9 +32,16 @@ jobs:
           python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py \
             --validate-only \
             --replications 2
-      - name: Run two-household smoke study
+      - name: Validate integration smoke specification
         run: |
           python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py \
+            --config papers/failure-aware-multimodal-behavioural-sensing/experiments/smoke_config.json \
+            --validate-only \
+            --replications 2
+      - name: Run short two-household smoke study
+        run: |
+          python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py \
+            --config papers/failure-aware-multimodal-behavioural-sensing/experiments/smoke_config.json \
             --replications 2 \
             --output paper-smoke-results
       - name: Assert smoke outputs
@@ -57,6 +69,8 @@ jobs:
               raise SystemExit(
                   f"two-household smoke run must not be confirmatory: {artifact['status']}"
               )
+          if artifact['resolved_config']['status'] != 'integration-smoke-only':
+              raise SystemExit('smoke workflow did not use smoke_config.json')
           if len(artifact['seeds']) != 2:
               raise SystemExit('smoke run did not use exactly two household seeds')
           if artifact['git']['dirty'] is not False:

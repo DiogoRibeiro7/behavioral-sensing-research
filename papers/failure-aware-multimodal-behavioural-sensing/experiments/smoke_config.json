@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "status": "integration-smoke-only",
+  "paper": "Failure-Aware Multimodal Behavioural Sensing",
+  "replications": {
+    "minimum": 200,
+    "seed_start": 10000,
+    "monte_carlo_se_target": 0.002,
+    "maximum": 1000
+  },
+  "household": {
+    "days": 3,
+    "step_minutes": 60
+  },
+  "primary_metrics": [
+    "balanced_accuracy",
+    "log_loss",
+    "brier",
+    "calibration_error",
+    "abstention_rate"
+  ],
+  "h1_missingness": {
+    "rates": [0.0, 0.05, 0.10, 0.20, 0.40]
+  },
+  "h2_sensor_subsets": {
+    "all_modalities": [
+      "front_door",
+      "bedroom_motion",
+      "bathroom_motion",
+      "kitchen_motion",
+      "living_motion",
+      "fridge_contact",
+      "bed_pressure",
+      "living_radar",
+      "wearable_motion",
+      "resident_beacon"
+    ],
+    "object_sensors_only": [
+      "front_door",
+      "bedroom_motion",
+      "bathroom_motion",
+      "kitchen_motion",
+      "living_motion",
+      "fridge_contact"
+    ],
+    "objects_plus_wearable": [
+      "front_door",
+      "bedroom_motion",
+      "bathroom_motion",
+      "kitchen_motion",
+      "living_motion",
+      "fridge_contact",
+      "wearable_motion",
+      "resident_beacon"
+    ],
+    "radar_door_bed": [
+      "front_door",
+      "living_radar",
+      "bed_pressure"
+    ],
+    "radar_door_bed_wearable": [
+      "front_door",
+      "living_radar",
+      "bed_pressure",
+      "wearable_motion",
+      "resident_beacon"
+    ],
+    "minimal_door_bed": [
+      "front_door",
+      "bed_pressure"
+    ]
+  },
+  "h3_attribution_scenarios": [
+    "resident_alone",
+    "short_visitor",
+    "prolonged_visitor",
+    "carer_visits",
+    "visitor_and_carer",
+    "resident_without_wearable",
+    "no_radar",
+    "sparse_coverage"
+  ],
+  "h4_failures": {
+    "missing_rate": 0.30,
+    "sensor_dropout": "bed_pressure",
+    "dropout_start_day": 1,
+    "dropout_days": 1
+  },
+  "h5_interactions": [
+    ["living_radar", "resident_beacon"],
+    ["wearable_motion", "resident_beacon"],
+    ["front_door", "resident_beacon"],
+    ["bed_pressure", "wearable_motion"]
+  ],
+  "reporting": {
+    "confidence_level": 0.95,
+    "bootstrap_resamples": 100,
+    "paired_by_seed": true,
+    "time_points_are_not_replications": true,
+    "field_performance_claims_forbidden": true
+  }
+}
