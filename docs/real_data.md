@@ -112,81 +112,100 @@ observable.
 ## Results on 22 real homes
 
 Every CASAS `hh` recording under 12 MB was scored: 22 homes, one resident each,
-motion and door sensors, **nothing refitted**. No emission rate, dwell time or
-threshold was changed from the declared defaults. Only annotated time was
-scored. After extending the location and activity maps, **no location and no
-activity label went unmapped in any home**, so nothing is being silently
+motion and door sensors, **nothing refitted**. Only annotated time was scored.
+No location and no activity label goes unmapped, so nothing is silently
 discarded.
 
 | | Simulator | Real homes (median) | Real homes (range) |
 | --- | --- | --- | --- |
-| Balanced accuracy | 0.816 | **0.364** | 0.273 – 0.468 |
-| Calibration error | 0.084 | **0.285** | 0.185 – 0.510 |
-| Abstention rate | — | 0.022 | 0.006 – 0.052 |
+| Balanced accuracy | 0.816 | **0.420** | 0.329 – 0.514 |
+| Calibration error | 0.084 | **0.314** | 0.221 – 0.921 |
+| Abstention rate | — | 0.025 | max 0.039 |
+| Labelled coverage | — | 89.9% | — |
 
-Not one of the 22 homes reaches 0.47. The simulator's figure is not approached
-anywhere.
-
-**The declared defaults do not transfer.** This is no longer a single data
-point: the result is consistent across 22 independent homes, and the failure
-takes the same shape in all of them.
-
-### What fails, and why it is the interesting part
+No home reaches 0.52. **The declared defaults do not transfer**, and the result
+is consistent across 22 independent homes.
 
 | State | Median recall | Range | Homes |
 | --- | --- | --- | --- |
 | sleeping | 0.74 | 0.39 – 0.87 | 22 |
-| home_active | 0.57 | 0.09 – 0.82 | 22 |
+| home_active | 0.58 | 0.10 – 0.82 | 22 |
 | kitchen_activity | 0.57 | 0.00 – 0.76 | 22 |
+| away | 0.36 | 0.03 – 0.62 | 22 |
 | bed_awake | 0.25 | 0.06 – 0.67 | 5 |
 | bathroom_activity | 0.25 | 0.00 – 0.57 | 22 |
 | home_inactive | 0.16 | 0.00 – 0.39 | 22 |
-| **away** | **0.00** | 0.00 – 0.33 | 22 |
 
-The split is not random. States with a distinctive room-and-rate signature
-survive: sleeping, cooking and general activity land between 0.57 and 0.74.
-States that require knowing the resident is *present but still* collapse.
+### Correction: an earlier version of this page was wrong about `away`
 
-**`away` recall is zero in the median home, across all 22.** On `hh103`, where
-the resident was genuinely `home_inactive`, the pipeline reported `away` 53% of
-the time; where they were genuinely `away`, it reported `home_active` almost
-always.
+A previous revision reported `away` recall of **0.00 in the median home** and
+built an explanation on it. That was an artefact of this adapter, not a property
+of the pipeline.
 
-### Two explanations tested, neither supported
+`Leave_Home` and `Enter_Home` annotate the *act of crossing the threshold*, with
+a median duration of about **twelve seconds**. Mapping `Leave_Home` to `AWAY`
+labelled a burst of motion inside the house as absence, so the inference was
+scored wrong for correctly reporting activity. Meanwhile the hours actually
+spent out carried no label and were never scored at all.
 
-The obvious reading is that these homes lack the sensors that confirm presence.
-The simulator's deployment has a bed sensor, a wearable and a beacon; these
-homes have motion and door sensors only, so motion silence is ambiguous between
-"sitting still" and "gone out". That explanation is **not supported by the
-evidence available here.**
+The measurement that exposed it: intervals labelled `AWAY` showed **130
+activations per hour** across the deployment. Absence does not produce 130
+events an hour.
 
-**A chair occupancy sensor does not help.** Five of the 22 homes carry a
-`LoungeChair` sensor, which is exactly a presence signal for a stationary
-resident. Those homes are not better: median `home_inactive` recall is 0.10 with
-the chair against 0.17 without, and balanced accuracy is 0.382 against 0.358.
-The difference runs the wrong way for the hypothesis and is well inside the
-spread of either group.
+`read_casas_hh` now derives the away period from the gap between a departure and
+the next arrival, which is the only annotation of absence the dataset supports.
+With that fix `away` recall is 0.36 and labelled coverage rises from 64% to 90%,
+because the time spent out is now scored rather than skipped. Median balanced
+accuracy rises from 0.364 to 0.420.
 
-**Modelling motion as occupancy state is worse, not better.** The adapter treats
-motion as event-kind and discards the OFF half of each pair. Reading those pairs
-as a persistent `PROXIMITY` state instead — so an OFF asserts absence — was
-tried on five homes. `away` recall goes to 1.00 in every one, and everything
-else falls apart: balanced accuracy drops from 0.35-0.47 to 0.16-0.23 and
-calibration error roughly doubles to 0.55-0.81. It reaches perfect `away` recall
-by reporting `away` almost always.
+The lesson generalises beyond this dataset. An annotation vocabulary can look
+like it names states when it actually names events, and the failure is silent:
+every number downstream is computed correctly from a truth series that means
+something other than what it claims.
 
-That failure is instructive. A motion sensor's OFF means "no motion in the last
-few seconds", not "nobody is home". Treating it as occupancy is precisely the
-`sensor activation != behavioural truth` conflation this project is built to
-avoid, and the event-kind reading in the adapter is the correct one.
+### What is left after the correction
 
-**So the mechanism is not established.** The failure is real, consistent across
-22 homes, and concentrated in the states that require knowing a resident is
-present but still. Why the pipeline cannot recover those states from this sensor
-suite remains open. Candidates not yet tested include the declared emission
-rates being wrong for real event densities, the dwell-time priors being wrong
-for real behaviour, and the occupancy layer's away logic depending on evidence
-these deployments do not produce.
+**The gap is real.** 0.420 against 0.816 is roughly half, across 22 homes, with
+none above 0.514.
+
+**`home_inactive` is the genuine failure**, at 0.16 median and unaffected by the
+away correction. A resident sitting still is the state the pipeline is worst at
+recognising, and that is not an artefact.
+
+**The declared event rates are measurably wrong.** Using
+`measure_event_rates`, pooled over six homes:
+
+| State, sensor in-room | Declared | Observed median | Ratio |
+| --- | --- | --- | --- |
+| kitchen_activity | 40/h | 580 | 14× |
+| bathroom_activity | 40/h | 299 | 7.5× |
+| sleeping | 0.8/h | 5.2 | 6.5× |
+| any sensor, elsewhere | 0.15/h | 0.0 | — |
+
+That is a plausible mechanism for the `home_inactive` failure. `HOME_INACTIVE`
+is declared at activity level 0.25, implying roughly 10 activations an hour from
+the in-room sensor, and a resident sitting still produces far fewer.
+
+**Refitting the rates helps that state but is not a fix.** Substituting measured
+values on six homes roughly doubles to triples `home_inactive` recall — 0.30 to
+0.59, 0.29 to 0.66, 0.20 to 0.47 — while balanced accuracy stays flat, sleeping
+recall falls, calibration degrades and abstention drops to almost zero. Seven
+constants eyeballed from six homes with no held-out set is parameter-fiddling,
+not fitting. It establishes that the rates matter and points the work
+somewhere specific; it does not resolve it.
+
+### Explanations tested and rejected
+
+- **An incomplete location map.** `DiningRoom` was unmapped in 14 homes.
+  Completing it moved the median from 0.356 to 0.364.
+- **Absent presence-confirming sensors.** Five homes carry a `LoungeChair`
+  occupancy sensor; they are not better, with `home_inactive` recall of 0.10
+  against 0.17 without.
+- **Modelling motion as occupancy state.** Reading ON/OFF pairs as a persistent
+  `PROXIMITY` state so that OFF asserts absence reaches 1.00 `away` recall by
+  reporting `away` almost always, collapsing balanced accuracy to 0.16 – 0.23.
+  A motion sensor's OFF means "no motion just now", not "nobody home", and the
+  event-kind reading is the correct one.
 
 ### The calibration result is the one to worry about
 

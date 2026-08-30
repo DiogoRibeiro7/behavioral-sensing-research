@@ -199,3 +199,57 @@ class TestRobustness:
     def test_rows_with_too_few_fields_are_counted(self) -> None:
         recording = read_casas_hh([*LINES, "2011-06-15,01:00:00"], timezone=UTC)
         assert recording.unparsed_lines == 1
+
+
+class TestDerivedAwayIntervals:
+    """`Leave_Home` marks crossing the threshold, not the time spent out.
+
+    Its median duration in real recordings is about twelve seconds. Scoring it
+    as AWAY penalises an inference that correctly reports activity, because the
+    resident is inside and walking to the door. The hours actually spent out
+    carry no label at all, so they have to be derived from the gap.
+    """
+
+    LINES = [
+        '2011-06-15,09:00:00.000000,OutsideDoor,OPEN,Leave_Home="begin"',
+        '2011-06-15,09:00:12.000000,OutsideDoor,CLOSE,Leave_Home="end"',
+        "2011-06-15,11:00:00.000000,Kitchen,ON",
+        '2011-06-15,14:00:00.000000,OutsideDoor,OPEN,Enter_Home="begin"',
+        '2011-06-15,14:00:12.000000,OutsideDoor,CLOSE,Enter_Home="end"',
+    ]
+
+    def test_the_gap_between_leaving_and_returning_becomes_away(self) -> None:
+        recording = read_casas_hh(self.LINES, timezone=UTC)
+        away = [a for a in recording.activities if a.state is BehaviouralState.AWAY]
+
+        assert len(away) == 1
+        assert away[0].start == at(9, 0) + timedelta(seconds=12)
+        assert away[0].end == at(14, 0)
+
+    def test_leaving_itself_is_not_away(self) -> None:
+        """Twelve seconds of walking to the door is activity in the home."""
+        recording = read_casas_hh(self.LINES, timezone=UTC)
+        leaving = [a for a in recording.activities if a.label == "Leave_Home"]
+
+        assert leaving and leaving[0].state is BehaviouralState.HOME_ACTIVE
+
+    def test_the_derivation_can_be_turned_off(self) -> None:
+        recording = read_casas_hh(self.LINES, timezone=UTC, derive_away=False)
+
+        assert not [a for a in recording.activities if a.state is BehaviouralState.AWAY]
+
+    def test_a_departure_with_no_return_yields_no_interval(self) -> None:
+        """An open-ended absence has no end to score against."""
+        lines = self.LINES[:2]
+        recording = read_casas_hh(lines, timezone=UTC)
+
+        assert not [a for a in recording.activities if a.state is BehaviouralState.AWAY]
+
+    def test_deriving_away_increases_the_labelled_span(self) -> None:
+        """The point of the derivation is that this time was previously unscored."""
+        with_away = read_casas_hh(self.LINES, timezone=UTC).labelled_fraction
+        without = read_casas_hh(
+            self.LINES, timezone=UTC, derive_away=False
+        ).labelled_fraction
+
+        assert with_away > without
