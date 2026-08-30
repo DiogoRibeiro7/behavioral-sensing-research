@@ -14,7 +14,7 @@ jobs:
       paper_python: ${{ steps.classify.outputs.paper_python }}
       full_repo: ${{ steps.classify.outputs.full_repo }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: classify
@@ -61,7 +61,7 @@ jobs:
     if: github.event_name == 'pull_request' && needs.changes.outputs.paper_only == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check whitespace and patch integrity
@@ -94,7 +94,7 @@ jobs:
     if: needs.changes.outputs.full_repo == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up Python
@@ -126,7 +126,7 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
     name: test (py${{ matrix.python-version }})
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -144,7 +144,7 @@ jobs:
     if: needs.changes.outputs.full_repo == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -173,7 +173,7 @@ jobs:
     if: needs.changes.outputs.full_repo == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
