@@ -23,7 +23,9 @@ HYPOTHESES = ("h1", "h2", "h3", "h4", "h5")
 
 def _load_runner() -> ModuleType:
     """Load the paper runner without turning the paper directory into a package."""
-    spec = importlib.util.spec_from_file_location("paper_confirmatory_runner", RUNNER_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "paper_confirmatory_runner", RUNNER_PATH
+    )
     if spec is None or spec.loader is None:
         raise RuntimeError("could not load run_confirmatory.py")
     module = importlib.util.module_from_spec(spec)
@@ -76,7 +78,9 @@ def _run_shard(
     seeds = _shard_seeds(full_seeds, shard_index, shard_count)
     provenance = runner._git_provenance()
     if provenance["commit"] == "unknown" or provenance["dirty"] is not False:
-        raise RuntimeError(f"production shard requires clean Git provenance: {provenance}")
+        raise RuntimeError(
+            f"production shard requires clean Git provenance: {provenance}"
+        )
 
     step = runner.timedelta(minutes=int(config["household"]["step_minutes"]))
     raw = {
@@ -192,7 +196,8 @@ def _merge_shards(
         "shard_count": shard_count,
         "results": results,
         "interpretation_guardrail": (
-            "All outcomes are simulator-derived and are not estimates of field performance."
+            "All outcomes are simulator-derived and are not estimates of field "
+            "performance."
         ),
     }
 
