@@ -88,16 +88,115 @@ most of it, and separating the two invites a reader to forget the difference.
 Scoring is refused outright when nothing carried a mapped label, because a
 metric over an empty sample still prints as a number.
 
+## Two export formats
+
+CASAS publishes recordings in more than one shape, and a reader written for one
+does not read the other.
+
+| | Classic (`read_casas`) | `hh` CSV (`read_casas_hh`) |
+| --- | --- | --- |
+| Separator | whitespace | comma, date and time split |
+| Third field | sensor id, `M004` | **location**, `Bedroom` |
+| Marker | `Sleeping begin` | `Sleep="begin"` |
+| Vocabulary | `Sleeping`, `Meal_Preparation` | `Sleep`, `Cook_Dinner` |
+
+Only six labels are common to both vocabularies, and none of the frequent ones
+are. The archives currently on Zenodo use the `hh` form, so that is the reader
+to start from.
+
+The `hh` export also carries the room in the data, which removes the need to
+reconstruct one from a floor plan — at the cost of having already aggregated
+each room's sensors into a single stream, so within-room redundancy is not
+observable.
+
+## First result on a real recording
+
+`hh103`, 57 days, one resident, seven locations. Nothing was tuned: no emission
+rate, dwell time or threshold was refitted. 65.5% of the span carried a mapped
+annotation and only that part was scored.
+
+| Metric | Simulator | **hh103** |
+| --- | --- | --- |
+| Balanced accuracy | 0.816 | **0.349** |
+| Calibration error | 0.084 | **0.299** |
+| Abstention rate | — | 0.021 |
+
+| State | Recall |
+| --- | --- |
+| kitchen_activity | 0.74 |
+| sleeping | 0.72 |
+| bed_awake | 0.67 |
+| bathroom_activity | 0.19 |
+| home_active | 0.08 |
+| away | 0.02 |
+| home_inactive | 0.02 |
+
+**The architecture does not transfer on declared defaults.** Balanced accuracy
+falls by more than half, and calibration error more than triples. This is one
+home in one dataset, so it is a data point rather than a verdict, but it is a
+real one and it points the same way the design documents feared.
+
+### What fails, and why it is the interesting part
+
+The split is not random. States with a distinctive room-and-rate signature
+survive: cooking, sleeping and being awake in bed all score around 0.7. States
+that require knowing the resident is *present but still* collapse.
+
+The confusion is specific. When the resident was genuinely `home_inactive`, the
+pipeline said `away` 53% of the time. When they were genuinely `away`, it said
+`home_active` essentially always.
+
+This home has seven motion and door streams and nothing else. The simulator's
+deployment includes a bed pressure sensor, a wearable and a resident beacon —
+precisely the modalities that distinguish a quiet resident from an empty house.
+Strip them out and motion silence becomes ambiguous between "sitting still" and
+"gone out", and the model resolves that ambiguity badly.
+
+That bears directly on the project's central question. Modality does substitute
+for sensor count, as the ablation found — but the substitution has a floor, and
+the presence-confirming modality appears to be the one that cannot be dropped.
+Reading motion silence as absence is exactly the failure the design set out to
+avoid, and on real data with a reduced sensor suite it happens anyway.
+
+### The calibration result is the one to worry about
+
+Calibration error of 0.299 with an abstention rate of 0.021 means the pipeline
+was **confidently wrong**: mostly incorrect, and almost never willing to say it
+did not know. The abstention mechanism is presented throughout this project as
+the safety valve that makes the rest defensible. On this recording it did not
+open.
+
+A monitoring system that reports "resident is out" while they sit quietly in a
+chair, with high stated confidence, is worse than one that reports nothing.
+
+### Reproducing it
+
+```python
+from datetime import timedelta
+from zoneinfo import ZoneInfo
+
+from sensor_modeling.datasets import evaluate_recording, read_casas_hh
+
+recording = read_casas_hh("labeled/hh103.csv", timezone=ZoneInfo("America/Los_Angeles"))
+print(recording.summary())
+print(evaluate_recording(recording, step=timedelta(minutes=5)).to_dict())
+```
+
+Data from <https://zenodo.org/records/15708568> (CC-BY-4.0), file
+`labeled_data.zip`. Not redistributed here.
+
+Results move with step size — balanced accuracy is 0.349 at five minutes, 0.252
+at ten, 0.248 at thirty — so quote the step alongside any number from this.
+
 ## Status
 
-The adapter is implemented and tested end to end, including an integration test
-that runs a CASAS-format recording through the unmodified pipeline. **That
-fixture is synthesised by this repository in CASAS format.** It establishes that
-the plumbing is correct and that the declared emission defaults separate states
-without being refitted. It says nothing about performance on a real apartment.
+The adapters are implemented and tested, and one real recording has been
+scored. What has **not** been done: more than one home, any other dataset, any
+fitting of parameters to real data, and any paired comparison of the kind the
+simulator experiments use. The single result above should not be generalised
+into a claim about the architecture, in either direction.
 
-Running this against downloaded CASAS recordings, and reporting what happens, is
-the outstanding work — and the answer is genuinely unknown. Nothing in the
-package is tuned for it: no emission rate, dwell time or threshold has been
-refitted. Whatever comes out is a lower bound on the approach with fitted
-parameters, and an honest measure of how far the defaults transfer.
+The obvious next steps are refitting emissions from a subset of homes and
+scoring on held-out ones, and checking whether the `home_inactive`/`away`
+confusion closes when a presence-confirming sensor is present in the
+deployment.

@@ -285,7 +285,10 @@ this biases inference toward inactivity — measured at kitchen recall 0.705 →
 
 | Risk | Severity |
 | --- | --- |
-| Simulator-only validation | **High** |
+| Declared defaults do not transfer to a real home (balanced accuracy 0.816 -> 0.349) | **High** |
+| Quiet presence read as absence without a presence-confirming sensor | **High** |
+| Abstention does not fire when the model is wrong on real data | **High** |
+| Simulator-only validation | **High**, now partly measured |
 | Small-sample pilots reported as though they were studies | High, addressed |
 | Attribution's value overstated by a single-seed demonstration | High, addressed |
 | Declared rather than fitted parameters | **High** |
