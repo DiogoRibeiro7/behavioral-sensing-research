@@ -23,6 +23,15 @@
   "h1_missingness": {
     "rates": [0.0, 0.05, 0.10, 0.20, 0.40]
   },
+  "h2_primary_noninferiority": {
+    "reference_configuration": "all_modalities",
+    "reduced_configuration": "radar_door_bed_wearable",
+    "metric": "balanced_accuracy",
+    "contrast": "full_minus_subset",
+    "absolute_margin": 0.02,
+    "confidence_level": 0.95,
+    "decision_rule": "ci_high_below_margin"
+  },
   "h2_sensor_subsets": {
     "all_modalities": [
       "front_door",
@@ -85,7 +94,9 @@
     "missing_rate": 0.30,
     "sensor_dropout": "bed_pressure",
     "dropout_start_day": 35,
-    "dropout_days": 14
+    "dropout_days": 14,
+    "control": "same_degraded_observations_with_health_reliabilities_forced_to_one",
+    "contrast": "failure_aware_minus_health_naive"
   },
   "h5_interactions": [
     ["living_radar", "resident_beacon"],
