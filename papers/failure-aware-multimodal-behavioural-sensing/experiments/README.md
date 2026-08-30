@@ -6,20 +6,42 @@ This directory contains the executable experiment protocol for the paper
 The manuscript's exploratory values are development diagnostics. They are not the
 confirmatory experiment and must not be silently promoted into the final results.
 
+## Current status
+
+The frozen confirmatory simulator study has now been executed and accepted at
+`N=200`. The accepted repository snapshot is in
+`results/confirmatory_n200/`.
+
+The frozen scientific revision remains
+`bd5a9b10068b69fc75cc6f806904430633ce7408`. Later documentation, validation,
+workflow and model-development commits do not move that experimental target.
+
 ## Files
 
 - `config.json` — frozen, machine-readable design and reporting rules.
-- `run_confirmatory.py` — executes H1–H5 on paired simulated household trajectories.
-- `results/` — generated outputs; not source-of-truth and should not be hand edited.
+- `CONFIRMATORY_CONTRACT.md` — scientific decision contract frozen before results.
+- `FREEZE_MANIFEST.json` — exact pre-results acceptance contract.
+- `run_confirmatory.py` — shared implementation and development/smoke runner;
+  direct output from this script is **not** eligible as the manuscript confirmatory
+  artifact.
+- `run_production.py` — authoritative frozen shard/merge route for confirmatory
+  execution.
+- `validate_frozen_artifact.py` — post-freeze acceptance validator.
+- `results/confirmatory_n200/` — accepted compact result snapshot and provenance.
 
 ## Hypotheses
 
 The runner maps directly to the manuscript hypotheses:
 
 - **H1** — graceful degradation across 0%, 5%, 10%, 20%, and 40% random missingness.
-- **H2** — sensor-count versus modality using fixed, named deployment subsets.
-- **H3** — occupancy-aware versus naive resident attribution across visitor/carer regimes.
-- **H4** — failure-aware inference versus a paired health-naive control that forces sensor reliability weights to one while retaining identical observations and health status calculation.
+- **H2** — sensor-count versus modality using fixed, named deployment subsets, with
+  the five-sensor `radar_door_bed_wearable` configuration as the frozen primary
+  non-inferiority comparison.
+- **H3** — occupancy-aware versus naive resident attribution across visitor/carer
+  regimes.
+- **H4** — failure-aware inference versus a paired health-naive control that forces
+  sensor reliability weights to one while retaining identical observations and
+  health status calculation.
 - **H5** — non-additive interactions for pre-specified sensor pairs.
 
 Every comparison is paired by household seed. Individual time points are observations,
@@ -27,7 +49,7 @@ not independent replications.
 
 ## Smoke test
 
-A short run verifies execution only:
+A short direct run verifies execution only:
 
 ```bash
 python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py \
@@ -35,48 +57,49 @@ python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confi
   --output /tmp/behavioural-sensing-paper-smoke
 ```
 
-A smoke run is marked `pilot-or-incomplete` and cannot be used as the paper's
-confirmatory result.
+A smoke or direct-run artifact cannot be used as the paper's confirmatory result.
 
-## Confirmatory run
+## Confirmatory production route
 
-After the experimental software revision has passed the repository release gates and
-is frozen:
+The accepted study used the frozen `run_production.py` shard/merge route with the
+stride-4 household seed sequence. Forty deterministic shards covered 200 independent
+households, after which the exact shard union was merged and passed the frozen
+artifact validator.
 
-```bash
-python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py
-```
+The pre-specified precision rule used the maximum Monte Carlo standard error across
+all pre-specified H2 reduced-configuration balanced-accuracy gaps. The accepted
+`N=200` artifact attained a maximum MCSE of `0.001124983614711242`, below the
+`0.002` target, so no prospective extension beyond 200 households is required.
 
-The default configuration starts with 200 independent household trajectories. The
-result is labelled `confirmatory` only when both conditions hold:
+The frozen primary H2 decision remains the five-sensor comparison only. Its negative
+non-inferiority result does not invalidate confirmatory status and cannot be replaced
+post hoc by a better-performing secondary subset.
 
-1. the configured minimum replication count is reached; and
-2. the maximum primary H2 Monte Carlo standard error is at or below 0.002.
+## Accepted output
 
-If the MCSE gate fails, increase the replication count without changing the model or
-hypotheses, up to the pre-specified maximum of 1000.
+The full accepted GitHub Actions bundle was produced by recovery run `33332161062`
+from the immutable shards of production run `33319406297`. The recovery reran no
+simulation. It merged the original shards with the frozen production code and
+validated them using the original acceptance revision.
 
-## Outputs
-
-The runner writes:
-
-- `confirmatory_results.json` — complete provenance, resolved configuration, seeds,
-  hypothesis-level results, summaries, and the MCSE gate;
-- `h1.csv` ... `h5.csv` — household-level analysis tables;
-- `generated_results.tex` — generated LaTeX macros for manuscript integration.
-
-The result artefact records the Git commit and dirty-worktree state. A final paper run
-should have `git_dirty: false`.
+`results/confirmatory_n200/RESULTS_MANIFEST.json` records the workflow IDs, Git
+revisions, artifact fingerprint, file SHA-256 values and interpretation guardrails.
+`accepted_summary.json` contains the compact accepted summaries used for manuscript
+integration.
 
 ## Interpretation rules
 
 - These experiments estimate performance under the specified simulator, not field
   performance.
 - Do not treat repeated time points as the replication unit.
-- Do not change hypotheses, sensor subsets, missingness levels, or primary metrics
-  after inspecting confirmatory results.
-- If software defects are found after the freeze, fix them transparently, invalidate
-  affected results, increment the experiment schema/config as needed, and rerun all
-  paired arms from the same seed set.
+- Do not change hypotheses, sensor subsets, missingness levels, margins, primary
+  metrics or acceptance rules after inspecting confirmatory results.
+- The primary H2 five-sensor non-inferiority result is negative and must remain
+  negative in the manuscript.
+- Secondary H2 configurations may be reported as pre-specified secondary evidence,
+  but cannot rescue or replace the primary comparison.
+- If a genuine scientific software defect is later found in the frozen experiment,
+  affected results must be invalidated transparently and a new versioned experiment
+  designed rather than silently rewriting this accepted snapshot.
 - External validation remains a separate stage and should not be tuned to reproduce
   the simulator conclusions.
