@@ -270,6 +270,49 @@ so this bounds the information present rather than what an unsupervised filter
 ought to find. And it is the same 22 homes from one research group, so 0.607 is
 a ceiling for this instrumentation, not for ambient sensing generally.
 
+### Where the missing accuracy actually lives
+
+Ablating the classifier's features says which information carries the signal,
+and therefore what the pipeline is not using.
+
+| Features given to the classifier | Balanced accuracy |
+| --- | --- |
+| Event counts, lags and time of day | 0.607 |
+| Without time of day | 0.537 |
+| Counts and time of day, no lags | 0.502 |
+| **Event counts only** | **0.397** |
+| Time of day only, no sensors | 0.262 |
+
+**The pipeline is already at the ceiling for the evidence it uses.** Given only
+instantaneous per-room event counts, the best achievable is 0.397. The pipeline
+scores 0.420. It is not squandering the evidence in front of it — on that
+evidence it is slightly *ahead* of a supervised classifier, which is a credit to
+the fusion layer rather than a criticism of it.
+
+The missing 0.19 is not hidden in the counts. It is in two things the pipeline
+does not have:
+
+- **Time of day is worth about +0.105** over counts alone. The pipeline has no
+  circadian term at all. Its continuous-time Markov prior models how long a
+  state persists, not when in the day that state is plausible, so it cannot
+  distinguish someone motionless at 02:00 from someone motionless at 14:00.
+- **Recent history is worth about +0.140** over counts alone. The pipeline is
+  recursive and carries a posterior forward, but that is not the same as having
+  the last few steps of raw room-resolved counts available as evidence.
+
+Together they account for +0.210, which is the whole of the gap and slightly
+more, so the two overlap.
+
+Time of day alone, with no sensor information whatsoever, reaches 0.262 against
+a 0.143 baseline. Daily rhythm is genuinely informative and the pipeline
+currently ignores it, but it is not a shortcut: a clock alone lands far below
+the 0.420 the pipeline achieves, so the sensors are doing most of the work.
+
+**This turns the gap into two specific, principled changes.** A time-inhomogeneous
+generator gives the CTMC a circadian prior, and a longer evidence window gives
+the emission model recent history. Both are interpretable, both are
+probabilistic, and neither requires anything the project's constraints exclude.
+
 ### Explanations tested and rejected
 
 - **An incomplete location map.** `DiningRoom` was unmapped in 14 homes.
