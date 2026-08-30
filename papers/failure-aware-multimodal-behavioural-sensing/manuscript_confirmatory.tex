@@ -1,0 +1,184 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage[backend=biber,style=authoryear,natbib=true,maxcitenames=2,maxbibnames=99]{biblatex}
+\addbibresource{references.bib}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\emergencystretch=2em
+
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\calO}{\mathcal{O}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\method}{\textsc{FAMS}}
+
+\title{Failure-Aware Multimodal Behavioural Sensing:\\
+Probabilistic State Inference, Person Attribution, and Sensor Reduction in Smart Homes}
+\author{Diogo Ribeiro\\
+\small \textit{Faculty of Media Arts and Design, Technical University of Porto}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Ambient assisted-living systems infer behaviour from sparse, heterogeneous, and imperfect sensor streams, yet sensor activation is often treated too directly as behavioural truth. We present a failure-aware multimodal framework in which sensor events are uncertain observations of latent behavioural state. The framework combines hardware-neutral observation semantics, sensor-health reliability, occupancy-aware resident attribution, continuous-time latent-state filtering, adaptive baselines, restrained alerting, and paired sensor ablation. We evaluated five pre-specified hypotheses in a frozen confirmatory simulation with $N=200$ paired household trajectories; the run passed its Monte Carlo precision and provenance gates. Random missingness produced graded loss of balanced accuracy, although abstention did not increase materially. The frozen five-sensor deployment failed non-inferiority against the ten-sensor deployment by a large margin: the balanced-accuracy gap was $0.1548$ (95\% CI $[0.1531,0.1564]$) against a $0.02$ margin. A secondary eight-sensor configuration was much closer to the full deployment, with a gap of $0.00529$. Occupancy-aware attribution helped under several contamination regimes, particularly carer-related scenarios, but harmed balanced accuracy when wearable and beacon evidence were unavailable. Failure-aware reliability weighting improved log loss while worsening balanced accuracy, Brier score, and calibration error, demonstrating a genuine scoring trade-off rather than uniform dominance. All four pre-specified sensor-interaction terms were positive. These results are simulator-derived and are not estimates of field performance. The contribution is therefore methodological and diagnostic: fewer sensors can preserve information, but aggressive reduction and reliability weighting have failure modes that must remain visible rather than being hidden by post-hoc model selection.
+\end{abstract}
+
+\noindent\textbf{Keywords:} ambient assisted living; behavioural sensing; sensor fusion; uncertainty; smart homes; missing data; multi-resident activity recognition; sensor ablation
+
+\section{Introduction}
+
+Ambient assisted living (AAL) offers a route to continuous, low-burden monitoring in the home, but the useful signal is indirect. Motion detectors, contact switches, bed sensors, wearables, and radar systems measure physical phenomena; they do not directly observe activities of daily living, health states, or clinical deterioration. Recent reviews describe AAL design as a system-level trade-off between sensing quality, privacy, usability, reliability, communication, cost, and decision-making \citep{zieni2025aal}. Statistical work on passive sensing has shown that interpretable models can capture within-home temporal structure and cross-sensor dependence \citep{gillam2022athome}, while smart-home activity recognition has developed increasingly sophisticated sequential and multi-person models \citep{asghari2019hhmm,wang2022multiperson}.
+
+Four methodological problems motivate the present framework. First, sensor semantics are often stronger than the evidence: a refrigerator-door activation is evidence of interaction, not proof of food intake. Second, missingness and behavioural quiet are confounded unless sensor-health semantics are represented explicitly. Third, activity in the home is not necessarily activity by the monitored resident. Fourth, more sensors are not automatically better because installation burden, maintenance, privacy, and failure surfaces also increase.
+
+We therefore model a posterior distribution over latent behavioural states,
+\begin{equation}
+\Prob(Z_t=z\mid\calO_{1:t}),
+\end{equation}
+with sensor quality, health reliability, and resident attribution tempering the evidential contribution of observations. A failed sensor contributes no state preference; it does not vote for inactivity.
+
+The paper makes five methodological contributions: a canonical observation model separating measurement from interpretation; reliability-aware multimodal filtering; occupancy-aware resident attribution; adaptive personal baselines for behavioural change; and paired sensor-ablation and interaction analysis. Unlike the earlier development manuscript, the present version reports the frozen confirmatory simulator study. All numerical conclusions remain explicitly simulator-derived, and external validation is treated as a separate scientific stage.
+
+\section{Related work}
+
+Passive and ambient sensing is attractive because it can observe routine without repeated user interaction. Transparent household-specific probabilistic models can capture temporal and cross-sensor structure \citep{gillam2022athome}. Sequential latent-state models are natural for activity recognition because activities exhibit persistence and transitions, while change-point methods offer a complementary view focused on transitions \citep{asghari2019hhmm,bermejo2021cpd,culman2020cpam}.
+
+Person attribution is a distinct inference problem from activity recognition. ARAS provides multi-resident smart-home data with labelled activities \citep{alemdar2013aras}, and multi-person activity-recognition work shows that associating observations with residents can materially change recognition performance \citep{wang2022multiperson}. Our scope is narrower: one monitored resident is modelled explicitly, while other occupants are contextual contamination rather than targets of biometric identification.
+
+Privacy-preserving richer sensing, including millimetre-wave radar, is increasingly relevant because it can provide presence, motion, posture, and tracking information without optical imagery \citep{chen2026mmwave,samimi2026fmcw}. The relevant design question is not simply whether such a modality improves accuracy, but whether it can replace narrower sensors without obscuring uncertainty or creating brittle dependence on one high-information stream.
+
+\section{Methodological framework}
+\label{sec:method}
+
+A canonical observation is represented as
+\begin{equation}
+O_i=(t_i,s_i,m_i,k_i,x_i,u_i,q_i,c_i,\rho_i),
+\end{equation}
+where the fields encode time, sensor identity, modality, temporal semantics, value, unit, device quality, confidence, and provenance/context. Events, persistent states, and sampled quantities are kept distinct so that absent observations are not silently converted into measured zeros.
+
+For sensor $s$ at time $t$, the health layer estimates
+\begin{equation}
+r_s(t)\in[0,1].
+\end{equation}
+Reliability depends on declared reporting semantics. A zero reliability weight means no state preference, not evidence for inactivity.
+
+Occupancy context is represented by $C_t$, and ambient evidence receives an attribution factor
+\begin{equation}
+a_s(t)=\Prob(\text{resident generated evidence from }s\mid\calO_{1:t}).
+\end{equation}
+Person-bound sensors can remain fully attributable when valid, whereas ambient evidence is discounted when another occupant may be its source.
+
+Between observations, the latent-state belief evolves under a continuous-time Markov generator $Q$,
+\begin{equation}
+\boldsymbol p(t+\Delta)=\boldsymbol p(t)\exp(Q\Delta).
+\end{equation}
+For observations $B_t$, the tempered update is
+\begin{equation}
+p_t(z)\propto p_{t^-}(z)\prod_{s\in B_t}L_s(z)^{\omega_s(t)},
+\end{equation}
+with
+\begin{equation}
+\omega_s(t)=\lambda_s q_s(t)c_s(t)r_s(t)a_s(t).
+\end{equation}
+This power-likelihood form reduces the influence of uncertain evidence without pretending that uncertainty is a deterministic negative observation, and is related to general Bayesian updating \citep{bissiri2016general}.
+
+Daily behavioural summaries integrate posterior state occupancy rather than only argmax labels. Poorly observed days can be excluded from baseline learning, and robust deviation scores and change-point methods separate ordinary variability from persistent shifts \citep{killick2012pelt}. Alerting remains downstream of state and change inference so that statistical novelty is not automatically equated with a delivered alert.
+
+For a deployment sensor set $S$ and metric $M(S)$, sensor marginal effects and interactions are defined by
+\begin{equation}
+\Delta_j=M(S)-M(S\setminus\{j\}),
+\end{equation}
+and
+\begin{equation}
+I_{ij}=\big[M(S)-M(S\setminus\{i,j\})\big]
+-\big[M(S)-M(S\setminus\{i\})\big]
+-\big[M(S)-M(S\setminus\{j\})\big].
+\end{equation}
+Positive $I_{ij}$ indicates complementarity under this definition.
+
+\section{Experimental design}
+\label{sec:experiments}
+
+The simulator generates longitudinal household trajectories with known latent state, resident location, sleep, outings, visitors, carer visits, and sensor observations. The generative process is deliberately structurally different from the estimator. Sensor degradation is injected separately from behavioural generation, allowing paired counterfactual comparisons on the same household trajectory.
+
+The confirmatory study was frozen before results were examined. The independent replication unit is one simulated household trajectory, with initial production size $N=200$ and seeds
+\begin{equation}
+s_i=10000+4i,\qquad i=0,\ldots,N-1.
+\end{equation}
+Replication could increase only for the pre-specified Monte Carlo precision criterion, up to $N=1000$, without inspecting hypothesis direction or changing the design. The target was maximum H2 balanced-accuracy MCSE $\leq0.002$ across the pre-specified reduced configurations. The observed maximum MCSE was $0.001125$, so the experiment stopped at the initial $N=200$.
+
+The frozen hypotheses were: H1, graceful degradation across 0\%, 5\%, 10\%, 20\%, and 40\% random missingness; H2, non-inferiority of a five-sensor radar/door/bed/wearable deployment relative to the ten-sensor deployment, with margin $0.02$ on balanced accuracy; H3, scenario-specific attribution value under visitor/carer contamination; H4, failure-aware versus health-naive reliability weighting on identical degraded observations; and H5, non-zero pre-specified sensor interactions. All uncertainty calculations are over households, never time points. A negative hypothesis result remains scientifically valid if the frozen provenance and precision gates pass.
+
+\input{confirmatory_results.tex}
+
+\section{Discussion}
+
+\subsection{Graceful degradation does not imply appropriate abstention}
+
+The H1 result separates two ideas that are often conflated. Balanced accuracy degrades gradually as random records are removed, which is preferable to a cliff-like failure. However, the inference system does not respond to this loss by abstaining materially more often, and the probabilistic metrics are not monotone in the intuitive direction. In particular, log loss improves while discrimination worsens. The architectural rule that missing sensors should not vote for inactivity is therefore necessary but not sufficient for an uncertainty mechanism that degrades in the way a downstream decision-maker might expect. Coverage-aware abstention remains a specific target for external validation and future model revision.
+
+\subsection{Sensor reduction is a frontier, not a five-sensor success}
+
+The primary H2 result is unambiguously negative. The frozen five-sensor deployment loses roughly 0.155 balanced-accuracy points relative to the full ten-sensor deployment, far outside the $0.02$ non-inferiority margin. The study therefore does not support the claim that the selected five-sensor kit preserves state-inference performance.
+
+At the same time, the secondary eight-sensor result shows that this negative result should not be simplified into ``more sensors are always better''. The eight-sensor configuration lies close to the full system, while six-, five-, three-, and two-sensor configurations lose substantially more information. The scientifically useful object is consequently a sensor-information frontier. The secondary configuration is evidence about that frontier, not a substitute primary hypothesis chosen after seeing the result.
+
+\subsection{Attribution is useful only when attribution evidence is itself adequate}
+
+H3 supports the idea that occupancy-aware attribution can matter under contamination, especially in carer-related regimes. Yet the reversal when wearable and resident-beacon evidence are removed is equally important. Attribution is a probabilistic nuisance-variable correction, not a universally beneficial preprocessing step. If the evidence identifying the resident is weak, discounting ambient evidence can remove useful signal from the wrong person hypothesis. External validation should therefore report attribution benefit jointly with the quality of the evidence used to perform attribution.
+
+\subsection{Failure-aware weighting changes the error distribution rather than dominating}
+
+H4 is a direct warning against evaluating reliability weighting with a single score. Failure-aware weighting improves log loss but worsens balanced accuracy, Brier score, and ECE on the frozen degraded-sensing regime. This means the weighting reduces some severe probability errors while producing worse average classification and calibration behaviour. The correct interpretation is a scoring trade-off, not a general robustness victory. Any operational deployment would need a loss function tied to the downstream decision rather than assuming that lower confidence under failure is automatically better in every statistical sense.
+
+\subsection{Sensor interactions are empirically non-additive in the simulator}
+
+All four H5 interaction terms are positive. The strongest interaction involves wearable motion and the resident beacon, with a smaller but clear interaction between bed pressure and wearable motion. These results are consistent with the idea that identity-bearing and ambient modalities can complement one another. They also explain why raw sensor count is a poor proxy for information content: what matters is not only which measurements are present but how their evidential roles combine.
+
+\section{Limitations}
+\label{sec:limitations}
+
+The dominant limitation is external validity. The simulator was written by the same project as the estimator. Structural separation, guard tests, and distinct generative assumptions reduce circularity but cannot remove model-world bias. Simulator seeds vary stochastic realisations under one assumed world; they do not represent the structural heterogeneity of real households.
+
+Second, several inference parameters are declared rather than estimated from independent field data, including state dwell assumptions, occupancy priors, evidence weights, and alert thresholds. Parameter uncertainty is not propagated. Third, occupancy and behavioural-state layers share evidence, so their errors are correlated even though the implementation treats the stages sequentially. Fourth, the ontology represents one monitored resident rather than a complete multi-resident latent-state system. Fifth, late observations beyond the configured tolerance are dropped rather than retrospectively smoothing past states.
+
+Finally, the confirmatory intervals are precise conditional on the simulator and paired household design; precision does not imply transportability. The narrow H2 interval establishes that the five-sensor gap is not Monte Carlo noise under this model world. It does not establish the size of that gap in real homes.
+
+\section{External validation}
+\label{sec:external}
+
+External validation should proceed without redesigning the model around the simulator results. CASAS provides annotated smart-home datasets spanning single-resident and multi-resident settings \citep{cook2013casas}, while ARAS provides month-long labelled recordings from two multi-resident homes \citep{alemdar2013aras}. These datasets can test state recognition, contamination, temporal generalisation, and robustness to real sensor sparsity.
+
+The external-validation workflow should freeze the ontology, observation semantics, metrics, and principal hypotheses; implement dataset adapters without modifying downstream inference; fit only parameters explicitly designated as trainable using household-separated training data; evaluate on held-out homes or held-out periods rather than random time points; and report discrimination, calibration, abstention, attribution evidence quality, and failure/coverage strata. The relevant question is not whether the simulator numbers reproduce exactly, but whether the qualitative findings survive: graded discrimination loss, conditional attribution value, a sensor-information frontier, non-additive sensor value, and the possibility that failure-aware weighting improves one proper score while worsening others.
+
+\section{Reproducibility and software}
+
+The confirmatory experiment is frozen to Git revision \texttt{bd5a9b10068b69fc75cc6f806904430633ce7408}, configuration SHA-256 \texttt{7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4}, Python 3.11.16, and the pinned numerical environment recorded in the accepted artifact. The original production run generated 40 immutable shards; a later merge-only recovery reused those shards after a workflow-path bug prevented the first merge from starting. The recovered merged artifact passed the original frozen validator without rerunning any household simulation. A repository-retained result snapshot records the validator output, accepted summaries, workflow identifiers, artifact digest, and file-level hashes.
+
+The accepted result remains simulator-derived. No field-performance claim is inferred from the validation status, and no secondary H2 sensor subset is promoted to replace the frozen primary comparison.
+
+\section{Conclusion}
+
+Failure-aware multimodal behavioural sensing is not validated by a single accuracy number. The frozen simulation instead reveals where the architecture succeeds and where its intuitions are incomplete. Random missingness produces graded discrimination loss, but the current abstention mechanism does not respond strongly to declining evidence. The selected five-sensor deployment is decisively not non-inferior to the ten-sensor system, although an eight-sensor secondary configuration preserves much more information. Occupancy-aware attribution helps in several contaminated scenarios but can become harmful when resident-specific evidence disappears. Failure-aware reliability weighting improves log loss while worsening balanced accuracy, Brier score, and calibration error. Sensor interactions are consistently positive for the four pre-specified pairs.
+
+These mixed and negative findings are the main value of the confirmatory study. They narrow the claims that should be carried into real-home evaluation and prevent a simulator from being used merely to certify a preferred architecture. The next scientific boundary is therefore external validation on held-out real households, with the present negative H2 result and metric disagreements preserved rather than tuned away.
+
+\printbibliography
+
+\end{document}
