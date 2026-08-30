@@ -18,8 +18,52 @@ env:
   PYTHON_VERSION: "3.11.16"
 
 jobs:
+  preflight:
+    name: validate dispatch
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out dispatch-time acceptance infrastructure
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          path: infra
+
+      - name: Verify dispatch-time freeze manifest
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(
+              "infra/papers/failure-aware-multimodal-behavioural-sensing/"
+              "experiments/FREEZE_MANIFEST.json"
+          )
+          manifest = json.loads(path.read_text(encoding="utf-8"))
+          assert manifest["status"] == "frozen-pre-results"
+          assert manifest["experiment_git_revision"] == os.environ["FROZEN_REVISION"]
+          assert (
+              manifest["frozen_files"]["config"]["sha256"]
+              == os.environ["CONFIG_SHA256"]
+          )
+          assert manifest["replications"]["initial_n"] == int(
+              os.environ["REPLICATIONS"]
+          )
+          PY
+
   shard:
     name: shard ${{ matrix.shard }}
+    needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
@@ -185,10 +229,10 @@ jobs:
           fetch-depth: 0
           path: frozen
 
-      - name: Check out current acceptance infrastructure
+      - name: Check out dispatch-time acceptance infrastructure
         uses: actions/checkout@v7
         with:
-          ref: develop
+          ref: ${{ github.sha }}
           fetch-depth: 1
           path: infra
 
