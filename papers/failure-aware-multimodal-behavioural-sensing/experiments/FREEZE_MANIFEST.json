@@ -1,0 +1,98 @@
+{
+  "freeze_schema_version": 1,
+  "status": "frozen-pre-results",
+  "freeze_date": "2026-08-30",
+  "paper": "Failure-Aware Multimodal Behavioural Sensing",
+  "experiment_git_revision": "bd5a9b10068b69fc75cc6f806904430633ce7408",
+  "eligible_execution_route": {
+    "shard_runner": "papers/failure-aware-multimodal-behavioural-sensing/experiments/run_production.py shard",
+    "merge_runner": "papers/failure-aware-multimodal-behavioural-sensing/experiments/run_production.py merge",
+    "direct_run_confirmatory_eligible": false,
+    "rule": "Only the complete artifact produced by run_production.py merge from the exact frozen shard set is eligible for confirmatory manuscript use."
+  },
+  "frozen_files": {
+    "config": {
+      "path": "papers/failure-aware-multimodal-behavioural-sensing/experiments/config.json",
+      "blob_sha": "c96d651c474ca16469f697e4814e76e298f55b3c",
+      "sha256": "7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4"
+    },
+    "contract": {
+      "path": "papers/failure-aware-multimodal-behavioural-sensing/experiments/CONFIRMATORY_CONTRACT.md",
+      "blob_sha": "9da0232b1a06cc4dfc3e9ae7116e4d26bdaa312c"
+    },
+    "confirmatory_runner": {
+      "path": "papers/failure-aware-multimodal-behavioural-sensing/experiments/run_confirmatory.py",
+      "blob_sha": "a547b21e46aa1b445f631464352acb03d8aa8238",
+      "role": "shared experiment implementation and development/smoke runner; direct output is not confirmatory-eligible"
+    },
+    "production_runner": {
+      "path": "papers/failure-aware-multimodal-behavioural-sensing/experiments/run_production.py",
+      "blob_sha": "f3beba9ea5c56b206a6260acf99b93935f24606c",
+      "role": "authoritative confirmatory shard and merge route"
+    }
+  },
+  "replications": {
+    "initial_n": 200,
+    "maximum_n": 1000,
+    "independent_unit": "simulated household trajectory",
+    "seed_start": 10000,
+    "seed_stride": 4,
+    "initial_first_seed": 10000,
+    "initial_last_seed": 10796,
+    "extension_rule": "Increase N only for the pre-specified H2 Monte Carlo precision criterion; do not inspect hypothesis direction or alter analysis choices."
+  },
+  "h2_primary_noninferiority": {
+    "reference_configuration": "all_modalities",
+    "reduced_configuration": "radar_door_bed_wearable",
+    "metric": "balanced_accuracy",
+    "estimand": "BA_full_minus_BA_reduced",
+    "absolute_margin": 0.02,
+    "confidence_level": 0.95,
+    "decision_rule": "paired_bootstrap_ci_high_strictly_below_0.02",
+    "scientific_result_does_not_control_confirmatory_status": true
+  },
+  "precision": {
+    "metric": "balanced_accuracy",
+    "contrast": "full_minus_subset",
+    "mcse_target": 0.002,
+    "implementation_scope": "maximum MCSE across all pre-specified H2 reduced-configuration balanced-accuracy gaps",
+    "note": "This is a conservative stopping rule. Secondary H2 configurations cannot replace the frozen primary non-inferiority contrast."
+  },
+  "reporting": {
+    "bootstrap_resamples": 5000,
+    "confidence_level": 0.95,
+    "paired_by_household_seed": true,
+    "time_points_are_not_replications": true,
+    "field_performance_claims_forbidden": true
+  },
+  "reference_environment": {
+    "python": "3.11.16",
+    "sensor-modeling": "0.2.0",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "pandas": "3.0.5"
+  },
+  "pre_freeze_evidence": {
+    "pr_head_ci_run": 33310037097,
+    "pr_head_ci_conclusion": "success",
+    "pr_head_smoke_run": 33310037084,
+    "pr_head_smoke_conclusion": "success",
+    "merged_smoke_run": 33310265664,
+    "merged_smoke_conclusion": "success",
+    "merged_smoke_artifact_id": 9731766562,
+    "merged_smoke_artifact_sha256": "decbbc9b06c789d9eb367c5df4747d1270425de032da94b67e1b5d890a3a7426",
+    "merged_shared_ci_run": 33310265571,
+    "merged_shared_ci_requirement": "must conclude success before production shards are started"
+  },
+  "acceptance": {
+    "requires_shard_count_field": true,
+    "requires_exact_frozen_git_revision": true,
+    "requires_clean_git_provenance": true,
+    "requires_exact_config_sha256": true,
+    "requires_exact_stride_seed_sequence": true,
+    "requires_complete_seed_coverage_for_every_hypothesis_arm": true,
+    "requires_mcse_gate_pass": true,
+    "requires_simulator_only_guardrail": true
+  },
+  "post_result_changes_require_new_experiment_version": true
+}
