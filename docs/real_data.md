@@ -217,6 +217,59 @@ held-out set, appeared to improve `home_inactive` recall while degrading
 everything else. That was parameter-fiddling and its result should be
 disregarded in favour of the held-out numbers above.
 
+### How much is recoverable at all
+
+The remaining question was whether roughly 0.42 is a poor result or close to
+what motion and door sensors support. That is measurable: fit a gradient-boosted
+classifier on the same information the pipeline receives — per-room event counts
+for the current step, three lagged steps, and time of day — training on 11 homes
+and scoring on the 11 held out.
+
+This is a diagnostic bound, not a proposed model, and nothing about it goes near
+the inference path.
+
+| | Balanced accuracy |
+| --- | --- |
+| Majority-class baseline | 0.143 |
+| **Pipeline, declared defaults** | **0.420** |
+| **Supervised ceiling** | **0.607** |
+| Simulator | 0.816 |
+
+**The ontology is identifiable from these sensors.** A classifier reaches 0.607,
+far above chance, so the states are genuinely separable from motion and door
+data. The worry that a seven-state ontology might be unrecoverable in principle
+from this instrumentation is answered, and answered favourably.
+
+**The pipeline recovers about two thirds of what is available.** 0.420 against a
+0.607 ceiling. The accuracy gap is therefore a deficiency in the inference, not
+a limit of the deployment, and it is worth closing.
+
+Per state, where the pipeline loses ground:
+
+| State | Pipeline | Ceiling |
+| --- | --- | --- |
+| bathroom_activity | 0.25 | 0.80 |
+| away | 0.36 | 0.82 |
+| home_inactive | 0.16 | 0.57 |
+| kitchen_activity | 0.57 | 0.82 |
+| sleeping | 0.74 | 0.87 |
+| home_active | **0.58** | 0.36 |
+
+The losses are concentrated in `bathroom_activity`, `away` and `home_inactive`.
+Notably the pipeline is *better* than the classifier at `home_active`, so the
+two have different error profiles rather than one dominating throughout.
+
+**The simulator is easier than reality even for an optimal method.** Its 0.816
+sits above the 0.607 ceiling measured on real homes. That is a fact about the
+simulator, not about the pipeline: results from it are not merely optimistic in
+degree, they exceed what the real instrumentation supports at all. Any figure
+quoted from the simulator should be read with that in mind.
+
+Two caveats that matter. The classifier sees labels and the pipeline does not,
+so this bounds the information present rather than what an unsupervised filter
+ought to find. And it is the same 22 homes from one research group, so 0.607 is
+a ceiling for this instrumentation, not for ambient sensing generally.
+
 ### Explanations tested and rejected
 
 - **An incomplete location map.** `DiningRoom` was unmapped in 14 homes.
