@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added `sensor_modeling.datasets`, bringing published annotated recordings into the canonical observation model so the pipeline can be run over data this project did not generate. The CASAS adapter refuses to guess a timezone, refuses to label unannotated time, and refuses to force unrecognised sensors or activity labels into the ontology, reporting each as discarded rather than admitting it as evidence. `evaluate_recording` scores the unmodified pipeline and reports coverage beside the metrics, and refuses to score a recording in which nothing carried a mapped label.
+- Added `docs/real_data.md` describing what the adapter will not do and why, and stating plainly that the shipped integration test uses a CASAS-format fixture written by this repository rather than a real recording.
+
 ### Changed
 - Moved every citation target to concept DOI `10.5281/zenodo.21337272`. Zenodo minted a new concept lineage when `0.2.0` was archived through the GitHub integration rather than adding a version to the existing one, so `10.5281/zenodo.17070041` now resolves to `0.1.0` alone and no longer stands for all versions. The `0.2.0` record links back with `isNewVersionOf`, and `ZENODO.md` documents both lineages.
 

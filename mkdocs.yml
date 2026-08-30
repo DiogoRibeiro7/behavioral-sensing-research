@@ -54,6 +54,7 @@ nav:
       - Inference: inference.md
       - Evaluation: evaluation.md
       - Limitations: limitations.md
+      - Real-data validation: real_data.md
   - Design records:
       - Multimodal architecture: MULTIMODAL_ARCHITECTURE.md
       - Research questions: RESEARCH_QUESTIONS.md
