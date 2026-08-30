@@ -13,9 +13,9 @@ import pytest
 
 from sensor_modeling.datasets import (
     ActivityInterval,
-    evaluate_recording,
     CasasReadError,
     casas_sensor_specs,
+    evaluate_recording,
     read_casas,
     truth_series,
 )
