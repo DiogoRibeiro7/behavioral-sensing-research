@@ -98,17 +98,25 @@ def _validate_h2_decision(
     }
 
 
-def validate(manifest: Mapping[str, Any], artifact: Mapping[str, Any]) -> dict[str, Any]:
+def validate(
+    manifest: Mapping[str, Any], artifact: Mapping[str, Any]
+) -> dict[str, Any]:
     """Fail closed unless an artifact satisfies the frozen confirmatory contract."""
     frozen_revision = str(manifest["experiment_git_revision"])
     frozen_config_sha = str(manifest["frozen_files"]["config"]["sha256"])
 
     if artifact.get("status") != "confirmatory":
-        raise ValueError(f"artifact status is not confirmatory: {artifact.get('status')}")
+        raise ValueError(
+            f"artifact status is not confirmatory: {artifact.get('status')}"
+        )
     if "shard_count" not in artifact or int(artifact["shard_count"]) < 1:
-        raise ValueError("confirmatory artifact was not produced by the production shard merge")
+        raise ValueError(
+            "confirmatory artifact was not produced by the production shard merge"
+        )
     if artifact.get("git", {}).get("commit") != frozen_revision:
-        raise ValueError("artifact Git revision does not match the frozen experiment revision")
+        raise ValueError(
+            "artifact Git revision does not match the frozen experiment revision"
+        )
     if artifact.get("git", {}).get("dirty") is not False:
         raise ValueError("artifact Git provenance is not clean")
     if artifact.get("config_sha256") != frozen_config_sha:
@@ -119,7 +127,9 @@ def validate(manifest: Mapping[str, Any], artifact: Mapping[str, Any]) -> dict[s
         raise ValueError("artifact contains duplicate household seeds")
     expected = _expected_seeds(manifest, len(seeds))
     if seeds != expected:
-        raise ValueError("artifact seed sequence does not exactly match the frozen stride sequence")
+        raise ValueError(
+            "artifact seed sequence does not exactly match the frozen stride sequence"
+        )
 
     _assert_complete_coverage(artifact, set(expected))
 
@@ -134,7 +144,9 @@ def validate(manifest: Mapping[str, Any], artifact: Mapping[str, Any]) -> dict[s
 
     guardrail = str(artifact.get("interpretation_guardrail", "")).lower()
     if "simulator" not in guardrail or "field performance" not in guardrail:
-        raise ValueError("artifact is missing the simulator-only interpretation guardrail")
+        raise ValueError(
+            "artifact is missing the simulator-only interpretation guardrail"
+        )
 
     environment = artifact.get("environment", {})
     required_environment = manifest["reference_environment"]
