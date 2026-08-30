@@ -1,0 +1,266 @@
+name: Paper confirmatory production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paper-confirmatory-production
+  cancel-in-progress: false
+
+env:
+  FROZEN_REVISION: bd5a9b10068b69fc75cc6f806904430633ce7408
+  CONFIG_SHA256: 7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4
+  REPLICATIONS: "200"
+  SHARD_COUNT: "40"
+  PYTHON_VERSION: "3.11.16"
+
+jobs:
+  shard:
+    name: shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard:
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 11
+          - 12
+          - 13
+          - 14
+          - 15
+          - 16
+          - 17
+          - 18
+          - 19
+          - 20
+          - 21
+          - 22
+          - 23
+          - 24
+          - 25
+          - 26
+          - 27
+          - 28
+          - 29
+          - 30
+          - 31
+          - 32
+          - 33
+          - 34
+          - 35
+          - 36
+          - 37
+          - 38
+          - 39
+
+    steps:
+      - name: Check out frozen experiment revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.FROZEN_REVISION }}
+          fetch-depth: 0
+          path: frozen
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pinned production environment
+        working-directory: frozen
+        shell: bash
+        run: |
+          cat > /tmp/paper-production-constraints.txt <<'EOF'
+          numpy==2.4.6
+          pandas==3.0.5
+          scipy==1.17.1
+          scikit-learn==1.9.0
+          matplotlib==3.11.1
+          seaborn==0.13.2
+          networkx==3.6.1
+          h5py==3.16.0
+          plotly==7.0.0
+          bokeh==3.9.2
+          flask==3.1.3
+          click==8.5.0
+          pyyaml==6.0.3
+          tqdm==4.70.0
+          joblib==1.5.3
+          EOF
+          python -m pip install --upgrade pip
+          python -m pip install -c /tmp/paper-production-constraints.txt -e .
+
+      - name: Verify frozen inputs and environment
+        working-directory: frozen
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$FROZEN_REVISION"
+          test -z "$(git status --porcelain)"
+          actual_sha="$(sha256sum papers/failure-aware-multimodal-behavioural-sensing/experiments/config.json | cut -d' ' -f1)"
+          test "$actual_sha" = "$CONFIG_SHA256"
+          python - <<'PY'
+          import importlib.metadata
+          import sys
+
+          expected = {
+              "sensor-modeling": "0.2.0",
+              "numpy": "2.4.6",
+              "scipy": "1.17.1",
+              "pandas": "3.0.5",
+              "scikit-learn": "1.9.0",
+          }
+          assert sys.version.split()[0] == "3.11.16", sys.version
+          for package, version in expected.items():
+              actual = importlib.metadata.version(package)
+              assert actual == version, (package, actual, version)
+          PY
+
+      - name: Run frozen production shard
+        working-directory: frozen
+        shell: bash
+        run: |
+          python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_production.py \
+            --replications "$REPLICATIONS" \
+            shard \
+            --shard-index "${{ matrix.shard }}" \
+            --shard-count "$SHARD_COUNT" \
+            --output production-shards
+
+      - name: Verify shard artifact
+        working-directory: frozen
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          paths = list(Path("production-shards").glob("shard-*-of-*.json"))
+          assert len(paths) == 1, paths
+          artifact = json.loads(paths[0].read_text())
+          assert artifact["artifact_type"] == "confirmatory-shard"
+          assert artifact["git"] == {
+              "commit": "bd5a9b10068b69fc75cc6f806904430633ce7408",
+              "dirty": False,
+          }
+          assert artifact["config_sha256"] == "7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4"
+          assert artifact["replications_total"] == 200
+          assert artifact["shard_count"] == 40
+          assert len(artifact["seeds"]) == 5
+          PY
+
+      - name: Upload raw shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-shard-${{ matrix.shard }}
+          path: frozen/production-shards/*.json
+          retention-days: 30
+          if-no-files-found: error
+
+  merge:
+    name: merge and validate
+    needs: shard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out frozen experiment revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.FROZEN_REVISION }}
+          fetch-depth: 0
+          path: frozen
+
+      - name: Check out current acceptance infrastructure
+        uses: actions/checkout@v7
+        with:
+          ref: develop
+          fetch-depth: 1
+          path: infra
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pinned production environment
+        working-directory: frozen
+        shell: bash
+        run: |
+          cat > /tmp/paper-production-constraints.txt <<'EOF'
+          numpy==2.4.6
+          pandas==3.0.5
+          scipy==1.17.1
+          scikit-learn==1.9.0
+          matplotlib==3.11.1
+          seaborn==0.13.2
+          networkx==3.6.1
+          h5py==3.16.0
+          plotly==7.0.0
+          bokeh==3.9.2
+          flask==3.1.3
+          click==8.5.0
+          pyyaml==6.0.3
+          tqdm==4.70.0
+          joblib==1.5.3
+          EOF
+          python -m pip install --upgrade pip
+          python -m pip install -c /tmp/paper-production-constraints.txt -e .
+
+      - name: Download all production shards
+        uses: actions/download-artifact@v5
+        with:
+          pattern: production-shard-*
+          path: frozen/production-shards
+          merge-multiple: true
+
+      - name: Verify exact shard file count
+        working-directory: frozen
+        shell: bash
+        run: |
+          count="$(find production-shards -maxdepth 1 -type f -name 'shard-*-of-*.json' | wc -l)"
+          test "$count" -eq "$SHARD_COUNT"
+
+      - name: Merge frozen shards
+        working-directory: frozen
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$FROZEN_REVISION"
+          test -z "$(git status --porcelain)"
+          python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_production.py \
+            --replications "$REPLICATIONS" \
+            merge \
+            --input production-shards \
+            --output production-results
+
+      - name: Validate manuscript-facing artifact against freeze
+        shell: bash
+        run: |
+          python infra/papers/failure-aware-multimodal-behavioural-sensing/experiments/validate_frozen_artifact.py \
+            frozen/production-results/confirmatory_results.json \
+            --manifest infra/papers/failure-aware-multimodal-behavioural-sensing/experiments/FREEZE_MANIFEST.json \
+            > frozen/production-results/freeze_validation.json
+          cat frozen/production-results/freeze_validation.json
+
+      - name: Upload merged confirmatory bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-confirmatory-n200
+          path: frozen/production-results/
+          retention-days: 90
+          if-no-files-found: error
