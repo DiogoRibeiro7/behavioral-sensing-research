@@ -267,8 +267,10 @@ class StateOntology:
             stickiness for that hour: a state the resident usually occupies at
             this time of day becomes correspondingly harder to leave.
 
-        Ignoring *at* when no circadian profile is set keeps the chain
-        time-homogeneous and identical to earlier releases.
+        Notes
+        -----
+        With no circadian profile set, *at* is ignored and the chain stays
+        time-homogeneous, identical to earlier releases.
         """
         if self.circadian is None or at is None:
             return transition_matrix(self.generator, elapsed.total_seconds())
