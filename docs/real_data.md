@@ -342,6 +342,59 @@ thing to measure. The feature is worth keeping — the improvement is real,
 consistent and free when unused — but it should not be mistaken for having
 closed that part of the gap.
 
+### Dwell times: measurably wrong, and correcting them does not help
+
+The declared dwell times are 3 to 9 times longer than the durations real
+residents actually spend in each state, measured over the annotated runs of 11
+homes:
+
+| State | Declared | Measured median |
+| --- | --- | --- |
+| home_active | 20 min | 2.2 |
+| kitchen_activity | 15 min | 3.7 |
+| away | 180 min | 53.0 |
+| home_inactive | 60 min | 19.6 |
+| bathroom_activity | 6 min | 2.3 |
+| sleeping | 180 min | 155.0 |
+
+The prediction was specific: a chain told that bathroom visits last six minutes
+should smooth away the real ones lasting two, and `bathroom_activity` is the
+pipeline's worst state at 0.25 against a 0.80 ceiling.
+
+Fitting dwell from the training half and scoring the held-out half **made
+things slightly worse.**
+
+| | Declared dwell | Measured dwell |
+| --- | --- | --- |
+| Balanced accuracy | 0.449 | 0.429 |
+| Calibration error | 0.312 | 0.319 |
+
+Better in 4 homes of 11, worse in 7. The sharp prediction failed outright:
+bathroom recall moved by 0.01 to 0.02, from 0.57 to 0.58 and 0.25 to 0.27,
+despite the prior being more than halved.
+
+**The most useful reading is that the long dwells are earning their keep as
+regularisation.** They smooth a noisy posterior, and matching them to observed
+durations trades that smoothing for noise. Being empirically accurate and being
+a useful prior are not the same property, which is worth knowing for a project
+whose parameters are declared rather than fitted throughout.
+
+It also rules out one of the three candidates for the accuracy gap, and it
+means the bathroom failure is not caused by excessive stickiness.
+
+### A note on the remaining candidate
+
+The ablation valued recent history at about +0.140, and the obvious response —
+give the emission model a longer window — is not available. The pipeline is a
+recursive filter: it already carries history in the belief state, and feeding it
+lagged observations would count evidence it has already absorbed a second time,
+producing exactly the overconfidence the calibration work just removed. A
+discriminative classifier can use lags because it is not recursive.
+
+So the third candidate is not simply unimplemented. It may not be reachable in
+this architecture without a different formulation, and that is the open question
+rather than a task waiting to be done.
+
 ### Explanations tested and rejected
 
 - **An incomplete location map.** `DiningRoom` was unmapped in 14 homes.
