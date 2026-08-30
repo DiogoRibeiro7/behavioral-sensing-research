@@ -29,7 +29,12 @@ from typing import Any
 
 import numpy as np
 
-from sensor_modeling.evaluation import Scenario, compare_scenario, named_subsets, state_metrics
+from sensor_modeling.evaluation import (
+    Scenario,
+    compare_scenario,
+    named_subsets,
+    state_metrics,
+)
 from sensor_modeling.evaluation.attribution import standard_scenarios
 from sensor_modeling.health.monitor import SensorHealthReport, SystemHealthReport
 from sensor_modeling.online import BehaviouralSensingPipeline, PipelineConfig
@@ -376,9 +381,7 @@ def _run_h5(
             }
             values = {
                 name: float(
-                    _subset_metrics(household, sensors, step=step)[
-                        "balanced_accuracy"
-                    ]
+                    _subset_metrics(household, sensors, step=step)["balanced_accuracy"]
                 )
                 for name, sensors in sensor_sets.items()
             }
@@ -563,7 +566,7 @@ def _summaries(
 
     h5_groups: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for row in results["h5"]:
-        h5_groups[f"{row['first_sensor']} + {row['second_sensor']}"] .append(row)
+        h5_groups[f"{row['first_sensor']} + {row['second_sensor']}"].append(row)
     output["h5"] = {
         pair: _sample_summary(
             _values(rows, "interaction"),
@@ -600,9 +603,11 @@ def _write_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
         raise ValueError(f"refusing to write empty result table: {path.name}")
     scalar_rows = [
         {
-            key: json.dumps(value, sort_keys=True)
-            if isinstance(value, (dict, list))
-            else value
+            key: (
+                json.dumps(value, sort_keys=True)
+                if isinstance(value, (dict, list))
+                else value
+            )
             for key, value in row.items()
         }
         for row in rows
@@ -633,9 +638,7 @@ def _latex_macros(summary: Mapping[str, Any], n: int, status: str) -> str:
     for name, entry in summary["h2"].items():
         if "full_minus_subset" in entry:
             gap = entry["full_minus_subset"]["balanced_accuracy"]["mean"]
-            lines.append(
-                f"\\newcommand{{\\HTwo{_macro_name(name)}Gap}}{{{gap:.3f}}}"
-            )
+            lines.append(f"\\newcommand{{\\HTwo{_macro_name(name)}Gap}}{{{gap:.3f}}}")
     carer = summary["h3"].get("carer_visits")
     if carer is not None:
         value = carer["balanced_accuracy_gain"]["mean"]
