@@ -239,13 +239,21 @@ The confirmatory programme is organised around five hypotheses.
 As sensing information is removed, state-inference performance may decline, but posterior uncertainty should increase rather than remain spuriously confident. Thus missingness should degrade discrimination and calibration smoothly rather than create a regime of high-confidence error.
 
 \paragraph{H2: modality partly substitutes for sensor count.}
-A smaller multimodal deployment can retain most of the information of a larger object-sensor deployment. Equivalence is not defined by accuracy alone; calibration and failure robustness must remain comparable.
+The primary H2 claim is a pre-specified non-inferiority comparison between the ten-sensor \texttt{all\_modalities} deployment and the five-sensor \texttt{radar\_door\_bed\_wearable} deployment. Let
+\begin{equation}
+D_{H2}=\operatorname{BA}_{\mathrm{full}}-\operatorname{BA}_{\mathrm{reduced}}.
+\end{equation}
+The reduced deployment is supported as non-inferior only when the upper endpoint of the two-sided 95\% household-paired bootstrap interval satisfies
+\begin{equation}
+U_{0.95}(D_{H2}) < 0.02.
+\end{equation}
+The remaining sensor subsets are secondary ablations; log loss, Brier score, ECE, and abstention provide secondary uncertainty and safety context rather than additional decision gates.
 
 \paragraph{H3: attribution matters under contamination.}
 Occupancy-aware attribution should improve probabilistic/state losses when visitors or carers are present, while producing negligible change when the resident is alone.
 
-\paragraph{H4: failure awareness dominates naive missingness handling.}
-Explicit sensor-health weighting should reduce bias toward inactivity when records are missing or a sensor under-delivers, compared with a model that treats missing evidence as observed silence.
+\paragraph{H4: failure awareness adds information under degraded sensing.}
+H4 compares two inference chains on the same degraded observation record: 30\% random record loss together with a 14-day \texttt{bed\_pressure} outage beginning on day 35. The failure-aware arm uses the estimated sensor-health reliability weights. The health-naive control preserves the same missing observations and health statuses but forces those reliability weights to one. The contrast therefore isolates the use of health reliability in inference; it does not impute missing records as zeros and does not treat missing evidence as observed silence.
 
 \paragraph{H5: sensor value is non-additive.}
 Sensor interactions $I_{ij}$ are expected to be non-zero: a person-bound sensor may contribute little in isolation but become valuable when combined with ambient sensors that lack identity information.
@@ -253,31 +261,32 @@ Sensor interactions $I_{ij}$ are expected to be non-zero: a person-bound sensor 
 \subsection{Pre-specified confirmatory simulation study}
 \label{sec:confirmatory}
 
-The current four-seed ablation demonstration is insufficient for publication-level uncertainty quantification. The confirmatory experiment will therefore be frozen before examining its results. Replication count will be selected from Monte Carlo precision, with a minimum of 200 independent household trajectories per principal regime unless a larger number is required to achieve a pre-specified Monte Carlo standard error for the primary paired difference.
+The confirmatory experiment was frozen before examining its results. The independent replication unit is one simulated household trajectory. The initial production size is $N=200$, with household seeds
+\begin{equation}
+s_i=10000+4i,\qquad i=0,\ldots,N-1.
+\end{equation}
+Replication may increase prospectively, without inspecting hypothesis direction or changing any analysis choice, only as needed to satisfy the pre-specified H2 Monte Carlo precision criterion, up to $N=1000$. The target is $\operatorname{MCSE}\leq 0.002$ for the paired H2 balanced-accuracy gap. All uncertainty calculations are over household trajectories, never individual time points.
 
-The principal factors are shown in \cref{tab:design}.
+The frozen confirmatory regimes are shown in \cref{tab:design}.
 
 \begin{table}[t]
 \centering
-\caption{Confirmatory simulation factors. The design is factorial where computationally reasonable and otherwise uses pre-specified matched contrasts.}
+\caption{Frozen confirmatory simulation regimes. Exploratory stress tests such as activity-correlated loss, stuck sensors, behavioural change, and broader outage patterns remain outside the confirmatory estimands.}
 \label{tab:design}
 \begin{tabular}{p{0.28\linewidth}p{0.62\linewidth}}
 \toprule
-Factor & Levels / regimes \\
+Hypothesis / factor & Frozen levels / regimes \\
 \midrule
-Random missingness & 0\%, 5\%, 10\%, 20\%, 40\% \\
-Sensor failure & none; one sensor; multiple simultaneous sensors; total delivery outage \\
-Activity-correlated loss & absent; moderate; severe \\
-Visitor contamination & none; short visitor; prolonged visitor; weekday carer; visitor plus carer \\
-Wearable adherence & full; intermittent; absent \\
-Behavioural change & none; abrupt step; gradual ramp \\
-Sensor deployment & full; object-only; objects + wearable; radar + door + bed; radar + door + bed + wearable; minimal door + bed \\
-Redundancy & none; declared redundant groups; undeclared correlated coverage stress test \\
+H1 random missingness & 0\%, 5\%, 10\%, 20\%, 40\% \\
+H2 sensor deployment & full ten-sensor deployment; five-sensor radar + door + bed + wearable primary reduced deployment; four additional pre-specified secondary subsets \\
+H3 attribution context & resident alone; short visitor; prolonged visitor; carer visits; visitor plus carer; resident without wearable; no radar; sparse coverage \\
+H4 degraded sensing & 30\% random record loss plus \texttt{bed\_pressure} outage from day 35 for 14 days; failure-aware vs health-naive reliability weighting on the same observations \\
+H5 interactions & living radar + resident beacon; wearable motion + resident beacon; front door + resident beacon; bed pressure + wearable motion \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The primary state metric will be balanced accuracy, with log loss, Brier score, ECE, and abstention rate treated as co-primary safety/uncertainty outcomes. For paired comparisons, uncertainty will be estimated over household trajectories, not over individual time points. We will report the Monte Carlo standard error of each principal effect alongside interval estimates.
+Balanced accuracy is the primary decision metric for H2. Log loss, Brier score, ECE, and abstention rate are reported as secondary uncertainty and safety outcomes. H1 is descriptive across all pre-specified missingness rates; H3 is reported separately by scenario; H4 reports failure-aware minus health-naive contrasts with metric-specific interpretation of sign; and all four H5 interaction pairs are reported. A negative hypothesis result remains a valid confirmatory result provided the frozen provenance, replication, seed-union, sharding, and precision requirements are satisfied.
 
 \section{Exploratory simulator-only results}
 \label{sec:pilotresults}
@@ -355,7 +364,7 @@ Fourth, the behavioural ontology represents one monitored resident. Other occupa
 
 Fifth, late observations beyond the configured tolerance are dropped rather than replayed through past state. The online filter is therefore not a fixed-interval smoother and cannot revise history after a long communication outage.
 
-Finally, the current exploratory intervals for sensor ablation and attribution are based on too few independent trajectories for publication-level claims. This is why the confirmatory protocol is specified separately and must be executed after the software quality gates are frozen.
+Finally, the current exploratory intervals for sensor ablation and attribution are based on too few independent trajectories for publication-level claims. This is why the confirmatory protocol is specified separately and must be executed only under the frozen experiment revision and artifact-acceptance rules.
 
 \section{External validation}
 \label{sec:external}
@@ -376,15 +385,15 @@ The scientifically interesting question is not whether simulator accuracy can be
 
 \section{Reproducibility and software}
 
-The implementation is available as the public \texttt{behavioral-sensing-research} research repository. The final experimental release used for the paper should freeze a software version, Git commit, resolved experiment configuration, sensor subsets, random seeds, metric definitions, and environment versions in every machine-readable result artefact. Generated simulation data need not be committed because trajectories are deterministic conditional on the frozen code and seeds; derived results should carry sufficient provenance to reproduce the run.
+The implementation is available as the public \texttt{behavioral-sensing-research} research repository. The confirmatory simulation is frozen to an exact Git revision, resolved experiment configuration, scientific contract, production seed formula, numerical environment, and machine-readable artifact-acceptance manifest. Manuscript-facing confirmatory results are admissible only after the production shards have been merged and the resulting artifact passes the frozen validator. Generated simulation data need not be committed because trajectories are deterministic conditional on the frozen code and seeds; derived results carry the provenance required to reproduce the run.
 
-Before any article results are frozen, the software release must satisfy the full supported Python matrix, documentation build, package build, static checks, and end-to-end experiment commands. The current manuscript intentionally separates the method from the not-yet-frozen confirmatory results.
+The software release used by the frozen experiment satisfied the experiment smoke path before the freeze, and later documentation or validation changes do not move the pinned experiment revision. Confirmatory result values remain unexamined at the time of this manuscript alignment.
 
 \section{Conclusion}
 
 We have presented a methodological framework for failure-aware multimodal behavioural sensing in smart homes. Its central principle is simple but consequential: sensors provide uncertain evidence about human state, and both absence of evidence and uncertainty about who generated an event must remain visible to the model. By coupling canonical observation semantics, sensor-health reliability, occupancy-aware attribution, probabilistic state inference, adaptive personal baselines, and paired sensor ablation, the framework supports a different class of research question from conventional activity-classification benchmarks. It asks not only whether a state can be recognised, but whether the system remains calibrated when sensors disappear, whether an ambient event belongs to the monitored resident, and whether fewer sensors can preserve useful information.
 
-The exploratory simulator results motivate these questions but do not answer them definitively. The next two steps are therefore intentionally conservative: execute the pre-specified large simulation study and then test the frozen architecture against annotated public smart-home datasets. A negative result at either stage would be scientifically informative. The goal is not maximum apparent accuracy; it is a monitoring system whose uncertainty degrades as honestly as its evidence does.
+The exploratory simulator results motivate these questions but do not answer them definitively. The next two steps are therefore intentionally conservative: execute the frozen large simulation study and then test the frozen architecture against annotated public smart-home datasets. A negative result at either stage would be scientifically informative. The goal is not maximum apparent accuracy; it is a monitoring system whose uncertainty degrades as honestly as its evidence does.
 
 \printbibliography
 
