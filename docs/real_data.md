@@ -109,65 +109,80 @@ reconstruct one from a floor plan — at the cost of having already aggregated
 each room's sensors into a single stream, so within-room redundancy is not
 observable.
 
-## First result on a real recording
+## Results on 22 real homes
 
-`hh103`, 57 days, one resident, seven locations. Nothing was tuned: no emission
-rate, dwell time or threshold was refitted. 65.5% of the span carried a mapped
-annotation and only that part was scored.
+Every CASAS `hh` recording under 12 MB was scored: 22 homes, one resident each,
+motion and door sensors, **nothing refitted**. No emission rate, dwell time or
+threshold was changed from the declared defaults. Only annotated time was
+scored. After extending the location and activity maps, **no location and no
+activity label went unmapped in any home**, so nothing is being silently
+discarded.
 
-| Metric | Simulator | **hh103** |
-| --- | --- | --- |
-| Balanced accuracy | 0.816 | **0.349** |
-| Calibration error | 0.084 | **0.299** |
-| Abstention rate | — | 0.021 |
+| | Simulator | Real homes (median) | Real homes (range) |
+| --- | --- | --- | --- |
+| Balanced accuracy | 0.816 | **0.364** | 0.273 – 0.468 |
+| Calibration error | 0.084 | **0.285** | 0.185 – 0.510 |
+| Abstention rate | — | 0.022 | 0.006 – 0.052 |
 
-| State | Recall |
-| --- | --- |
-| kitchen_activity | 0.74 |
-| sleeping | 0.72 |
-| bed_awake | 0.67 |
-| bathroom_activity | 0.19 |
-| home_active | 0.08 |
-| away | 0.02 |
-| home_inactive | 0.02 |
+Not one of the 22 homes reaches 0.47. The simulator's figure is not approached
+anywhere.
 
-**The architecture does not transfer on declared defaults.** Balanced accuracy
-falls by more than half, and calibration error more than triples. This is one
-home in one dataset, so it is a data point rather than a verdict, but it is a
-real one and it points the same way the design documents feared.
+**The declared defaults do not transfer.** This is no longer a single data
+point: the result is consistent across 22 independent homes, and the failure
+takes the same shape in all of them.
 
 ### What fails, and why it is the interesting part
 
+| State | Median recall | Range | Homes |
+| --- | --- | --- | --- |
+| sleeping | 0.74 | 0.39 – 0.87 | 22 |
+| home_active | 0.57 | 0.09 – 0.82 | 22 |
+| kitchen_activity | 0.57 | 0.00 – 0.76 | 22 |
+| bed_awake | 0.25 | 0.06 – 0.67 | 5 |
+| bathroom_activity | 0.25 | 0.00 – 0.57 | 22 |
+| home_inactive | 0.16 | 0.00 – 0.39 | 22 |
+| **away** | **0.00** | 0.00 – 0.33 | 22 |
+
 The split is not random. States with a distinctive room-and-rate signature
-survive: cooking, sleeping and being awake in bed all score around 0.7. States
-that require knowing the resident is *present but still* collapse.
+survive: sleeping, cooking and general activity land between 0.57 and 0.74.
+States that require knowing the resident is *present but still* collapse.
 
-The confusion is specific. When the resident was genuinely `home_inactive`, the
-pipeline said `away` 53% of the time. When they were genuinely `away`, it said
-`home_active` essentially always.
+**`away` recall is zero in the median home, across all 22.** On `hh103`, where
+the resident was genuinely `home_inactive`, the pipeline reported `away` 53% of
+the time; where they were genuinely `away`, it reported `home_active` almost
+always.
 
-This home has seven motion and door streams and nothing else. The simulator's
+These homes have motion and door sensors and nothing else. The simulator's
 deployment includes a bed pressure sensor, a wearable and a resident beacon —
-precisely the modalities that distinguish a quiet resident from an empty house.
-Strip them out and motion silence becomes ambiguous between "sitting still" and
-"gone out", and the model resolves that ambiguity badly.
+precisely the modalities that separate a quiet resident from an empty house.
+Without them, motion silence is ambiguous between "sitting still" and "gone
+out", and the model resolves it badly and consistently.
 
-That bears directly on the project's central question. Modality does substitute
-for sensor count, as the ablation found — but the substitution has a floor, and
-the presence-confirming modality appears to be the one that cannot be dropped.
-Reading motion silence as absence is exactly the failure the design set out to
-avoid, and on real data with a reduced sensor suite it happens anyway.
+That qualifies the ablation result. Modality does substitute for sensor count,
+but the substitution has a floor, and presence confirmation looks like the
+capability that cannot be dropped. Reading silence as absence is the failure
+this project set out to prevent, and it happens anyway once the confirming
+sensors are gone.
 
 ### The calibration result is the one to worry about
 
-Calibration error of 0.299 with an abstention rate of 0.021 means the pipeline
-was **confidently wrong**: mostly incorrect, and almost never willing to say it
-did not know. The abstention mechanism is presented throughout this project as
-the safety valve that makes the rest defensible. On this recording it did not
-open.
+Median calibration error 0.285 with median abstention 0.022 means the pipeline
+was **confidently wrong**: incorrect more often than not, and almost never
+willing to say it did not know. Abstention never exceeded 5.2% in any home.
 
-A monitoring system that reports "resident is out" while they sit quietly in a
-chair, with high stated confidence, is worse than one that reports nothing.
+The abstention mechanism is presented throughout this project as the safety
+valve that makes the rest defensible. On real data it did not open.
+
+A monitoring system that reports "resident is out" with high stated confidence
+while they sit quietly in a chair is worse than one that reports nothing.
+
+### A check that mattered
+
+The first pass left `DiningRoom` unmapped in 14 of the 22 homes, along with
+`Office`, `Hall` and four activity labels, so real evidence was being discarded.
+That could have accounted for the poor scores. It did not: completing the maps
+moved median balanced accuracy from 0.356 to 0.364. The result is robust to the
+most obvious explanation that would have let the architecture off.
 
 ### Reproducing it
 
@@ -185,16 +200,19 @@ print(evaluate_recording(recording, step=timedelta(minutes=5)).to_dict())
 Data from <https://zenodo.org/records/15708568> (CC-BY-4.0), file
 `labeled_data.zip`. Not redistributed here.
 
-Results move with step size — balanced accuracy is 0.349 at five minutes, 0.252
-at ten, 0.248 at thirty — so quote the step alongside any number from this.
+Results move with step size — on `hh103`, balanced accuracy is 0.349 at five
+minutes, 0.252 at ten and 0.248 at thirty — so quote the step alongside any
+number from this. All figures above use a five-minute step, the most favourable
+of the three.
 
 ## Status
 
-The adapters are implemented and tested, and one real recording has been
-scored. What has **not** been done: more than one home, any other dataset, any
-fitting of parameters to real data, and any paired comparison of the kind the
-simulator experiments use. The single result above should not be generalised
-into a claim about the architecture, in either direction.
+The adapters are implemented and tested, and 22 real homes have been scored.
+What has **not** been done: any dataset other than CASAS, any fitting of
+parameters to real data, and any paired comparison of the kind the simulator
+experiments use. These are all single-resident homes from one research group's
+instrumentation, so they are not independent of each other in the way 22
+households from different studies would be.
 
 The obvious next steps are refitting emissions from a subset of homes and
 scoring on held-out ones, and checking whether the `home_inactive`/`away`

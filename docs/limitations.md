@@ -6,29 +6,37 @@ down will have them discovered by whoever trusts it first.
 
 ## Measured on real data
 
-One real recording has now been scored: CASAS `hh103`, 57 days, seven motion and
-door locations, nothing refitted. Balanced accuracy was **0.349** against 0.816
-on the simulator, and calibration error **0.299** against 0.084.
+Twenty-two real CASAS homes have now been scored with nothing refitted, and
+with every location and activity label mapped so that no evidence is discarded.
 
-The failure is specific rather than diffuse. States with a distinctive
-room-and-rate signature held up — cooking 0.74, sleeping 0.72, awake in bed 0.67
-— while states needing evidence that the resident is *present but still*
-collapsed: `home_inactive` 0.02, `away` 0.02. Where the resident was genuinely
-inactive at home, the pipeline reported `away` in 53% of cases.
+| | Simulator | Real homes (median) |
+| --- | --- | --- |
+| Balanced accuracy | 0.816 | **0.364** |
+| Calibration error | 0.084 | **0.285** |
 
-That deployment has no bed sensor, wearable or beacon. Those are the modalities
-that separate a quiet resident from an empty house, and without them motion
-silence is ambiguous. Reading silence as absence is the failure this project
-explicitly set out to avoid, and it happened anyway once the confirming sensors
-were gone.
+No home exceeded 0.468. The failure takes the same shape in all of them. States
+with a distinctive room-and-rate signature held up — sleeping 0.74, activity
+0.57, cooking 0.57 — while states needing evidence that the resident is
+*present but still* collapsed: `home_inactive` 0.16, and **`away` 0.00 in the
+median home**.
 
-Worse, abstention fired on only 2.1% of steps while the model was wrong more
-often than right. The mechanism presented throughout as the safety valve did not
-open.
+These deployments have motion and door sensors only. The simulator's has a bed
+sensor, a wearable and a beacon, which are the modalities that separate a quiet
+resident from an empty house. Without them, motion silence is ambiguous, and
+the model reads it as absence. That is the exact failure this project set out to
+prevent, and it happens once the confirming sensors are gone.
 
-This is one home in one dataset and should not be generalised in either
-direction. It is, however, the first evidence from data this project did not
-generate, and it does not support the simulator's numbers.
+Abstention reached at most 5.2% in any home, median 2.2%, while the model was
+wrong more often than right. The mechanism presented throughout as the safety
+valve did not open.
+
+An obvious alternative explanation was checked and rejected: an incomplete
+location map was discarding evidence in 14 homes, and fixing it moved the median
+from 0.356 to 0.364.
+
+These are single-resident homes from one research group's instrumentation, so
+they are not 22 independent studies. But they are 22 real homes, and they do not
+support the simulator's numbers.
 
 ## The single most important limitation
 

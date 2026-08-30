@@ -71,7 +71,17 @@ HH_LOCATIONS: Mapping[str, tuple[str, Modality]] = {
     "LivingRoom": ("living", Modality.MOTION),
     "LoungeChair": ("living", Modality.MOTION),
     "WorkArea": ("living", Modality.MOTION),
+    "Office": ("living", Modality.MOTION),
+    # A dining room is mapped to living space rather than to the kitchen. The
+    # kitchen state means being active in the kitchen, and eating is mapped to
+    # HOME_ACTIVE for the same reason; routing dining motion into kitchen
+    # evidence would manufacture agreement between the two.
+    "DiningRoom": ("living", Modality.MOTION),
+    "Hall": ("hall", Modality.MOTION),
+    "Entry": ("hall", Modality.MOTION),
     "OutsideDoor": ("hall", Modality.DOOR),
+    "FrontDoor": ("hall", Modality.DOOR),
+    "BackDoor": ("hall", Modality.DOOR),
 }
 
 #: ``hh`` activity labels mapped onto this package's behavioural states.
@@ -121,6 +131,13 @@ HH_ACTIVITY_STATES: Mapping[str, BehaviouralState] = {
     "Relax": BehaviouralState.HOME_INACTIVE,
     "Read": BehaviouralState.HOME_INACTIVE,
     "Phone": BehaviouralState.HOME_INACTIVE,
+    "Entertain_Guests": BehaviouralState.HOME_ACTIVE,
+    "Drink": BehaviouralState.HOME_ACTIVE,
+    "Take_Medicine": BehaviouralState.HOME_ACTIVE,
+    "Morning_Meds": BehaviouralState.HOME_ACTIVE,
+    "Evening_Meds": BehaviouralState.HOME_ACTIVE,
+    "Work_At_Desk": BehaviouralState.HOME_ACTIVE,
+    "Exercise": BehaviouralState.HOME_ACTIVE,
     "Leave_Home": BehaviouralState.AWAY,
     "Step_Out": BehaviouralState.AWAY,
 }
