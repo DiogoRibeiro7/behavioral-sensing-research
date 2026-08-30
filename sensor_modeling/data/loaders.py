@@ -4,21 +4,27 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Generator, Iterable
+from collections.abc import Generator, Iterable, Mapping
+from os import PathLike
 
 import pandas as pd
-
-try:
-    import h5py  # type: ignore
-except Exception:  # pragma: no cover - handled gracefully
-    h5py = None  # type: ignore
 
 from sensor_modeling.utils.data_io import SensorDataset, read_sensor_csv
 
 logger = logging.getLogger(__name__)
 
 
-def load_csv(path: str, timestamp_col: str = "timestamp", **kwargs) -> SensorDataset:
+def _parse_timestamps(values: object, field_name: str) -> pd.Series:
+    """Parse timestamp values and reject missing or invalid entries."""
+    timestamps = pd.to_datetime(values, errors="coerce")
+    if pd.isna(timestamps).any():
+        raise ValueError(f"Timestamp field '{field_name}' contains invalid timestamps")
+    return timestamps
+
+
+def load_csv(
+    path: str | PathLike[str], timestamp_col: str = "timestamp", **kwargs
+) -> SensorDataset:
     """Load sensor readings from a CSV file.
 
     Parameters
@@ -37,42 +43,64 @@ def load_csv(path: str, timestamp_col: str = "timestamp", **kwargs) -> SensorDat
     """
     try:
         df = read_sensor_csv(path, timestamp_col=timestamp_col, **kwargs)
-    except Exception as exc:
+    except (
+        OSError,
+        TypeError,
+        UnicodeError,
+        ValueError,
+        pd.errors.ParserError,
+    ) as exc:
         logger.error("Failed to read CSV %s: %s", path, exc)
         raise ValueError(f"Unable to read CSV file: {path}") from exc
     logger.info("Loaded CSV with shape %s from %s", df.shape, path)
     return SensorDataset(df)
 
 
-def load_json(path: str, timestamp_field: str = "timestamp") -> SensorDataset:
+def load_json(
+    path: str | PathLike[str], timestamp_field: str = "timestamp"
+) -> SensorDataset:
     """Load sensor event log data from a JSON file."""
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             records = json.load(f)
-    except Exception as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         logger.error("Failed to read JSON %s: %s", path, exc)
         raise ValueError(f"Unable to read JSON file: {path}") from exc
-    if not isinstance(records, list):
-        raise ValueError("JSON file must contain a list of records")
-    try:
-        df = pd.DataFrame(records)
-    except Exception as exc:
-        logger.error("JSON structure invalid: %s", exc)
-        raise ValueError("Invalid JSON structure for tabular data") from exc
-    if timestamp_field not in df.columns:
-        raise ValueError(
-            f"Timestamp field '{timestamp_field}' missing from JSON records"
-        )
-    df[timestamp_field] = pd.to_datetime(df[timestamp_field])
-    df = df.set_index(timestamp_field).sort_index()
+
+    df = _records_to_frame(records, timestamp_field=timestamp_field)
     logger.info("Loaded JSON with shape %s from %s", df.shape, path)
     return SensorDataset(df)
 
 
-def load_hdf5(path: str, key: str = "data") -> SensorDataset:
+def _records_to_frame(records: object, timestamp_field: str) -> pd.DataFrame:
+    """Convert JSON records into a timestamp-indexed DataFrame."""
+    if not isinstance(records, list):
+        raise ValueError("JSON file must contain a list of records")
+    if any(not isinstance(record, Mapping) for record in records):
+        raise ValueError("Invalid JSON structure for tabular data")
+
+    try:
+        df = pd.DataFrame(records)
+    except (TypeError, ValueError) as exc:
+        logger.error("JSON structure invalid: %s", exc)
+        raise ValueError("Invalid JSON structure for tabular data") from exc
+
+    if timestamp_field not in df.columns:
+        raise ValueError(
+            f"Timestamp field '{timestamp_field}' missing from JSON records"
+        )
+
+    df[timestamp_field] = _parse_timestamps(df[timestamp_field], timestamp_field)
+    return df.set_index(timestamp_field).sort_index()
+
+
+def load_hdf5(path: str | PathLike[str], key: str = "data") -> SensorDataset:
     """Load sensor data from an HDF5 file."""
-    if h5py is None:
-        raise ImportError("h5py is required for HDF5 support")
+    try:
+        import h5py
+    except ImportError as exc:  # pragma: no cover - dependency is installed in CI
+        raise ImportError("h5py is required for HDF5 support") from exc
+
     try:
         with h5py.File(path, "r") as h5:
             if key not in h5:
@@ -81,14 +109,14 @@ def load_hdf5(path: str, key: str = "data") -> SensorDataset:
             if "timestamp" in h5[key].attrs:
                 ts = pd.to_datetime(h5[key].attrs["timestamp"])
                 data.index = ts
-    except Exception as exc:
+    except OSError as exc:
         logger.error("Failed to read HDF5 %s: %s", path, exc)
         raise ValueError(f"Unable to read HDF5 file: {path}") from exc
     logger.info("Loaded HDF5 dataset '%s' with shape %s from %s", key, data.shape, path)
     return SensorDataset(data)
 
 
-def stream_data(source: Iterable[dict]) -> Generator[SensorDataset, None, None]:
+def stream_data(source: Iterable[object]) -> Generator[SensorDataset, None, None]:
     """Yield datasets from a real-time streaming source.
 
     Parameters
@@ -98,11 +126,21 @@ def stream_data(source: Iterable[dict]) -> Generator[SensorDataset, None, None]:
     """
     for item in source:
         try:
-            timestamp = item.get("timestamp")
-            if timestamp is None:
-                raise ValueError("Streaming item missing 'timestamp' field")
-            df = pd.DataFrame([item]).set_index(pd.to_datetime([timestamp]))
-            yield SensorDataset(df.drop(columns=["timestamp"]))
-        except Exception as exc:
+            yield _stream_item_to_dataset(item)
+        except (TypeError, ValueError, KeyError) as exc:
             logger.warning("Skipping malformed streaming item %s: %s", item, exc)
             continue
+
+
+def _stream_item_to_dataset(item: object) -> SensorDataset:
+    """Convert one streaming record into a single-row dataset."""
+    if not isinstance(item, Mapping):
+        raise TypeError("Streaming item must be a mapping")
+
+    timestamp = item.get("timestamp")
+    if timestamp is None:
+        raise ValueError("Streaming item missing 'timestamp' field")
+
+    timestamp_index = _parse_timestamps([timestamp], "timestamp")
+    df = pd.DataFrame([item]).set_index(timestamp_index)
+    return SensorDataset(df.drop(columns=["timestamp"]))

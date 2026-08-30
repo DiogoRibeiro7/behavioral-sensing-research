@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 import seaborn as sns
+from matplotlib.figure import Figure
 
 from ...analysis.dependency_network import SensorDependencyNetwork
 from .base_model import BernoulliAutoregressiveModel
@@ -32,6 +33,9 @@ class MultivariateAutoregressiveModel:
         Args:
             sensor_names: List of sensor names to model jointly
         """
+        if not sensor_names:
+            raise ValueError("sensor_names must contain at least one sensor")
+
         self.sensor_names = sensor_names
         self.n_sensors = len(sensor_names)
 
@@ -167,7 +171,7 @@ class MultivariateAutoregressiveModel:
         independent_bics = {}
         for sensor in self.sensor_names:
             temp_model = BernoulliAutoregressiveModel([sensor], sensor)
-            result = temp_model.fit(data[sensor : sensor + 1])  # Only use target sensor
+            result = temp_model.fit(data[[sensor]])  # Only use target sensor
             independent_bics[sensor] = result.get("bic", float("inf"))
 
         comparison_results["independent_models"] = {
@@ -280,7 +284,9 @@ class MultivariateAutoregressiveModel:
 
         return "\n".join(report)
 
-    def plot_interaction_summary(self, data: pd.DataFrame):
+    def plot_interaction_summary(
+        self, data: pd.DataFrame, *, show: bool = True
+    ) -> Figure:
         """
         Create comprehensive visualization of sensor interactions.
 
@@ -290,7 +296,7 @@ class MultivariateAutoregressiveModel:
         analysis = self.analyze_sensor_interactions(data)
 
         # Create subplot layout
-        fig, axes = plt.subplots(2, 3, figsize=(20, 12))
+        fig, _ = plt.subplots(2, 3, figsize=(20, 12))
         fig.suptitle("Sensor Interaction Analysis Summary", fontsize=16, y=0.98)
 
         # Plot 1: Dependency Network
@@ -319,7 +325,8 @@ class MultivariateAutoregressiveModel:
                     transform=plt.gca().transAxes,
                 )
                 plt.title("Dependency Network")
-        except Exception:
+        except (nx.NetworkXException, ValueError) as exc:
+            logger.warning("Network visualization failed: %s", exc)
             plt.text(
                 0.5,
                 0.5,
@@ -399,4 +406,6 @@ class MultivariateAutoregressiveModel:
             plt.title("Community Structure")
 
         plt.tight_layout()
-        plt.show()
+        if show:
+            plt.show()
+        return fig

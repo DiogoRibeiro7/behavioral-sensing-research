@@ -8,9 +8,11 @@ that they can run in environments without a full web server.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Collection, Iterable, Sequence
+from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from bokeh.embed import file_html
@@ -18,6 +20,16 @@ from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, CustomJS, Div, HoverTool, Slider
 from bokeh.plotting import figure
 from bokeh.resources import CDN
+
+
+def _require_columns(
+    data: pd.DataFrame, required: Collection[str], context: str
+) -> None:
+    """Raise a clear error when required visualization columns are missing."""
+    missing = sorted(set(required) - set(data.columns))
+    if missing:
+        names = ", ".join(missing)
+        raise ValueError(f"{context} requires columns: {names}")
 
 
 def real_time_display(data: pd.DataFrame) -> px.line:
@@ -28,6 +40,7 @@ def real_time_display(data: pd.DataFrame) -> px.line:
     data:
         DataFrame with at least ``timestamp``, ``sensor`` and ``value`` columns.
     """
+    _require_columns(data, {"sensor", "timestamp", "value"}, "real_time_display")
     return px.line(data, x="timestamp", y="value", color="sensor")
 
 
@@ -58,7 +71,12 @@ def _build_parameter_sweep(
     ordered_values = sorted({float(v) for v in values})
     if not ordered_values:
         raise ValueError("values must contain at least one candidate")
+    if not np.isfinite(ordered_values).all():
+        raise ValueError("values must contain only finite candidates")
+
     scores = [_score_parameter(model, param, value) for value in ordered_values]
+    if not np.isfinite(scores).all():
+        raise ValueError("parameter scores must be finite")
     return ordered_values, scores
 
 
@@ -170,17 +188,20 @@ summary.text =
 
 def drill_down(changes: pd.DataFrame) -> px.scatter:
     """Plot detected changes with interactive hover information."""
+    _require_columns(changes, {"score", "time"}, "drill_down")
     return px.scatter(changes, x="time", y="score")
 
 
 def export(fig: Any, path: str) -> None:
     """Export a Plotly or Bokeh figure to an HTML file."""
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     if hasattr(fig, "write_html"):
-        fig.write_html(path)
+        fig.write_html(output_path)
     elif fig.__class__.__module__.startswith("bokeh"):
         html = file_html(fig, CDN, "export")
         with open(
-            path, "w", encoding="utf-8"
+            output_path, "w", encoding="utf-8"
         ) as fh:  # pragma: no cover - simple file write
             fh.write(html)
     else:  # pragma: no cover - defensive fallback

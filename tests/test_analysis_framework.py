@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -21,26 +22,78 @@ def test_pipeline_and_reporting(tmp_path):
     results = pipe.run(ds)
     assert {"ar", "hmm", "cpd", "nhpp"} <= results.keys()
 
-    tex = tmp_path / "report.tex"
-    html = tmp_path / "dashboard.html"
-    fhir = tmp_path / "fhir.json"
-    reporting.generate_latex_report(results, tex)
-    reporting.create_html_dashboard(results, html)
-    reporting.export_to_fhir(results, fhir)
+    tex = tmp_path / "direct" / "report.tex"
+    html = tmp_path / "direct" / "dashboard.html"
+    fhir = tmp_path / "direct" / "fhir.json"
+    assert reporting.generate_latex_report(results, tex) == tex
+    assert reporting.create_html_dashboard(results, html) == html
+    assert reporting.export_to_fhir(results, fhir) == fhir
     assert tex.exists()
     assert html.exists()
     assert fhir.exists()
-    fhir_payload = json.loads(fhir.read_text())
+    fhir_payload = json.loads(fhir.read_text(encoding="utf-8"))
     assert fhir_payload["resourceType"] == "Observation"
     assert fhir_payload["code"]["text"] == "Sensor modeling analysis summary"
     assert "valueString" not in fhir_payload
     assert {item["code"]["text"] for item in fhir_payload["component"]} == set(results)
 
     nested_output = tmp_path / "nested" / "reports"
-    pipe.generate_report(results, nested_output)
+    report_paths = pipe.generate_report(results, nested_output)
+    assert report_paths == {
+        "latex": nested_output / "analysis.tex",
+        "html": nested_output / "dashboard.html",
+        "fhir": nested_output / "analysis_fhir.json",
+    }
     assert (nested_output / "analysis.tex").exists()
     assert (nested_output / "dashboard.html").exists()
     assert (nested_output / "analysis_fhir.json").exists()
+
+
+class _ArrayProbabilityModel:
+    def fit(self, data):
+        return self
+
+    def predict_probabilities(self, data):
+        return np.arange(10, dtype=float)
+
+
+class _FailingPipelineModel:
+    def fit(self, data):
+        raise ValueError("model cannot fit")
+
+
+def test_pipeline_formats_numpy_probability_outputs():
+    pipe = AnalysisPipeline(models={"ar": _ArrayProbabilityModel()})
+
+    results = pipe.run(SensorDataset(_sample_df()))
+
+    assert results == {"ar": {"probabilities": [0.0, 1.0, 2.0, 3.0, 4.0]}}
+
+
+def test_pipeline_records_expected_model_failures():
+    pipe = AnalysisPipeline(models={"hmm": _FailingPipelineModel()})
+
+    results = pipe.run(SensorDataset(_sample_df()))
+
+    assert results == {"hmm": {"error": "model cannot fit"}}
+
+
+def test_pipeline_validates_input_frame():
+    pipe = AnalysisPipeline(models={"unknown": object()})
+
+    with pytest.raises(ValueError, match="at least one row"):
+        pipe.run(pd.DataFrame(columns=["sensor_0"]))
+
+    with pytest.raises(ValueError, match="sensor column"):
+        pipe.run(pd.DataFrame(index=[pd.Timestamp("2024-01-01")]))
+
+
+def test_template_rendering_returns_original_on_format_errors():
+    assert reporting.render_template("Hello {name}", {"name": "Ada"}) == "Hello Ada"
+    assert reporting.render_template("Hello {missing}", {}) == "Hello {missing}"
+    assert (
+        reporting.render_template("Value {name!z}", {"name": "Ada"}) == "Value {name!z}"
+    )
 
 
 def test_comparison_and_behavioral():
@@ -64,6 +117,32 @@ def test_comparison_and_behavioral():
     assert len(anomalies) == len(ds.to_dataframe())
     assert trends.shape[0] == ds.to_dataframe().shape[0]
     assert "overall_activity" in health
+
+
+def test_standardize_metrics_handles_empty_and_missing_values():
+    assert comparison.standardize_metrics({}) == {}
+    assert comparison.standardize_metrics({"a": 2.0, "b": 2.0}) == {
+        "a": 0.0,
+        "b": 0.0,
+    }
+
+    standardized = comparison.standardize_metrics(
+        {"low": 2.0, "missing": float("nan"), "high": 4.0}
+    )
+
+    assert standardized["low"] == 0.0
+    assert np.isnan(standardized["missing"])
+    assert standardized["high"] == 1.0
+
+
+def test_significance_test_validates_paired_scores():
+    assert comparison.significance_test([0.2, 0.3], [0.2, 0.3]) == 1.0
+
+    with pytest.raises(ValueError, match="same length"):
+        comparison.significance_test([0.1, 0.2], [0.1])
+
+    with pytest.raises(ValueError, match="at least two"):
+        comparison.significance_test([0.1, float("nan")], [0.1, 0.2])
 
 
 class _PredictOnlyModel:
@@ -96,3 +175,24 @@ def test_cross_validate_accepts_explicit_model_scorer():
     )
 
     assert scores["predict_only"] == 0.5
+
+
+class _FailingScoreModel:
+    def fit(self, data):
+        return self
+
+    def score(self, data):
+        raise ValueError("cannot score this fold")
+
+
+def test_cross_validate_records_nan_for_expected_fold_failures():
+    ds = SensorDataset(_sample_df())
+
+    scores = comparison.cross_validate({"failing": _FailingScoreModel()}, ds)
+
+    assert np.isnan(scores["failing"])
+
+
+def test_time_series_splits_requires_positive_split_count():
+    with pytest.raises(ValueError, match="n_splits"):
+        comparison.time_series_splits(_sample_df(), n_splits=0)

@@ -11,6 +11,11 @@ from dataclasses import dataclass
 import numpy as np
 
 from ..utils.plotting import plot_change_points
+from ._validation import (
+    validate_positive_int,
+    validate_positive_threshold,
+    validate_series,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,14 +26,18 @@ class EnergyEfficientCPD:
 
     window: int = 10
 
+    def __post_init__(self) -> None:
+        validate_positive_int(self.window, "window")
+
     def fit(self, series: np.ndarray) -> EnergyEfficientCPD:
-        self.series = np.asarray(series)
+        self.series = validate_series(series)
         return self
 
     def predict(self, threshold: float = 0.5, plot: bool = False) -> np.ndarray:
         """Detect change points based on energy across windows."""
         if not hasattr(self, "series"):
             raise ValueError("Model must be fitted before prediction")
+        threshold = validate_positive_threshold(threshold)
         n = len(self.series)
         energies = [
             np.sum(

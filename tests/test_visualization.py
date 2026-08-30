@@ -4,6 +4,7 @@ import os
 from unittest.mock import MagicMock
 
 import pandas as pd
+import pytest
 from bokeh.models import Div, Slider
 from flask import Flask
 
@@ -31,7 +32,7 @@ def test_interactive_export(tmp_path):
     """Export interactive visualization to HTML."""
     df = _sample_data()
     fig = interactive.real_time_display(df)
-    out = tmp_path / "fig.html"
+    out = tmp_path / "nested" / "fig.html"
     interactive.export(fig, out)
     assert out.exists()
 
@@ -45,6 +46,15 @@ class _DummyTuningModel:
     def score_parameter(self, param, value):
         assert param == "penalty"
         return -((value - 2.0) ** 2) + 4.0
+
+
+class _NonFiniteTuningModel:
+    """Small model that returns invalid parameter diagnostics."""
+
+    penalty = 1.0
+
+    def score_parameter(self, param, value):
+        return float("nan")
 
 
 def test_parameter_tuning_returns_visible_diagnostic_layout():
@@ -69,6 +79,31 @@ def test_parameter_tuning_export_supports_bokeh_layout(tmp_path):
     assert "penalty diagnostic sweep" in out.read_text(encoding="utf-8")
 
 
+def test_interactive_visualizations_validate_inputs():
+    """Interactive helpers should validate data schema and parameter sweeps."""
+    df = _sample_data()
+    changes = pd.DataFrame({"time": df["timestamp"], "score": range(len(df))})
+
+    assert interactive.drill_down(changes) is not None
+
+    with pytest.raises(ValueError, match="real_time_display requires columns"):
+        interactive.real_time_display(df.drop(columns=["sensor"]))
+
+    with pytest.raises(ValueError, match="drill_down requires columns"):
+        interactive.drill_down(changes.drop(columns=["score"]))
+
+    with pytest.raises(ValueError, match="finite candidates"):
+        interactive.parameter_tuning(
+            _DummyTuningModel(), "penalty", [1.0, float("inf")]
+        )
+
+    with pytest.raises(ValueError, match="parameter scores must be finite"):
+        interactive.parameter_tuning(_NonFiniteTuningModel(), "penalty", [1.0, 2.0])
+
+    with pytest.raises(TypeError, match="Unsupported figure type"):
+        interactive.export(object(), "unsupported.html")
+
+
 def test_clinical_alerts():
     """Verify clinical alert logic triggers correctly."""
     df = _sample_data()
@@ -76,11 +111,66 @@ def test_clinical_alerts():
     assert alerts["a"] is True
 
 
+def test_clinical_visualizations_validate_inputs():
+    """Clinical helpers should report missing columns and invalid windows clearly."""
+    df = _sample_data()
+    normative = df.copy()
+    activity_fig = clinical.activity_summary(df)
+    trend_fig = clinical.trend_monitor(df, window=2)
+    comparison_fig = clinical.compare_norms(df, normative)
+
+    assert activity_fig is not None
+    assert trend_fig is not None
+    assert comparison_fig is not None
+
+    with pytest.raises(ValueError, match="activity_summary requires columns"):
+        clinical.activity_summary(df.drop(columns=["activity"]))
+
+    with pytest.raises(ValueError, match="clinical_alerts requires columns"):
+        clinical.clinical_alerts(df.drop(columns=["value"]), {"a": 5})
+
+    with pytest.raises(ValueError, match="window must be at least 1"):
+        clinical.trend_monitor(df, window=0)
+
+    with pytest.raises(ValueError, match="normative data requires columns"):
+        clinical.compare_norms(df, normative.drop(columns=["value"]))
+
+
 def test_research_publication_figure():
     """Create a publication-quality figure."""
     df = _sample_data()
     fig = research.publication_figure(df, "timestamp", "value")
     assert fig is not None
+
+
+def test_research_visualizations_validate_inputs():
+    """Research plotting helpers should validate required schema and residuals."""
+    df = _sample_data()
+    scores = pd.DataFrame(
+        {"model": ["ar", "hmm"], "metric": ["auc", "auc"], "score": [0.7, 0.8]}
+    )
+    results = pd.DataFrame(
+        {"model": ["ar", "hmm"], "test": ["t-test", "t-test"], "pvalue": [0.2, 0.01]}
+    )
+
+    assert research.model_diagnostics([0.1, -0.2, 0.0]) is not None
+    assert research.performance_comparison(scores) is not None
+    assert research.statistical_tests(results) is not None
+
+    with pytest.raises(ValueError, match="publication_figure requires columns"):
+        research.publication_figure(df.drop(columns=["value"]), "timestamp", "value")
+
+    with pytest.raises(ValueError, match="at least one value"):
+        research.model_diagnostics([])
+
+    with pytest.raises(ValueError, match="finite values"):
+        research.model_diagnostics([0.1, float("nan")])
+
+    with pytest.raises(ValueError, match="performance_comparison requires columns"):
+        research.performance_comparison(scores.drop(columns=["metric"]))
+
+    with pytest.raises(ValueError, match="statistical_tests requires columns"):
+        research.statistical_tests(results.drop(columns=["pvalue"]))
 
 
 def test_web_app_factory():

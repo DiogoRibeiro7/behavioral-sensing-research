@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
 title: "Sensor Modeling Research Toolkit"
-abstract: "A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies multiple modeling paradigms including Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes into a single cohesive framework designed for ambient assisted living (AAL), digital health, and smart home research applications."
+abstract: "A research-grade Python toolkit for interpretable, probabilistic, privacy-preserving analysis of behavioural sensor data, and for multimodal ambient sensing in assisted-living and digital-health research. It provides an end-to-end pipeline from heterogeneous sensor observations to explained alerts, alongside an established modelling core of Bernoulli autoregressive models, hidden Markov models, change-point detection and non-homogeneous Poisson processes. Sensor failure, missing data, visitors and uncertainty are treated as first-class modelling concerns: a missing observation is never read as evidence of inactivity, and ambient activity is never automatically attributed to the monitored resident. Research software, not a medical device."
 
 authors:
   - family-names: "Ribeiro"
@@ -27,8 +27,8 @@ repository-code: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
 repository-artifact: "https://zenodo.org/records/17070041"
 url: "https://sensor-modeling.readthedocs.io"
 
-version: "0.1.3"
-date-released: "2026-07-13"
+version: "0.2.0"
+date-released: "2026-08-30"
 license: MIT
 license-url: "https://opensource.org/licenses/MIT"
 
@@ -135,10 +135,10 @@ preferred-citation:
       affiliation: "ESMAD - Instituto Politécnico do Porto"
       orcid: "https://orcid.org/0009-0001-2022-7072"
   year: 2026
-  version: "0.1.3"
+  version: "0.2.0"
   doi: "10.5281/zenodo.17070041"
   url: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
-  abstract: "A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies multiple modeling paradigms including Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes into a single cohesive framework designed for ambient assisted living (AAL), digital health, and smart home research applications."
+  abstract: "A research-grade Python toolkit for interpretable, probabilistic, privacy-preserving analysis of behavioural sensor data, and for multimodal ambient sensing in assisted-living and digital-health research. It provides an end-to-end pipeline from heterogeneous sensor observations to explained alerts, alongside an established modelling core of Bernoulli autoregressive models, hidden Markov models, change-point detection and non-homogeneous Poisson processes. Sensor failure, missing data, visitors and uncertainty are treated as first-class modelling concerns: a missing observation is never read as evidence of inactivity, and ambient activity is never automatically attributed to the monitored resident. Research software, not a medical device."
 
 # Contact information
 contact:

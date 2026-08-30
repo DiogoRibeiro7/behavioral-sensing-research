@@ -3,45 +3,42 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict
 
 import pandas as pd
+
+from ._frame import prepare_sensor_frame
 
 logger = logging.getLogger(__name__)
 
 
-def calculate_behavioral_metrics(data: pd.DataFrame) -> Dict:
+def calculate_behavioral_metrics(data: pd.DataFrame) -> dict[str, object]:
     """Calculate basic behavioral pattern metrics from sensor data."""
-    metrics: Dict = {}
+    sensor_data = prepare_sensor_frame(data, context="calculate_behavioral_metrics")
+    metrics: dict[str, object] = {}
 
-    total_activations = data.sum().sum()
-    total_possible = len(data) * len(data.columns)
-    metrics["overall_activity_rate"] = total_activations / total_possible
+    total_activations = sensor_data.sum().sum()
+    total_possible = len(sensor_data) * len(sensor_data.columns)
+    metrics["overall_activity_rate"] = float(total_activations / total_possible)
     metrics["total_activations"] = int(total_activations)
 
-    data_with_hour = data.copy()
-    data_with_hour["hour"] = data.index.hour
-    hourly_activity = data_with_hour.groupby("hour")[data.columns].sum()
+    hourly_activity = sensor_data.groupby(sensor_data.index.hour).sum()
     metrics["peak_activity_hour"] = int(hourly_activity.sum(axis=1).idxmax())
     metrics["quietest_hour"] = int(hourly_activity.sum(axis=1).idxmin())
 
-    sensor_metrics = {}
-    for sensor in data.columns:
-        sensor_data = data[sensor]
+    sensor_metrics: dict[str, dict[str, float | int]] = {}
+    for sensor in sensor_data.columns:
+        series = sensor_data[sensor]
+        daily_variance = series.groupby(series.index.date).sum().var()
         sensor_metrics[sensor] = {
-            "activation_rate": float(sensor_data.mean()),
-            "total_activations": int(sensor_data.sum()),
-            "longest_inactive_period": _find_longest_streak(sensor_data, 0),
-            "longest_active_period": _find_longest_streak(sensor_data, 1),
-            "daily_variance": float(
-                sensor_data.groupby(sensor_data.index.date).sum().var()
-            ),
+            "activation_rate": float(series.mean()),
+            "total_activations": int(series.sum()),
+            "longest_inactive_period": _find_longest_streak(series, 0),
+            "longest_active_period": _find_longest_streak(series, 1),
+            "daily_variance": 0.0 if pd.isna(daily_variance) else float(daily_variance),
         }
     metrics["sensor_metrics"] = sensor_metrics
 
-    data_with_dow = data.copy()
-    data_with_dow["day_of_week"] = data.index.dayofweek
-    dow_activity = data_with_dow.groupby("day_of_week")[data.columns].sum()
+    dow_activity = sensor_data.groupby(sensor_data.index.dayofweek).sum()
     weekday_names = [
         "Monday",
         "Tuesday",

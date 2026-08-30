@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict
+from collections.abc import Mapping
+from typing import Protocol
 
 import numpy as np
 import pandas as pd
@@ -14,14 +15,36 @@ from .plotting import plot_quantile_intervals
 logger = logging.getLogger(__name__)
 
 
+class SupportsPredictionIntervals(Protocol):
+    """Model interface required by prediction validation."""
+
+    def predict_probabilities(self, data: pd.DataFrame) -> np.ndarray:
+        """Return predicted event probabilities."""
+        ...
+
+    def compute_quantile_intervals(
+        self, probabilities: np.ndarray, confidence: float
+    ) -> Mapping[str, np.ndarray]:
+        """Return lower, upper, and mean prediction intervals."""
+        ...
+
+
 def validate_model_predictions(
-    model,
+    model: SupportsPredictionIntervals,
     test_data: pd.DataFrame | SensorDataset,
     sensor_name: str,
     confidence: float = 0.95,
-) -> Dict:
+    *,
+    plot: bool = True,
+) -> dict[str, object]:
     """Validate model predictions using quantile coverage metrics."""
+    if not 0 < confidence < 1:
+        raise ValueError("confidence must be between 0 and 1")
+
     df = test_data.to_dataframe() if isinstance(test_data, SensorDataset) else test_data
+    if sensor_name not in df.columns:
+        raise KeyError(f"Sensor '{sensor_name}' not found in test data")
+
     probabilities = model.predict_probabilities(df)
     quantile_info = model.compute_quantile_intervals(probabilities, confidence)
     if not quantile_info:
@@ -46,7 +69,8 @@ def validate_model_predictions(
     mse = np.mean((actual_counts - quantile_info["means"]) ** 2)
     coverage_accuracy = 100 - abs(outside_percentage - expected_outside)
 
-    plot_quantile_intervals(actual_counts, quantile_info, sensor_name=sensor_name)
+    if plot:
+        plot_quantile_intervals(actual_counts, quantile_info, sensor_name=sensor_name)
 
     return {
         "validation_successful": True,
@@ -57,27 +81,30 @@ def validate_model_predictions(
         "mean_squared_error": mse,
         "actual_counts": actual_counts,
         "quantile_info": quantile_info,
-        "is_well_calibrated": abs(outside_percentage - expected_outside) < 2.5,
+        "is_well_calibrated": bool(abs(outside_percentage - expected_outside) < 2.5),
     }
 
 
-def create_model_comparison_report(results: Dict) -> str:
+def create_model_comparison_report(results: Mapping[str, object]) -> str:
     """Create a formatted comparison report for multiple modeling approaches."""
     report = ["MODEL COMPARISON REPORT", "=" * 40, "\nBIC COMPARISON:"]
-    bic_scores = {}
+    bic_scores: dict[str, float] = {}
     for approach, data in results.items():
-        if "total_bic" in data:
-            report.append(
-                f"{approach.replace('_', ' ').title()}: {data['total_bic']:.2f}"
-            )
-            bic_scores[approach] = data["total_bic"]
+        if isinstance(data, Mapping) and isinstance(data.get("total_bic"), int | float):
+            total_bic = float(data["total_bic"])
+            report.append(f"{approach.replace('_', ' ').title()}: {total_bic:.2f}")
+            bic_scores[approach] = total_bic
 
-    if "improvements" in results:
+    improvements = results.get("improvements")
+    if isinstance(improvements, Mapping):
         report.append("\nIMPROVEMENTS (Lower BIC is better):")
-        for comparison, improvement in results["improvements"].items():
-            direction = "better" if improvement > 0 else "worse"
+        for comparison, improvement in improvements.items():
+            if not isinstance(improvement, int | float):
+                continue
+            improvement_value = float(improvement)
+            direction = "better" if improvement_value > 0 else "worse"
             report.append(
-                f"{comparison.replace('_', ' ').title()}: {improvement:.2f} ({direction})"
+                f"{comparison.replace('_', ' ').title()}: {improvement_value:.2f} ({direction})"
             )
 
     if bic_scores:

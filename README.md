@@ -1,12 +1,26 @@
 # Sensor Modeling Research Toolkit
 
-A comprehensive, research-grade Python library for analyzing, modeling, and visualizing behavioral sensor data in smart environments. The toolkit unifies multiple modeling paradigms including Bernoulli autoregressive models, hidden Markov models, change-point detection, and non-homogeneous Poisson processes into a single cohesive framework designed for ambient assisted living (AAL), digital health, and smart home research.
+A research-grade Python toolkit for **interpretable, probabilistic,
+privacy-preserving** analysis of behavioural sensor data, and for multimodal
+ambient sensing in ambient assisted living (AAL), digital health and smart-home
+research.
+
+It provides an end-to-end pipeline from heterogeneous sensor observations to
+explained alerts, alongside an established modelling core of Bernoulli
+autoregressive models, hidden Markov models, change-point detection and
+non-homogeneous Poisson processes.
+
+> **This is a research toolkit, not a medical device.** Nothing it produces is
+> a diagnosis, and no claim of clinical effectiveness is made or supported.
+> Every quantitative result quoted here comes from the bundled simulator and
+> has **not** been validated against real sensor data.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.10--3.12-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/sensor-modeling/badge/?version=latest)](https://sensor-modeling.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17070041.svg)](https://doi.org/10.5281/zenodo.17070041)
+[![Version](https://img.shields.io/badge/version-0.2.0-informational.svg)](CHANGELOG.md)
 
 ## 🎯 Overview
 
@@ -19,6 +33,125 @@ The **Sensor Modeling Research Toolkit** addresses the growing need for reproduc
 - **Clinical Focus**: Visualization and reporting utilities designed for healthcare stakeholders and non-technical users
 - **Lightweight Deployment**: Minimal dependencies and efficient implementations suitable for edge computing and real-time applications
 - **Extensible Architecture**: Modular design allows researchers to easily add new algorithms and extend existing functionality
+
+## 🧭 Observation, state, change, alert
+
+The platform keeps five kinds of thing strictly distinct, and most of its
+design follows from refusing to collapse them:
+
+| Kind | What it is | Example |
+| --- | --- | --- |
+| **Measured observation** | A sensor reported a value at an instant | The fridge contact closed at 08:14 |
+| **Derived feature** | A value an upstream device computed, carrying its own confidence | The radar reports 2 tracked people |
+| **Inferred state** | A posterior over what the resident was probably doing | `P(kitchen_activity) = 0.81` |
+| **Behavioural change** | A shift against the resident's own history | Sleep has trended down for three weeks |
+| **Alert** | A judgement that a person should look at something | An `attention` alert, with its caveats |
+
+A sensor event is not a behaviour:
+
+```text
+fridge opening      != eating
+tap activation      != drinking
+toilet event        != confirmed toileting
+chair activity      != sedentary behaviour
+door event          != resident movement
+missing observation != inactivity
+```
+
+The state ontology therefore stops at `kitchen_activity` and makes no claim
+about food intake. Two rules are enforced mechanically rather than by
+convention:
+
+- **A missing observation is missing evidence, never negative evidence.**
+  Sensor reliability enters the fusion likelihood as a tempering weight, so a
+  failed sensor contributes a flat likelihood and cannot look like a quiet
+  resident.
+- **Ambient activity is not automatically the resident's.** Occupancy
+  estimation produces `P(activity was the resident's)`, which discounts
+  evidence while a visitor or carer may be present.
+
+The system can also return `unknown`. Abstention is a first-class output, not
+a failure.
+
+### Supported and unsupported claims
+
+The distinction the platform is built to hold. The left column is what the
+evidence supports; the right is what it does **not**, however tempting the
+inference.
+
+| Supported | Not supported |
+| --- | --- |
+| Evidence of kitchen activity | Food consumption |
+| Evidence of bathroom activity | Confirmed toileting |
+| Bed occupancy with sustained low movement | Clinically defined sleep, or a sleep disorder |
+| A door was crossed | The resident left the house |
+| A sustained change against the resident's own history | A cause, a prognosis, or a diagnosis |
+| Reduced room-to-room transitions | Deterioration in mobility as a clinical finding |
+| Sensor coverage has fallen | The resident has become less active |
+| `P(resident generated this activity) = 0.5` | Identification of who did it |
+
+Two of these deserve spelling out.
+
+**`kitchen_activity` is not eating.** A fridge contact records a door opening.
+Turning that into a meal requires evidence the sensor cannot supply, so the
+ontology stops where the evidence stops.
+
+**`sleeping` is not sleep.** It is bed occupancy accompanied by sustained low
+movement. It has no relationship to polysomnography, and mapping it to a
+clinical sleep concept is a further inferential step this platform does not
+take.
+
+## 🏠 Multimodal ambient sensing pipeline
+
+```text
+heterogeneous observations -> validation -> sensor health -> occupancy context
+    -> multimodal fusion -> behavioural state -> adaptive baseline
+    -> change detection -> restrained alerts -> evaluation
+```
+
+| Package | Responsibility |
+| --- | --- |
+| `sensor_modeling.observations` | Canonical hardware-neutral observation model, sensor registry, boundary validation, clock-drift correction |
+| `sensor_modeling.health` | Online per-sensor reliability, emitted as an evidence weight |
+| `sensor_modeling.context` | Occupancy contexts and uncertainty-aware attribution, from anonymous evidence only |
+| `sensor_modeling.states` / `sensor_modeling.fusion` | Continuous-time state ontology and the recursive multimodal filter |
+| `sensor_modeling.baseline` | Adaptive, weekday-aware, non-stationary personal baselines |
+| `sensor_modeling.alerts` | Restrained, explained alerting with deduplication and rate limiting |
+| `sensor_modeling.simulation` | Synthetic households with controlled ground truth |
+| `sensor_modeling.evaluation` | Problem-appropriate metrics and paired sensor-ablation studies |
+| `sensor_modeling.online` | Incremental, snapshot-able orchestration |
+
+### Reproducible end-to-end example
+
+```bash
+sensor-modeling demo --days 90 --seed 20240304 --step-minutes 10
+```
+
+Simulates a household with a carer and visitors, injects a three-day bed-sensor
+dropout and five days of wearable non-adherence, loses, duplicates, delays and
+clock-skews the record, introduces a genuine change in sleep on a known day,
+then runs the whole pipeline and reports what it did and did not recover —
+including its own false-alert burden. Two runs produce identical numbers.
+
+### Sensor-ablation experiment
+
+```bash
+sensor-modeling ablate --days 14 --seeds 11 22 33 44
+```
+
+Every configuration is evaluated on identical simulated households, so the
+comparison measures sensing rather than residents. On a four-seed sweep, adding
+a person-bound wearable to six object sensors recovered most of the full
+ten-sensor deployment's accuracy — the remaining gap is 0.012 balanced accuracy
+(95% CI [+0.004, +0.020]), real but small — while removing the wearable cost
+0.173 (95% CI [+0.140, +0.201]). A five-sensor configuration was the *best
+calibrated* of all despite lower accuracy, which an accuracy-only evaluation
+would have hidden. See [`docs/evaluation.md`](docs/evaluation.md).
+
+> These numbers describe behaviour on the bundled simulator under its default
+> parameters. They are not estimates of field performance. Nothing here has
+> been validated against real sensor data — see
+> [`docs/limitations.md`](docs/limitations.md).
 
 ## ✨ Features
 
@@ -251,6 +384,10 @@ The toolkit is organized into four primary layers designed for modularity and ex
 
 ## 📈 Roadmap Progress
 
+The high-level status table below summarizes current capabilities. See
+[`ROADMAP.md`](ROADMAP.md) for release milestones, quality gates, and
+longer-term priorities.
+
 Feature                             | Status     | Implementation
 ----------------------------------- | ---------- | -----------------------------------------
 **Bernoulli Autoregressive Models** | ✅ Complete | Single/multivariate, automatic selection
@@ -258,9 +395,14 @@ Feature                             | Status     | Implementation
 **Change Point Detection**          | 🟡 Partial | 4 algorithms, expanding to deep learning
 **NHPP-PELT**                       | ✅ Complete | B-spline intensities, diagnostics
 **Causal Network Analysis**         | ✅ Complete | Granger tests, network metrics
-**Missing Data Handling**           | 🟡 Partial | Gap-aware fill/interpolate/drop/flag workflows with masks
+**Missing Data Handling**           | ✅ Complete | Gap-aware workflows plus reliability-tempered fusion
+**Multimodal Fusion**               | ✅ Complete | Continuous-time filter over asynchronous modalities
+**Sensor Health Modelling**         | ✅ Complete | Online reliability feeding the inference layer
+**Occupancy & Attribution**         | ✅ Complete | Probabilistic visitor/resident attribution
+**Adaptive Baselines**              | ✅ Complete | Robust, weekday-aware, non-stationary
+**Sensor Ablation Studies**         | ✅ Complete | Paired designs with effect sizes
 **Deep Learning CPD**               | 🔵 Planned | Transformer and CNN-based approaches
-**Real-time Processing**            | 🔵 Planned | Streaming algorithms and online learning
+**Real-time Processing**            | ✅ Complete | Incremental pipeline, bounded memory, snapshot/restore
 **Clinical Integration**            | 🟡 Partial | Minimal FHIR-style export, expanding toward validated HL7 profiles
 
 ## 📚 Research Foundation
@@ -364,7 +506,7 @@ We welcome contributions from researchers and practitioners! The toolkit is desi
 
   ```bash
   pytest tests/test_my_new_algorithm.py
-  sphinx-build -b html docs docs/_build/html
+  mkdocs build --strict
   ```
 
 5. **Submit a pull request** with:
@@ -383,6 +525,8 @@ We welcome contributions from researchers and practitioners! The toolkit is desi
 - **Reproducibility**: Use fixed random seeds and provide example datasets
 
 See <CONTRIBUTING.md> for detailed guidelines and our [Code of Conduct](CODE_OF_CONDUCT.md).
+Maintainers should use [`RELEASE.md`](RELEASE.md) for the main-only release
+checklist.
 
 ## 📄 License
 
@@ -394,6 +538,8 @@ Distributed under the [MIT License](LICENSE). This allows for both academic and 
 - **Institution**: ESMAD - Instituto Politécnico do Porto
 - **Issues**: Use GitHub Issues for bug reports and feature requests
 - **Discussions**: GitHub Discussions for questions and community support
+- **Security**: Follow [`SECURITY.md`](SECURITY.md) for private vulnerability reports
+- **Support**: See [`SUPPORT.md`](SUPPORT.md) for the right support channel
 
 ## 📖 Documentation
 
@@ -412,7 +558,7 @@ If you use this software in your research, please cite it as:
   author={Ribeiro, Diogo},
   year={2026},
   url={https://github.com/DiogoRibeiro7/behavioral-sensing-research},
-  version={0.1.3},
+  version={0.2.0},
   doi={10.5281/zenodo.17070041}
 }
 ```
