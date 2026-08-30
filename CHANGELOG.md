@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Moved every citation target to concept DOI `10.5281/zenodo.21337272`. Zenodo minted a new concept lineage when `0.2.0` was archived through the GitHub integration rather than adding a version to the existing one, so `10.5281/zenodo.17070041` now resolves to `0.1.0` alone and no longer stands for all versions. The `0.2.0` record links back with `isNewVersionOf`, and `ZENODO.md` documents both lineages.
+
 ## [0.2.0] - 2026-08-30
 
 Extends the toolkit into a multimodal ambient-sensing research platform. The

@@ -9,7 +9,13 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-CONCEPT_DOI = "10.5281/zenodo.17070041"
+#: Concept DOI resolving to the latest archived version.
+#:
+#: Zenodo minted a new concept lineage when 0.2.0 was archived through the
+#: GitHub integration, so 0.1.0 remains under 10.5281/zenodo.17070041 while
+#: everything from 0.2.0 onwards lives here. See ZENODO.md.
+CONCEPT_DOI = "10.5281/zenodo.21337272"
+LEGACY_CONCEPT_DOI = "10.5281/zenodo.17070041"
 
 
 def _read(path: str) -> str:
@@ -95,3 +101,39 @@ def test_zenodo_metadata_has_required_repository_linkage():
         and item["resource_type"] == "software"
         for item in related_identifiers
     )
+
+
+def test_the_superseded_concept_doi_is_not_a_citation_target():
+    """0.1.0's concept DOI must not be offered as the project's DOI.
+
+    Zenodo minted a new concept lineage when 0.2.0 was archived, so the older
+    concept resolves to 0.1.0 alone. Presenting it as the "all versions" DOI
+    would send anyone citing this work to an archive that predates the release
+    they are using. It may still appear as historical context, but never as the
+    thing to cite.
+    """
+    citation = yaml.safe_load(_read("CITATION.cff"))
+    readme = _read("README.md")
+    pyproject = _read("pyproject.toml")
+
+    assert citation["preferred-citation"]["doi"] == CONCEPT_DOI
+    assert LEGACY_CONCEPT_DOI not in readme
+    assert LEGACY_CONCEPT_DOI not in pyproject
+
+
+def test_the_zenodo_notes_explain_the_split_lineage():
+    """A reader hitting the old DOI needs to find out why it stops at 0.1.0."""
+    zenodo_doc = _read("ZENODO.md")
+
+    assert CONCEPT_DOI in zenodo_doc
+    assert LEGACY_CONCEPT_DOI in zenodo_doc
+    assert "10.5281/zenodo.22171268" in zenodo_doc, "0.2.0 version DOI missing"
+
+
+def test_every_archived_release_has_a_version_doi():
+    """A release table row without a DOI is not a citable archive."""
+    rows = [line for line in _read("ZENODO.md").splitlines() if line.startswith("| 0.")]
+
+    assert rows, "no archived releases listed"
+    for row in rows:
+        assert "10.5281/zenodo." in row, row

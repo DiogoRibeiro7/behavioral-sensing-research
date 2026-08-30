@@ -19,7 +19,7 @@ non-homogeneous Poisson processes.
 [![Python Version](https://img.shields.io/badge/python-3.10--3.12-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/sensor-modeling/badge/?version=latest)](https://sensor-modeling.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17070041.svg)](https://doi.org/10.5281/zenodo.17070041)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21337272.svg)](https://doi.org/10.5281/zenodo.21337272)
 [![Version](https://img.shields.io/badge/version-0.2.0-informational.svg)](CHANGELOG.md)
 
 ## 🎯 Overview
@@ -559,7 +559,7 @@ If you use this software in your research, please cite it as:
   year={2026},
   url={https://github.com/DiogoRibeiro7/behavioral-sensing-research},
   version={0.2.0},
-  doi={10.5281/zenodo.17070041}
+  doi={10.5281/zenodo.21337272}
 }
 ```
 
