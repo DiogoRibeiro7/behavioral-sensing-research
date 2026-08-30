@@ -1,0 +1,107 @@
+{
+  "config_sha256": "7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4",
+  "environment": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "platform": "Linux-6.11.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.16",
+    "scipy": "1.17.1",
+    "sensor-modeling": "0.2.0"
+  },
+  "experiment_git_revision": "bd5a9b10068b69fc75cc6f806904430633ce7408",
+  "h2_primary_noninferiority": {
+    "ci_high": 0.15641314849498592,
+    "ci_low": 0.15310025955167178,
+    "estimate": 0.15478368245435956,
+    "margin": 0.02,
+    "metric": "balanced_accuracy",
+    "noninferior": false,
+    "reduced_configuration": "radar_door_bed_wearable",
+    "reference_configuration": "all_modalities"
+  },
+  "interpretation_guardrail": "All outcomes are simulator-derived and are not estimates of field performance.",
+  "mcse_gate": {
+    "contrast": "full_minus_subset",
+    "maximum_observed_mcse": 0.001124983614711242,
+    "metric": "balanced_accuracy",
+    "passed": true,
+    "target": 0.002
+  },
+  "replications": 200,
+  "shard_count": 40,
+  "status": "confirmatory",
+  "summaries": {
+    "h1": {
+      "0.0": {
+        "balanced_accuracy": {"mean": 0.7458205531402652, "ci_low": 0.7443320618148015, "ci_high": 0.7473395384726924},
+        "log_loss": {"mean": 1.664481349276214},
+        "brier": {"mean": 0.2654794884770434},
+        "calibration_error": {"mean": 0.12262743044104814},
+        "abstention_rate": {"mean": 9.67837998808815e-06}
+      },
+      "0.05": {
+        "balanced_accuracy": {"mean": 0.741865910659282},
+        "log_loss": {"mean": 1.6154378468591468},
+        "brier": {"mean": 0.2651858419702589},
+        "calibration_error": {"mean": 0.12188882133202178},
+        "abstention_rate": {"mean": 7.4449076831447305e-06},
+        "balanced_accuracy_change_from_zero": {"mean": -0.003954642480983104, "ci_low": -0.004458402115978311, "ci_high": -0.0034533703624897954}
+      },
+      "0.1": {
+        "balanced_accuracy": {"mean": 0.7369290737932289},
+        "log_loss": {"mean": 1.5753308293360642},
+        "brier": {"mean": 0.2654556591708629},
+        "calibration_error": {"mean": 0.12141787153892791},
+        "abstention_rate": {"mean": 1.042287075640262e-05},
+        "balanced_accuracy_change_from_zero": {"mean": -0.008891479347036164, "ci_low": -0.009594131433488653, "ci_high": -0.00817749881986029}
+      },
+      "0.2": {
+        "balanced_accuracy": {"mean": 0.7238756923477611},
+        "log_loss": {"mean": 1.5032139323975298},
+        "brier": {"mean": 0.26758673454070525},
+        "calibration_error": {"mean": 0.12065821238064474},
+        "abstention_rate": {"mean": 1.9356759976176295e-05},
+        "balanced_accuracy_change_from_zero": {"mean": -0.02194486079250396, "ci_low": -0.023031520047373272, "ci_high": -0.020880116417603886}
+      },
+      "0.4": {
+        "balanced_accuracy": {"mean": 0.6681380194790801},
+        "log_loss": {"mean": 1.4602104614518219},
+        "brier": {"mean": 0.3034746724905883},
+        "calibration_error": {"mean": 0.13437615537562522},
+        "abstention_rate": {"mean": 5.285884455032758e-05},
+        "balanced_accuracy_change_from_zero": {"mean": -0.07768253366118484, "ci_low": -0.07949202694952454, "ci_high": -0.07594105153316481}
+      }
+    },
+    "h2": {
+      "all_modalities": {"n_sensors": 10, "balanced_accuracy": 0.7458205531402652},
+      "minimal_door_bed": {"n_sensors": 2, "balanced_accuracy": 0.286712391532673, "gap_mean": 0.4591081616075921, "gap_ci_low": 0.45751986944061723, "gap_ci_high": 0.46076870804631126},
+      "object_sensors_only": {"n_sensors": 6, "balanced_accuracy": 0.5839369130586989, "gap_mean": 0.1618836400815661, "gap_ci_low": 0.1597270753460681, "gap_ci_high": 0.16403871672045242},
+      "objects_plus_wearable": {"n_sensors": 8, "balanced_accuracy": 0.7405303205671833, "gap_mean": 0.005290232573081827, "gap_ci_low": 0.005065690934282663, "gap_ci_high": 0.005512294281052834},
+      "radar_door_bed": {"n_sensors": 3, "balanced_accuracy": 0.3189123743115872, "gap_mean": 0.42690817882867793, "gap_ci_low": 0.42477057101179266, "gap_ci_high": 0.42900464242627045},
+      "radar_door_bed_wearable": {"n_sensors": 5, "balanced_accuracy": 0.5910368706859055, "gap_mean": 0.15478368245435956, "gap_ci_low": 0.15310025955167178, "gap_ci_high": 0.15641314849498592}
+    },
+    "h3": {
+      "resident_alone": {"balanced_accuracy_gain": -0.0004162228902412829, "ci_low": -0.0005243012550649443, "ci_high": -0.0003106741681065226, "calibration_gain": 0.0004918276337322687},
+      "short_visitor": {"balanced_accuracy_gain": -0.00013256591194301447, "ci_low": -0.00026894177480820314, "ci_high": 2.882004858170948e-06, "calibration_gain": 0.0012753166164930455},
+      "prolonged_visitor": {"balanced_accuracy_gain": 0.00022959830984643493, "ci_low": 6.758302932486157e-05, "ci_high": 0.0003889399093283258, "calibration_gain": 0.002039832620476996},
+      "carer_visits": {"balanced_accuracy_gain": 0.005891180520346499, "ci_low": 0.005615819722473952, "ci_high": 0.006149643927825933, "calibration_gain": 0.0029424790982031917},
+      "visitor_and_carer": {"balanced_accuracy_gain": 0.006285242608515741, "ci_low": 0.005993016411975217, "ci_high": 0.006590116955302196, "calibration_gain": 0.004007068308313716},
+      "resident_without_wearable": {"balanced_accuracy_gain": -0.01097323073435507, "ci_low": -0.011417806509129196, "ci_high": -0.010566602955086032, "calibration_gain": 0.004756686807519009},
+      "no_radar": {"balanced_accuracy_gain": 0.005075937088572662, "ci_low": 0.004773518207968155, "ci_high": 0.005374772793721139, "calibration_gain": 0.0034692599523684507},
+      "sparse_coverage": {"balanced_accuracy_gain": 0.0037982937818588016, "ci_low": 0.0035462134037249865, "ci_high": 0.004029803408147244, "calibration_gain": 0.0027613378558003832}
+    },
+    "h4": {
+      "balanced_accuracy": {"mean": -0.01449839057687879, "ci_low": -0.015387164339373715, "ci_high": -0.013626292919442212},
+      "log_loss": {"mean": -0.10956948398044233, "ci_low": -0.11460320571475907, "ci_high": -0.10454402047450956},
+      "brier": {"mean": 0.015649034928629405, "ci_low": 0.014482883134302092, "ci_high": 0.016805535422883145},
+      "calibration_error": {"mean": 0.003937036948292956, "ci_low": 0.0034402707478517302, "ci_high": 0.004431376840618611},
+      "abstention_rate": {"mean": -2.710505431213761e-22, "ci_low": -1.2674955330553823e-05, "ci_high": 1.2656343061346041e-05}
+    },
+    "h5": {
+      "living_radar + resident_beacon": {"mean": 0.0020371038659052526, "ci_low": 0.0015962630570499818, "ci_high": 0.002486110914265128},
+      "wearable_motion + resident_beacon": {"mean": 0.01558930299927197, "ci_low": 0.01507366562787497, "ci_high": 0.016108367930112687},
+      "front_door + resident_beacon": {"mean": 0.0006622784529494708, "ci_low": 0.0005062209309334638, "ci_high": 0.0008147724236137157},
+      "bed_pressure + wearable_motion": {"mean": 0.007790517669618918, "ci_low": 0.007533626952304031, "ci_high": 0.008055160484674289}
+    }
+  }
+}

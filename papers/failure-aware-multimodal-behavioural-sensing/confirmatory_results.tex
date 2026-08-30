@@ -1,0 +1,136 @@
+% Confirmatory manuscript result section.
+% Values are copied from experiments/results/confirmatory_n200/accepted_summary.json,
+% which is the repository-retained snapshot of the artifact accepted by the frozen validator.
+
+\section{Confirmatory simulator results}
+\label{sec:confirmatory-results}
+
+\paragraph{Acceptance and precision.}
+The frozen production experiment completed at the initial pre-specified size of $N=200$ household trajectories. The maximum H2 balanced-accuracy Monte Carlo standard error across the pre-specified reduced configurations was $0.001125$, below the frozen target of $0.002$. No prospective replication extension was therefore required. The merged artifact passed the frozen provenance, seed-union, environment, sharding, and result-acceptance checks. All results in this section are simulator-derived and are not estimates of field performance.
+
+\subsection{H1: random missingness degrades discrimination, but the uncertainty response is not monotone}
+
+Balanced accuracy declined at every pre-specified missingness level, from $0.7458$ with no injected loss to $0.6681$ at 40\% random record loss (\cref{tab:h1-confirmatory}). The paired change at 40\% loss was $-0.0777$ (95\% CI $[-0.0795,-0.0759]$). This supports a graded rather than catastrophic discrimination loss under random missingness.
+
+The stronger uncertainty component of H1 was not supported uniformly. Log loss decreased from $1.6645$ to $1.4602$ as missingness increased to 40\%, ECE changed little through 20\% loss before rising to $0.1344$ at 40\%, and abstention remained extremely rare throughout. Thus the present confidence and abstention rules do not simply convert missing evidence into progressively more abstention. Graceful degradation is supported for balanced accuracy, but not as a general claim that all uncertainty diagnostics worsen monotonically or that the system reliably abstains as coverage falls.
+
+\begin{table}[t]
+\centering
+\small
+\caption{H1 confirmatory random-missingness results. The balanced-accuracy difference is paired against the 0\% missingness trajectory for the same household seed.}
+\label{tab:h1-confirmatory}
+\begin{tabular}{rrrrrr}
+\toprule
+Missing & BA & $\Delta$BA & 95\% CI for $\Delta$BA & Log loss & ECE \\
+\midrule
+0\%  & 0.7458 & ---     & ---                    & 1.6645 & 0.1226 \\
+5\%  & 0.7419 & -0.0040 & [-0.0045,-0.0035]     & 1.6154 & 0.1219 \\
+10\% & 0.7369 & -0.0089 & [-0.0096,-0.0082]     & 1.5753 & 0.1214 \\
+20\% & 0.7239 & -0.0219 & [-0.0230,-0.0209]     & 1.5032 & 0.1207 \\
+40\% & 0.6681 & -0.0777 & [-0.0795,-0.0759]     & 1.4602 & 0.1344 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Across the same sequence the mean Brier score was $0.2655$, $0.2652$, $0.2655$, $0.2676$, and $0.3035$, respectively. Mean abstention rates ranged only from approximately $7.4\times10^{-6}$ to $5.3\times10^{-5}$.
+
+\subsection{H2: the frozen five-sensor deployment is not non-inferior}
+
+The primary H2 comparison was negative. The ten-sensor deployment achieved mean balanced accuracy $0.7458$, whereas the frozen five-sensor \texttt{radar\_door\_bed\_wearable} deployment achieved $0.5910$. The paired full-minus-reduced gap was
+\begin{equation}
+D_{H2}=0.1548,
+\end{equation}
+with a two-sided 95\% household-paired interval $[0.1531,0.1564]$. The pre-specified non-inferiority condition required the upper interval endpoint to be strictly below $0.02$; instead it was $0.1564$. The five-sensor deployment therefore fails the primary H2 non-inferiority criterion by a wide margin.
+
+The secondary ablations nevertheless show that sensor count alone is not the relevant quantity (\cref{tab:h2-confirmatory}). The eight-sensor \texttt{objects\_plus\_wearable} configuration had a full-minus-subset gap of only $0.00529$ (95\% CI $[0.00507,0.00551]$). This is useful evidence about the sensor-information frontier, but it is a secondary result and cannot replace or rescue the frozen five-sensor hypothesis.
+
+\begin{table}[t]
+\centering
+\small
+\caption{H2 confirmatory sensor-ablation results. The five-sensor row is the frozen primary non-inferiority comparison; all other reduced configurations are secondary.}
+\label{tab:h2-confirmatory}
+\begin{tabular}{lrrr}
+\toprule
+Configuration & Sensors & BA & Full-minus-subset gap (95\% CI) \\
+\midrule
+\texttt{all\_modalities} & 10 & 0.7458 & --- \\
+\texttt{objects\_plus\_wearable} & 8 & 0.7405 & 0.00529 [0.00507,0.00551] \\
+\texttt{object\_sensors\_only} & 6 & 0.5839 & 0.16188 [0.15973,0.16404] \\
+\texttt{radar\_door\_bed\_wearable} & 5 & 0.5910 & 0.15478 [0.15310,0.15641] \\
+\texttt{radar\_door\_bed} & 3 & 0.3189 & 0.42691 [0.42477,0.42900] \\
+\texttt{minimal\_door\_bed} & 2 & 0.2867 & 0.45911 [0.45752,0.46077] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{H3: attribution value is conditional on occupancy and attribution evidence}
+
+Occupancy-aware attribution was not uniformly beneficial (\cref{tab:h3-confirmatory}). Its balanced-accuracy effect was essentially null for a short visitor, small and positive for prolonged visitors, and larger for carer-related contamination. The largest positive pre-specified effect occurred with visitor and carer contamination, $+0.00629$ (95\% CI $[0.00599,0.00659]$). Removing radar still left a positive attribution effect, $+0.00508$, and sparse coverage produced $+0.00380$.
+
+The important reversal occurred when the resident wearable and beacon were unavailable: attribution reduced balanced accuracy by $0.01097$ (95\% CI $[-0.01142,-0.01057]$). Calibration gain, defined as the reduction in ECE from occupancy-aware attribution, remained positive in every scenario. H3 is therefore supported only in a conditional sense: attribution can help under contamination, particularly carer contamination, but its discrimination value depends on the evidence available for identifying the monitored resident.
+
+\begin{table}[t]
+\centering
+\small
+\caption{H3 confirmatory attribution effects. $\Delta$BA is occupancy-aware minus naive balanced accuracy. Calibration gain is naive ECE minus occupancy-aware ECE, so positive values indicate improved calibration.}
+\label{tab:h3-confirmatory}
+\begin{tabular}{lrrr}
+\toprule
+Scenario & $\Delta$BA & 95\% CI & Calibration gain \\
+\midrule
+Resident alone & -0.00042 & [-0.00052,-0.00031] & 0.00049 \\
+Short visitor & -0.00013 & [-0.00027,0.00000] & 0.00128 \\
+Prolonged visitor & 0.00023 & [0.00007,0.00039] & 0.00204 \\
+Carer visits & 0.00589 & [0.00562,0.00615] & 0.00294 \\
+Visitor and carer & 0.00629 & [0.00599,0.00659] & 0.00401 \\
+Resident without wearable & -0.01097 & [-0.01142,-0.01057] & 0.00476 \\
+No radar & 0.00508 & [0.00477,0.00537] & 0.00347 \\
+Sparse coverage & 0.00380 & [0.00355,0.00403] & 0.00276 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{H4: reliability weighting produces a scoring trade-off rather than uniform improvement}
+
+H4 compared failure-aware and health-naive inference on exactly the same degraded observations. The contrast is failure-aware minus health-naive. Failure awareness reduced balanced accuracy by $0.01450$ (95\% CI $[-0.01539,-0.01363]$), increased Brier score by $0.01565$ (95\% CI $[0.01448,0.01681]$), and increased ECE by $0.00394$ (95\% CI $[0.00344,0.00443]$). In contrast, log loss improved by $0.10957$, because the failure-aware minus naive contrast was $-0.10957$ (95\% CI $[-0.11460,-0.10454]$). Abstention was unchanged to numerical precision.
+
+The pre-specified comparison therefore does not support a general claim that health reliability weighting improves inference. Under this degradation regime it reduces the penalty from severe probability errors as measured by log loss, while worsening balanced accuracy, Brier score, and calibration error. This metric disagreement is itself a substantive result: failure-aware tempering changes the shape of probabilistic error rather than dominating the health-naive control.
+
+\begin{table}[t]
+\centering
+\small
+\caption{H4 confirmatory failure-aware minus health-naive contrasts on identical degraded observations.}
+\label{tab:h4-confirmatory}
+\begin{tabular}{lrr}
+\toprule
+Metric & Mean contrast & 95\% CI \\
+\midrule
+Balanced accuracy & -0.01450 & [-0.01539,-0.01363] \\
+Log loss & -0.10957 & [-0.11460,-0.10454] \\
+Brier score & 0.01565 & [0.01448,0.01681] \\
+ECE & 0.00394 & [0.00344,0.00443] \\
+Abstention rate & $\approx 0$ & [-0.000013,0.000013] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{H5: all pre-specified sensor interactions are positive}
+
+All four pre-specified H5 interactions were positive with 95\% intervals excluding zero (\cref{tab:h5-confirmatory}). The strongest complementarity was between wearable motion and the resident beacon, $I_{ij}=0.01559$ (95\% CI $[0.01507,0.01611]$), followed by bed pressure plus wearable motion at $0.00779$. These results support the claim that sensor value is non-additive under the simulator: person-bound and ambient modalities can carry information that becomes more useful in combination than suggested by their separate marginal effects.
+
+\begin{table}[t]
+\centering
+\small
+\caption{H5 confirmatory balanced-accuracy interaction terms. Positive values indicate complementarity under the pre-specified definition of $I_{ij}$.}
+\label{tab:h5-confirmatory}
+\begin{tabular}{lrr}
+\toprule
+Sensor pair & $I_{ij}$ & 95\% CI \\
+\midrule
+Living radar + resident beacon & 0.00204 & [0.00160,0.00249] \\
+Wearable motion + resident beacon & 0.01559 & [0.01507,0.01611] \\
+Front door + resident beacon & 0.00066 & [0.00051,0.00081] \\
+Bed pressure + wearable motion & 0.00779 & [0.00753,0.00806] \\
+\bottomrule
+\end{tabular}
+\end{table}

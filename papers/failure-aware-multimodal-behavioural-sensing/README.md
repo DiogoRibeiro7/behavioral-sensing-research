@@ -4,52 +4,43 @@ LaTeX source for the methodological paper:
 
 > **Failure-Aware Multimodal Behavioural Sensing: Probabilistic State Inference, Person Attribution, and Sensor Reduction in Smart Homes**
 
-## Contents
+## Manuscript sources
 
-- `main.tex` — manuscript source.
-- `references.bib` — bibliography used by the manuscript.
-- `experiments/` — frozen confirmatory experiment specification and executable H1–H5 runner.
+- `manuscript_confirmatory.tex` — current results-bearing publication candidate.
+- `confirmatory_results.tex` — confirmatory H1–H5 result section, traceable to the accepted frozen result snapshot.
+- `main.tex` — pre-results manuscript retained for provenance; it still contains exploratory/pre-execution wording and is no longer the publication candidate.
+- `references.bib` — bibliography used by both manuscript versions.
+- `experiments/` — frozen experiment specification, executable production route, validator, and repository-retained accepted N=200 result snapshot.
 
-The manuscript deliberately separates exploratory simulator-only results from the pre-specified confirmatory study. Current numerical values should not be interpreted as estimates of real-home performance.
+All confirmatory numerical results are simulator-derived and must not be interpreted as estimates of real-home performance.
 
-## Build
+## Build the confirmatory manuscript
 
-The paper uses `biblatex` with the `biber` backend.
-
-```bash
-pdflatex main.tex
-biber main
-pdflatex main.tex
-pdflatex main.tex
-```
-
-Run the commands from this directory so that `references.bib` is resolved locally.
-
-## Confirmatory experiment
-
-The machine-readable design is in `experiments/config.json`. A short execution can be used only as a smoke test:
+The paper uses `biblatex` with the `biber` backend. Run from this directory:
 
 ```bash
-python experiments/run_confirmatory.py --replications 2 --output /tmp/behavioural-sensing-paper-smoke
+pdflatex manuscript_confirmatory.tex
+biber manuscript_confirmatory
+pdflatex manuscript_confirmatory.tex
+pdflatex manuscript_confirmatory.tex
 ```
 
-After the experimental software revision has passed the repository release gates and is frozen, run the pre-specified experiment with:
+The confirmatory manuscript inputs `confirmatory_results.tex`, whose values are copied from the accepted repository snapshot at:
 
-```bash
-python experiments/run_confirmatory.py
+```text
+experiments/results/confirmatory_n200/accepted_summary.json
 ```
 
-The default protocol starts at 200 paired household trajectories and requires the primary Monte Carlo standard-error gate before an artefact can be marked `confirmatory`. See `experiments/README.md` for the full rules and outputs.
+That snapshot records the frozen experiment revision, config digest, accepted workflow provenance, MCSE gate, primary H2 decision, and H1–H5 summaries.
 
-## Research status
+## Confirmatory status
 
-The paper is a working manuscript. Before submission:
+The frozen experiment was executed at N=200 paired household trajectories. The maximum observed H2 balanced-accuracy MCSE was `0.0011249836`, below the pre-specified `0.002` target, so no prospective replication extension was required.
 
-1. fix the repository release blockers and freeze the experimental software revision;
-2. execute the confirmatory paired simulation study with the pre-specified replication and MCSE rules;
-3. replace or clearly separate exploratory pilot results from confirmatory results;
-4. use the generated result artefacts and LaTeX macros rather than hand-entering confirmatory numbers;
-5. validate the frozen framework against at least one annotated external smart-home dataset;
-6. confirm author affiliation and submission metadata.
+The frozen primary H2 result is negative and must remain negative in downstream writing: the five-sensor `radar_door_bed_wearable` deployment had a full-minus-reduced balanced-accuracy gap of `0.1547836825` with 95% paired interval `[0.1531002596, 0.1564131485]`, compared with the non-inferiority margin `0.02`. The much smaller gap for the eight-sensor `objects_plus_wearable` configuration is secondary evidence about the sensor-information frontier and cannot replace the primary comparison.
 
-Generated LaTeX build artefacts and submission-specific files should not be treated as source-of-truth unless explicitly added for a release or archive.
+H1, H3, and H4 are deliberately reported as mixed where their metrics or scenarios disagree. H5 reports all four pre-specified interactions. No result should be simplified to a stronger claim than the frozen summaries support.
+
+## Remaining scientific boundary
+
+The confirmatory simulator study is complete. The next scientific stage is external validation on held-out real smart-home data without tuning the architecture to reproduce the simulator conclusions. In particular, external validation should preserve the negative H2 result and the observed metric disagreements as hypotheses to test rather than problems to optimise away.

@@ -49,6 +49,15 @@ on `bathroom_activity` (0.25 against 0.80), `away` (0.36 against 0.82) and
 `home_inactive` (0.16 against 0.57), while beating the classifier on
 `home_active`.
 
+Ablating the classifier's features locates the shortfall precisely. Given only
+instantaneous event counts the ceiling is 0.397, and the pipeline scores 0.420:
+**on the evidence it uses, it is already at the ceiling.** The missing accuracy
+is in two things it does not have — an explicit time-of-day term, worth about
++0.105, and several steps of recent room-resolved counts, worth about +0.140.
+The continuous-time Markov prior models how long a state lasts but not when in
+the day it is plausible, so a resident motionless at 02:00 and at 14:00 look
+alike to it.
+
 These are single-resident homes from one research group's instrumentation, so
 they are not 22 independent studies, and 0.607 is a ceiling for this
 instrumentation rather than for ambient sensing generally. The gap between 0.420

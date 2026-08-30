@@ -1,0 +1,61 @@
+{
+  "accepted_at": "2026-08-30",
+  "accepted_bundle_file_sha256": {
+    "confirmatory_results.json": "c266ec2c851f8f23d582b86546f398c9a69833fd635b9925b1b519f25e63bc53",
+    "freeze_validation.json": "e9474c39981204534236dd5964634b29a53f83fe39a298b695d4a05dbaa7fc7a",
+    "generated_results.tex": "c7d22d25cfb4b56dabf1084ec7b13b6252e26db580acd8661dbf88404c869375",
+    "h1.csv": "57f587cda5e515ff1fe2af867f2830d12fa792b2fc6e937e8747adbb30ed1904",
+    "h2.csv": "b5ac8c3b2f0ff108faa82f2663a8df5c4ca5f8a6420eff25d6d00602d2f9c7d0",
+    "h3.csv": "fd02a83f5dde62ee1e87a1307d6d4b0f66250f5b7df5e603e52a308e8677b122",
+    "h4.csv": "b8ec1824298578a4ae4bbd910df8b4ba98e9ad6859203b5ddec50d5b8d2d5943",
+    "h5.csv": "662469c39298fbed866bac630d9a02f9d329d683d7bb3c5d5a252d6d31fa1562"
+  },
+  "acceptance": {
+    "config_sha256": "7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4",
+    "experiment_git_revision": "bd5a9b10068b69fc75cc6f806904430633ce7408",
+    "h2_primary_noninferiority": {
+      "ci_high": 0.15641314849498592,
+      "ci_low": 0.15310025955167178,
+      "estimate": 0.15478368245435956,
+      "margin": 0.02,
+      "metric": "balanced_accuracy",
+      "noninferior": false,
+      "reduced_configuration": "radar_door_bed_wearable",
+      "reference_configuration": "all_modalities"
+    },
+    "replications": 200,
+    "shard_count": 40,
+    "valid_confirmatory_artifact": true
+  },
+  "frozen_experiment": {
+    "acceptance_revision": "311b3a375638fdbe27825da8d190f9e1582f56b6",
+    "config_sha256": "7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4",
+    "git_revision": "bd5a9b10068b69fc75cc6f806904430633ce7408",
+    "replications": 200,
+    "shard_count": 40
+  },
+  "github_actions": {
+    "accepted_artifact_id": 9737957755,
+    "accepted_artifact_name": "paper-confirmatory-n200-recovered",
+    "accepted_artifact_sha256": "05f73ed90c7c89a92b580f9ff64d06b1654799f3484dbde6b6068a95e2d36ae6",
+    "recovery_merge_run_id": 33332161062,
+    "source_production_run_id": 33319406297
+  },
+  "interpretation_guardrail": "All outcomes are simulator-derived and are not estimates of field performance.",
+  "paper": "failure-aware-multimodal-behavioural-sensing",
+  "precision": {
+    "contrast": "full_minus_subset",
+    "maximum_observed_mcse": 0.001124983614711242,
+    "metric": "balanced_accuracy",
+    "passed": true,
+    "target": 0.002
+  },
+  "rules": [
+    "The primary H2 five-sensor non-inferiority result is negative and must not be replaced by a secondary subset.",
+    "No prospective replication extension is permitted or required because the frozen MCSE gate passed at N=200.",
+    "All reported values are simulator-derived and are not estimates of field performance.",
+    "The accepted summary is a compact snapshot of the validator-passing artifact; household-level CSVs remain reproducible from the frozen code, environment, and seeds and are fingerprinted here."
+  ],
+  "schema_version": 1,
+  "status": "accepted-confirmatory-results"
+}
