@@ -269,11 +269,10 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           pattern: production-shard-*
-          path: frozen/production-shards
+          path: production-shards
           merge-multiple: true
 
       - name: Verify exact shard file count
-        working-directory: frozen
         shell: bash
         run: |
           count="$(find production-shards -maxdepth 1 -type f -name 'shard-*-of-*.json' | wc -l)"
@@ -288,23 +287,23 @@ jobs:
           python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_production.py \
             --replications "$REPLICATIONS" \
             merge \
-            --input production-shards \
-            --output production-results
+            --input ../production-shards \
+            --output ../production-results
 
       - name: Validate manuscript-facing artifact against freeze
         shell: bash
         run: |
           python infra/papers/failure-aware-multimodal-behavioural-sensing/experiments/validate_frozen_artifact.py \
-            frozen/production-results/confirmatory_results.json \
+            production-results/confirmatory_results.json \
             --manifest infra/papers/failure-aware-multimodal-behavioural-sensing/experiments/FREEZE_MANIFEST.json \
-            > frozen/production-results/freeze_validation.json
-          cat frozen/production-results/freeze_validation.json
+            > production-results/freeze_validation.json
+          cat production-results/freeze_validation.json
 
       - name: Upload merged confirmatory bundle
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: paper-confirmatory-n200
-          path: frozen/production-results/
+          path: production-results/
           retention-days: 90
-          if-no-files-found: error
+          if-no-files-found: warn

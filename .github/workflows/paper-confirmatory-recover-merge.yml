@@ -1,0 +1,197 @@
+name: Recover paper confirmatory merge
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: paper-confirmatory-recovery
+  cancel-in-progress: false
+
+env:
+  SOURCE_RUN_ID: "33319406297"
+  ACCEPTANCE_REVISION: 311b3a375638fdbe27825da8d190f9e1582f56b6
+  FROZEN_REVISION: bd5a9b10068b69fc75cc6f806904430633ce7408
+  CONFIG_SHA256: 7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4
+  REPLICATIONS: "200"
+  SHARD_COUNT: "40"
+  PYTHON_VERSION: "3.11.16"
+
+jobs:
+  recover:
+    name: recover merge and validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out frozen experiment revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.FROZEN_REVISION }}
+          fetch-depth: 0
+          path: frozen
+
+      - name: Check out original acceptance infrastructure
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.ACCEPTANCE_REVISION }}
+          fetch-depth: 1
+          path: infra
+
+      - name: Verify fixed recovery contract
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest_path = Path(
+              "infra/papers/failure-aware-multimodal-behavioural-sensing/"
+              "experiments/FREEZE_MANIFEST.json"
+          )
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          assert manifest["status"] == "frozen-pre-results"
+          assert manifest["experiment_git_revision"] == os.environ["FROZEN_REVISION"]
+          assert (
+              manifest["frozen_files"]["config"]["sha256"]
+              == os.environ["CONFIG_SHA256"]
+          )
+          assert manifest["replications"]["initial_n"] == int(
+              os.environ["REPLICATIONS"]
+          )
+          PY
+
+      - name: Set up frozen Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pinned production environment
+        working-directory: frozen
+        shell: bash
+        run: |
+          cat > /tmp/paper-production-constraints.txt <<'EOF'
+          numpy==2.4.6
+          pandas==3.0.5
+          scipy==1.17.1
+          scikit-learn==1.9.0
+          matplotlib==3.11.1
+          seaborn==0.13.2
+          networkx==3.6.1
+          h5py==3.16.0
+          plotly==7.0.0
+          bokeh==3.9.2
+          flask==3.1.3
+          click==8.5.0
+          pyyaml==6.0.3
+          tqdm==4.70.0
+          joblib==1.5.3
+          EOF
+          python -m pip install --upgrade pip
+          python -m pip install -c /tmp/paper-production-constraints.txt -e .
+
+      - name: Verify frozen science checkout and environment
+        working-directory: frozen
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$FROZEN_REVISION"
+          test -z "$(git status --porcelain)"
+          actual_sha="$(sha256sum papers/failure-aware-multimodal-behavioural-sensing/experiments/config.json | cut -d' ' -f1)"
+          test "$actual_sha" = "$CONFIG_SHA256"
+          python - <<'PY'
+          import importlib.metadata
+          import sys
+
+          expected = {
+              "sensor-modeling": "0.2.0",
+              "numpy": "2.4.6",
+              "scipy": "1.17.1",
+              "pandas": "3.0.5",
+              "scikit-learn": "1.9.0",
+          }
+          assert sys.version.split()[0] == "3.11.16", sys.version
+          for package, version in expected.items():
+              assert importlib.metadata.version(package) == version
+          PY
+
+      - name: Download immutable shards from original run
+        uses: actions/download-artifact@v5
+        with:
+          pattern: production-shard-*
+          path: production-shards
+          merge-multiple: true
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+
+      - name: Verify shard provenance without reading outcomes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          paths = sorted(Path("production-shards").glob("shard-*-of-*.json"))
+          assert len(paths) == int(os.environ["SHARD_COUNT"]), len(paths)
+          observed_indices = []
+          observed_seeds = []
+          for path in paths:
+              artifact = json.loads(path.read_text(encoding="utf-8"))
+              assert artifact["artifact_type"] == "confirmatory-shard"
+              assert artifact["git"] == {
+                  "commit": os.environ["FROZEN_REVISION"],
+                  "dirty": False,
+              }
+              assert artifact["config_sha256"] == os.environ["CONFIG_SHA256"]
+              assert artifact["replications_total"] == int(os.environ["REPLICATIONS"])
+              assert artifact["shard_count"] == int(os.environ["SHARD_COUNT"])
+              observed_indices.append(int(artifact["shard_index"]))
+              observed_seeds.extend(int(seed) for seed in artifact["seeds"])
+          assert sorted(observed_indices) == list(range(int(os.environ["SHARD_COUNT"])))
+          assert len(observed_seeds) == len(set(observed_seeds)) == int(
+              os.environ["REPLICATIONS"]
+          )
+          expected_seeds = [10000 + 4 * index for index in range(200)]
+          assert sorted(observed_seeds) == expected_seeds
+          PY
+
+      - name: Merge original frozen shards
+        working-directory: frozen
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$FROZEN_REVISION"
+          test -z "$(git status --porcelain)"
+          python papers/failure-aware-multimodal-behavioural-sensing/experiments/run_production.py \
+            --replications "$REPLICATIONS" \
+            merge \
+            --input ../production-shards \
+            --output ../production-results
+
+      - name: Validate manuscript-facing artifact against original freeze
+        shell: bash
+        run: |
+          python infra/papers/failure-aware-multimodal-behavioural-sensing/experiments/validate_frozen_artifact.py \
+            production-results/confirmatory_results.json \
+            --manifest infra/papers/failure-aware-multimodal-behavioural-sensing/experiments/FREEZE_MANIFEST.json \
+            > production-results/freeze_validation.json
+          cat production-results/freeze_validation.json
+
+      - name: Upload recovered merged bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-confirmatory-n200-recovered
+          path: production-results/
+          retention-days: 90
+          if-no-files-found: warn
