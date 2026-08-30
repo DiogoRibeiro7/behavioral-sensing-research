@@ -35,7 +35,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from datetime import datetime, tzinfo
 from pathlib import Path
 
@@ -126,6 +126,10 @@ HH_ACTIVITY_STATES: Mapping[str, BehaviouralState] = {
     "Work_On_Computer": BehaviouralState.HOME_ACTIVE,
     "Housekeeping": BehaviouralState.HOME_ACTIVE,
     "Laundry": BehaviouralState.HOME_ACTIVE,
+    # Leave_Home and Enter_Home mark the act of crossing the threshold, with a
+    # median duration of about twelve seconds. They are moments of activity in
+    # the home, not the state of being out of it; the away period is the gap
+    # between them, which carries no label of its own. See derive_away.
     "Enter_Home": BehaviouralState.HOME_ACTIVE,
     "Watch_TV": BehaviouralState.HOME_INACTIVE,
     "Relax": BehaviouralState.HOME_INACTIVE,
@@ -138,7 +142,7 @@ HH_ACTIVITY_STATES: Mapping[str, BehaviouralState] = {
     "Evening_Meds": BehaviouralState.HOME_ACTIVE,
     "Work_At_Desk": BehaviouralState.HOME_ACTIVE,
     "Exercise": BehaviouralState.HOME_ACTIVE,
-    "Leave_Home": BehaviouralState.AWAY,
+    "Leave_Home": BehaviouralState.HOME_ACTIVE,
     "Step_Out": BehaviouralState.AWAY,
 }
 
@@ -177,12 +181,48 @@ def hh_sensor_specs(
     return specs, frozenset(unmapped)
 
 
+def _derive_away_intervals(
+    activities: Sequence[ActivityInterval],
+) -> list[ActivityInterval]:
+    """Infer the away periods that lie between leaving and returning.
+
+    ``Leave_Home`` and ``Enter_Home`` are instants, not durations: their median
+    length is around twelve seconds, because they annotate the act of crossing
+    the threshold. The resident is inside and moving while they are marked, so
+    scoring them as ``AWAY`` penalises an inference that correctly reports
+    activity, and the hours actually spent out carry no label at all.
+
+    The away period is the gap from the end of a departure to the start of the
+    next arrival. Deriving it turns unlabelled time into the only annotation of
+    absence the dataset supports.
+    """
+    ordered = sorted(activities, key=lambda interval: interval.start)
+    derived: list[ActivityInterval] = []
+    left_at = None
+    for interval in ordered:
+        if interval.label == "Leave_Home":
+            left_at = interval.end
+        elif interval.label == "Enter_Home" and left_at is not None:
+            if interval.start > left_at:
+                derived.append(
+                    ActivityInterval(
+                        label="Away",
+                        start=left_at,
+                        end=interval.start,
+                        state=BehaviouralState.AWAY,
+                    )
+                )
+            left_at = None
+    return derived
+
+
 def read_casas_hh(
     source: Path | str | Iterable[str],
     *,
     timezone: tzinfo,
     activity_states: Mapping[str, BehaviouralState] | None = None,
     locations: Mapping[str, tuple[str, Modality]] | None = None,
+    derive_away: bool = True,
 ) -> CasasRecording:
     """Read a CASAS ``hh`` CSV recording.
 
@@ -198,6 +238,12 @@ def read_casas_hh(
         Overrides :data:`HH_ACTIVITY_STATES`.
     locations
         Overrides :data:`HH_LOCATIONS`.
+    derive_away
+        Add an ``AWAY`` interval spanning each gap between a ``Leave_Home`` and
+        the next ``Enter_Home``. Those two labels mark instants of crossing the
+        threshold, so without this the time actually spent out is unlabelled and
+        the only annotation scored as absence is a few seconds of the resident
+        walking to the door. See :func:`_derive_away_intervals`.
 
     Notes
     -----
@@ -349,6 +395,9 @@ def read_casas_hh(
         )
 
     close_run()
+
+    if derive_away:
+        activities.extend(_derive_away_intervals(activities))
 
     observations.sort(key=lambda observation: observation.timestamp)
     activities.sort(key=lambda interval: interval.start)

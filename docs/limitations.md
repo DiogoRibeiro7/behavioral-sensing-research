@@ -6,42 +6,38 @@ down will have them discovered by whoever trusts it first.
 
 ## Measured on real data
 
-Twenty-two real CASAS homes have now been scored with nothing refitted, and
-with every location and activity label mapped so that no evidence is discarded.
+Twenty-two real CASAS homes have been scored with nothing refitted and nothing
+discarded, over a median 90% of each recording.
 
 | | Simulator | Real homes (median) |
 | --- | --- | --- |
-| Balanced accuracy | 0.816 | **0.364** |
-| Calibration error | 0.084 | **0.285** |
+| Balanced accuracy | 0.816 | **0.420** |
+| Calibration error | 0.084 | **0.314** |
 
-No home exceeded 0.468. The failure takes the same shape in all of them. States
-with a distinctive room-and-rate signature held up — sleeping 0.74, activity
-0.57, cooking 0.57 — while states needing evidence that the resident is
-*present but still* collapsed: `home_inactive` 0.16, and **`away` 0.00 in the
-median home**.
+No home exceeded 0.514. Sleeping (0.74), general activity (0.58) and cooking
+(0.57) hold up. **`home_inactive` is the genuine failure at 0.16** — a resident
+sitting still is the state the pipeline is worst at recognising.
 
-Why remains open. The obvious explanation, that these deployments lack the
-sensors confirming presence, was tested twice and did not hold. The five homes
-carrying a chair occupancy sensor are not better, with `home_inactive` recall of
-0.10 against 0.17 without it. Re-reading motion as a persistent occupancy state
-so that an OFF asserts absence made things worse: `away` recall reaches 1.00
-while balanced accuracy falls to 0.16-0.23, because it then reports `away`
-almost always. A motion sensor's OFF means "no motion just now", not "nobody
-home", and the event-kind reading is the correct one.
+Declared event rates are measurably wrong: real in-room sensors fire at 299/h
+during bathroom activity and 580/h during cooking against a declared 40/h. That
+is a plausible mechanism, since `HOME_INACTIVE` is declared to emit roughly 10
+activations an hour and a still resident produces far fewer. Substituting
+measured rates doubles to triples `home_inactive` recall but costs sleeping
+recall and calibration, so it points the work somewhere specific without
+resolving it.
 
-So the failure is established and its mechanism is not.
-
-Abstention reached at most 5.2% in any home, median 2.2%, while the model was
-wrong more often than right. The mechanism presented throughout as the safety
-valve did not open.
-
-An obvious alternative explanation was checked and rejected: an incomplete
-location map was discarding evidence in 14 homes, and fixing it moved the median
-from 0.356 to 0.364.
+An earlier revision of this page reported `away` recall of 0.00 and treated it
+as a finding. **That was wrong.** `Leave_Home` annotates twelve seconds of
+crossing the threshold, not the hours spent out, so the truth series labelled
+motion inside the house as absence. With away derived from the gap between
+departure and return, recall is 0.36 and coverage rises from 64% to 90%. Three
+further explanations for the remaining gap were tested and rejected: an
+incomplete location map, absent presence-confirming sensors, and occupancy-state
+modelling.
 
 These are single-resident homes from one research group's instrumentation, so
-they are not 22 independent studies. But they are 22 real homes, and they do not
-support the simulator's numbers.
+they are not 22 independent studies. The gap between 0.420 and 0.816 is real
+nonetheless.
 
 ## The single most important limitation
 
