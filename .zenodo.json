@@ -1,12 +1,21 @@
 {
   "title": "Sensor Modeling Research Toolkit",
   "upload_type": "software",
-  "description": "A research-grade Python toolkit for interpretable, probabilistic, privacy-preserving analysis of behavioural sensor data, and for multimodal ambient sensing in assisted-living and digital-health research. Alongside its established modelling core -- Bernoulli autoregressive models, hidden Markov models, change-point detection and non-homogeneous Poisson processes -- it provides an end-to-end pipeline from heterogeneous sensor observations to explained alerts: a canonical hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and person attribution from anonymous evidence, continuous-time multimodal fusion into latent behavioural states with explicit abstention, adaptive non-stationary personal baselines, restrained alerting, a synthetic household simulator with controlled ground truth, and a paired sensor-ablation framework. The design treats sensor failure, missing data, visitors and uncertainty as first-class modelling concerns rather than operational afterthoughts: a missing observation is never read as evidence of inactivity, and ambient activity is never automatically attributed to the monitored resident. No cameras, microphones or biometric identification are used anywhere in the design. This is a research toolkit and not a medical device; no claim of clinical effectiveness is made or supported.",
+  "publication_date": "2026-08-30",
+  "description": "A research-grade Python toolkit for interpretable, probabilistic, privacy-preserving analysis of behavioural sensor data, and for multimodal ambient sensing in assisted-living and digital-health research. Alongside its established modelling core -- Bernoulli autoregressive models, hidden Markov models, change-point detection and non-homogeneous Poisson processes -- it provides an end-to-end pipeline from heterogeneous sensor observations to explained alerts: a canonical hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and person attribution from anonymous evidence, continuous-time multimodal fusion into latent behavioural states with explicit abstention, adaptive non-stationary personal baselines, restrained alerting, a synthetic household simulator with controlled ground truth, and a paired sensor-ablation framework. The design treats sensor failure, missing data, visitors and uncertainty as first-class modelling concerns rather than operational afterthoughts: a missing observation is never read as evidence of inactivity, and ambient activity is never automatically attributed to the monitored resident. No cameras, microphones or biometric identification are used anywhere in the design. This is research software and not a medical device; no claim of clinical effectiveness is made or supported.",
   "creators": [
     {
       "name": "Ribeiro, Diogo",
       "orcid": "0009-0001-2022-7072",
-      "affiliation": "ESMAD - Instituto Politecnico do Porto"
+      "affiliation": "ESMAD - Instituto Politécnico do Porto"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Ribeiro, Diogo",
+      "type": "ContactPerson",
+      "orcid": "0009-0001-2022-7072",
+      "affiliation": "ESMAD - Instituto Politécnico do Porto"
     }
   ],
   "access_right": "open",
@@ -38,10 +47,26 @@
       "resource_type": "software"
     },
     {
+      "identifier": "https://sensor-modeling.readthedocs.io",
+      "relation": "isDocumentedBy",
+      "resource_type": "publication-softwaredocumentation"
+    },
+    {
+      "identifier": "10.5281/zenodo.21337272",
+      "relation": "isPartOf",
+      "resource_type": "software"
+    },
+    {
       "identifier": "10.5281/zenodo.17070042",
       "relation": "isNewVersionOf",
       "resource_type": "software"
     }
   ],
-  "notes": "Research software. Not a medical device. Quantitative results reported with this release are produced by the bundled simulator and have not been validated against real sensor data."
+  "references": [
+    "Gillam, J., Hoque, E., & Alshurafa, N. (2022). Modeling and forecasting of at home activity in older adults using passive sensor technology. Computers in Biology and Medicine, 143. https://doi.org/10.1016/j.compbiomed.2022.105286",
+    "Asghari, P., & Nazerfard, E. (2019). Online Human Activity Recognition Employing Hierarchical Hidden Markov Models. arXiv:1903.04820.",
+    "Dadi, K. (2021). Embedding-based real-time change point detection with application to activity segmentation in smart home time series data. Expert Systems with Applications, 182. https://doi.org/10.1016/j.eswa.2021.115217",
+    "Cook, D. (2020). Easing Power Consumption of Wearable Activity Monitoring with Change Point Detection. Sensors, 20(1). https://doi.org/10.3390/s20010310"
+  ],
+  "notes": "Research software. Not a medical device. Quantitative results reported with this release are produced by the bundled simulator and have not been validated against real sensor data. The current project concept DOI is 10.5281/zenodo.21337272. The earlier concept DOI 10.5281/zenodo.17070041 applies only to the archived 0.1.0 release because Zenodo created a new concept lineage when 0.2.0 was archived through the GitHub integration."
 }

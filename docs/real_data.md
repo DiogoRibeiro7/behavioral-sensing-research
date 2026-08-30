@@ -88,16 +88,157 @@ most of it, and separating the two invites a reader to forget the difference.
 Scoring is refused outright when nothing carried a mapped label, because a
 metric over an empty sample still prints as a number.
 
+## Two export formats
+
+CASAS publishes recordings in more than one shape, and a reader written for one
+does not read the other.
+
+| | Classic (`read_casas`) | `hh` CSV (`read_casas_hh`) |
+| --- | --- | --- |
+| Separator | whitespace | comma, date and time split |
+| Third field | sensor id, `M004` | **location**, `Bedroom` |
+| Marker | `Sleeping begin` | `Sleep="begin"` |
+| Vocabulary | `Sleeping`, `Meal_Preparation` | `Sleep`, `Cook_Dinner` |
+
+Only six labels are common to both vocabularies, and none of the frequent ones
+are. The archives currently on Zenodo use the `hh` form, so that is the reader
+to start from.
+
+The `hh` export also carries the room in the data, which removes the need to
+reconstruct one from a floor plan — at the cost of having already aggregated
+each room's sensors into a single stream, so within-room redundancy is not
+observable.
+
+## Results on 22 real homes
+
+Every CASAS `hh` recording under 12 MB was scored: 22 homes, one resident each,
+motion and door sensors, **nothing refitted**. No emission rate, dwell time or
+threshold was changed from the declared defaults. Only annotated time was
+scored. After extending the location and activity maps, **no location and no
+activity label went unmapped in any home**, so nothing is being silently
+discarded.
+
+| | Simulator | Real homes (median) | Real homes (range) |
+| --- | --- | --- | --- |
+| Balanced accuracy | 0.816 | **0.364** | 0.273 – 0.468 |
+| Calibration error | 0.084 | **0.285** | 0.185 – 0.510 |
+| Abstention rate | — | 0.022 | 0.006 – 0.052 |
+
+Not one of the 22 homes reaches 0.47. The simulator's figure is not approached
+anywhere.
+
+**The declared defaults do not transfer.** This is no longer a single data
+point: the result is consistent across 22 independent homes, and the failure
+takes the same shape in all of them.
+
+### What fails, and why it is the interesting part
+
+| State | Median recall | Range | Homes |
+| --- | --- | --- | --- |
+| sleeping | 0.74 | 0.39 – 0.87 | 22 |
+| home_active | 0.57 | 0.09 – 0.82 | 22 |
+| kitchen_activity | 0.57 | 0.00 – 0.76 | 22 |
+| bed_awake | 0.25 | 0.06 – 0.67 | 5 |
+| bathroom_activity | 0.25 | 0.00 – 0.57 | 22 |
+| home_inactive | 0.16 | 0.00 – 0.39 | 22 |
+| **away** | **0.00** | 0.00 – 0.33 | 22 |
+
+The split is not random. States with a distinctive room-and-rate signature
+survive: sleeping, cooking and general activity land between 0.57 and 0.74.
+States that require knowing the resident is *present but still* collapse.
+
+**`away` recall is zero in the median home, across all 22.** On `hh103`, where
+the resident was genuinely `home_inactive`, the pipeline reported `away` 53% of
+the time; where they were genuinely `away`, it reported `home_active` almost
+always.
+
+### Two explanations tested, neither supported
+
+The obvious reading is that these homes lack the sensors that confirm presence.
+The simulator's deployment has a bed sensor, a wearable and a beacon; these
+homes have motion and door sensors only, so motion silence is ambiguous between
+"sitting still" and "gone out". That explanation is **not supported by the
+evidence available here.**
+
+**A chair occupancy sensor does not help.** Five of the 22 homes carry a
+`LoungeChair` sensor, which is exactly a presence signal for a stationary
+resident. Those homes are not better: median `home_inactive` recall is 0.10 with
+the chair against 0.17 without, and balanced accuracy is 0.382 against 0.358.
+The difference runs the wrong way for the hypothesis and is well inside the
+spread of either group.
+
+**Modelling motion as occupancy state is worse, not better.** The adapter treats
+motion as event-kind and discards the OFF half of each pair. Reading those pairs
+as a persistent `PROXIMITY` state instead — so an OFF asserts absence — was
+tried on five homes. `away` recall goes to 1.00 in every one, and everything
+else falls apart: balanced accuracy drops from 0.35-0.47 to 0.16-0.23 and
+calibration error roughly doubles to 0.55-0.81. It reaches perfect `away` recall
+by reporting `away` almost always.
+
+That failure is instructive. A motion sensor's OFF means "no motion in the last
+few seconds", not "nobody is home". Treating it as occupancy is precisely the
+`sensor activation != behavioural truth` conflation this project is built to
+avoid, and the event-kind reading in the adapter is the correct one.
+
+**So the mechanism is not established.** The failure is real, consistent across
+22 homes, and concentrated in the states that require knowing a resident is
+present but still. Why the pipeline cannot recover those states from this sensor
+suite remains open. Candidates not yet tested include the declared emission
+rates being wrong for real event densities, the dwell-time priors being wrong
+for real behaviour, and the occupancy layer's away logic depending on evidence
+these deployments do not produce.
+
+### The calibration result is the one to worry about
+
+Median calibration error 0.285 with median abstention 0.022 means the pipeline
+was **confidently wrong**: incorrect more often than not, and almost never
+willing to say it did not know. Abstention never exceeded 5.2% in any home.
+
+The abstention mechanism is presented throughout this project as the safety
+valve that makes the rest defensible. On real data it did not open.
+
+A monitoring system that reports "resident is out" with high stated confidence
+while they sit quietly in a chair is worse than one that reports nothing.
+
+### A check that mattered
+
+The first pass left `DiningRoom` unmapped in 14 of the 22 homes, along with
+`Office`, `Hall` and four activity labels, so real evidence was being discarded.
+That could have accounted for the poor scores. It did not: completing the maps
+moved median balanced accuracy from 0.356 to 0.364. The result is robust to the
+most obvious explanation that would have let the architecture off.
+
+### Reproducing it
+
+```python
+from datetime import timedelta
+from zoneinfo import ZoneInfo
+
+from sensor_modeling.datasets import evaluate_recording, read_casas_hh
+
+recording = read_casas_hh("labeled/hh103.csv", timezone=ZoneInfo("America/Los_Angeles"))
+print(recording.summary())
+print(evaluate_recording(recording, step=timedelta(minutes=5)).to_dict())
+```
+
+Data from <https://zenodo.org/records/15708568> (CC-BY-4.0), file
+`labeled_data.zip`. Not redistributed here.
+
+Results move with step size — on `hh103`, balanced accuracy is 0.349 at five
+minutes, 0.252 at ten and 0.248 at thirty — so quote the step alongside any
+number from this. All figures above use a five-minute step, the most favourable
+of the three.
+
 ## Status
 
-The adapter is implemented and tested end to end, including an integration test
-that runs a CASAS-format recording through the unmodified pipeline. **That
-fixture is synthesised by this repository in CASAS format.** It establishes that
-the plumbing is correct and that the declared emission defaults separate states
-without being refitted. It says nothing about performance on a real apartment.
+The adapters are implemented and tested, and 22 real homes have been scored.
+What has **not** been done: any dataset other than CASAS, any fitting of
+parameters to real data, and any paired comparison of the kind the simulator
+experiments use. These are all single-resident homes from one research group's
+instrumentation, so they are not independent of each other in the way 22
+households from different studies would be.
 
-Running this against downloaded CASAS recordings, and reporting what happens, is
-the outstanding work — and the answer is genuinely unknown. Nothing in the
-package is tuned for it: no emission rate, dwell time or threshold has been
-refitted. Whatever comes out is a lower bound on the approach with fitted
-parameters, and an honest measure of how far the defaults transfer.
+The obvious next steps are refitting emissions from a subset of homes and
+scoring on held-out ones, and checking whether the `home_inactive`/`away`
+confusion closes when a presence-confirming sensor is present in the
+deployment.

@@ -24,11 +24,16 @@ from .casas import (
     read_casas,
     truth_series,
 )
+from .casas_hh import HH_ACTIVITY_STATES, HH_LOCATIONS, hh_sensor_specs, read_casas_hh
 from .evaluate import DatasetEvaluation, evaluate_recording
 
 __all__ = [
     "ActivityInterval",
     "DatasetEvaluation",
+    "HH_ACTIVITY_STATES",
+    "HH_LOCATIONS",
+    "hh_sensor_specs",
+    "read_casas_hh",
     "evaluate_recording",
     "CASAS_ACTIVITY_STATES",
     "CasasReadError",
