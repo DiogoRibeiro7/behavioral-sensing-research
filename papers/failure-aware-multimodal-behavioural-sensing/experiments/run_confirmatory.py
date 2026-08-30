@@ -29,7 +29,12 @@ from typing import Any
 
 import numpy as np
 
-from sensor_modeling.evaluation import Scenario, compare_scenario, named_subsets, state_metrics
+from sensor_modeling.evaluation import (
+    Scenario,
+    compare_scenario,
+    named_subsets,
+    state_metrics,
+)
 from sensor_modeling.evaluation.attribution import standard_scenarios
 from sensor_modeling.health.monitor import SensorHealthReport, SystemHealthReport
 from sensor_modeling.online import BehaviouralSensingPipeline, PipelineConfig
@@ -563,7 +568,7 @@ def _summaries(
 
     h5_groups: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for row in results["h5"]:
-        h5_groups[f"{row['first_sensor']} + {row['second_sensor']}"] .append(row)
+        h5_groups[f"{row['first_sensor']} + {row['second_sensor']}"].append(row)
     output["h5"] = {
         pair: _sample_summary(
             _values(rows, "interaction"),
@@ -576,7 +581,9 @@ def _summaries(
     return output
 
 
-def _mcse_gate(config: Mapping[str, Any], summary: Mapping[str, Any]) -> dict[str, Any]:
+def _mcse_gate(
+    config: Mapping[str, Any], summary: Mapping[str, Any]
+) -> dict[str, Any]:
     """Apply the pre-specified precision gate to H2 balanced-accuracy gaps."""
     target = float(config["replications"]["monte_carlo_se_target"])
     observed = [
@@ -667,7 +674,11 @@ def run(config: Mapping[str, Any], seeds: Sequence[int]) -> dict[str, Any]:
         "h5": _run_h5(config, seeds, step),
     }
     summary = _summaries(config, raw)
-    return {"raw": raw, "summaries": summary, "mcse_gate": _mcse_gate(config, summary)}
+    return {
+        "raw": raw,
+        "summaries": summary,
+        "mcse_gate": _mcse_gate(config, summary),
+    }
 
 
 def _confirmatory_status(
