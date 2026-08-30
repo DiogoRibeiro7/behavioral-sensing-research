@@ -152,17 +152,41 @@ the resident was genuinely `home_inactive`, the pipeline reported `away` 53% of
 the time; where they were genuinely `away`, it reported `home_active` almost
 always.
 
-These homes have motion and door sensors and nothing else. The simulator's
-deployment includes a bed pressure sensor, a wearable and a resident beacon —
-precisely the modalities that separate a quiet resident from an empty house.
-Without them, motion silence is ambiguous between "sitting still" and "gone
-out", and the model resolves it badly and consistently.
+### Two explanations tested, neither supported
 
-That qualifies the ablation result. Modality does substitute for sensor count,
-but the substitution has a floor, and presence confirmation looks like the
-capability that cannot be dropped. Reading silence as absence is the failure
-this project set out to prevent, and it happens anyway once the confirming
-sensors are gone.
+The obvious reading is that these homes lack the sensors that confirm presence.
+The simulator's deployment has a bed sensor, a wearable and a beacon; these
+homes have motion and door sensors only, so motion silence is ambiguous between
+"sitting still" and "gone out". That explanation is **not supported by the
+evidence available here.**
+
+**A chair occupancy sensor does not help.** Five of the 22 homes carry a
+`LoungeChair` sensor, which is exactly a presence signal for a stationary
+resident. Those homes are not better: median `home_inactive` recall is 0.10 with
+the chair against 0.17 without, and balanced accuracy is 0.382 against 0.358.
+The difference runs the wrong way for the hypothesis and is well inside the
+spread of either group.
+
+**Modelling motion as occupancy state is worse, not better.** The adapter treats
+motion as event-kind and discards the OFF half of each pair. Reading those pairs
+as a persistent `PROXIMITY` state instead — so an OFF asserts absence — was
+tried on five homes. `away` recall goes to 1.00 in every one, and everything
+else falls apart: balanced accuracy drops from 0.35-0.47 to 0.16-0.23 and
+calibration error roughly doubles to 0.55-0.81. It reaches perfect `away` recall
+by reporting `away` almost always.
+
+That failure is instructive. A motion sensor's OFF means "no motion in the last
+few seconds", not "nobody is home". Treating it as occupancy is precisely the
+`sensor activation != behavioural truth` conflation this project is built to
+avoid, and the event-kind reading in the adapter is the correct one.
+
+**So the mechanism is not established.** The failure is real, consistent across
+22 homes, and concentrated in the states that require knowing a resident is
+present but still. Why the pipeline cannot recover those states from this sensor
+suite remains open. Candidates not yet tested include the declared emission
+rates being wrong for real event densities, the dwell-time priors being wrong
+for real behaviour, and the occupancy layer's away logic depending on evidence
+these deployments do not produce.
 
 ### The calibration result is the one to worry about
 

@@ -20,11 +20,16 @@ with a distinctive room-and-rate signature held up — sleeping 0.74, activity
 *present but still* collapsed: `home_inactive` 0.16, and **`away` 0.00 in the
 median home**.
 
-These deployments have motion and door sensors only. The simulator's has a bed
-sensor, a wearable and a beacon, which are the modalities that separate a quiet
-resident from an empty house. Without them, motion silence is ambiguous, and
-the model reads it as absence. That is the exact failure this project set out to
-prevent, and it happens once the confirming sensors are gone.
+Why remains open. The obvious explanation, that these deployments lack the
+sensors confirming presence, was tested twice and did not hold. The five homes
+carrying a chair occupancy sensor are not better, with `home_inactive` recall of
+0.10 against 0.17 without it. Re-reading motion as a persistent occupancy state
+so that an OFF asserts absence made things worse: `away` recall reaches 1.00
+while balanced accuracy falls to 0.16-0.23, because it then reports `away`
+almost always. A motion sensor's OFF means "no motion just now", not "nobody
+home", and the event-kind reading is the correct one.
+
+So the failure is established and its mechanism is not.
 
 Abstention reached at most 5.2% in any home, median 2.2%, while the model was
 wrong more often than right. The mechanism presented throughout as the safety
