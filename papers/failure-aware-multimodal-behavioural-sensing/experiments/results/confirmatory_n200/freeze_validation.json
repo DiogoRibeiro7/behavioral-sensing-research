@@ -1,0 +1,17 @@
+{
+  "config_sha256": "7b48ec89155f78ae7965ac59c9b17a6bf164889ed7f38194c35ba1576aedfae4",
+  "experiment_git_revision": "bd5a9b10068b69fc75cc6f806904430633ce7408",
+  "h2_primary_noninferiority": {
+    "ci_high": 0.15641314849498592,
+    "ci_low": 0.15310025955167178,
+    "estimate": 0.15478368245435956,
+    "margin": 0.02,
+    "metric": "balanced_accuracy",
+    "noninferior": false,
+    "reduced_configuration": "radar_door_bed_wearable",
+    "reference_configuration": "all_modalities"
+  },
+  "replications": 200,
+  "shard_count": 40,
+  "valid_confirmatory_artifact": true
+}
