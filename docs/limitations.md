@@ -35,9 +35,24 @@ further explanations for the remaining gap were tested and rejected: an
 incomplete location map, absent presence-confirming sensors, and occupancy-state
 modelling.
 
+A supervised classifier given the same per-room event counts, three lagged
+steps and time of day reaches **0.607** balanced accuracy on held-out homes,
+against a 0.143 majority-class baseline. Two things follow. The seven-state
+ontology *is* recoverable from motion and door sensors, so the gap is a
+deficiency in the inference rather than a limit of the deployment. And the
+simulator's 0.816 sits **above** the ceiling measured on real homes, so its
+figures exceed what this instrumentation supports at all rather than merely
+being optimistic.
+
+The pipeline recovers about two thirds of what is available, losing most ground
+on `bathroom_activity` (0.25 against 0.80), `away` (0.36 against 0.82) and
+`home_inactive` (0.16 against 0.57), while beating the classifier on
+`home_active`.
+
 These are single-resident homes from one research group's instrumentation, so
-they are not 22 independent studies. The gap between 0.420 and 0.816 is real
-nonetheless.
+they are not 22 independent studies, and 0.607 is a ceiling for this
+instrumentation rather than for ambient sensing generally. The gap between 0.420
+and what is recoverable is real nonetheless.
 
 ## The single most important limitation
 
