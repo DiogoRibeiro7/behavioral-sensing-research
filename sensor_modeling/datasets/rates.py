@@ -24,9 +24,13 @@ import logging
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from statistics import median
+from typing import TYPE_CHECKING
 
 from ..states import BehaviouralState, StateOntology
 from .casas import CasasRecording
+
+if TYPE_CHECKING:  # pragma: no cover - import cycle avoided at runtime
+    from ..fusion.defaults import EmissionDefaults
 
 logger = logging.getLogger(__name__)
 
@@ -252,4 +256,83 @@ def pooled_rate_report(
             )
             for state, intervals in merged_n.items()
         }
+    )
+
+
+def fit_emission_defaults(
+    recordings: Sequence[CasasRecording],
+    *,
+    ontology: StateOntology | None = None,
+    idle_rate: float = 0.02,
+    away_rate: float = 0.02,
+) -> "EmissionDefaults":
+    """Derive emission rate constants from annotated recordings.
+
+    The package ships *declared* rates, reasoned about rather than measured.
+    This turns measurements into the same shape, so the two can be compared on
+    held-out homes.
+
+    ``EmissionDefaults`` expresses a rate as ``active_rate`` scaled by a
+    per-state activity level, so the peak measured rate becomes ``active_rate``
+    and every state's level is its measured rate as a fraction of that. States
+    the ontology does not place in a room have no in-room measurement, so their
+    deployment-wide rate is used instead; it is the only measurement available
+    for them.
+
+    Notes
+    -----
+    Fit on some homes and score on others. Fitting and scoring on the same
+    recordings measures how well the constants memorise those homes, which is
+    not the question anyone is asking.
+
+    In this repository's own experiment, fitting on eleven CASAS homes and
+    scoring on eleven held-out ones cut median calibration error from 0.312 to
+    0.202 while leaving balanced accuracy unchanged at roughly 0.42. Rate
+    miscalibration explains the overconfidence and not the accuracy gap.
+    """
+    from ..fusion.defaults import EmissionDefaults
+
+    if not recordings:
+        raise ValueError("at least one recording is required to fit rates")
+
+    report = pooled_rate_report(recordings, ontology=ontology)
+    states = ontology or StateOntology()
+
+    in_room = {
+        state: sample.median_in_room
+        for state, sample in report.samples.items()
+        if sample.median_in_room is not None
+    }
+    overall = {
+        state: sample.median_overall
+        for state, sample in report.samples.items()
+        if sample.median_overall is not None
+    }
+    if not in_room:
+        raise ValueError(
+            "no state with a room was annotated, so no active rate can be fitted"
+        )
+
+    peak = max(in_room.values())
+    if peak <= 0:
+        raise ValueError("measured peak activation rate is zero")
+
+    levels: dict[BehaviouralState, float] = {}
+    for state in states.states:
+        if state is BehaviouralState.AWAY:
+            levels[state] = 0.0
+        elif state in in_room:
+            levels[state] = max(in_room[state] / peak, 1e-4)
+        elif state in overall:
+            levels[state] = max(overall[state] / peak, 1e-4)
+        else:
+            # Nothing was annotated for this state, so nothing is claimed about
+            # it; the declared midpoint is left in place rather than invented.
+            levels[state] = 0.5
+
+    return EmissionDefaults(
+        active_rate=peak,
+        idle_rate=idle_rate,
+        away_rate=away_rate,
+        activity_levels=levels,
     )

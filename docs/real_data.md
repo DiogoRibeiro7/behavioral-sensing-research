@@ -186,13 +186,36 @@ That is a plausible mechanism for the `home_inactive` failure. `HOME_INACTIVE`
 is declared at activity level 0.25, implying roughly 10 activations an hour from
 the in-room sensor, and a resident sitting still produces far fewer.
 
-**Refitting the rates helps that state but is not a fix.** Substituting measured
-values on six homes roughly doubles to triples `home_inactive` recall — 0.30 to
-0.59, 0.29 to 0.66, 0.20 to 0.47 — while balanced accuracy stays flat, sleeping
-recall falls, calibration degrades and abstention drops to almost zero. Seven
-constants eyeballed from six homes with no held-out set is parameter-fiddling,
-not fitting. It establishes that the rates matter and points the work
-somewhere specific; it does not resolve it.
+### Fitting the rates on held-out homes
+
+The rates were fitted on 11 homes with `fit_emission_defaults` and scored on the
+other 11, which never contributed to the fit. Nothing but the rate constants
+changed: ontology, fusion, occupancy and alerting are untouched.
+
+| | Declared | Fitted | |
+| --- | --- | --- | --- |
+| Balanced accuracy | 0.449 | 0.418 | slightly worse |
+| Calibration error | 0.312 | **0.202** | **35% better** |
+
+**Fitting the rates fixes the overconfidence and not the accuracy.** That is the
+cleanest result available here, and it splits the failure in two.
+
+The declared rates were making the pipeline confidently wrong; measured rates
+make it appropriately uncertain, cutting calibration error by a third on homes
+that had no part in the fit. But discrimination does not move. Whatever limits
+balanced accuracy to roughly 0.42 is **not** the emission constants, and no
+amount of rate-fitting will reach the simulator's 0.816.
+
+So the two failures have different causes, and only one of them is now
+explained. Candidates for the accuracy gap that remain untested: the dwell-time
+priors, the occupancy layer's assumptions, and the possibility that a
+seven-state ontology is simply not identifiable from motion and door sensors
+alone.
+
+An earlier probe using seven constants eyeballed from six homes, with no
+held-out set, appeared to improve `home_inactive` recall while degrading
+everything else. That was parameter-fiddling and its result should be
+disregarded in favour of the held-out numbers above.
 
 ### Explanations tested and rejected
 

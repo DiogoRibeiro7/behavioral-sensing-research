@@ -26,7 +26,13 @@ from .casas import (
 )
 from .casas_hh import HH_ACTIVITY_STATES, HH_LOCATIONS, hh_sensor_specs, read_casas_hh
 from .evaluate import DatasetEvaluation, evaluate_recording
-from .rates import RateReport, RateSample, measure_event_rates, pooled_rate_report
+from .rates import (
+    RateReport,
+    RateSample,
+    fit_emission_defaults,
+    measure_event_rates,
+    pooled_rate_report,
+)
 
 __all__ = [
     "ActivityInterval",
@@ -37,6 +43,7 @@ __all__ = [
     "read_casas_hh",
     "RateReport",
     "RateSample",
+    "fit_emission_defaults",
     "measure_event_rates",
     "pooled_rate_report",
     "evaluate_recording",
