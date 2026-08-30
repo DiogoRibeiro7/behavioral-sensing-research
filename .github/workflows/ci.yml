@@ -20,14 +20,21 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -e .[dev]
+      # Pull requests lint only what they changed, which keeps them fast.
+      # Pushes to a shared branch lint everything, because the changed-files
+      # scope cannot see breakage that arrived in an earlier merge: a red lint
+      # merged anyway stays red in the tree while every later run reports
+      # success, having checked somebody else's files.
       - name: Run pre-commit on changed files
+        if: github.event_name == 'pull_request'
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            pre-commit run --from-ref "origin/${{ github.base_ref }}" --to-ref HEAD
-          else
-            pre-commit run --from-ref "${{ github.event.before }}" --to-ref "${{ github.sha }}"
-          fi
+          pre-commit run --from-ref "origin/${{ github.base_ref }}" --to-ref HEAD
+      - name: Run pre-commit on all files
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          pre-commit run --all-files
   test:
     runs-on: ubuntu-latest
     strategy:

@@ -19,7 +19,6 @@ import json
 import math
 import subprocess
 from collections import defaultdict
-from dataclasses import asdict, replace
 from datetime import timedelta
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -34,7 +33,13 @@ from sensor_modeling.evaluation import (
 )
 from sensor_modeling.health.monitor import SensorHealthReport, SystemHealthReport
 from sensor_modeling.online import BehaviouralSensingPipeline, PipelineConfig
-from sensor_modeling.simulation import DegradationConfig, HouseholdConfig, degrade, dropout, simulate
+from sensor_modeling.simulation import (
+    DegradationConfig,
+    HouseholdConfig,
+    degrade,
+    dropout,
+    simulate,
+)
 
 HERE = Path(__file__).resolve().parent
 DEFAULT_CONFIG = HERE / "config.json"
@@ -225,9 +230,7 @@ def _run_h2(
     return {"rows": rows}
 
 
-def _scenarios_for_seed(
-    config: Mapping[str, Any], seed: int
-) -> list[Scenario]:
+def _scenarios_for_seed(config: Mapping[str, Any], seed: int) -> list[Scenario]:
     from sensor_modeling.evaluation.attribution import standard_scenarios
 
     available = {
@@ -281,7 +284,9 @@ def _run_h4(
         )
         observations, dropped = degrade(household.observations, degradation)
         aware = _pipeline_metrics(household, observations, step=step, health_aware=True)
-        naive = _pipeline_metrics(household, observations, step=step, health_aware=False)
+        naive = _pipeline_metrics(
+            household, observations, step=step, health_aware=False
+        )
         for arm, metrics in (("failure_aware", aware), ("health_naive", naive)):
             rows.append(
                 {
@@ -307,7 +312,9 @@ def _run_h5(
                 "full": all_sensors,
                 "without_first": tuple(s for s in all_sensors if s != first),
                 "without_second": tuple(s for s in all_sensors if s != second),
-                "without_both": tuple(s for s in all_sensors if s not in {first, second}),
+                "without_both": tuple(
+                    s for s in all_sensors if s not in {first, second}
+                ),
             }
             values: dict[str, float] = {}
             for name, sensors in configurations.items():
@@ -339,9 +346,7 @@ def _run_h5(
     return {"rows": rows}
 
 
-def _summaries(
-    config: Mapping[str, Any], results: Mapping[str, Any]
-) -> dict[str, Any]:
+def _summaries(config: Mapping[str, Any], results: Mapping[str, Any]) -> dict[str, Any]:
     confidence = float(config["reporting"]["confidence_level"])
     resamples = int(config["reporting"]["bootstrap_resamples"])
     output: dict[str, Any] = {}
@@ -453,7 +458,11 @@ def _write_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
     for row in rows:
         scalar_rows.append(
             {
-                key: json.dumps(value, sort_keys=True) if isinstance(value, (dict, list)) else value
+                key: (
+                    json.dumps(value, sort_keys=True)
+                    if isinstance(value, (dict, list))
+                    else value
+                )
                 for key, value in row.items()
             }
         )

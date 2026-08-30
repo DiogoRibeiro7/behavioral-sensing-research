@@ -28,7 +28,7 @@ repository-artifact: "https://zenodo.org/records/17070041"
 url: "https://sensor-modeling.readthedocs.io"
 
 version: "0.2.0"
-date-released: "2026-08-29"
+date-released: "2026-08-30"
 license: MIT
 license-url: "https://opensource.org/licenses/MIT"
 

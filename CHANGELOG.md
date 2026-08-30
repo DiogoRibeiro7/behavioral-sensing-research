@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-08-29
+## [0.2.0] - 2026-08-30
 
 Extends the toolkit into a multimodal ambient-sensing research platform. The
 work is additive: no public symbol was removed or changed, and a user of
@@ -46,6 +46,7 @@ has not been validated against real sensor data. See `docs/limitations.md`.
 - Added guard tests importing every module and rejecting shared container defaults on dataclass fields, so a version-specific failure of this kind fails on any interpreter.
 - Added `git_commit`, `git_dirty`, `schema_version` and a snapshot of resolved algorithm defaults to experiment provenance, so a record identifies the exact code and model specification behind it rather than only a package version.
 - Added a `gate` job aggregating lint, test, docs and package into a single required check.
+- Changed the lint job to check every file on pushes to a shared branch, keeping the fast changed-files scope for pull requests. The narrow scope could not see breakage that arrived in an earlier merge, so a red lint merged anyway stayed red in the tree while every later run reported success after checking unrelated files.
 - Added `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/SENSOR_DATA_MODEL.md`, `docs/UNCERTAINTY_MODEL.md`, `docs/EVALUATION_DESIGN.md`, `docs/ADVERSARIAL_REVIEW.md`, `docs/RELEASE_READINESS.md` and `docs/multimodal_ingestion.md`.
 - Added backwards-compatibility tests exercising the original models, data layer and public surface.
 - Added `docs/ambient_architecture.md`, `docs/inference.md`, `docs/evaluation.md`, and `docs/limitations.md`.
