@@ -56,7 +56,15 @@ is in two things it does not have — an explicit time-of-day term, worth about
 +0.105, and several steps of recent room-resolved counts, worth about +0.140.
 The continuous-time Markov prior models how long a state lasts but not when in
 the day it is plausible, so a resident motionless at 02:00 and at 14:00 look
-alike to it.
+alike to it. A circadian prior recovers about a tenth of that.
+
+Two further attempts failed. Declared dwell times are 3 to 9 times longer than
+real state durations, but fitting them to measurement lowered balanced accuracy
+from 0.449 to 0.429: the long dwells are doing useful work as regularisation,
+and being empirically accurate is not the same as being a useful prior. And the
+history term the ablation valued at +0.140 is not straightforwardly available to
+a recursive filter, which already carries history in its belief and would
+double-count evidence if given lagged observations as well.
 
 These are single-resident homes from one research group's instrumentation, so
 they are not 22 independent studies, and 0.607 is a ceiling for this
