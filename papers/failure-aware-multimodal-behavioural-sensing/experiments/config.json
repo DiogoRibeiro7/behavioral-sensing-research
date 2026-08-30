@@ -5,6 +5,7 @@
   "replications": {
     "minimum": 200,
     "seed_start": 10000,
+    "seed_stride": 4,
     "monte_carlo_se_target": 0.002,
     "maximum": 1000
   },
