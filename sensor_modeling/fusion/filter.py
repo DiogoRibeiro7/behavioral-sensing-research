@@ -214,7 +214,9 @@ class MultimodalBayesFilter:
             )
 
         elapsed = moment - self._at if self._at is not None else moment - moment
-        predicted = self._belief @ self.ontology.transition(elapsed)
+        # The moment is passed so a circadian ontology can vary its dynamics by
+        # hour. A time-homogeneous one ignores it.
+        predicted = self._belief @ self.ontology.transition(elapsed, at=moment)
 
         grouped: dict[str, list[Observation]] = {}
         for observation in observations:

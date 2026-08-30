@@ -17,9 +17,10 @@ follows from its matrix exponential.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import datetime, timedelta
 from enum import Enum
 
 import numpy as np
@@ -144,6 +145,17 @@ class StateOntology:
         Room each state implies, or ``None`` when it makes no spatial claim.
     jumps
         Permitted destinations from each state. Defaults to every other state.
+    circadian
+        Optional per-state stickiness by hour of day: 24 positive multipliers
+        each, where a value above one means the state persists longer at that
+        hour. ``None`` leaves the chain time-homogeneous, which is the
+        behaviour every previous release had.
+
+        The dwell time says how long a state lasts. It cannot say *when* that
+        state is plausible, so without this a resident motionless at 02:00 and
+        one motionless at 14:00 are indistinguishable to the prior. Measured on
+        real recordings, that distinction is worth roughly 0.1 balanced
+        accuracy; see ``docs/real_data.md``.
     """
 
     states: tuple[BehaviouralState, ...] = DEFAULT_STATES
@@ -156,6 +168,28 @@ class StateOntology:
     jumps: Mapping[BehaviouralState, Sequence[BehaviouralState]] = field(
         default_factory=lambda: dict(DEFAULT_JUMPS)
     )
+    circadian: Mapping[BehaviouralState, Sequence[float]] | None = None
+
+    def _validate_circadian(self) -> None:
+        """Reject a circadian profile that cannot be a stickiness multiplier."""
+        if self.circadian is None:
+            return
+        for state, profile in self.circadian.items():
+            if state not in self.states:
+                raise ValueError(
+                    f"circadian profile names {state!r}, which is not in the ontology"
+                )
+            values = tuple(profile)
+            if len(values) != 24:
+                raise ValueError(
+                    f"circadian profile for {state!r} has {len(values)} entries; "
+                    "one per hour of the day is required"
+                )
+            if any(not math.isfinite(v) or v <= 0.0 for v in values):
+                raise ValueError(
+                    f"circadian multipliers for {state!r} must be finite and "
+                    "positive; a zero would make the state impossible to leave"
+                )
 
     def __post_init__(self) -> None:
         """Validate the ontology and precompute its generator."""
@@ -175,7 +209,9 @@ class StateOntology:
                 raise ValueError(f"mean dwell time for {state.value} must be positive")
         object.__setattr__(self, "_generator", self._build_generator())
 
-    # ------------------------------------------------------------------
+        # ------------------------------------------------------------------
+        self._validate_circadian()
+
     @property
     def size(self) -> int:
         """Number of latent states."""
@@ -217,9 +253,51 @@ class StateOntology:
         """The continuous-time generator matrix, in transitions per second."""
         return np.asarray(object.__getattribute__(self, "_generator"))
 
-    def transition(self, elapsed: timedelta) -> np.ndarray:
-        """Return ``P(Z_{t+elapsed} | Z_t)`` as a row-stochastic matrix."""
-        return transition_matrix(self.generator, elapsed.total_seconds())
+    def transition(self, elapsed: timedelta, at: datetime | None = None) -> np.ndarray:
+        """Return ``P(Z_{t+elapsed} | Z_t)`` as a row-stochastic matrix.
+
+        Parameters
+        ----------
+        elapsed
+            Time to advance. Arbitrary intervals are supported, which is what
+            lets asynchronous evidence be handled without resampling.
+        at
+            When the step begins, in local time. Used only when *circadian* is
+            set, in which case each state's exit rate is divided by its
+            stickiness for that hour: a state the resident usually occupies at
+            this time of day becomes correspondingly harder to leave.
+
+        Ignoring *at* when no circadian profile is set keeps the chain
+        time-homogeneous and identical to earlier releases.
+        """
+        if self.circadian is None or at is None:
+            return transition_matrix(self.generator, elapsed.total_seconds())
+        return transition_matrix(
+            self._circadian_generator(at.hour), elapsed.total_seconds()
+        )
+
+    def _circadian_generator(self, hour: int) -> np.ndarray:
+        """Return the generator with exit rates scaled for *hour*.
+
+        Scaling the whole row preserves the relative destinations: the chain
+        becomes more or less reluctant to leave a state without changing where
+        it goes when it does. Rebuilding the diagonal keeps rows summing to
+        zero, which is what makes the result a generator at all.
+        """
+        profiles = self.circadian or {}
+        generator = np.array(self.generator, dtype=float, copy=True)
+        for index, state in enumerate(self.states):
+            profile = profiles.get(state)
+            if profile is None:
+                continue
+            stickiness = float(tuple(profile)[hour % 24])
+            row = generator[index]
+            off = row.copy()
+            off[index] = 0.0
+            off /= stickiness
+            generator[index] = off
+            generator[index, index] = -off.sum()
+        return generator
 
     def stationary(self) -> np.ndarray:
         """Return the stationary distribution implied by the generator.

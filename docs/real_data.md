@@ -270,6 +270,36 @@ so this bounds the information present rather than what an unsupervised filter
 ought to find. And it is the same 22 homes from one research group, so 0.607 is
 a ceiling for this instrumentation, not for ambient sensing generally.
 
+### A circadian prior, and what it actually bought
+
+The ablation said time of day is worth about +0.105. `StateOntology` now takes
+an optional `circadian` profile — 24 stickiness multipliers per state — which
+divides that state's exit rates by its multiplier for the current hour, making
+a state the resident usually occupies at this time correspondingly harder to
+leave.
+
+Profiles fitted on 11 homes as a lift ratio, scored on the 11 held out:
+
+| | Plain | Circadian |
+| --- | --- | --- |
+| Balanced accuracy | 0.449 | **0.460** |
+| Calibration error | 0.312 | **0.296** |
+
+Better in 10 of the 11 homes, and better calibrated in 9.
+
+**It delivers about a tenth of what the ablation suggested was there.** +0.011
+against +0.105. That gap is the interesting part: modulating transition rates is
+a much weaker lever than letting a model condition on the hour directly. The
+prior only changes how reluctant the chain is to leave a state; it never enters
+the evidence, so it cannot say "these counts look like 03:00 rather than 14:00".
+
+So most of the circadian signal remains unexploited, and the transition-rate
+route is not how to reach it. A time-varying term on the *emission* side, or a
+time-conditioned prior over states rather than over dwell, would be the next
+thing to measure. The feature is worth keeping — the improvement is real,
+consistent and free when unused — but it should not be mistaken for having
+closed that part of the gap.
+
 ### Explanations tested and rejected
 
 - **An incomplete location map.** `DiningRoom` was unmapped in 14 homes.
