@@ -4,7 +4,7 @@
 
 **Prospective candidate specification — primary external test outcomes remain uninspected.**
 
-This document selects the model form that will be frozen for the one-shot external validation defined in `docs/EXTERNAL_VALIDATION_CONTRACT.md`. It uses only evidence already obtained from the 22-home CASAS `hh` development panel.
+This document selects the model form that will be frozen for the one-shot external validation defined in `papers/failure-aware-multimodal-behavioural-sensing/EXTERNAL_VALIDATION_CONTRACT.md`. It uses only evidence already obtained from the 22-home CASAS `hh` development panel.
 
 ## Candidate
 
@@ -74,11 +74,11 @@ Any subsequent modification defines a new exploratory or future model version.
 
 ## Primary estimand
 
-For eligible test home `h`,
+For eligible test home `h`, the paired difference is
 
-\[
-D_h = BA_h^{(v0.3)} - BA_h^{(v0.2)}.
-\]
+```text
+D_h = BA_h(v0.3) - BA_h(v0.2)
+```
 
 The primary summary is the mean paired household difference with the interval procedure frozen in the external-validation contract. Time points are observations, not independent replications.
 
