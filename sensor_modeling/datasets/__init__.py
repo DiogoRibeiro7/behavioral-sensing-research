@@ -25,6 +25,7 @@ from .casas import (
     truth_series,
 )
 from .casas_hh import HH_ACTIVITY_STATES, HH_LOCATIONS, hh_sensor_specs, read_casas_hh
+from .circadian import CircadianProfileFit, fit_circadian_profile
 from .evaluate import DatasetEvaluation, evaluate_recording
 from .rates import (
     RateReport,
@@ -36,6 +37,7 @@ from .rates import (
 
 __all__ = [
     "ActivityInterval",
+    "CircadianProfileFit",
     "DatasetEvaluation",
     "HH_ACTIVITY_STATES",
     "HH_LOCATIONS",
@@ -43,6 +45,7 @@ __all__ = [
     "read_casas_hh",
     "RateReport",
     "RateSample",
+    "fit_circadian_profile",
     "fit_emission_defaults",
     "measure_event_rates",
     "pooled_rate_report",
