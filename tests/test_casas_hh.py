@@ -20,6 +20,7 @@ from sensor_modeling.datasets import (
     read_casas_hh,
 )
 from sensor_modeling.datasets.casas import truth_series
+from sensor_modeling.datasets.casas_hh import HH_LOCATIONS, normalise_location
 from sensor_modeling.observations import Modality
 from sensor_modeling.states import BehaviouralState
 
@@ -253,3 +254,63 @@ class TestDerivedAwayIntervals:
         ).labelled_fraction
 
         assert with_away > without
+
+
+class TestExtendedLocationVocabulary:
+    """Later CASAS releases name sensors `<Room><Instance><Fixture>`.
+
+    A reader handling only the flat vocabulary silently produces no
+    observations for those homes, which looks like an ineligible recording
+    rather than a parser gap.
+    """
+
+    def test_a_fixture_sensor_resolves_to_its_room(self) -> None:
+        assert normalise_location("BedroomABed") == ("bedroom", Modality.MOTION)
+        assert normalise_location("KitchenARefrigerator") == (
+            "kitchen",
+            Modality.MOTION,
+        )
+        assert normalise_location("BathroomAToilet") == ("bathroom", Modality.MOTION)
+
+    def test_a_bed_sensor_is_motion_not_presence(self) -> None:
+        """The dataset uses PIR and magnetic door sensors only.
+
+        A sensor aimed at a bed detects movement at the bed. Mapping it to a
+        presence modality would invent a measurement the deployment does not
+        make, which the validation contract forbids.
+        """
+        room, modality = normalise_location("BedroomABed")
+
+        assert modality is Modality.MOTION
+        assert modality is not Modality.BED_PRESSURE
+
+    def test_the_main_door_is_the_only_door(self) -> None:
+        """`BedroomADoor` is a motion sensor by the door, not a contact."""
+        assert normalise_location("MainDoor") == ("hall", Modality.DOOR)
+        assert normalise_location("BedroomADoor") == ("bedroom", Modality.MOTION)
+
+    def test_temperature_is_a_sample_not_an_activation(self) -> None:
+        room, modality = normalise_location("BathroomATemperature")
+        assert modality is Modality.ENVIRONMENTAL
+
+        lines = [
+            "2015-10-04,00:09:26.771558,BathroomATemperature,20.0",
+            "2015-10-04,00:19:26.771558,BathroomATemperature,21.5",
+        ]
+        recording = read_casas_hh(lines, timezone=UTC)
+        values = [o.value for o in recording.observations]
+        assert values == [pytest.approx(20.0), pytest.approx(21.5)]
+
+    def test_an_unrecognised_room_is_still_refused(self) -> None:
+        """The normaliser must not become a way of admitting anything."""
+        assert normalise_location("Garage") is None
+        assert normalise_location("Nonsense") is None
+
+    def test_the_instance_letter_is_stripped(self) -> None:
+        assert normalise_location("HallwayA") == ("hall", Modality.MOTION)
+        assert normalise_location("BedroomBArea") == ("bedroom", Modality.MOTION)
+
+    def test_the_flat_vocabulary_still_wins(self) -> None:
+        """Existing names keep their explicit mapping rather than being parsed."""
+        assert normalise_location("OutsideDoor") == HH_LOCATIONS["OutsideDoor"]
+        assert normalise_location("LoungeChair") == HH_LOCATIONS["LoungeChair"]

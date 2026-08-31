@@ -31,7 +31,7 @@
     "hh129",
     "hh130"
   ],
-  "eligible_count": 16,
+  "eligible_count": 43,
   "eligible_homes": [
     {
       "bytes": 13977124,
@@ -197,6 +197,52 @@
       "unmapped_locations": []
     },
     {
+      "bytes": 20597078,
+      "eligible": true,
+      "filename": "ihs07.csv",
+      "id": "ihs07",
+      "labelled_fraction": 0.7046375656224668,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 227360,
+      "reason": "meets all criteria",
+      "sha256": "8c746628f124d2d64674197aa44da74ed01054bdf0fea2b0e3e760b851e534fd",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 20087357,
+      "eligible": true,
+      "filename": "ihs11.csv",
+      "id": "ihs11",
+      "labelled_fraction": 0.6605260123767668,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 217833,
+      "reason": "meets all criteria",
+      "sha256": "1e6a432c2463536ad0e59cc1983ccb451958453b8d7d3786af99c9f660435a03",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
       "bytes": 10553536,
       "eligible": true,
       "filename": "mn57.csv",
@@ -223,7 +269,7 @@
       "eligible": true,
       "filename": "mn77.csv",
       "id": "mn77",
-      "labelled_fraction": 1.0,
+      "labelled_fraction": 0.618767300342159,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -232,48 +278,20 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 40870,
+      "observations": 116362,
       "reason": "meets all criteria",
       "sha256": "5f9ada69087967a7cac56d90fa9825fba5fb2006dff441f82612c42d6562a790",
       "unmapped_activities": [
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBTemperature",
-        "BathroomBToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 2869721,
       "eligible": true,
       "filename": "mn82.csv",
       "id": "mn82",
-      "labelled_fraction": 1.0,
+      "labelled_fraction": 0.8800864679453513,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -282,35 +300,136 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 5118,
+      "observations": 31420,
       "reason": "meets all criteria",
       "sha256": "6872198314eb64f0ab91074253440c9b7603e141051a7c1876889ef88444da10",
       "unmapped_activities": [
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAChair",
-        "SewingRoomAArea"
-      ]
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4773293,
+      "eligible": true,
+      "filename": "rw101.csv",
+      "id": "rw101",
+      "labelled_fraction": 0.8672351769642208,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 34909,
+      "reason": "meets all criteria",
+      "sha256": "55fa73172241d8ead58084482ab5063a7094a9f64464df0766d321ac7eb44136",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6890177,
+      "eligible": true,
+      "filename": "rw103.csv",
+      "id": "rw103",
+      "labelled_fraction": 0.7567547026587811,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 55601,
+      "reason": "meets all criteria",
+      "sha256": "88789edaf20e00ba062c5c283b23ede776f3e00f67b291e5c3966f6c11bb0eb9",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4426027,
+      "eligible": true,
+      "filename": "rw105.csv",
+      "id": "rw105",
+      "labelled_fraction": 0.7574730018716425,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 49229,
+      "reason": "meets all criteria",
+      "sha256": "a17e204ebd003dd94230958080362472c7398d598d67b91eda1ba75f002dbf84",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 5133920,
+      "eligible": true,
+      "filename": "rw106.csv",
+      "id": "rw106",
+      "labelled_fraction": 0.5836586820584645,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 57329,
+      "reason": "meets all criteria",
+      "sha256": "1659f9ef7e2a3cf787a7e147dc89119700b52e2b939f428f5e833bb3fa0d8bc0",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3964227,
+      "eligible": true,
+      "filename": "rw107.csv",
+      "id": "rw107",
+      "labelled_fraction": 0.8692827496905651,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 44382,
+      "reason": "meets all criteria",
+      "sha256": "26aaef53144447344f0bfd45e72e8c89bdd90a5c03d34218f567475780364f8c",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 11339787,
+      "eligible": true,
+      "filename": "tm001.csv",
+      "id": "tm001",
+      "labelled_fraction": 0.7585927942572174,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 124083,
+      "reason": "meets all criteria",
+      "sha256": "f4ba921dbf6452ff9802b7a53e6b56214d5886e85e67890a54ba290fa24a6742",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower"
+      ],
+      "unmapped_locations": []
     },
     {
       "bytes": 32832376,
@@ -332,6 +451,53 @@
       "unmapped_activities": [
         "Put_Groceries_Away",
         "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 9621446,
+      "eligible": true,
+      "filename": "tm003.csv",
+      "id": "tm003",
+      "labelled_fraction": 0.6042968572006822,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 104540,
+      "reason": "meets all criteria",
+      "sha256": "0d38b61e162a46a25aafd17c602f6872604ad33dc8e6878df8a7f39f7cbf409c",
+      "unmapped_activities": [
+        "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 13051193,
+      "eligible": true,
+      "filename": "tm005.csv",
+      "id": "tm005",
+      "labelled_fraction": 0.5623782556574983,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 136392,
+      "reason": "meets all criteria",
+      "sha256": "41b7e4b0020ffe29ad373017f9115de8d054c8669bbe939a3179346f70022686",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave"
       ],
       "unmapped_locations": []
     },
@@ -427,9 +593,399 @@
       "sha256": "b9ae3466bcbff9918f17528fe15214247ed839d87febea651e6f313e112cfd58",
       "unmapped_activities": [],
       "unmapped_locations": []
+    },
+    {
+      "bytes": 17924623,
+      "eligible": true,
+      "filename": "tm010.csv",
+      "id": "tm010",
+      "labelled_fraction": 0.8571576729228266,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 195676,
+      "reason": "meets all criteria",
+      "sha256": "2da1b045cc6008d4b6c098fb0091be0c5e44719e225116188ad8a037ed9362a9",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 26326497,
+      "eligible": true,
+      "filename": "tm011.csv",
+      "id": "tm011",
+      "labelled_fraction": 0.700165713023043,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 285508,
+      "reason": "meets all criteria",
+      "sha256": "57ecc899f108ea0f7a75238c66da2af25306a832a38195ecfa22558ea0c7397a",
+      "unmapped_activities": [
+        "Sew",
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 13413923,
+      "eligible": true,
+      "filename": "tm013.csv",
+      "id": "tm013",
+      "labelled_fraction": 0.965896335210897,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 147957,
+      "reason": "meets all criteria",
+      "sha256": "8f7721a11add3188367e611e7efb4c979e0812e8bba3f1f46359a5a3089f9a92",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7613546,
+      "eligible": true,
+      "filename": "tm014.csv",
+      "id": "tm014",
+      "labelled_fraction": 0.5210548157885802,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 82906,
+      "reason": "meets all criteria",
+      "sha256": "604b76ffe5f363afb52d040d52da90c3f7c5ca03d0b8b32ebbe94c4bca26c379",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7475231,
+      "eligible": true,
+      "filename": "tm015.csv",
+      "id": "tm015",
+      "labelled_fraction": 0.714595462992545,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "sleeping"
+      ],
+      "observations": 80218,
+      "reason": "meets all criteria",
+      "sha256": "f97cfb62ff1b7f8cb0ba296abbe732e480150a6e68bbf034c66321d04fba9938",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3619126,
+      "eligible": true,
+      "filename": "tm016.csv",
+      "id": "tm016",
+      "labelled_fraction": 0.15110367231791794,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 40643,
+      "reason": "meets all criteria",
+      "sha256": "c067ea601d90b0c799cc5d29c729e12c30bf9a28f93e385e0aa6bf8750fc2dd6",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4693771,
+      "eligible": true,
+      "filename": "tm017.csv",
+      "id": "tm017",
+      "labelled_fraction": 0.19760424894199685,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 48455,
+      "reason": "meets all criteria",
+      "sha256": "587406cffc2917005bdbf9492c13c572baa58d79d78b7a38e4101820541a85b5",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6407160,
+      "eligible": true,
+      "filename": "tm018.csv",
+      "id": "tm018",
+      "labelled_fraction": 0.6796513909281852,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 71421,
+      "reason": "meets all criteria",
+      "sha256": "86bfc9e11af8c664da4b22d6c78c9565880c66d45b74b0c6aa19b18ef1d1ee57",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4887333,
+      "eligible": true,
+      "filename": "tm019.csv",
+      "id": "tm019",
+      "labelled_fraction": 0.9074110183310178,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 53682,
+      "reason": "meets all criteria",
+      "sha256": "5bfebafef622d10a7cfa7a2174deb06e9d71362c6fbb0f997d4fc909f6b58bf0",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7393364,
+      "eligible": true,
+      "filename": "tm020.csv",
+      "id": "tm020",
+      "labelled_fraction": 0.6398640342810745,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 82240,
+      "reason": "meets all criteria",
+      "sha256": "2d945faf779f67430c871713acef6afbfee9efd89cd1f7e89f484436334abf02",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 8613817,
+      "eligible": true,
+      "filename": "tm021.csv",
+      "id": "tm021",
+      "labelled_fraction": 0.7795750141848896,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 94379,
+      "reason": "meets all criteria",
+      "sha256": "2e225897d7f479b32a19a33ff5ac9a26d88e336479b1bc87d8c443d8bd6451e2",
+      "unmapped_activities": [
+        "Staff_Enter",
+        "Staff_Leave",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 14368500,
+      "eligible": true,
+      "filename": "tm022.csv",
+      "id": "tm022",
+      "labelled_fraction": 0.7602267960200597,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 152522,
+      "reason": "meets all criteria",
+      "sha256": "36a706e608a481ff4c132953a08b0f12bd6cf8620e5af82474bb3766f84cbc66",
+      "unmapped_activities": [
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 12282971,
+      "eligible": true,
+      "filename": "tm026.csv",
+      "id": "tm026",
+      "labelled_fraction": 0.7769141259314376,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 138326,
+      "reason": "meets all criteria",
+      "sha256": "c6e06702b80a019d2be6ef45ab6342da2203b12a1f837d11f5c682d14ce6fcde",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7758885,
+      "eligible": true,
+      "filename": "tm029.csv",
+      "id": "tm029",
+      "labelled_fraction": 0.5418838134880274,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 85176,
+      "reason": "meets all criteria",
+      "sha256": "f33a7286fa4dbeb11ca726863ee392e62ac206857ace1173804be7578dde0c1c",
+      "unmapped_activities": [
+        "Pet_Activity",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7991155,
+      "eligible": true,
+      "filename": "tm035.csv",
+      "id": "tm035",
+      "labelled_fraction": 0.5165943196688402,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 88664,
+      "reason": "meets all criteria",
+      "sha256": "3c65aa2de3e3c30b2c7f2fffa9b78d6d7954789510a1c13e29be2c49cbd99b64",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6606270,
+      "eligible": true,
+      "filename": "tm037.csv",
+      "id": "tm037",
+      "labelled_fraction": 0.9058779560858531,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 72809,
+      "reason": "meets all criteria",
+      "sha256": "bee4460da31dec3251134a1a9a0a832d992d21fb0a55ed30e855ad1d9a84dc2d",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 20670634,
+      "eligible": true,
+      "filename": "tm038.csv",
+      "id": "tm038",
+      "labelled_fraction": 0.6814079340310213,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 213437,
+      "reason": "meets all criteria",
+      "sha256": "aa28cb045458fbefeca9a37533621b2fa71f0a09e1200b2325dff070a3fc2619",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
     }
   ],
-  "note": "27 otherwise-eligible single-resident homes are blocked by adapter vocabulary, not by the contract criteria. Recorded per contract section 2: the defect and its disposition must be documented before any model output from those files is inspected. This manifest is not frozen.",
+  "note": "Screened with the extended location normaliser. Every exclusion is now a contract criterion, not a parser defect. Not frozen: freezing the cohort is a deliberate act taken before scoring.",
   "purpose": "external-validation primary test cohort",
   "schema_version": 1,
   "scored": false,
@@ -783,10 +1339,10 @@
     },
     {
       "bytes": 20597078,
-      "eligible": false,
+      "eligible": true,
       "filename": "ihs07.csv",
       "id": "ihs07",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.7046375656224668,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -795,47 +1351,14 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 227360,
+      "reason": "meets all criteria",
       "sha256": "8c746628f124d2d64674197aa44da74ed01054bdf0fea2b0e3e760b851e534fd",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBTemperature",
-        "BathroomBToilet",
-        "BathroomCArea",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "BedroomBBed",
-        "BedroomBDoor",
-        "BedroomCArea",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "HallwayA",
-        "HallwayB",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 21962152,
@@ -855,10 +1378,10 @@
     },
     {
       "bytes": 20087357,
-      "eligible": false,
+      "eligible": true,
       "filename": "ihs11.csv",
       "id": "ihs11",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.6605260123767668,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -867,33 +1390,14 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 217833,
+      "reason": "meets all criteria",
       "sha256": "1e6a432c2463536ad0e59cc1983ccb451958453b8d7d3786af99c9f660435a03",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomAArea",
-        "HallwayA",
-        "HallwayB",
-        "HallwayC",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 4227714,
@@ -954,7 +1458,7 @@
       "eligible": true,
       "filename": "mn77.csv",
       "id": "mn77",
-      "labelled_fraction": 1.0,
+      "labelled_fraction": 0.618767300342159,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -963,48 +1467,20 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 40870,
+      "observations": 116362,
       "reason": "meets all criteria",
       "sha256": "5f9ada69087967a7cac56d90fa9825fba5fb2006dff441f82612c42d6562a790",
       "unmapped_activities": [
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBTemperature",
-        "BathroomBToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 2869721,
       "eligible": true,
       "filename": "mn82.csv",
       "id": "mn82",
-      "labelled_fraction": 1.0,
+      "labelled_fraction": 0.8800864679453513,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1013,35 +1489,13 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 5118,
+      "observations": 31420,
       "reason": "meets all criteria",
       "sha256": "6872198314eb64f0ab91074253440c9b7603e141051a7c1876889ef88444da10",
       "unmapped_activities": [
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAChair",
-        "SewingRoomAArea"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 18379133,
@@ -1093,10 +1547,10 @@
     },
     {
       "bytes": 4773293,
-      "eligible": false,
+      "eligible": true,
       "filename": "rw101.csv",
       "id": "rw101",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.8672351769642208,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1105,35 +1559,18 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 34909,
+      "reason": "meets all criteria",
       "sha256": "55fa73172241d8ead58084482ab5063a7094a9f64464df0766d321ac7eb44136",
       "unmapped_activities": [],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomATemperature",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "KitchenArea",
-        "KitchenRefrigerator",
-        "KitchenSink",
-        "KitchenTemperature",
-        "LivingRoomArea",
-        "LivingRoomChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 6890177,
-      "eligible": false,
+      "eligible": true,
       "filename": "rw103.csv",
       "id": "rw103",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.7567547026587811,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1142,33 +1579,11 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 55601,
+      "reason": "meets all criteria",
       "sha256": "88789edaf20e00ba062c5c283b23ede776f3e00f67b291e5c3966f6c11bb0eb9",
       "unmapped_activities": [],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomATemperature",
-        "BathroomBArea",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "EntrywayB",
-        "HallwayA",
-        "KitchenArea",
-        "KitchenDiningChair",
-        "KitchenRefrigerator",
-        "KitchenSink",
-        "KitchenStove",
-        "KitchenTemperature",
-        "LaundryRoomA",
-        "LivingRoomArea",
-        "LivingRoomChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 10468948,
@@ -1180,10 +1595,10 @@
     },
     {
       "bytes": 4426027,
-      "eligible": false,
+      "eligible": true,
       "filename": "rw105.csv",
       "id": "rw105",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.7574730018716425,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1192,37 +1607,18 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 49229,
+      "reason": "meets all criteria",
       "sha256": "a17e204ebd003dd94230958080362472c7398d598d67b91eda1ba75f002dbf84",
       "unmapped_activities": [],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomATemperature",
-        "BathroomBArea",
-        "BedroomABed",
-        "DiningRoomArea",
-        "EntrywayB",
-        "KitchenArea",
-        "KitchenRefrigerator",
-        "KitchenSink",
-        "KitchenStove",
-        "KitchenTemperature",
-        "LaundryRoomA",
-        "LivingRoomArea",
-        "LivingRoomChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 5133920,
-      "eligible": false,
+      "eligible": true,
       "filename": "rw106.csv",
       "id": "rw106",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.5836586820584645,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1231,42 +1627,18 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 57329,
+      "reason": "meets all criteria",
       "sha256": "1659f9ef7e2a3cf787a7e147dc89119700b52e2b939f428f5e833bb3fa0d8bc0",
       "unmapped_activities": [],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomATemperature",
-        "BathroomBArea",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomArea",
-        "EntrywayB",
-        "EntrywayC",
-        "HallwayA",
-        "HallwayB",
-        "KitchenArea",
-        "KitchenDiningChair",
-        "KitchenRefrigerator",
-        "KitchenSink",
-        "KitchenStove",
-        "KitchenTemperature",
-        "LivingRoomArea",
-        "LivingRoomChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 3964227,
-      "eligible": false,
+      "eligible": true,
       "filename": "rw107.csv",
       "id": "rw107",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.8692827496905651,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1275,31 +1647,11 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 44382,
+      "reason": "meets all criteria",
       "sha256": "26aaef53144447344f0bfd45e72e8c89bdd90a5c03d34218f567475780364f8c",
       "unmapped_activities": [],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomATemperature",
-        "BathroomBArea",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomArea",
-        "EntrywayB",
-        "HallwayA",
-        "HallwayB",
-        "KitchenDiningChair",
-        "KitchenStove",
-        "KitchenTemperature",
-        "LivingRoomArea",
-        "LivingRoomChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 7910259,
@@ -1311,10 +1663,10 @@
     },
     {
       "bytes": 11339787,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm001.csv",
       "id": "tm001",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.7585927942572174,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1323,32 +1675,14 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 124083,
+      "reason": "meets all criteria",
       "sha256": "f4ba921dbf6452ff9802b7a53e6b56214d5886e85e67890a54ba290fa24a6742",
       "unmapped_activities": [
         "Put_Groceries_Away",
         "Shower"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 32832376,
@@ -1375,10 +1709,10 @@
     },
     {
       "bytes": 9621446,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm003.csv",
       "id": "tm003",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.6042968572006822,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1387,29 +1721,13 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 104540,
+      "reason": "meets all criteria",
       "sha256": "0d38b61e162a46a25aafd17c602f6872604ad33dc8e6878df8a7f39f7cbf409c",
       "unmapped_activities": [
         "Shower"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomACloset",
-        "BedroomADoor",
-        "HallwayA",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 38026783,
@@ -1421,10 +1739,10 @@
     },
     {
       "bytes": 13051193,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm005.csv",
       "id": "tm005",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.5623782556574983,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1433,8 +1751,8 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 136392,
+      "reason": "meets all criteria",
       "sha256": "41b7e4b0020ffe29ad373017f9115de8d054c8669bbe939a3179346f70022686",
       "unmapped_activities": [
         "Put_Groceries_Away",
@@ -1442,27 +1760,7 @@
         "Staff_Enter",
         "Staff_Leave"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomACloset",
-        "BedroomADoor",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 9062359,
@@ -1559,10 +1857,10 @@
     },
     {
       "bytes": 17924623,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm010.csv",
       "id": "tm010",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.8571576729228266,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1571,44 +1869,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 195676,
+      "reason": "meets all criteria",
       "sha256": "2da1b045cc6008d4b6c098fb0091be0c5e44719e225116188ad8a037ed9362a9",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "KitchenAArea",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 26326497,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm011.csv",
       "id": "tm011",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.700165713023043,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1617,52 +1892,22 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 285508,
+      "reason": "meets all criteria",
       "sha256": "57ecc899f108ea0f7a75238c66da2af25306a832a38195ecfa22558ea0c7397a",
       "unmapped_activities": [
         "Sew",
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "BedroomBBed",
-        "BedroomBDoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "EntrywayD",
-        "EntrywayE",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 13413923,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm013.csv",
       "id": "tm013",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.965896335210897,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1672,32 +1917,18 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 147957,
+      "reason": "meets all criteria",
       "sha256": "8f7721a11add3188367e611e7efb4c979e0812e8bba3f1f46359a5a3089f9a92",
       "unmapped_activities": [],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomABed",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 7613546,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm014.csv",
       "id": "tm014",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.5210548157885802,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1706,42 +1937,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 82906,
+      "reason": "meets all criteria",
       "sha256": "604b76ffe5f363afb52d040d52da90c3f7c5ca03d0b8b32ebbe94c4bca26c379",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "EntrywayB",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 7475231,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm015.csv",
       "id": "tm015",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.714595462992545,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1749,36 +1959,21 @@
         "home_inactive",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 80218,
+      "reason": "meets all criteria",
       "sha256": "f97cfb62ff1b7f8cb0ba296abbe732e480150a6e68bbf034c66321d04fba9938",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 3619126,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm016.csv",
       "id": "tm016",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.15110367231791794,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1787,43 +1982,20 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 40643,
+      "reason": "meets all criteria",
       "sha256": "c067ea601d90b0c799cc5d29c729e12c30bf9a28f93e385e0aa6bf8750fc2dd6",
       "unmapped_activities": [
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 4693771,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm017.csv",
       "id": "tm017",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.19760424894199685,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1832,47 +2004,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 48455,
+      "reason": "meets all criteria",
       "sha256": "587406cffc2917005bdbf9492c13c572baa58d79d78b7a38e4101820541a85b5",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "EntrywayD",
-        "EntrywayE",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 6407160,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm018.csv",
       "id": "tm018",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.6796513909281852,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1881,38 +2027,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 71421,
+      "reason": "meets all criteria",
       "sha256": "86bfc9e11af8c664da4b22d6c78c9565880c66d45b74b0c6aa19b18ef1d1ee57",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "KitchenAArea",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 4887333,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm019.csv",
       "id": "tm019",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.9074110183310178,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1921,40 +2050,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 53682,
+      "reason": "meets all criteria",
       "sha256": "5bfebafef622d10a7cfa7a2174deb06e9d71362c6fbb0f997d4fc909f6b58bf0",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 7393364,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm020.csv",
       "id": "tm020",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.6398640342810745,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -1963,49 +2073,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 82240,
+      "reason": "meets all criteria",
       "sha256": "2d945faf779f67430c871713acef6afbfee9efd89cd1f7e89f484436334abf02",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBTemperature",
-        "BathroomBToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 8613817,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm021.csv",
       "id": "tm021",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.7795750141848896,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -2014,44 +2096,22 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 94379,
+      "reason": "meets all criteria",
       "sha256": "2e225897d7f479b32a19a33ff5ac9a26d88e336479b1bc87d8c443d8bd6451e2",
       "unmapped_activities": [
         "Staff_Enter",
         "Staff_Leave",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "EntrywayB",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 14368500,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm022.csv",
       "id": "tm022",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.7602267960200597,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -2060,8 +2120,8 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 152522,
+      "reason": "meets all criteria",
       "sha256": "36a706e608a481ff4c132953a08b0f12bd6cf8620e5af82474bb3766f84cbc66",
       "unmapped_activities": [
         "Shower",
@@ -2069,34 +2129,14 @@
         "Staff_Leave",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MOfficeAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 12282971,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm026.csv",
       "id": "tm026",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.7769141259314376,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -2105,49 +2145,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 138326,
+      "reason": "meets all criteria",
       "sha256": "c6e06702b80a019d2be6ef45ab6342da2203b12a1f837d11f5c682d14ce6fcde",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBTemperature",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "BedroomBBed",
-        "BedroomBDoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 7758885,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm029.csv",
       "id": "tm029",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.5418838134880274,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -2156,49 +2168,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 85176,
+      "reason": "meets all criteria",
       "sha256": "f33a7286fa4dbeb11ca726863ee392e62ac206857ace1173804be7578dde0c1c",
       "unmapped_activities": [
         "Pet_Activity",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBTemperature",
-        "BathroomBToilet",
-        "BedroomAArea",
-        "BedroomADoor",
-        "BedroomBArea",
-        "BedroomBBed",
-        "BedroomBDoor",
-        "BedroomCArea",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "LivingRoomBArea",
-        "LivingRoomBChair",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 7991155,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm035.csv",
       "id": "tm035",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.5165943196688402,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -2207,51 +2191,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 88664,
+      "reason": "meets all criteria",
       "sha256": "3c65aa2de3e3c30b2c7f2fffa9b78d6d7954789510a1c13e29be2c49cbd99b64",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BathroomBArea",
-        "BathroomBSink",
-        "BathroomBTemperature",
-        "BathroomBToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "BedroomBArea",
-        "BedroomBBed",
-        "BedroomBDoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "EntrywayC",
-        "HallwayA",
-        "KitchenAArea",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway",
-        "OfficeAArea",
-        "OfficeAChair"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 6606270,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm037.csv",
       "id": "tm037",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.9058779560858531,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -2260,40 +2214,21 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 72809,
+      "reason": "meets all criteria",
       "sha256": "bee4460da31dec3251134a1a9a0a832d992d21fb0a55ed30e855ad1d9a84dc2d",
       "unmapped_activities": [
         "Shower",
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "EntrywayB",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     },
     {
       "bytes": 20670634,
-      "eligible": false,
+      "eligible": true,
       "filename": "tm038.csv",
       "id": "tm038",
-      "labelled_fraction": 0.0,
+      "labelled_fraction": 0.6814079340310213,
       "mapped_states": [
         "away",
         "bathroom_activity",
@@ -2302,33 +2237,13 @@
         "kitchen_activity",
         "sleeping"
       ],
-      "observations": 0,
-      "reason": "no representable observations",
+      "observations": 213437,
+      "reason": "meets all criteria",
       "sha256": "aa28cb045458fbefeca9a37533621b2fa71f0a09e1200b2325dff070a3fc2619",
       "unmapped_activities": [
         "Wakeup"
       ],
-      "unmapped_locations": [
-        "BathroomAArea",
-        "BathroomASink",
-        "BathroomATemperature",
-        "BathroomAToilet",
-        "BedroomAArea",
-        "BedroomABed",
-        "BedroomADoor",
-        "DiningRoomAArea",
-        "EntrywayB",
-        "KitchenAArea",
-        "KitchenADiningChair",
-        "KitchenARefrigerator",
-        "KitchenASink",
-        "KitchenAStove",
-        "KitchenATemperature",
-        "LivingRoomAArea",
-        "LivingRoomAChair",
-        "MainDoor",
-        "MainEntryway"
-      ]
+      "unmapped_locations": []
     }
   ],
   "source": {
@@ -2336,5 +2251,5 @@
     "record": "15708568",
     "resident_counts": "Zenodo record description for the same record"
   },
-  "status": "draft-pending-adapter-decision"
+  "status": "draft-not-frozen"
 }

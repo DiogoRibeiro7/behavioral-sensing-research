@@ -146,6 +146,100 @@ HH_ACTIVITY_STATES: Mapping[str, BehaviouralState] = {
     "Step_Out": BehaviouralState.AWAY,
 }
 
+#: Fixture and coverage suffixes CASAS appends to a room name.
+#:
+#: The published description explains the convention: a trailing letter
+#: distinguishes rooms of the same type (``BedroomA``, ``BedroomB``), ``Area``
+#: marks an unconstrained sensor covering a whole room, and the remaining
+#: suffixes name the fixture a narrow-lensed sensor points at.
+_FIXTURES = (
+    "Area",
+    "Bed",
+    "Chair",
+    "DiningChair",
+    "Door",
+    "Refrigerator",
+    "Sink",
+    "Stove",
+    "Toilet",
+    "Temperature",
+    "Entryway",
+    "Shower",
+    "Cabinet",
+    "Closet",
+    "Desk",
+    "Couch",
+    "Table",
+    "Microwave",
+    "Washer",
+    "Dryer",
+)
+
+#: Room words appearing in the extended vocabulary, mapped to canonical rooms.
+#:
+#: Only rooms actually present in the CASAS recordings are listed. Adding a
+#: speculative entry would silently start admitting a sensor nobody has looked
+#: at, which is the opposite of what the unmapped report is for. Rooms the
+#: ontology does not model -- an office, a sewing room, a laundry -- map to
+#: living space, since what the states distinguish is being awake and occupied
+#: rather than the specific room.
+_ROOM_WORDS: Mapping[str, str] = {
+    "Bathroom": "bathroom",
+    "Bedroom": "bedroom",
+    "Kitchen": "kitchen",
+    "LivingRoom": "living",
+    "DiningRoom": "living",
+    "Office": "living",
+    "MOffice": "living",
+    "SewingRoom": "living",
+    "LaundryRoom": "living",
+    "WorkArea": "living",
+    "Hallway": "hall",
+    "Entryway": "hall",
+    "Main": "hall",
+}
+
+_TRAILING_LETTER = re.compile(r"^(?P<room>.*?)(?P<instance>[A-Z])$")
+
+
+def normalise_location(location: str) -> tuple[str, Modality] | None:
+    """Resolve an extended CASAS location name to a room and modality.
+
+    Later releases name sensors ``<Room>[Instance][Fixture]`` -- ``BedroomABed``,
+    ``KitchenARefrigerator``, ``HallwayA`` -- where the flat vocabulary used a
+    bare room. Returns ``None`` for a name this cannot resolve, so an
+    unrecognised sensor is still excluded and reported rather than guessed at.
+
+    Every sensor here is a PIR motion detector or a magnetic door contact,
+    per the dataset description. A sensor aimed at a bed is therefore *motion
+    at the bed*, not an occupancy measurement, and is mapped as motion.
+    Treating it as presence would invent a measurement the deployment does not
+    make.
+    """
+    if location in HH_LOCATIONS:
+        return HH_LOCATIONS[location]
+
+    stem = location
+    modality = Modality.MOTION
+    for fixture in sorted(_FIXTURES, key=len, reverse=True):
+        if stem.endswith(fixture) and stem != fixture:
+            if fixture == "Temperature":
+                modality = Modality.ENVIRONMENTAL
+            elif fixture == "Door" and stem.startswith("Main"):
+                modality = Modality.DOOR
+            stem = stem[: -len(fixture)]
+            break
+
+    match = _TRAILING_LETTER.match(stem)
+    if match and match.group("room") in _ROOM_WORDS:
+        stem = match.group("room")
+
+    room = _ROOM_WORDS.get(stem)
+    if room is None:
+        return None
+    return room, modality
+
+
 _MARKER = re.compile(r'^\s*([A-Za-z0-9_]+)\s*=\s*"?(begin|end)"?\s*$')
 _BARE_LABEL = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
 
@@ -162,17 +256,20 @@ def hh_sensor_specs(
     unmapped: set[str] = set()
 
     for location in sorted(set(locations)):
-        mapping = HH_LOCATIONS.get(location)
+        mapping = normalise_location(location)
         if mapping is None:
             unmapped.add(location)
             continue
         room, modality = mapping
+        environmental = modality is Modality.ENVIRONMENTAL
         specs.append(
             SensorSpec(
                 sensor_id=location,
                 modality=modality,
-                kind=ObservationKind.EVENT,
-                unit=Unit.NONE,
+                kind=(
+                    ObservationKind.SAMPLE if environmental else ObservationKind.EVENT
+                ),
+                unit=Unit.CELSIUS if environmental else Unit.NONE,
                 room=room,
                 attributable=False,
                 description=f"CASAS hh location {location}",
@@ -375,12 +472,19 @@ def read_casas_hh(
         if spec is None:
             continue
 
-        upper = value.upper()
-        if upper in DEACTIVATION_VALUES:
-            deactivations += 1
-            continue
-        if upper not in ACTIVATION_VALUES:
-            continue
+        if spec.kind is ObservationKind.SAMPLE:
+            try:
+                numeric = float(value)
+            except ValueError:
+                continue
+        else:
+            upper = value.upper()
+            if upper in DEACTIVATION_VALUES:
+                deactivations += 1
+                continue
+            if upper not in ACTIVATION_VALUES:
+                continue
+            numeric = 1.0
 
         observations.append(
             Observation(
@@ -388,7 +492,7 @@ def read_casas_hh(
                 sensor_id=spec.sensor_id,
                 modality=spec.modality,
                 kind=spec.kind,
-                value=1.0,
+                value=numeric,
                 unit=spec.unit,
                 source="casas-hh",
             )
