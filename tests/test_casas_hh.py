@@ -339,3 +339,27 @@ def test_the_cohort_screener_reads_the_resident_registry() -> None:
     assert "hh107" not in single and "hh121" not in single
     assert "hh104" in single
     assert source.get("record") == "15708568"
+
+
+def test_the_cohort_manifest_records_its_own_provenance() -> None:
+    """A frozen cohort must trace to the code and metadata that produced it.
+
+    The profile freeze records its fitting revision. A cohort manifest without
+    the equivalent would be the weaker half of the pair: the homes could not be
+    tied to the screening logic that selected them.
+    """
+    import json
+    from pathlib import Path
+
+    manifest = json.loads(
+        Path("artifacts/v03/external_cohort_manifest_draft.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert len(manifest["screening_revision"]) == 40
+    assert len(manifest["source"]["registry_sha256"]) == 64
+    assert manifest["source"]["resident_counts"].endswith(
+        "casas_v1_resident_registry.json"
+    )
+    assert manifest["scored"] is False

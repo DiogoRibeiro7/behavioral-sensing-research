@@ -4,6 +4,11 @@ The contract requires the eligible test-home identifiers and raw-file checksums
 to be frozen in a machine-readable manifest **before** primary scoring. This
 builds that manifest.
 
+The manifest records the revision of this script and the checksum of the
+registry it read, so a frozen cohort can be traced to the code and the metadata
+that produced it. The profile freeze records its fitting revision for the same
+reason; a cohort without one would be the weaker half of the pair.
+
 It is outcome-blind by construction. It reads resident-count metadata, file
 sizes, checksums and activity annotations; it never constructs a pipeline, never
 runs inference, and never computes a metric. Eligibility is decided by the
@@ -127,6 +132,11 @@ def main() -> None:
     parser.add_argument("--timezone", default="America/Los_Angeles")
     parser.add_argument("--source-record", default="15708568")
     parser.add_argument("--registry", type=Path, default=REGISTRY_PATH)
+    parser.add_argument(
+        "--screening-revision",
+        required=True,
+        help="Git revision of the screening code, recorded in the manifest",
+    )
     args = parser.parse_args()
 
     panel, single_resident, registry_source = load_registry(args.registry)
@@ -152,6 +162,7 @@ def main() -> None:
 
     manifest = {
         "schema_version": 1,
+        "screening_revision": args.screening_revision,
         "status": "prospective-cohort-manifest",
         "purpose": "external-validation primary test cohort",
         "scored": False,
@@ -160,6 +171,7 @@ def main() -> None:
             "record": args.source_record,
             "resident_counts": "artifacts/v03/casas_v1_resident_registry.json",
             "registry_source": registry_source,
+            "registry_sha256": _sha256(args.registry),
         },
         "criteria": {
             "outside_development_panel": True,
@@ -183,6 +195,7 @@ def main() -> None:
     print(
         json.dumps(
             {
+                "screening_revision": args.screening_revision,
                 "eligible": len(eligible),
                 "screened": len(screened),
                 "homes": [row["id"] for row in eligible],
