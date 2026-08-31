@@ -6,13 +6,15 @@ This contract governs the real-home external validation of the paper **Failure-A
 
 ## 1. Development data are not confirmatory external test data
 
-The 22 single-resident CASAS `hh` homes already analysed in `docs/real_data.md` are designated **development-only**. Their aggregate performance, per-state recall, emission-rate fitting, supervised recoverability ceiling, and feature-ablation results have already been inspected and used to motivate model-development hypotheses. They must not be reused as the primary external-validation test set.
+The 22 CASAS `hh` recordings already analysed in `docs/real_data.md` are designated **development-only**. Resident-count metadata identify 20 of these recordings as single-resident and `hh107` and `hh121` as two-resident. All 22 remain development-only because their aggregate performance, per-state recall, emission-rate fitting, supervised recoverability ceiling, and feature-ablation results have already been inspected and used to motivate model-development hypotheses. None may be reused as the primary external-validation test set.
+
+The resident-count correction is metadata-based and was made before any primary external-test outcome was inspected. It does not release `hh107` or `hh121` back into the test pool; prior outcome inspection is sufficient to make a recording development data.
 
 Any home, recording, split, or label whose outcome was inspected before this freeze is development data, even if it was called "held out" relative to a narrower fitting step.
 
 ## 2. Primary test cohort
 
-The primary external-validation cohort consists of eligible **single-resident labelled CASAS homes outside the previously analysed `hh` development panel**.
+The primary external-validation cohort consists of eligible **single-resident labelled CASAS homes outside the entire previously analysed 22-recording `hh` development panel**.
 
 Eligibility is determined before scoring and without reference to model performance:
 
@@ -29,7 +31,7 @@ The exact eligible test-home identifiers and raw-file checksums must be frozen i
 
 ## 3. Development / test firewall
 
-The previously examined 22-home `hh` panel may be used to develop the v0.3 candidate, including:
+The previously examined 22-recording `hh` panel may be used to develop the v0.3 candidate, including:
 
 - fitting trainable emission parameters;
 - choosing a circadian parameterisation;
@@ -37,6 +39,8 @@ The previously examined 22-home `hh` panel may be used to develop the v0.3 candi
 - fixing numerical stabilisation and implementation details;
 - debugging dataset adapters;
 - establishing deterministic activity/state mappings where the dataset vocabulary requires them.
+
+For the final circadian parameter fit used by the single-resident external-validation candidate, only the 20 single-resident members of that already-inspected panel are eligible. `hh107` and `hh121` remain development-only but are excluded from parameter estimation because they are two-resident. No untouched home may be added to the fitting set merely to restore a count of 22.
 
 The primary test cohort may be used only for final scoring after the v0.3 candidate is frozen. No parameter, mapping, threshold, state rule, sensor semantic, history length, circadian basis, or model structure may be changed in response to its outcomes.
 
@@ -47,7 +51,7 @@ A defect that makes the frozen candidate scientifically non-executable may be co
 The external study compares, on every eligible primary test home:
 
 - **v0.2 frozen architecture / declared defaults**: the pre-development reference corresponding to the simulator paper architecture;
-- **v0.3 candidate**: the model frozen after development on the 22-home panel and before primary-test scoring.
+- **v0.3 candidate**: the model frozen after development on the already-inspected panel and before primary-test scoring.
 
 A supervised classifier is **not** a primary comparator. It remains a development diagnostic for recoverability and must not be used to tune or select the v0.3 candidate on the primary test cohort.
 
@@ -108,6 +112,7 @@ Before scoring any primary test home, the repository must contain a candidate fr
 - exact activity-mapping table;
 - exact dataset-adapter revision;
 - trainable parameters and the development homes used to estimate them;
+- the complete 22-recording historical development-panel manifest and the 20-home single-resident fitting subset, including the metadata-based exclusions `hh107` and `hh121`;
 - circadian basis/knots or equivalent representation;
 - history-window definition;
 - state ontology;
