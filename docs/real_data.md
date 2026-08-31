@@ -361,7 +361,20 @@ divides that state's exit rates by its multiplier for the current hour, making
 a state the resident usually occupies at this time correspondingly harder to
 leave.
 
-Profiles fitted on 11 homes as a lift ratio, scored on the 11 held out:
+Profiles are fitted with `fit_circadian_profile`, which measures each state's
+share of labelled time per hour, shrinks it toward that state's overall share so
+a sparse hour cannot produce an extreme multiplier, and clips the result to a
+sane range:
+
+```python
+from sensor_modeling.datasets import fit_circadian_profile
+from sensor_modeling.states import StateOntology
+
+fit = fit_circadian_profile(development_recordings)   # never the test homes
+ontology = StateOntology(circadian=fit.profile)
+```
+
+Fitted on 11 homes, scored on the 11 held out:
 
 | | Plain | Circadian |
 | --- | --- | --- |
@@ -369,6 +382,12 @@ Profiles fitted on 11 homes as a lift ratio, scored on the 11 held out:
 | Calibration error | 0.312 | **0.296** |
 
 Better in 10 of the 11 homes, and better calibrated in 9.
+
+The figure survived a change of estimator. It was first measured with a cruder
+fitter that counted five-minute steps and applied no shrinkage; the shipped one
+weights by labelled duration and shrinks toward the overall share. Two
+independently written fitters, the same split, the same answer to within a
+thousandth — which is a better guarantee than either number on its own.
 
 **It delivers about a tenth of what the ablation suggested was there.** +0.011
 against +0.105. That gap is the interesting part: modulating transition rates is
