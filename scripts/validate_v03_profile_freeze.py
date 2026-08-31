@@ -8,7 +8,12 @@ import json
 from pathlib import Path
 
 EXPECTED_CANDIDATE = "v0.2 + circadian prior only"
-EXPECTED_HOME_COUNT = 22
+EXPECTED_PANEL_COUNT = 22
+EXPECTED_FITTING_COUNT = 20
+EXPECTED_EXCLUSIONS = {
+    "hh107": "two-resident CASAS metadata",
+    "hh121": "two-resident CASAS metadata",
+}
 DECIMAL_LIMIT = 12_000_000
 BINARY_LIMIT = 12 * 1024 * 1024
 EXPECTED_PROFILE_STATES = {
@@ -49,11 +54,11 @@ def _validate_size_rule(
         assert evaluation == {
             "decimal_MB": {
                 "byte_limit_exclusive": DECIMAL_LIMIT,
-                "development_home_count": EXPECTED_HOME_COUNT,
+                "development_panel_count": EXPECTED_PANEL_COUNT,
             },
             "binary_MiB": {
                 "byte_limit_exclusive": BINARY_LIMIT,
-                "development_home_count": EXPECTED_HOME_COUNT,
+                "development_panel_count": EXPECTED_PANEL_COUNT,
             },
         }
 
@@ -64,37 +69,57 @@ def _validate_size_rule(
 def validate(
     payload: dict[str, object], *, expected_revision: str | None = None
 ) -> None:
-    assert payload["schema_version"] == 1
+    assert payload["schema_version"] == 2
     assert payload["status"] == "frozen-development-fit"
     assert payload["candidate"] == EXPECTED_CANDIDATE
     assert payload["test_outcomes_inspected"] is False
-    assert payload["development_home_count"] == EXPECTED_HOME_COUNT
+    assert payload["development_panel_count"] == EXPECTED_PANEL_COUNT
+    assert payload["fitting_home_count"] == EXPECTED_FITTING_COUNT
 
-    homes = payload["development_homes"]
-    assert isinstance(homes, list)
-    assert len(homes) == EXPECTED_HOME_COUNT
-    ids = [row["id"] for row in homes]
-    names = [row["filename"] for row in homes]
-    digests = [row["sha256"] for row in homes]
-    assert len(set(ids)) == EXPECTED_HOME_COUNT
-    assert len(set(names)) == EXPECTED_HOME_COUNT
-    assert len(set(digests)) == EXPECTED_HOME_COUNT
-    for row in homes:
+    panel = payload["development_panel_homes"]
+    assert isinstance(panel, list)
+    assert len(panel) == EXPECTED_PANEL_COUNT
+    panel_ids = [row["id"] for row in panel]
+    names = [row["filename"] for row in panel]
+    digests = [row["sha256"] for row in panel]
+    assert len(set(panel_ids)) == EXPECTED_PANEL_COUNT
+    assert len(set(names)) == EXPECTED_PANEL_COUNT
+    assert len(set(digests)) == EXPECTED_PANEL_COUNT
+    for row in panel:
         assert isinstance(row["bytes"], int) and row["bytes"] > 0
         assert isinstance(row["sha256"], str) and len(row["sha256"]) == 64
+
+    fitting_ids = payload["fitting_home_ids"]
+    assert isinstance(fitting_ids, list)
+    assert len(fitting_ids) == EXPECTED_FITTING_COUNT
+    assert len(set(fitting_ids)) == EXPECTED_FITTING_COUNT
+
+    exclusions = payload["fitting_exclusions"]
+    assert isinstance(exclusions, list)
+    exclusion_map = {row["id"]: row["reason"] for row in exclusions}
+    assert exclusion_map == EXPECTED_EXCLUSIONS
+    assert len(exclusions) == len(EXPECTED_EXCLUSIONS)
+
+    panel_set = set(panel_ids)
+    fitting_set = set(fitting_ids)
+    exclusion_set = set(EXPECTED_EXCLUSIONS)
+    assert exclusion_set <= panel_set
+    assert fitting_set <= panel_set
+    assert fitting_set.isdisjoint(exclusion_set)
+    assert fitting_set | exclusion_set == panel_set
 
     source = payload["source"]
     assert isinstance(source, dict)
     assert source["provider"] == "CASAS / Zenodo"
     assert source["record"] == "15708568"
-    _validate_size_rule(source, homes)
+    _validate_size_rule(source, panel)
 
     fit = payload["fit"]
     assert isinstance(fit, dict)
     profile = fit["profile"]
     assert isinstance(profile, dict)
     assert set(profile) == EXPECTED_PROFILE_STATES
-    assert fit["recordings"] == EXPECTED_HOME_COUNT
+    assert fit["recordings"] == EXPECTED_FITTING_COUNT
     assert fit["labelled_seconds"] > 0
     minimum = float(fit["minimum_multiplier"])
     maximum = float(fit["maximum_multiplier"])
@@ -126,7 +151,8 @@ def main() -> None:
                 "valid_v03_profile_freeze": True,
                 "profile_sha256": payload["profile_sha256"],
                 "fitting_revision": payload["fitting_revision"],
-                "development_home_count": payload["development_home_count"],
+                "development_panel_count": payload["development_panel_count"],
+                "fitting_home_count": payload["fitting_home_count"],
             },
             sort_keys=True,
         )

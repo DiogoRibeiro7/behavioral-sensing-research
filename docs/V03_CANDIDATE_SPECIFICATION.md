@@ -50,7 +50,11 @@ Only the circadian profile differs.
 
 ## Development fitting of the final profile
 
-Before any primary test home is scored, one final circadian profile may be estimated using **all 22 development-only `hh` homes**. This is model fitting, not external evaluation.
+The previously analysed development panel contains 22 `hh` recordings. CASAS metadata identify `hh107` and `hh121` as two-resident homes. They remain permanently development-only because their outcomes were already inspected, but they are not eligible to estimate the final single-resident circadian profile.
+
+Before any primary test home is scored, one final circadian profile may therefore be estimated using the **20 single-resident homes inside the already-inspected 22-home development panel**. No untouched home may be added merely to keep the fitting count at 22.
+
+This correction is based on resident-count metadata, not model performance. The earlier all-22 development fit is retained only as a reproducibility diagnostic and is not the immutable candidate profile.
 
 The fitting procedure must be the same family used for the development experiment documented in PR #102: a per-state, per-local-hour profile derived from labelled occupancy frequencies/lift and converted to strictly positive stickiness multipliers accepted by `StateOntology`.
 
@@ -58,11 +62,12 @@ The fitting step may not inspect any primary test-home labels, sensor outcomes, 
 
 The fitted profile must be committed in a machine-readable file before scoring, together with:
 
-1. the exact 22 development-home identifiers;
-2. the fitting code revision;
-3. the profile SHA-256;
-4. a declaration that no primary test-home outcome was inspected;
-5. the exact v0.3 candidate Git revision that will be scored.
+1. the exact 22 development-panel identifiers;
+2. the exact 20 single-resident identifiers used for parameter fitting and the two metadata-based exclusions;
+3. the fitting code revision;
+4. the profile SHA-256;
+5. a declaration that no primary test-home outcome was inspected;
+6. the exact v0.3 candidate Git revision that will be scored.
 
 After that commit, the profile is immutable for the primary external test.
 
@@ -80,7 +85,7 @@ For eligible test home `h`, the paired difference is
 D_h = BA_h(v0.3) - BA_h(v0.2)
 ```
 
-The primary summary is the mean paired household difference with the interval procedure frozen in the external-validation contract. Time points are observations, not independent replications.
+The primary summary is the **median** paired household difference with the interval procedure frozen in the external-validation contract. Time points are observations, not independent replications.
 
 Secondary outcomes remain calibration error, log loss, Brier score, abstention rate, labelled/scored coverage, and state-specific recall. They do not replace the primary balanced-accuracy estimand.
 
