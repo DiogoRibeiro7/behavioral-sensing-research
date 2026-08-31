@@ -111,7 +111,11 @@ def main() -> None:
         json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
-    print(json.dumps({"homes": [row["id"] for row in homes], "profile_sha256": fit.sha256()}))
+    print(
+        json.dumps(
+            {"homes": [row["id"] for row in homes], "profile_sha256": fit.sha256()}
+        )
+    )
 
 
 if __name__ == "__main__":

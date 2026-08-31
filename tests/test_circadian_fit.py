@@ -56,9 +56,7 @@ def test_an_absent_state_gets_a_neutral_profile() -> None:
 
 def test_intervals_are_split_across_hour_boundaries() -> None:
     start = datetime(2024, 1, 1, 9, 30, tzinfo=UTC)
-    spans = ActivityInterval(
-        "sleep", start, start + timedelta(hours=2), S.SLEEPING
-    )
+    spans = ActivityInterval("sleep", start, start + timedelta(hours=2), S.SLEEPING)
     fit = fit_circadian_profile([recording(spans)], shrinkage_hours=0.0)
 
     # The interval contributes to 09, 10 and 11; with no competing labelled
@@ -100,9 +98,7 @@ def test_multiplier_bounds_are_enforced() -> None:
 
 
 def test_serialisation_and_hash_are_stable() -> None:
-    recordings = [
-        recording(interval(0, 6, S.SLEEPING), interval(8, 8, S.HOME_ACTIVE))
-    ]
+    recordings = [recording(interval(0, 6, S.SLEEPING), interval(8, 8, S.HOME_ACTIVE))]
     first = fit_circadian_profile(recordings)
     second = fit_circadian_profile(recordings)
     assert first.to_dict() == second.to_dict()
