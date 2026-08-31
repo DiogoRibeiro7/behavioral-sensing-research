@@ -100,7 +100,10 @@ def _reconstruct(
 
 def _select_fitting_paths(panel_paths: list[Path]) -> list[Path]:
     panel_ids = [_home_id(path) for path in panel_paths]
-    if len(panel_paths) != EXPECTED_PANEL_HOMES or len(set(panel_ids)) != EXPECTED_PANEL_HOMES:
+    if (
+        len(panel_paths) != EXPECTED_PANEL_HOMES
+        or len(set(panel_ids)) != EXPECTED_PANEL_HOMES
+    ):
         raise SystemExit("development panel does not contain 22 unique hh identifiers")
     if not MULTI_RESIDENT_IDS <= set(panel_ids):
         missing = sorted(MULTI_RESIDENT_IDS - set(panel_ids))
