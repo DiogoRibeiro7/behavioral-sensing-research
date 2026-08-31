@@ -542,6 +542,51 @@ what the output feeds.
 Stacking them is the one thing to avoid, and it is exactly what a reader would
 do by default given three separate features each documented as an improvement.
 
+### Why abstention does not fire, and why raising the threshold will not fix it
+
+The pipeline abstained on 2.2% of steps while being wrong more often than right.
+The obvious reading is that the thresholds were set for the simulator, where the
+model is right about 82% of the time, and are simply too low for real data. That
+reading is wrong.
+
+Over 60,948 scored steps from five homes, stated confidence separates correct
+from incorrect answers by only **+0.073**: mean 0.832 when right against 0.758
+when wrong. Worse, the relationship is not monotonic where it matters most.
+
+| Stated confidence | Steps | Accuracy |
+| --- | --- | --- |
+| 0.00 – 0.30 | 360 | 0.475 |
+| 0.30 – 0.50 | 5,459 | 0.314 |
+| 0.50 – 0.70 | 15,535 | 0.384 |
+| 0.70 – 0.85 | 7,813 | 0.506 |
+| 0.85 – 0.95 | 8,127 | **0.653** |
+| **0.95 – 1.00** | **23,654** | **0.561** |
+
+**The most confident band is less accurate than the band below it**, and it is
+the largest, covering 39% of all scored steps. Raising the abstention threshold
+therefore cannot work: it discards the 0.85–0.95 band, which is the pipeline's
+best, while keeping the saturated one.
+
+The thresholds bear this out. Abstaining below 0.90 keeps 47% of steps at
+accuracy 0.579 against a 0.498 baseline; abstaining below 0.95 keeps 39% and
+accuracy *falls* to 0.561.
+
+The likely mechanism is saturation rather than evidence. During a long quiet
+period the chain's stickiness carries the belief toward one state and nothing
+arrives to contradict it, so the posterior approaches certainty because no
+evidence has been seen, not because the evidence is strong. Those steps are
+confident by construction, and the ontology's dwell times — 3 to 9 times longer
+than real state durations — make the effect worse.
+
+**This is a safety finding, not a tuning one.** The project presents abstention
+as the mechanism that makes the rest defensible: a model that does not know
+should say so. On real recordings the quantity it uses to decide that is only
+weakly related to whether it is right, and inverts exactly where the model is
+most assertive. No threshold setting repairs a signal shaped like this.
+
+It is also untouched by the v0.3 candidate, which changes the transition prior
+and leaves the abstention path alone.
+
 ### Explanations tested and rejected
 
 - **An incomplete location map.** `DiningRoom` was unmapped in 14 homes.

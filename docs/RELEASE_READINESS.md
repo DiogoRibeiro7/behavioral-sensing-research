@@ -287,7 +287,7 @@ this biases inference toward inactivity — measured at kitchen recall 0.705 →
 | --- | --- |
 | Declared defaults do not transfer: 22 real homes, median balanced accuracy 0.420 against 0.816 | **High** |
 | `home_inactive` recall 0.16 on real homes; declared event rates 7-14x below measured | **High** |
-| Abstention does not fire when wrong on real data (median 2.5%, max 3.9%) | **High** |
+| Abstention does not fire when wrong, and confidence inverts above 0.95 so no threshold repairs it | **High** |
 | Simulator reports 0.816, above the 0.607 recoverable from real instrumentation | **High** |
 | Pipeline recovers two thirds of what real sensors support (0.420 of 0.607) | **High** |
 | Small-sample pilots reported as though they were studies | High, addressed |
