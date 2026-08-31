@@ -993,7 +993,7 @@
       "unmapped_locations": []
     }
   ],
-  "note": "Eligibility read from the resident registry. Every exclusion is a contract criterion, not a parser defect. Not frozen.",
+  "note": "Eligibility read from the resident registry; every exclusion is a contract criterion, not a parser defect. Records the screening revision and registry checksum so a frozen cohort traces to the code and metadata that produced it. Not frozen.",
   "purpose": "external-validation primary test cohort",
   "schema_version": 1,
   "scored": false,
@@ -2254,9 +2254,11 @@
       "unmapped_locations": []
     }
   ],
+  "screening_revision": "13722ab2e4e8b26f88f2f5cac02e3039d33d8ac7",
   "source": {
     "provider": "CASAS / Zenodo",
     "record": "15708568",
+    "registry_sha256": "d5f0c1086ba06cbf095206019a3cff2bebfd6cedf09ecd6b496d703443393066",
     "registry_source": {
       "archive": "labeled_data.zip",
       "archive_bytes": 236037656,
