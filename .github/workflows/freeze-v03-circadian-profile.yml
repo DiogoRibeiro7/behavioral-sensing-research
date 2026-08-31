@@ -1,0 +1,132 @@
+name: Freeze v0.3 circadian profile
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: freeze-v03-circadian-profile
+  cancel-in-progress: false
+
+env:
+  ZENODO_RECORD: "15708568"
+  OUTPUT_DIR: v03-profile-freeze
+
+jobs:
+  fit:
+    name: fit development-only profile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out fitting revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Download and verify public CASAS archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p casas-archive "$OUTPUT_DIR"
+          python - <<'PY'
+          import hashlib
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          record = "15708568"
+          with urllib.request.urlopen(f"https://zenodo.org/api/records/{record}") as response:
+              meta = json.load(response)
+
+          files = meta.get("files", [])
+          candidates = [item for item in files if item.get("key") == "labeled_data.zip"]
+          if len(candidates) != 1:
+              raise SystemExit(f"expected one labeled_data.zip in Zenodo metadata, got {len(candidates)}")
+          item = candidates[0]
+          url = item["links"]["self"]
+          checksum = item.get("checksum", "")
+          target = Path("casas-archive/labeled_data.zip")
+          urllib.request.urlretrieve(url, target)
+
+          if checksum:
+              algorithm, expected = checksum.split(":", 1)
+              h = hashlib.new(algorithm)
+              with target.open("rb") as handle:
+                  for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                      h.update(chunk)
+              if h.hexdigest() != expected:
+                  raise SystemExit(
+                      f"Zenodo archive checksum mismatch: {h.hexdigest()} != {expected}"
+                  )
+
+          Path("v03-profile-freeze/source_metadata.json").write_text(
+              json.dumps(
+                  {
+                      "record": record,
+                      "file": item.get("key"),
+                      "bytes": item.get("size"),
+                      "checksum": checksum,
+                  },
+                  indent=2,
+                  sort_keys=True,
+              ) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          unzip -q casas-archive/labeled_data.zip -d casas-archive/extracted
+
+      - name: Reconstruct 22-home development cohort and fit profile
+        shell: bash
+        run: |
+          python scripts/freeze_v03_circadian_profile.py \
+            casas-archive/extracted \
+            "$OUTPUT_DIR/v03_circadian_profile.json" \
+            --source-record "$ZENODO_RECORD" \
+            --fitting-revision "$GITHUB_SHA"
+
+      - name: Verify frozen output without scoring homes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("v03-profile-freeze/v03_circadian_profile.json").read_text())
+          assert payload["status"] == "frozen-development-fit"
+          assert payload["candidate"] == "v0.2 + circadian prior only"
+          assert payload["development_home_count"] == 22
+          assert len(payload["development_homes"]) == 22
+          assert len({row["id"] for row in payload["development_homes"]}) == 22
+          assert len({row["sha256"] for row in payload["development_homes"]}) == 22
+          assert len(payload["profile_sha256"]) == 64
+          assert payload["test_outcomes_inspected"] is False
+          assert payload["fitting_revision"] == "${{ github.sha }}"
+          PY
+
+      - name: Upload development-fit freeze artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v03-circadian-profile-freeze
+          path: v03-profile-freeze/
+          retention-days: 90
+          if-no-files-found: error
