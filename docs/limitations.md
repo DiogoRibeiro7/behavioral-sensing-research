@@ -26,6 +26,18 @@ measured rates doubles to triples `home_inactive` recall but costs sleeping
 recall and calibration, so it points the work somewhere specific without
 resolving it.
 
+**Abstention cannot be repaired by raising its threshold.** It fired on 2.2% of
+steps while the model was wrong more often than right, and the obvious fix —
+thresholds tuned for a simulator where the model is right 82% of the time — does
+not work. Over 60,948 scored steps, stated confidence separates right from wrong
+by only 0.073, and the relationship inverts where it matters: the 0.95-1.00
+band, covering 39% of all steps, is *less* accurate (0.561) than the 0.85-0.95
+band (0.653). Raising the threshold discards the pipeline's best band and keeps
+its saturated one. The likely cause is that during quiet periods the belief
+approaches certainty because no evidence arrived, not because the evidence was
+strong. This is a safety limitation, not a tuning parameter, and the v0.3
+candidate does not touch it.
+
 An earlier revision of this page reported `away` recall of 0.00 and treated it
 as a finding. **That was wrong.** `Leave_Home` annotates twelve seconds of
 crossing the threshold, not the hours spent out, so the truth series labelled
