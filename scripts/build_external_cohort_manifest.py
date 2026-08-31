@@ -4,6 +4,11 @@ The contract requires the eligible test-home identifiers and raw-file checksums
 to be frozen in a machine-readable manifest **before** primary scoring. This
 builds that manifest.
 
+Output is a candidate manifest. Freezing it is a separate deliberate act, and
+the frozen artefact lives at ``artifacts/v03/external_cohort_manifest.json``;
+this script does not write there, so re-running it cannot disturb a cohort that
+has already been frozen.
+
 The manifest records the revision of this script and the checksum of the
 registry it read, so a frozen cohort can be traced to the code and the metadata
 that produced it. The profile freeze records its fitting revision for the same
