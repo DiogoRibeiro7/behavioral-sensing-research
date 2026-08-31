@@ -73,9 +73,7 @@ def _reconstruct(
         }
         for name, limit, paths in options
     }
-    matches = [
-        item for item in options if len(item[2]) == EXPECTED_DEVELOPMENT_HOMES
-    ]
+    matches = [item for item in options if len(item[2]) == EXPECTED_DEVELOPMENT_HOMES]
     if not matches:
         counts = {name: len(paths) for name, _, paths in options}
         raise SystemExit(
@@ -89,9 +87,7 @@ def _reconstruct(
         return paths, name, limit, evaluation, False
 
     reference_key = _cohort_key(root, matches[0][2])
-    if any(
-        _cohort_key(root, paths) != reference_key for _, _, paths in matches[1:]
-    ):
+    if any(_cohort_key(root, paths) != reference_key for _, _, paths in matches[1:]):
         raise SystemExit(
             "development cohort reconstruction is genuinely ambiguous: multiple "
             "12 MB conventions yield 22 homes but select different files"
