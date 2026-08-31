@@ -347,14 +347,15 @@ def test_the_cohort_manifest_records_its_own_provenance() -> None:
     The profile freeze records its fitting revision. A cohort manifest without
     the equivalent would be the weaker half of the pair: the homes could not be
     tied to the screening logic that selected them.
+
+    Asserted against the frozen manifest rather than a draft, so the check
+    follows the artefact that actually governs scoring.
     """
     import json
     from pathlib import Path
 
     manifest = json.loads(
-        Path("artifacts/v03/external_cohort_manifest_draft.json").read_text(
-            encoding="utf-8"
-        )
+        Path("artifacts/v03/external_cohort_manifest.json").read_text(encoding="utf-8")
     )
 
     assert len(manifest["screening_revision"]) == 40
@@ -363,3 +364,4 @@ def test_the_cohort_manifest_records_its_own_provenance() -> None:
         "casas_v1_resident_registry.json"
     )
     assert manifest["scored"] is False
+    assert manifest["status"] == "frozen-primary-external-cohort"
