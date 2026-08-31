@@ -27,7 +27,9 @@ def _canonical_fit_sha256(fit: dict[str, object]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def validate(payload: dict[str, object], *, expected_revision: str | None = None) -> None:
+def validate(
+    payload: dict[str, object], *, expected_revision: str | None = None
+) -> None:
     assert payload["schema_version"] == 1
     assert payload["status"] == "frozen-development-fit"
     assert payload["candidate"] == EXPECTED_CANDIDATE
