@@ -13,9 +13,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
-_TIMESTAMP = re.compile(
-    r"^\s*(\d{4}-\d{2}-\d{2})[\s,]+(\d{2}:\d{2}:\d{2}(?:\.\d+)?)"
-)
+_TIMESTAMP = re.compile(r"^\s*(\d{4}-\d{2}-\d{2})[\s,]+(\d{2}:\d{2}:\d{2}(?:\.\d+)?)")
 _MARKER = re.compile(r'([A-Za-z][A-Za-z0-9_]*)\s*=\s*"?(begin|end)"?', re.I)
 _TOKEN = re.compile(r"[A-Za-z0-9]+")
 
@@ -36,9 +34,7 @@ def _home_matches(path: Path, known_ids: set[str]) -> list[str]:
     """Return resident-registry IDs explicitly represented in a path component."""
     components = [path.stem, *path.parts[:-1]]
     normalised = {_normalise(component) for component in components if component}
-    return sorted(
-        home_id for home_id in known_ids if _normalise(home_id) in normalised
-    )
+    return sorted(home_id for home_id in known_ids if _normalise(home_id) in normalised)
 
 
 def _delimiter(line: str) -> str:

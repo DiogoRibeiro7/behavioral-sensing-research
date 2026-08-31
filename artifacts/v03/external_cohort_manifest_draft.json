@@ -31,6 +31,14 @@
     "hh129",
     "hh130"
   ],
+  "development_panel_family": "hh",
+  "eligible_by_family": {
+    "hh": 8,
+    "ihs": 2,
+    "mn": 3,
+    "rw": 5,
+    "tm": 25
+  },
   "eligible_count": 43,
   "eligible_homes": [
     {
@@ -985,7 +993,7 @@
       "unmapped_locations": []
     }
   ],
-  "note": "Eligibility read from the resident registry rather than an inline copy. Every exclusion is a contract criterion; none is a parser defect. Not frozen: freezing the cohort is a deliberate act taken before scoring.",
+  "note": "Eligibility read from the resident registry. Every exclusion is a contract criterion, not a parser defect. Not frozen.",
   "purpose": "external-validation primary test cohort",
   "schema_version": 1,
   "scored": false,

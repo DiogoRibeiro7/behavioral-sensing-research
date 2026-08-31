@@ -64,6 +64,7 @@ nav:
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md
       - v0.3 freeze verification: V03_PROFILE_FREEZE_VERIFICATION.md
+      - External cohort composition: EXTERNAL_COHORT_COMPOSITION.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:
