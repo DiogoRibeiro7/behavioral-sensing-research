@@ -10,6 +10,35 @@ establish properties of the inference model, not of any real home.
 annotated recordings into the same canonical observation model, so the same
 pipeline can be run over data this project did not generate.
 
+## In short
+
+The pipeline was run over 22 real CASAS homes with nothing refitted, and then
+against a measured ceiling for how much those sensors support at all.
+
+| | Balanced accuracy |
+| --- | --- |
+| Chance | 0.143 |
+| Pipeline, declared defaults | 0.420 |
+| Best single adjustment | 0.463 |
+| Recoverable from these sensors | 0.607 |
+| Simulator | 0.816 |
+
+Three things follow, and the rest of this page is the evidence for them.
+
+**The simulator is easier than reality even for an optimal method.** Its 0.816
+sits above the 0.607 a supervised classifier reaches on real homes, so its
+figures exceed what this instrumentation supports rather than merely being
+optimistic.
+
+**The pipeline is at the ceiling for the evidence it uses.** Given only
+instantaneous per-room counts the best achievable is 0.397; the pipeline scores
+0.420. The shortfall is in time of day and recent history, neither of which it
+had.
+
+**The three additions made in response do not combine.** Use one, chosen by what
+the output feeds; see [What to actually use](#what-to-actually-use).
+
+
 ## What is implemented
 
 An adapter for [CASAS](https://casas.wsu.edu/datasets/) recordings, and a runner
@@ -185,6 +214,18 @@ recognising, and that is not an artefact.
 That is a plausible mechanism for the `home_inactive` failure. `HOME_INACTIVE`
 is declared at activity level 0.25, implying roughly 10 activations an hour from
 the in-room sensor, and a resident sitting still produces far fewer.
+
+### The calibration result is the one to worry about
+
+Median calibration error 0.285 with median abstention 0.022 means the pipeline
+was **confidently wrong**: incorrect more often than not, and almost never
+willing to say it did not know. Abstention never exceeded 5.2% in any home.
+
+The abstention mechanism is presented throughout this project as the safety
+valve that makes the rest defensible. On real data it did not open.
+
+A monitoring system that reports "resident is out" with high stated confidence
+while they sit quietly in a chair is worse than one that reports nothing.
 
 ### Fitting the rates on held-out homes
 
@@ -494,26 +535,11 @@ do by default given three separate features each documented as an improvement.
   reporting `away` almost always, collapsing balanced accuracy to 0.16 – 0.23.
   A motion sensor's OFF means "no motion just now", not "nobody home", and the
   event-kind reading is the correct one.
-
-### The calibration result is the one to worry about
-
-Median calibration error 0.285 with median abstention 0.022 means the pipeline
-was **confidently wrong**: incorrect more often than not, and almost never
-willing to say it did not know. Abstention never exceeded 5.2% in any home.
-
-The abstention mechanism is presented throughout this project as the safety
-valve that makes the rest defensible. On real data it did not open.
-
-A monitoring system that reports "resident is out" with high stated confidence
-while they sit quietly in a chair is worse than one that reports nothing.
-
-### A check that mattered
-
-The first pass left `DiningRoom` unmapped in 14 of the 22 homes, along with
-`Office`, `Hall` and four activity labels, so real evidence was being discarded.
-That could have accounted for the poor scores. It did not: completing the maps
-moved median balanced accuracy from 0.356 to 0.364. The result is robust to the
-most obvious explanation that would have let the architecture off.
+- **Dwell-time miscalibration.** Declared dwells are 3 to 9 times longer than
+  measured durations, and fitting them lowered balanced accuracy from 0.449 to
+  0.429. See *Dwell times* above.
+- **Stacking the three components that did help.** Together they score 0.435
+  against 0.463 for the best single one. See *The three components interfere*.
 
 ### Reproducing it
 
