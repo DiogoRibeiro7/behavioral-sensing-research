@@ -435,6 +435,53 @@ model extracts from the same information. The remaining signal appears not to be
 accessible to this generative, recursive formulation through incremental
 additions to it.
 
+### The three components interfere: do not stack them
+
+Each addition was measured against the baseline on its own. Measured together on
+the same 11 held-out homes, with everything fitted on the training half, they do
+not combine.
+
+| Configuration | Balanced accuracy | Calibration error |
+| --- | --- | --- |
+| baseline | 0.449 | 0.312 |
+| fitted rates | 0.418 | **0.202** |
+| circadian prior | 0.460 | 0.296 |
+| smoothing, lag 1 | **0.463** | 0.327 |
+| rates + circadian | 0.434 | 0.299 |
+| **all three** | 0.435 | 0.327 |
+
+**All three together is worse than any one of them alone.** It loses 0.028
+balanced accuracy against smoothing alone, and its calibration is worse than the
+baseline's, undoing the one clear win the fitted rates produced.
+
+Each component pulls a different way, and the pulls do not add:
+
+- **Fitted rates trade accuracy for calibration.** They cut calibration error by
+  a third, from 0.312 to 0.202, and cost 0.031 balanced accuracy doing it. The
+  model becomes appropriately uncertain, and an appropriately uncertain model
+  commits to fewer states.
+- **Smoothing trades calibration for accuracy.** It is the best single choice
+  for accuracy at 0.463, and it makes calibration *worse* than the baseline,
+  0.327 against 0.312. Pulling isolated steps toward their neighbours
+  concentrates belief, and concentrated belief is overconfident unless the
+  neighbours were right.
+- **The circadian prior is the only one that improves both**, modestly: 0.460
+  accuracy and 0.296 calibration.
+
+### What to actually use
+
+There is no configuration that is best at everything, so the choice depends on
+what the output feeds.
+
+| If the output is used for | Use | Because |
+| --- | --- | --- |
+| Alerting, where a stated confidence must mean something | **fitted rates** | Calibration 0.202. Overconfidence is the failure that matters when someone acts on the number |
+| Retrospective analysis and reporting | **smoothing** at lag 1 | Best accuracy at 0.463, five minutes of latency |
+| A single default with no strong preference | **circadian prior** | The only one that improves both, and it costs nothing when a profile is not supplied |
+
+Stacking them is the one thing to avoid, and it is exactly what a reader would
+do by default given three separate features each documented as an improvement.
+
 ### Explanations tested and rejected
 
 - **An incomplete location map.** `DiningRoom` was unmapped in 14 homes.
