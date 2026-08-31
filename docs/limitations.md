@@ -58,6 +58,13 @@ The continuous-time Markov prior models how long a state lasts but not when in
 the day it is plausible, so a resident motionless at 02:00 and at 14:00 look
 alike to it. A circadian prior recovers about a tenth of that.
 
+The three components added in response — fitted emission rates, the circadian
+prior and smoothing — **do not combine.** All three together score 0.435
+balanced accuracy against 0.463 for smoothing alone, with calibration worse than
+the baseline. Fitted rates trade accuracy for calibration and smoothing trades
+calibration for accuracy, so stacking them gives up both. See
+[Real-data validation](real_data.md) for which to use when.
+
 Two further attempts failed. Declared dwell times are 3 to 9 times longer than
 real state durations, but fitting them to measurement lowered balanced accuracy
 from 0.449 to 0.429: the long dwells are doing useful work as regularisation,
