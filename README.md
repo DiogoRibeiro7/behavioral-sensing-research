@@ -26,6 +26,27 @@ non-homogeneous Poisson processes.
 
 The **Sensor Modeling Research Toolkit** addresses the growing need for reproducible, interpretable analysis of behavioral sensor streams in smart environments. Unlike general-purpose machine learning libraries, this toolkit provides domain-specific implementations optimized for the unique characteristics of ambient sensor data: irregular sampling, frequent missingness, binary activations, and the need for transparent, clinically interpretable models.
 
+### What the numbers mean
+
+Most quantitative results in this repository come from the bundled simulator.
+They have since been checked against real recordings, and the comparison
+matters when reading them:
+
+| | Balanced accuracy |
+| --- | --- |
+| Simulator | 0.816 |
+| 22 real CASAS homes | **0.420** |
+| Recoverable from those sensors by any method | 0.607 |
+
+The simulator's figure sits **above** what that instrumentation supports even
+for a supervised classifier with access to the labels. Simulator results are
+therefore not an estimate of real-world performance, and should not be read as
+one. The pipeline is close to the ceiling for the evidence it actually uses;
+the gap is in information those deployments do not carry.
+
+See [Real-data validation](docs/real_data.md) and
+[Known limitations](docs/limitations.md).
+
 ### Key Differentiators
 
 - **Research-Grade Implementation**: Clean, documented, and tested implementations of established algorithms from recent literature
