@@ -98,6 +98,27 @@ def _reconstruct(
     return matches[0][2], convention, effective_limit, evaluation, True
 
 
+def _select_fitting_paths(panel_paths: list[Path]) -> list[Path]:
+    panel_ids = [_home_id(path) for path in panel_paths]
+    if len(panel_paths) != EXPECTED_PANEL_HOMES or len(set(panel_ids)) != EXPECTED_PANEL_HOMES:
+        raise SystemExit("development panel does not contain 22 unique hh identifiers")
+    if not MULTI_RESIDENT_IDS <= set(panel_ids):
+        missing = sorted(MULTI_RESIDENT_IDS - set(panel_ids))
+        raise SystemExit(
+            f"expected metadata exclusions are absent from panel: {missing}"
+        )
+
+    fitting_paths = [
+        path for path in panel_paths if _home_id(path) not in MULTI_RESIDENT_IDS
+    ]
+    if len(fitting_paths) != EXPECTED_FITTING_HOMES:
+        raise SystemExit(
+            f"expected {EXPECTED_FITTING_HOMES} single-resident fitting homes, "
+            f"got {len(fitting_paths)}"
+        )
+    return fitting_paths
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("archive_root", type=Path)
@@ -109,21 +130,8 @@ def main() -> None:
     panel_paths, convention, byte_limit, rule_evaluation, invariant = _reconstruct(
         args.archive_root
     )
+    fitting_paths = _select_fitting_paths(panel_paths)
     panel_ids = [_home_id(path) for path in panel_paths]
-    if len(set(panel_ids)) != EXPECTED_PANEL_HOMES:
-        raise SystemExit("development panel does not contain 22 unique hh identifiers")
-    if not MULTI_RESIDENT_IDS <= set(panel_ids):
-        missing = sorted(MULTI_RESIDENT_IDS - set(panel_ids))
-        raise SystemExit(f"expected metadata exclusions are absent from panel: {missing}")
-
-    fitting_paths = [
-        path for path in panel_paths if _home_id(path) not in MULTI_RESIDENT_IDS
-    ]
-    if len(fitting_paths) != EXPECTED_FITTING_HOMES:
-        raise SystemExit(
-            f"expected {EXPECTED_FITTING_HOMES} single-resident fitting homes, "
-            f"got {len(fitting_paths)}"
-        )
 
     zone = ZoneInfo("America/Los_Angeles")
     recordings = [read_casas_hh(path, timezone=zone) for path in fitting_paths]
