@@ -141,6 +141,15 @@ def main() -> None:
     screened = [screen(path, zone, panel, single_resident) for path in paths]
     eligible = [row for row in screened if row["eligible"]]
 
+    # Family composition decides how a result should be read. The candidate was
+    # developed entirely on `hh`; a cohort drawn mostly from other families is a
+    # harder test than the development panel implies, and a null result there
+    # means something different from a null result within `hh`.
+    families: dict[str, int] = {}
+    for row in eligible:
+        family = str(row["id"]).rstrip("0123456789")
+        families[family] = families.get(family, 0) + 1
+
     manifest = {
         "schema_version": 1,
         "status": "prospective-cohort-manifest",
@@ -162,6 +171,8 @@ def main() -> None:
         },
         "development_panel": sorted(panel),
         "eligible_count": len(eligible),
+        "eligible_by_family": dict(sorted(families.items())),
+        "development_panel_family": "hh",
         "eligible_homes": eligible,
         "screened": screened,
     }
