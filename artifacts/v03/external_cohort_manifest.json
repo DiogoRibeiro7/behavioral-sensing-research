@@ -1,0 +1,2289 @@
+{
+  "criteria": {
+    "minimum_mapped_states": 5,
+    "non_zero_labelled_coverage": true,
+    "outside_development_panel": true,
+    "representable_observations": true,
+    "single_resident": true,
+    "size_cutoff": null
+  },
+  "development_panel": [
+    "hh101",
+    "hh102",
+    "hh103",
+    "hh105",
+    "hh106",
+    "hh107",
+    "hh108",
+    "hh110",
+    "hh111",
+    "hh114",
+    "hh118",
+    "hh119",
+    "hh120",
+    "hh121",
+    "hh122",
+    "hh123",
+    "hh124",
+    "hh125",
+    "hh126",
+    "hh127",
+    "hh129",
+    "hh130"
+  ],
+  "development_panel_family": "hh",
+  "eligible_by_family": {
+    "hh": 8,
+    "ihs": 2,
+    "mn": 3,
+    "rw": 5,
+    "tm": 25
+  },
+  "eligible_count": 43,
+  "eligible_homes": [
+    {
+      "bytes": 13977124,
+      "eligible": true,
+      "filename": "hh104.csv",
+      "id": "hh104",
+      "labelled_fraction": 0.6772537591265646,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 172284,
+      "reason": "meets all criteria",
+      "sha256": "36650c4b30feb8f843943041611aa4f22e85ae8f79d40b4bb33f294bd0bf4f84",
+      "unmapped_activities": [
+        "Nap"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 16551557,
+      "eligible": true,
+      "filename": "hh109.csv",
+      "id": "hh109",
+      "labelled_fraction": 0.9080949336294902,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 199574,
+      "reason": "meets all criteria",
+      "sha256": "ac02a6f32d26d7d0298b5d710606ce5964acadf84e2fd2eb0734c91a36f1f618",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 19316778,
+      "eligible": true,
+      "filename": "hh112.csv",
+      "id": "hh112",
+      "labelled_fraction": 0.9321456678643522,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 234260,
+      "reason": "meets all criteria",
+      "sha256": "aa47b69edbe6592d40d943bd7cda17cc737ecebcf29d87874ed0341575e0f70a",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 90127982,
+      "eligible": true,
+      "filename": "hh113.csv",
+      "id": "hh113",
+      "labelled_fraction": 0.8758694358147882,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 1141063,
+      "reason": "meets all criteria",
+      "sha256": "712edaa2ef121b09a67e3c441837b02e7785546d50b21b972a265ecb6ac7e630",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 65522065,
+      "eligible": true,
+      "filename": "hh115.csv",
+      "id": "hh115",
+      "labelled_fraction": 0.9028383552742512,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 800032,
+      "reason": "meets all criteria",
+      "sha256": "d1d4a1ba4a8eab1f7b298ef55decdd7ece4050ac9bd2f6f346eebd62b4cb4ac2",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 15775080,
+      "eligible": true,
+      "filename": "hh116.csv",
+      "id": "hh116",
+      "labelled_fraction": 0.8360936524460048,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 194313,
+      "reason": "meets all criteria",
+      "sha256": "7ed93e07555521a0f905b8b65f0556b72fc71719528ef92adc42448faeaea6e1",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 31597863,
+      "eligible": true,
+      "filename": "hh117.csv",
+      "id": "hh117",
+      "labelled_fraction": 0.7758792464505148,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 385093,
+      "reason": "meets all criteria",
+      "sha256": "6f9f83d085de9d98c870f1c5c54be70ccdacc2428919893b5b74faaf56e8f0f7",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 16140540,
+      "eligible": true,
+      "filename": "hh128.csv",
+      "id": "hh128",
+      "labelled_fraction": 0.7619363854724157,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 201285,
+      "reason": "meets all criteria",
+      "sha256": "050a529c7defea2437c1109a4ad68b4871e4fffb5f59329ee01b77e4507c5660",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 20597078,
+      "eligible": true,
+      "filename": "ihs07.csv",
+      "id": "ihs07",
+      "labelled_fraction": 0.7046375656224668,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 227360,
+      "reason": "meets all criteria",
+      "sha256": "8c746628f124d2d64674197aa44da74ed01054bdf0fea2b0e3e760b851e534fd",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 20087357,
+      "eligible": true,
+      "filename": "ihs11.csv",
+      "id": "ihs11",
+      "labelled_fraction": 0.6605260123767668,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 217833,
+      "reason": "meets all criteria",
+      "sha256": "1e6a432c2463536ad0e59cc1983ccb451958453b8d7d3786af99c9f660435a03",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 10553536,
+      "eligible": true,
+      "filename": "mn57.csv",
+      "id": "mn57",
+      "labelled_fraction": 0.8269114267730613,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 128180,
+      "reason": "meets all criteria",
+      "sha256": "7170078f24402f4206c138c022d77998faf34ece1be9432be764abb89fada54a",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 10376898,
+      "eligible": true,
+      "filename": "mn77.csv",
+      "id": "mn77",
+      "labelled_fraction": 0.618767300342159,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 116362,
+      "reason": "meets all criteria",
+      "sha256": "5f9ada69087967a7cac56d90fa9825fba5fb2006dff441f82612c42d6562a790",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 2869721,
+      "eligible": true,
+      "filename": "mn82.csv",
+      "id": "mn82",
+      "labelled_fraction": 0.8800864679453513,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 31420,
+      "reason": "meets all criteria",
+      "sha256": "6872198314eb64f0ab91074253440c9b7603e141051a7c1876889ef88444da10",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4773293,
+      "eligible": true,
+      "filename": "rw101.csv",
+      "id": "rw101",
+      "labelled_fraction": 0.8672351769642208,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 34909,
+      "reason": "meets all criteria",
+      "sha256": "55fa73172241d8ead58084482ab5063a7094a9f64464df0766d321ac7eb44136",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6890177,
+      "eligible": true,
+      "filename": "rw103.csv",
+      "id": "rw103",
+      "labelled_fraction": 0.7567547026587811,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 55601,
+      "reason": "meets all criteria",
+      "sha256": "88789edaf20e00ba062c5c283b23ede776f3e00f67b291e5c3966f6c11bb0eb9",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4426027,
+      "eligible": true,
+      "filename": "rw105.csv",
+      "id": "rw105",
+      "labelled_fraction": 0.7574730018716425,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 49229,
+      "reason": "meets all criteria",
+      "sha256": "a17e204ebd003dd94230958080362472c7398d598d67b91eda1ba75f002dbf84",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 5133920,
+      "eligible": true,
+      "filename": "rw106.csv",
+      "id": "rw106",
+      "labelled_fraction": 0.5836586820584645,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 57329,
+      "reason": "meets all criteria",
+      "sha256": "1659f9ef7e2a3cf787a7e147dc89119700b52e2b939f428f5e833bb3fa0d8bc0",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3964227,
+      "eligible": true,
+      "filename": "rw107.csv",
+      "id": "rw107",
+      "labelled_fraction": 0.8692827496905651,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 44382,
+      "reason": "meets all criteria",
+      "sha256": "26aaef53144447344f0bfd45e72e8c89bdd90a5c03d34218f567475780364f8c",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 11339787,
+      "eligible": true,
+      "filename": "tm001.csv",
+      "id": "tm001",
+      "labelled_fraction": 0.7585927942572174,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 124083,
+      "reason": "meets all criteria",
+      "sha256": "f4ba921dbf6452ff9802b7a53e6b56214d5886e85e67890a54ba290fa24a6742",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 32832376,
+      "eligible": true,
+      "filename": "tm002.csv",
+      "id": "tm002",
+      "labelled_fraction": 0.6843930601742374,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 403424,
+      "reason": "meets all criteria",
+      "sha256": "c267195dc51de6d07fa58eaeca942adfcf9bcccfc5479e4a8e337c34457f1f6f",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 9621446,
+      "eligible": true,
+      "filename": "tm003.csv",
+      "id": "tm003",
+      "labelled_fraction": 0.6042968572006822,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 104540,
+      "reason": "meets all criteria",
+      "sha256": "0d38b61e162a46a25aafd17c602f6872604ad33dc8e6878df8a7f39f7cbf409c",
+      "unmapped_activities": [
+        "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 13051193,
+      "eligible": true,
+      "filename": "tm005.csv",
+      "id": "tm005",
+      "labelled_fraction": 0.5623782556574983,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 136392,
+      "reason": "meets all criteria",
+      "sha256": "41b7e4b0020ffe29ad373017f9115de8d054c8669bbe939a3179346f70022686",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 9062359,
+      "eligible": true,
+      "filename": "tm006.csv",
+      "id": "tm006",
+      "labelled_fraction": 0.7525111748822007,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 111077,
+      "reason": "meets all criteria",
+      "sha256": "e41c1327d9e5d518e7f3276379dfacb5194b968ed660db4213e854b0e8b1eeff",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3502910,
+      "eligible": true,
+      "filename": "tm007.csv",
+      "id": "tm007",
+      "labelled_fraction": 0.7723851756318024,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 42214,
+      "reason": "meets all criteria",
+      "sha256": "324f3933f68ad0055071962372b446a69eab0712f54f9a922f24ef1cefc8e8ba",
+      "unmapped_activities": [
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6381244,
+      "eligible": true,
+      "filename": "tm008.csv",
+      "id": "tm008",
+      "labelled_fraction": 0.8492833353160486,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 78442,
+      "reason": "meets all criteria",
+      "sha256": "dcc54bdb8b72763d4f49dc7000843c9aa435b84e866863e631c4763747dca198",
+      "unmapped_activities": [
+        "Pet_Activity",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 8623894,
+      "eligible": true,
+      "filename": "tm009.csv",
+      "id": "tm009",
+      "labelled_fraction": 0.9677195910853745,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "sleeping"
+      ],
+      "observations": 103774,
+      "reason": "meets all criteria",
+      "sha256": "b9ae3466bcbff9918f17528fe15214247ed839d87febea651e6f313e112cfd58",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 17924623,
+      "eligible": true,
+      "filename": "tm010.csv",
+      "id": "tm010",
+      "labelled_fraction": 0.8571576729228266,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 195676,
+      "reason": "meets all criteria",
+      "sha256": "2da1b045cc6008d4b6c098fb0091be0c5e44719e225116188ad8a037ed9362a9",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 26326497,
+      "eligible": true,
+      "filename": "tm011.csv",
+      "id": "tm011",
+      "labelled_fraction": 0.700165713023043,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 285508,
+      "reason": "meets all criteria",
+      "sha256": "57ecc899f108ea0f7a75238c66da2af25306a832a38195ecfa22558ea0c7397a",
+      "unmapped_activities": [
+        "Sew",
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 13413923,
+      "eligible": true,
+      "filename": "tm013.csv",
+      "id": "tm013",
+      "labelled_fraction": 0.965896335210897,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 147957,
+      "reason": "meets all criteria",
+      "sha256": "8f7721a11add3188367e611e7efb4c979e0812e8bba3f1f46359a5a3089f9a92",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7613546,
+      "eligible": true,
+      "filename": "tm014.csv",
+      "id": "tm014",
+      "labelled_fraction": 0.5210548157885802,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 82906,
+      "reason": "meets all criteria",
+      "sha256": "604b76ffe5f363afb52d040d52da90c3f7c5ca03d0b8b32ebbe94c4bca26c379",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7475231,
+      "eligible": true,
+      "filename": "tm015.csv",
+      "id": "tm015",
+      "labelled_fraction": 0.714595462992545,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "sleeping"
+      ],
+      "observations": 80218,
+      "reason": "meets all criteria",
+      "sha256": "f97cfb62ff1b7f8cb0ba296abbe732e480150a6e68bbf034c66321d04fba9938",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3619126,
+      "eligible": true,
+      "filename": "tm016.csv",
+      "id": "tm016",
+      "labelled_fraction": 0.15110367231791794,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 40643,
+      "reason": "meets all criteria",
+      "sha256": "c067ea601d90b0c799cc5d29c729e12c30bf9a28f93e385e0aa6bf8750fc2dd6",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4693771,
+      "eligible": true,
+      "filename": "tm017.csv",
+      "id": "tm017",
+      "labelled_fraction": 0.19760424894199685,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 48455,
+      "reason": "meets all criteria",
+      "sha256": "587406cffc2917005bdbf9492c13c572baa58d79d78b7a38e4101820541a85b5",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6407160,
+      "eligible": true,
+      "filename": "tm018.csv",
+      "id": "tm018",
+      "labelled_fraction": 0.6796513909281852,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 71421,
+      "reason": "meets all criteria",
+      "sha256": "86bfc9e11af8c664da4b22d6c78c9565880c66d45b74b0c6aa19b18ef1d1ee57",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4887333,
+      "eligible": true,
+      "filename": "tm019.csv",
+      "id": "tm019",
+      "labelled_fraction": 0.9074110183310178,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 53682,
+      "reason": "meets all criteria",
+      "sha256": "5bfebafef622d10a7cfa7a2174deb06e9d71362c6fbb0f997d4fc909f6b58bf0",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7393364,
+      "eligible": true,
+      "filename": "tm020.csv",
+      "id": "tm020",
+      "labelled_fraction": 0.6398640342810745,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 82240,
+      "reason": "meets all criteria",
+      "sha256": "2d945faf779f67430c871713acef6afbfee9efd89cd1f7e89f484436334abf02",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 8613817,
+      "eligible": true,
+      "filename": "tm021.csv",
+      "id": "tm021",
+      "labelled_fraction": 0.7795750141848896,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 94379,
+      "reason": "meets all criteria",
+      "sha256": "2e225897d7f479b32a19a33ff5ac9a26d88e336479b1bc87d8c443d8bd6451e2",
+      "unmapped_activities": [
+        "Staff_Enter",
+        "Staff_Leave",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 14368500,
+      "eligible": true,
+      "filename": "tm022.csv",
+      "id": "tm022",
+      "labelled_fraction": 0.7602267960200597,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 152522,
+      "reason": "meets all criteria",
+      "sha256": "36a706e608a481ff4c132953a08b0f12bd6cf8620e5af82474bb3766f84cbc66",
+      "unmapped_activities": [
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 12282971,
+      "eligible": true,
+      "filename": "tm026.csv",
+      "id": "tm026",
+      "labelled_fraction": 0.7769141259314376,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 138326,
+      "reason": "meets all criteria",
+      "sha256": "c6e06702b80a019d2be6ef45ab6342da2203b12a1f837d11f5c682d14ce6fcde",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7758885,
+      "eligible": true,
+      "filename": "tm029.csv",
+      "id": "tm029",
+      "labelled_fraction": 0.5418838134880274,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 85176,
+      "reason": "meets all criteria",
+      "sha256": "f33a7286fa4dbeb11ca726863ee392e62ac206857ace1173804be7578dde0c1c",
+      "unmapped_activities": [
+        "Pet_Activity",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7991155,
+      "eligible": true,
+      "filename": "tm035.csv",
+      "id": "tm035",
+      "labelled_fraction": 0.5165943196688402,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 88664,
+      "reason": "meets all criteria",
+      "sha256": "3c65aa2de3e3c30b2c7f2fffa9b78d6d7954789510a1c13e29be2c49cbd99b64",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6606270,
+      "eligible": true,
+      "filename": "tm037.csv",
+      "id": "tm037",
+      "labelled_fraction": 0.9058779560858531,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 72809,
+      "reason": "meets all criteria",
+      "sha256": "bee4460da31dec3251134a1a9a0a832d992d21fb0a55ed30e855ad1d9a84dc2d",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 20670634,
+      "eligible": true,
+      "filename": "tm038.csv",
+      "id": "tm038",
+      "labelled_fraction": 0.6814079340310213,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 213437,
+      "reason": "meets all criteria",
+      "sha256": "aa28cb045458fbefeca9a37533621b2fa71f0a09e1200b2325dff070a3fc2619",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    }
+  ],
+  "freeze": {
+    "freeze_source_revision": "a0171a0c6223a4d3fee5fa5f815eb669617969f0",
+    "inventory_artifact_digest": "sha256:918c5e0c0ad08826cc64817ccc0c3b1757427431b327edba258c6fdab71e6ba6",
+    "inventory_file_sha256": "4fba8c92068a2e4d976ea6636efc61184432f4f50b11719e16a2ddc66c7bcf9f",
+    "inventory_run_id": 33421732358,
+    "model_inference_performed": false,
+    "performance_metrics_computed": false,
+    "primary_test_outcomes_inspected": false,
+    "raw_identity_match": true,
+    "reconciled_manifest_sha256": "2d5e785dff7153ac099ac1c3670474a97f54498ac5f2c54153bd82722eaf749a",
+    "reconciliation_artifact_digest": "sha256:d67b4e9a5046c4fbf7c1e548b8c5c7b89f3d005be247bdfab2d24287e15550c2",
+    "reconciliation_run_id": 33425711732,
+    "screening_revision": "13722ab2e4e8b26f88f2f5cac02e3039d33d8ac7"
+  },
+  "note": "Eligibility read from the resident registry; every exclusion is a contract criterion, not a parser defect. Records the screening revision and registry checksum so a frozen cohort traces to the code and metadata that produced it. Not frozen.",
+  "purpose": "external-validation primary test cohort",
+  "schema_version": 1,
+  "scored": false,
+  "screened": [
+    {
+      "bytes": 9008908,
+      "eligible": false,
+      "filename": "hh101.csv",
+      "id": "hh101",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "3f4d4a53ef4940670ef855c66cd9dee0a458700656afb112f2c80b703b65666d"
+    },
+    {
+      "bytes": 11322712,
+      "eligible": false,
+      "filename": "hh102.csv",
+      "id": "hh102",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "3720812ee71d89f230149cc0b6562f308eb8658e9198ff69d27be9a1d77b29d2"
+    },
+    {
+      "bytes": 4627295,
+      "eligible": false,
+      "filename": "hh103.csv",
+      "id": "hh103",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "bb589e6e350d971533a1e75eff4a960a590eb034d54b5e76855ee55e04d0e18b"
+    },
+    {
+      "bytes": 13977124,
+      "eligible": true,
+      "filename": "hh104.csv",
+      "id": "hh104",
+      "labelled_fraction": 0.6772537591265646,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 172284,
+      "reason": "meets all criteria",
+      "sha256": "36650c4b30feb8f843943041611aa4f22e85ae8f79d40b4bb33f294bd0bf4f84",
+      "unmapped_activities": [
+        "Nap"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 5906157,
+      "eligible": false,
+      "filename": "hh105.csv",
+      "id": "hh105",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "e50b80bab18551ae365c259b5b19210833cdbfecdf85fa6a2e760018e12e5f85"
+    },
+    {
+      "bytes": 8388453,
+      "eligible": false,
+      "filename": "hh106.csv",
+      "id": "hh106",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "d7bc4b7d43e24dc7d826c06c618a2206a2290302da6998dba9a5e7d23b5186a4"
+    },
+    {
+      "bytes": 9492063,
+      "eligible": false,
+      "filename": "hh107.csv",
+      "id": "hh107",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "1dbcdd0a594e11195dd8aecd59c8c6490efce08f5f25cec634268ce8e198845b"
+    },
+    {
+      "bytes": 11901894,
+      "eligible": false,
+      "filename": "hh108.csv",
+      "id": "hh108",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "02dc7a30cf16fd82605084bae34e8b1c2929fe306afef6dd75fc13c316151c6b"
+    },
+    {
+      "bytes": 16551557,
+      "eligible": true,
+      "filename": "hh109.csv",
+      "id": "hh109",
+      "labelled_fraction": 0.9080949336294902,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 199574,
+      "reason": "meets all criteria",
+      "sha256": "ac02a6f32d26d7d0298b5d710606ce5964acadf84e2fd2eb0734c91a36f1f618",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4056034,
+      "eligible": false,
+      "filename": "hh110.csv",
+      "id": "hh110",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "c89fbf594549cd749d83e1b57c3d4b424d519211456c45d74c691e3bfe476c33"
+    },
+    {
+      "bytes": 9131785,
+      "eligible": false,
+      "filename": "hh111.csv",
+      "id": "hh111",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "10cdf20436acf834fea9d4b3bd40e6bd634050da7e1cff89ee4d79f817532b38"
+    },
+    {
+      "bytes": 19316778,
+      "eligible": true,
+      "filename": "hh112.csv",
+      "id": "hh112",
+      "labelled_fraction": 0.9321456678643522,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 234260,
+      "reason": "meets all criteria",
+      "sha256": "aa47b69edbe6592d40d943bd7cda17cc737ecebcf29d87874ed0341575e0f70a",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 90127982,
+      "eligible": true,
+      "filename": "hh113.csv",
+      "id": "hh113",
+      "labelled_fraction": 0.8758694358147882,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 1141063,
+      "reason": "meets all criteria",
+      "sha256": "712edaa2ef121b09a67e3c441837b02e7785546d50b21b972a265ecb6ac7e630",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 5613709,
+      "eligible": false,
+      "filename": "hh114.csv",
+      "id": "hh114",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "51dace896e9e8ebb0dd62fafcadc7319c0b54ef60aacf8d62630fd45401d85d1"
+    },
+    {
+      "bytes": 65522065,
+      "eligible": true,
+      "filename": "hh115.csv",
+      "id": "hh115",
+      "labelled_fraction": 0.9028383552742512,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 800032,
+      "reason": "meets all criteria",
+      "sha256": "d1d4a1ba4a8eab1f7b298ef55decdd7ece4050ac9bd2f6f346eebd62b4cb4ac2",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 15775080,
+      "eligible": true,
+      "filename": "hh116.csv",
+      "id": "hh116",
+      "labelled_fraction": 0.8360936524460048,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 194313,
+      "reason": "meets all criteria",
+      "sha256": "7ed93e07555521a0f905b8b65f0556b72fc71719528ef92adc42448faeaea6e1",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 31597863,
+      "eligible": true,
+      "filename": "hh117.csv",
+      "id": "hh117",
+      "labelled_fraction": 0.7758792464505148,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 385093,
+      "reason": "meets all criteria",
+      "sha256": "6f9f83d085de9d98c870f1c5c54be70ccdacc2428919893b5b74faaf56e8f0f7",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7237232,
+      "eligible": false,
+      "filename": "hh118.csv",
+      "id": "hh118",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "5fa3f1e2b3c4dde5ce251f635abea710aadc382c6c554595eec8f2e80011ee36"
+    },
+    {
+      "bytes": 3816893,
+      "eligible": false,
+      "filename": "hh119.csv",
+      "id": "hh119",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "8bf08d3568c4eec3d236bd62ef5c0e9ad38ea03a2ddd79e32db7324db11f10f6"
+    },
+    {
+      "bytes": 8959248,
+      "eligible": false,
+      "filename": "hh120.csv",
+      "id": "hh120",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "3d2b52061cd1f6660fe1f2bb1ac84f7784756a756ee8d6b6fcb7c9bfbaad6b1a"
+    },
+    {
+      "bytes": 5402770,
+      "eligible": false,
+      "filename": "hh121.csv",
+      "id": "hh121",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "99ddf079add9b79fbbc515f59f52764d9b2da5623ba5b90e7d6b7a3a226838f1"
+    },
+    {
+      "bytes": 5155585,
+      "eligible": false,
+      "filename": "hh122.csv",
+      "id": "hh122",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "d4143027bc742e0c7dbdeb16d7095fafa5c69b8f5026aceb22954b8b50d17ac9"
+    },
+    {
+      "bytes": 4256955,
+      "eligible": false,
+      "filename": "hh123.csv",
+      "id": "hh123",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "05f149f788bd4d42fc4314a955f1dd6e55742aa366e3f2fa5fdf334ba2a4a5fb"
+    },
+    {
+      "bytes": 531309,
+      "eligible": false,
+      "filename": "hh124.csv",
+      "id": "hh124",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "9c944a1460d194bde94a617ba8d4818ffa80cfb3adf67fb70fb2960fb1b6a5ce"
+    },
+    {
+      "bytes": 8669757,
+      "eligible": false,
+      "filename": "hh125.csv",
+      "id": "hh125",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "6723cce771fd0f41e088f23bc59f02a45b275303bcf1bbf5ceff569e4822d4b4"
+    },
+    {
+      "bytes": 4565211,
+      "eligible": false,
+      "filename": "hh126.csv",
+      "id": "hh126",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "c315fb1549522a6dfcd7d4b90540c8c780e27bf3dca0ea3b039825995e0e66d1"
+    },
+    {
+      "bytes": 1996730,
+      "eligible": false,
+      "filename": "hh127.csv",
+      "id": "hh127",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "d3d91e4d08600deabff70ae2fbb63e4aff763ff9c194d643a081920f7d36fe84"
+    },
+    {
+      "bytes": 16140540,
+      "eligible": true,
+      "filename": "hh128.csv",
+      "id": "hh128",
+      "labelled_fraction": 0.7619363854724157,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 201285,
+      "reason": "meets all criteria",
+      "sha256": "050a529c7defea2437c1109a4ad68b4871e4fffb5f59329ee01b77e4507c5660",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6433788,
+      "eligible": false,
+      "filename": "hh129.csv",
+      "id": "hh129",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "a6065cbec7a1f9e2bc14cb9a63a2697f3010b9427cebc5338ad90d4925e5d37f"
+    },
+    {
+      "bytes": 4914658,
+      "eligible": false,
+      "filename": "hh130.csv",
+      "id": "hh130",
+      "reason": "development panel; outcomes inspected",
+      "sha256": "34f48db608acea7a325721a4f81a71fc8fda3c6069f32ed4964a0c7023824103"
+    },
+    {
+      "bytes": 15147832,
+      "eligible": false,
+      "filename": "ihs06.csv",
+      "id": "ihs06",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "69585bb81ebac60b6723e0bac89b22a39e2b7b150f20b23d8c54975ed4c30228"
+    },
+    {
+      "bytes": 20597078,
+      "eligible": true,
+      "filename": "ihs07.csv",
+      "id": "ihs07",
+      "labelled_fraction": 0.7046375656224668,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 227360,
+      "reason": "meets all criteria",
+      "sha256": "8c746628f124d2d64674197aa44da74ed01054bdf0fea2b0e3e760b851e534fd",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 21962152,
+      "eligible": false,
+      "filename": "ihs08.csv",
+      "id": "ihs08",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "ab1bb017901d14ca5d064f80fa73fa8de9910f3d60202fbbd0da58e297359df8"
+    },
+    {
+      "bytes": 36108271,
+      "eligible": false,
+      "filename": "ihs09.csv",
+      "id": "ihs09",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "33965f72c3712d1c89b95482d8e443ada4958c0f1df93e1af4302b66baea7748"
+    },
+    {
+      "bytes": 20087357,
+      "eligible": true,
+      "filename": "ihs11.csv",
+      "id": "ihs11",
+      "labelled_fraction": 0.6605260123767668,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 217833,
+      "reason": "meets all criteria",
+      "sha256": "1e6a432c2463536ad0e59cc1983ccb451958453b8d7d3786af99c9f660435a03",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4227714,
+      "eligible": false,
+      "filename": "mn50.csv",
+      "id": "mn50",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "34332b962fac2e78e9865823b2102ee74d80064396a4dedf2a33b40486d4297e"
+    },
+    {
+      "bytes": 7088678,
+      "eligible": false,
+      "filename": "mn51.csv",
+      "id": "mn51",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "ec031b961157f561c2cf28980474486ea766d91417204efce0b795fbe5133fec"
+    },
+    {
+      "bytes": 10553536,
+      "eligible": true,
+      "filename": "mn57.csv",
+      "id": "mn57",
+      "labelled_fraction": 0.8269114267730613,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 128180,
+      "reason": "meets all criteria",
+      "sha256": "7170078f24402f4206c138c022d77998faf34ece1be9432be764abb89fada54a",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 8142562,
+      "eligible": false,
+      "filename": "mn61.csv",
+      "id": "mn61",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "0a82e895fa384389d986f3389a8a4eb61eef4fc60a038a7dcd2ead88da81d129"
+    },
+    {
+      "bytes": 6004546,
+      "eligible": false,
+      "filename": "mn71.csv",
+      "id": "mn71",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "4d1393363d98cc1f5b6630d2271d1ccfc7f94ab6dd3de66074b328d47dc17dde"
+    },
+    {
+      "bytes": 10376898,
+      "eligible": true,
+      "filename": "mn77.csv",
+      "id": "mn77",
+      "labelled_fraction": 0.618767300342159,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 116362,
+      "reason": "meets all criteria",
+      "sha256": "5f9ada69087967a7cac56d90fa9825fba5fb2006dff441f82612c42d6562a790",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 2869721,
+      "eligible": true,
+      "filename": "mn82.csv",
+      "id": "mn82",
+      "labelled_fraction": 0.8800864679453513,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 31420,
+      "reason": "meets all criteria",
+      "sha256": "6872198314eb64f0ab91074253440c9b7603e141051a7c1876889ef88444da10",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 18379133,
+      "eligible": false,
+      "filename": "mn83.csv",
+      "id": "mn83",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "d51917dac6205a2eb63654f608b053e8a2ca91b0c7ca1fe1133bbc7df005d1e9"
+    },
+    {
+      "bytes": 133820371,
+      "eligible": false,
+      "filename": "mv001.csv",
+      "id": "mv001",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "74b1a88512b63297847a1fea1be1d3b8cd9fe6424b574e6417eeeb14e0334b2e"
+    },
+    {
+      "bytes": 8111605,
+      "eligible": false,
+      "filename": "mva001.csv",
+      "id": "mva001",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "9eb25c644d37ebeb3668dc2c016dbeafb120184dad657476650ac165b3c5f45d"
+    },
+    {
+      "bytes": 16977574,
+      "eligible": false,
+      "filename": "mva002.csv",
+      "id": "mva002",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "71324c1633018bcb781c2dc11fa92d9fb027a3b99cdd8aca49fd793e53984538"
+    },
+    {
+      "bytes": 18812839,
+      "eligible": false,
+      "filename": "mva003.csv",
+      "id": "mva003",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "b689aa1505325a287156959e52d1b82f26cb9048e508dcaf403c2516d24c9e13"
+    },
+    {
+      "bytes": 6321651,
+      "eligible": false,
+      "filename": "mva004.csv",
+      "id": "mva004",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "c782241108ce172689fc34d6ab74f002a5bb15f275ac578287706a5838ba8697"
+    },
+    {
+      "bytes": 4773293,
+      "eligible": true,
+      "filename": "rw101.csv",
+      "id": "rw101",
+      "labelled_fraction": 0.8672351769642208,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 34909,
+      "reason": "meets all criteria",
+      "sha256": "55fa73172241d8ead58084482ab5063a7094a9f64464df0766d321ac7eb44136",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6890177,
+      "eligible": true,
+      "filename": "rw103.csv",
+      "id": "rw103",
+      "labelled_fraction": 0.7567547026587811,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 55601,
+      "reason": "meets all criteria",
+      "sha256": "88789edaf20e00ba062c5c283b23ede776f3e00f67b291e5c3966f6c11bb0eb9",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 10468948,
+      "eligible": false,
+      "filename": "rw104.csv",
+      "id": "rw104",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "ef96178fa5331ba6c949dbe4b608d6c0c06305a8fd6649b8bb8acbe1d68147e1"
+    },
+    {
+      "bytes": 4426027,
+      "eligible": true,
+      "filename": "rw105.csv",
+      "id": "rw105",
+      "labelled_fraction": 0.7574730018716425,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 49229,
+      "reason": "meets all criteria",
+      "sha256": "a17e204ebd003dd94230958080362472c7398d598d67b91eda1ba75f002dbf84",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 5133920,
+      "eligible": true,
+      "filename": "rw106.csv",
+      "id": "rw106",
+      "labelled_fraction": 0.5836586820584645,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 57329,
+      "reason": "meets all criteria",
+      "sha256": "1659f9ef7e2a3cf787a7e147dc89119700b52e2b939f428f5e833bb3fa0d8bc0",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3964227,
+      "eligible": true,
+      "filename": "rw107.csv",
+      "id": "rw107",
+      "labelled_fraction": 0.8692827496905651,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 44382,
+      "reason": "meets all criteria",
+      "sha256": "26aaef53144447344f0bfd45e72e8c89bdd90a5c03d34218f567475780364f8c",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7910259,
+      "eligible": false,
+      "filename": "rw110.csv",
+      "id": "rw110",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "5d761aae2f7d72e7e13d646b0f7b6850654c6d88879e6207a0b69742a1d462b6"
+    },
+    {
+      "bytes": 11339787,
+      "eligible": true,
+      "filename": "tm001.csv",
+      "id": "tm001",
+      "labelled_fraction": 0.7585927942572174,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 124083,
+      "reason": "meets all criteria",
+      "sha256": "f4ba921dbf6452ff9802b7a53e6b56214d5886e85e67890a54ba290fa24a6742",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 32832376,
+      "eligible": true,
+      "filename": "tm002.csv",
+      "id": "tm002",
+      "labelled_fraction": 0.6843930601742374,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 403424,
+      "reason": "meets all criteria",
+      "sha256": "c267195dc51de6d07fa58eaeca942adfcf9bcccfc5479e4a8e337c34457f1f6f",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 9621446,
+      "eligible": true,
+      "filename": "tm003.csv",
+      "id": "tm003",
+      "labelled_fraction": 0.6042968572006822,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 104540,
+      "reason": "meets all criteria",
+      "sha256": "0d38b61e162a46a25aafd17c602f6872604ad33dc8e6878df8a7f39f7cbf409c",
+      "unmapped_activities": [
+        "Shower"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 38026783,
+      "eligible": false,
+      "filename": "tm004.csv",
+      "id": "tm004",
+      "reason": "not single-resident by Zenodo metadata",
+      "sha256": "8a905c678be172568ba7210131e5ab6652ab6399e6c7f5b8cf98fa8388d48bb8"
+    },
+    {
+      "bytes": 13051193,
+      "eligible": true,
+      "filename": "tm005.csv",
+      "id": "tm005",
+      "labelled_fraction": 0.5623782556574983,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 136392,
+      "reason": "meets all criteria",
+      "sha256": "41b7e4b0020ffe29ad373017f9115de8d054c8669bbe939a3179346f70022686",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 9062359,
+      "eligible": true,
+      "filename": "tm006.csv",
+      "id": "tm006",
+      "labelled_fraction": 0.7525111748822007,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 111077,
+      "reason": "meets all criteria",
+      "sha256": "e41c1327d9e5d518e7f3276379dfacb5194b968ed660db4213e854b0e8b1eeff",
+      "unmapped_activities": [
+        "Put_Groceries_Away",
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3502910,
+      "eligible": true,
+      "filename": "tm007.csv",
+      "id": "tm007",
+      "labelled_fraction": 0.7723851756318024,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 42214,
+      "reason": "meets all criteria",
+      "sha256": "324f3933f68ad0055071962372b446a69eab0712f54f9a922f24ef1cefc8e8ba",
+      "unmapped_activities": [
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6381244,
+      "eligible": true,
+      "filename": "tm008.csv",
+      "id": "tm008",
+      "labelled_fraction": 0.8492833353160486,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 78442,
+      "reason": "meets all criteria",
+      "sha256": "dcc54bdb8b72763d4f49dc7000843c9aa435b84e866863e631c4763747dca198",
+      "unmapped_activities": [
+        "Pet_Activity",
+        "Staff_Enter",
+        "Staff_Leave"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 8623894,
+      "eligible": true,
+      "filename": "tm009.csv",
+      "id": "tm009",
+      "labelled_fraction": 0.9677195910853745,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "sleeping"
+      ],
+      "observations": 103774,
+      "reason": "meets all criteria",
+      "sha256": "b9ae3466bcbff9918f17528fe15214247ed839d87febea651e6f313e112cfd58",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 17924623,
+      "eligible": true,
+      "filename": "tm010.csv",
+      "id": "tm010",
+      "labelled_fraction": 0.8571576729228266,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 195676,
+      "reason": "meets all criteria",
+      "sha256": "2da1b045cc6008d4b6c098fb0091be0c5e44719e225116188ad8a037ed9362a9",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 26326497,
+      "eligible": true,
+      "filename": "tm011.csv",
+      "id": "tm011",
+      "labelled_fraction": 0.700165713023043,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 285508,
+      "reason": "meets all criteria",
+      "sha256": "57ecc899f108ea0f7a75238c66da2af25306a832a38195ecfa22558ea0c7397a",
+      "unmapped_activities": [
+        "Sew",
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 13413923,
+      "eligible": true,
+      "filename": "tm013.csv",
+      "id": "tm013",
+      "labelled_fraction": 0.965896335210897,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 147957,
+      "reason": "meets all criteria",
+      "sha256": "8f7721a11add3188367e611e7efb4c979e0812e8bba3f1f46359a5a3089f9a92",
+      "unmapped_activities": [],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7613546,
+      "eligible": true,
+      "filename": "tm014.csv",
+      "id": "tm014",
+      "labelled_fraction": 0.5210548157885802,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 82906,
+      "reason": "meets all criteria",
+      "sha256": "604b76ffe5f363afb52d040d52da90c3f7c5ca03d0b8b32ebbe94c4bca26c379",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7475231,
+      "eligible": true,
+      "filename": "tm015.csv",
+      "id": "tm015",
+      "labelled_fraction": 0.714595462992545,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "sleeping"
+      ],
+      "observations": 80218,
+      "reason": "meets all criteria",
+      "sha256": "f97cfb62ff1b7f8cb0ba296abbe732e480150a6e68bbf034c66321d04fba9938",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 3619126,
+      "eligible": true,
+      "filename": "tm016.csv",
+      "id": "tm016",
+      "labelled_fraction": 0.15110367231791794,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 40643,
+      "reason": "meets all criteria",
+      "sha256": "c067ea601d90b0c799cc5d29c729e12c30bf9a28f93e385e0aa6bf8750fc2dd6",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4693771,
+      "eligible": true,
+      "filename": "tm017.csv",
+      "id": "tm017",
+      "labelled_fraction": 0.19760424894199685,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 48455,
+      "reason": "meets all criteria",
+      "sha256": "587406cffc2917005bdbf9492c13c572baa58d79d78b7a38e4101820541a85b5",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6407160,
+      "eligible": true,
+      "filename": "tm018.csv",
+      "id": "tm018",
+      "labelled_fraction": 0.6796513909281852,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 71421,
+      "reason": "meets all criteria",
+      "sha256": "86bfc9e11af8c664da4b22d6c78c9565880c66d45b74b0c6aa19b18ef1d1ee57",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 4887333,
+      "eligible": true,
+      "filename": "tm019.csv",
+      "id": "tm019",
+      "labelled_fraction": 0.9074110183310178,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 53682,
+      "reason": "meets all criteria",
+      "sha256": "5bfebafef622d10a7cfa7a2174deb06e9d71362c6fbb0f997d4fc909f6b58bf0",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7393364,
+      "eligible": true,
+      "filename": "tm020.csv",
+      "id": "tm020",
+      "labelled_fraction": 0.6398640342810745,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 82240,
+      "reason": "meets all criteria",
+      "sha256": "2d945faf779f67430c871713acef6afbfee9efd89cd1f7e89f484436334abf02",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 8613817,
+      "eligible": true,
+      "filename": "tm021.csv",
+      "id": "tm021",
+      "labelled_fraction": 0.7795750141848896,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 94379,
+      "reason": "meets all criteria",
+      "sha256": "2e225897d7f479b32a19a33ff5ac9a26d88e336479b1bc87d8c443d8bd6451e2",
+      "unmapped_activities": [
+        "Staff_Enter",
+        "Staff_Leave",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 14368500,
+      "eligible": true,
+      "filename": "tm022.csv",
+      "id": "tm022",
+      "labelled_fraction": 0.7602267960200597,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 152522,
+      "reason": "meets all criteria",
+      "sha256": "36a706e608a481ff4c132953a08b0f12bd6cf8620e5af82474bb3766f84cbc66",
+      "unmapped_activities": [
+        "Shower",
+        "Staff_Enter",
+        "Staff_Leave",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 12282971,
+      "eligible": true,
+      "filename": "tm026.csv",
+      "id": "tm026",
+      "labelled_fraction": 0.7769141259314376,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 138326,
+      "reason": "meets all criteria",
+      "sha256": "c6e06702b80a019d2be6ef45ab6342da2203b12a1f837d11f5c682d14ce6fcde",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7758885,
+      "eligible": true,
+      "filename": "tm029.csv",
+      "id": "tm029",
+      "labelled_fraction": 0.5418838134880274,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 85176,
+      "reason": "meets all criteria",
+      "sha256": "f33a7286fa4dbeb11ca726863ee392e62ac206857ace1173804be7578dde0c1c",
+      "unmapped_activities": [
+        "Pet_Activity",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 7991155,
+      "eligible": true,
+      "filename": "tm035.csv",
+      "id": "tm035",
+      "labelled_fraction": 0.5165943196688402,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 88664,
+      "reason": "meets all criteria",
+      "sha256": "3c65aa2de3e3c30b2c7f2fffa9b78d6d7954789510a1c13e29be2c49cbd99b64",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 6606270,
+      "eligible": true,
+      "filename": "tm037.csv",
+      "id": "tm037",
+      "labelled_fraction": 0.9058779560858531,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 72809,
+      "reason": "meets all criteria",
+      "sha256": "bee4460da31dec3251134a1a9a0a832d992d21fb0a55ed30e855ad1d9a84dc2d",
+      "unmapped_activities": [
+        "Shower",
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    },
+    {
+      "bytes": 20670634,
+      "eligible": true,
+      "filename": "tm038.csv",
+      "id": "tm038",
+      "labelled_fraction": 0.6814079340310213,
+      "mapped_states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "observations": 213437,
+      "reason": "meets all criteria",
+      "sha256": "aa28cb045458fbefeca9a37533621b2fa71f0a09e1200b2325dff070a3fc2619",
+      "unmapped_activities": [
+        "Wakeup"
+      ],
+      "unmapped_locations": []
+    }
+  ],
+  "screening_revision": "13722ab2e4e8b26f88f2f5cac02e3039d33d8ac7",
+  "source": {
+    "provider": "CASAS / Zenodo",
+    "record": "15708568",
+    "registry_sha256": "d5f0c1086ba06cbf095206019a3cff2bebfd6cedf09ecd6b496d703443393066",
+    "registry_source": {
+      "archive": "labeled_data.zip",
+      "archive_bytes": 236037656,
+      "archive_checksum": "md5:ec37d679e85a6ae39e84994888afd514",
+      "doi": "10.5281/zenodo.15708568",
+      "provider": "Zenodo",
+      "published": "2025-06-20",
+      "record": "15708568",
+      "release_version": "v1"
+    },
+    "resident_counts": "artifacts/v03/casas_v1_resident_registry.json"
+  },
+  "status": "frozen-primary-external-cohort"
+}

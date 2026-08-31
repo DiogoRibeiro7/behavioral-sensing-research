@@ -1,0 +1,13 @@
+{
+  "eligible_count": 43,
+  "freeze_source_revision": "a0171a0c6223a4d3fee5fa5f815eb669617969f0",
+  "inventory_run_id": 33421732358,
+  "manifest_sha256": "6e3e157327c6eb40edfae498c2c4cc679a9e7c5b999899cf31683ed8161bc332",
+  "primary_test_outcomes_inspected": false,
+  "reconciliation_run_id": 33425711732,
+  "schema_version": 1,
+  "scored": false,
+  "screening_revision": "13722ab2e4e8b26f88f2f5cac02e3039d33d8ac7",
+  "source_record": "15708568",
+  "status": "frozen-before-primary-scoring"
+}
