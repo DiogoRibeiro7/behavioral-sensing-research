@@ -54,6 +54,22 @@ def validate(
     assert source["record"] == "15708568"
     assert source["size_convention"] in {"decimal_MB", "binary_MiB"}
     assert source["byte_limit_exclusive"] in {12_000_000, 12 * 1024 * 1024}
+    # Where more than one 12 MB convention selects the documented cohort, the
+    # recorded one must be among them: the prose ambiguity is then resolved by
+    # the archive itself rather than by a choice made during fitting.
+    equivalent = source.get("equivalent_size_conventions")
+    if equivalent is not None:
+        assert isinstance(equivalent, list) and equivalent
+        assert set(equivalent) <= {"decimal_MB", "binary_MiB"}
+        assert source["size_convention"] in equivalent
+    # Where more than one 12 MB convention selects the documented cohort, the
+    # recorded one must be among them: the prose ambiguity is then resolved by
+    # the files themselves rather than by a choice made here.
+    equivalent = source.get("equivalent_size_conventions")
+    if equivalent is not None:
+        assert isinstance(equivalent, list) and equivalent
+        assert set(equivalent) <= {"decimal_MB", "binary_MiB"}
+        assert source["size_convention"] in equivalent
     assert all(row["bytes"] < source["byte_limit_exclusive"] for row in homes)
 
     fit = payload["fit"]

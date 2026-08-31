@@ -42,27 +42,60 @@ def _candidates(root: Path, limit: int) -> list[Path]:
     )
 
 
+def _agreeing_conventions(root: Path) -> list[str]:
+    """Return every 12 MB convention that selects the documented cohort.
+
+    More than one means the prose's decimal/binary ambiguity never mattered:
+    they pick the same files, so the cohort is determined by the archive.
+    """
+    return [
+        name
+        for name, limit in (("decimal_MB", DECIMAL_LIMIT), ("binary_MiB", BINARY_LIMIT))
+        if len(_candidates(root, limit)) == EXPECTED_DEVELOPMENT_HOMES
+    ]
+
+
 def _reconstruct(root: Path) -> tuple[list[Path], str, int]:
     """Recover the documented 22-home cohort from metadata only.
 
     Historical prose says "under 12 MB" but did not retain whether MB meant
-    decimal or MiB. We evaluate both metadata conventions and accept a unique
-    convention only when it reproduces exactly the documented 22 homes. No
-    labels, model predictions or scores participate in this choice.
+    decimal or MiB. Both metadata conventions are evaluated. What matters is
+    whether they disagree about *which* homes are selected, not how many
+    conventions happen to yield the documented count: if every convention
+    reaching 22 homes selects the same 22, the cohort is determined and the
+    prose's ambiguity never mattered. Only a disagreement about membership is
+    genuinely unresolvable from metadata.
+
+    No labels, model predictions or scores participate in this choice.
     """
     options = [
         ("decimal_MB", DECIMAL_LIMIT, _candidates(root, DECIMAL_LIMIT)),
         ("binary_MiB", BINARY_LIMIT, _candidates(root, BINARY_LIMIT)),
     ]
     matches = [item for item in options if len(item[2]) == EXPECTED_DEVELOPMENT_HOMES]
-    if len(matches) != 1:
+    if not matches:
         counts = {name: len(paths) for name, _, paths in options}
         raise SystemExit(
-            "development cohort reconstruction is ambiguous; expected exactly "
-            f"one 12 MB convention to yield {EXPECTED_DEVELOPMENT_HOMES} homes, "
-            f"got {counts}"
+            "development cohort reconstruction failed; no 12 MB convention "
+            f"yields {EXPECTED_DEVELOPMENT_HOMES} homes, got {counts}"
         )
-    name, limit, paths = matches[0]
+
+    selections = {tuple(path.name for path in paths) for _, _, paths in matches}
+    if len(selections) != 1:
+        raise SystemExit(
+            "development cohort reconstruction is ambiguous; the 12 MB "
+            "conventions each yield "
+            f"{EXPECTED_DEVELOPMENT_HOMES} homes but disagree on which: "
+            + "; ".join(
+                f"{name}={[path.name for path in paths]}" for name, _, paths in matches
+            )
+        )
+
+    # Record a single convention so the artefact stays within the validator's
+    # vocabulary, and the strictest limit, since every matching convention
+    # selected the same files anyway. The agreement itself is recorded
+    # alongside it.
+    name, limit, paths = min(matches, key=lambda item: item[1])
     return paths, name, limit
 
 
@@ -97,6 +130,7 @@ def main() -> None:
             "record": str(args.source_record),
             "archive_rule": "single-resident hh CSV under documented 12 MB cutoff",
             "size_convention": convention,
+            "equivalent_size_conventions": _agreeing_conventions(args.archive_root),
             "byte_limit_exclusive": byte_limit,
         },
         "development_home_count": len(homes),
