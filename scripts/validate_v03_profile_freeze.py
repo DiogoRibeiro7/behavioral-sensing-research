@@ -29,7 +29,9 @@ def _canonical_fit_sha256(fit: dict[str, object]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _validate_size_rule(source: dict[str, object], homes: list[dict[str, object]]) -> None:
+def _validate_size_rule(
+    source: dict[str, object], homes: list[dict[str, object]]
+) -> None:
     convention = source["size_convention"]
     limit = source["byte_limit_exclusive"]
     evaluation = source.get("size_rule_evaluation")
