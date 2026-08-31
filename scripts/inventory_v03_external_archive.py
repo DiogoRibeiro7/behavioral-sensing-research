@@ -36,7 +36,9 @@ def _home_matches(path: Path, known_ids: set[str]) -> list[str]:
     """Return resident-registry IDs explicitly represented in a path component."""
     components = [path.stem, *path.parts[:-1]]
     normalised = {_normalise(component) for component in components if component}
-    return sorted(home_id for home_id in known_ids if _normalise(home_id) in normalised)
+    return sorted(
+        home_id for home_id in known_ids if _normalise(home_id) in normalised
+    )
 
 
 def _delimiter(line: str) -> str:
@@ -88,7 +90,9 @@ def _inspect_text(path: Path, max_lines: int = 5000) -> dict[str, object]:
     }
 
 
-def build_inventory(archive_root: Path, registry: dict[str, object]) -> dict[str, object]:
+def build_inventory(
+    archive_root: Path, registry: dict[str, object]
+) -> dict[str, object]:
     singles = set(registry["single_resident_home_ids"])
     development = set(registry["development_only_home_ids"])
     candidates = singles - development
@@ -99,14 +103,19 @@ def build_inventory(archive_root: Path, registry: dict[str, object]) -> dict[str
         | set(registry["unknown_resident_home_ids"])
     )
 
-    by_home: dict[str, list[dict[str, object]]] = {home_id: [] for home_id in candidates}
+    by_home: dict[str, list[dict[str, object]]] = {
+        home_id: [] for home_id in candidates
+    }
     ambiguous_paths: list[dict[str, object]] = []
 
     for path in sorted(p for p in archive_root.rglob("*") if p.is_file()):
         matches = _home_matches(path.relative_to(archive_root), known)
         if len(matches) > 1:
             ambiguous_paths.append(
-                {"path": path.relative_to(archive_root).as_posix(), "matches": matches}
+                {
+                    "path": path.relative_to(archive_root).as_posix(),
+                    "matches": matches,
+                }
             )
             continue
         if len(matches) != 1 or matches[0] not in candidates:
