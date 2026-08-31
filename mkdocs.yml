@@ -62,6 +62,7 @@ nav:
       - Uncertainty model: UNCERTAINTY_MODEL.md
       - Evaluation design: EVALUATION_DESIGN.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
+      - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:
