@@ -19,22 +19,41 @@ New work should prioritize:
 
 ## Current Baseline
 
-The current `0.1.x` series provides the foundation for data loading,
-preprocessing, simulation, model fitting, change-point detection, analysis,
-visualization, and report generation.
+`0.2.0` is released, on PyPI and archived on Zenodo. It extends the original
+modelling core into a multimodal ambient-sensing platform: canonical
+observations, sensor health, occupancy and attribution, continuous-time fusion
+with abstention, adaptive baselines, restrained alerting, simulation,
+evaluation, an incremental pipeline, and interoperability export.
 
-Implemented or substantially available:
+Since release, the platform has been measured against real recordings for the
+first time. **That measurement is now the most important fact about the
+project's status**, and the rest of this roadmap is organised around it.
 
-- CSV, JSON, HDF5, and streaming-oriented data loading.
-- Gap-aware missing-data handling with masks and summaries.
-- Synthetic behavioral sensor data generation with reproducible simulation.
-- Bernoulli autoregressive models, including multivariate variants.
-- Multiple HMM variants for activity-state modeling.
-- NHPP-PELT segmentation with B-spline intensities and diagnostics.
-- Several change-point detection implementations.
-- Analysis pipeline reports in LaTeX, HTML, and minimal FHIR-style JSON.
-- Flask-based visualization app with authenticated upload workflow.
-- Zenodo, citation, and release metadata.
+| | Balanced accuracy |
+| --- | --- |
+| Simulator | 0.816 |
+| 22 real CASAS homes, nothing refitted | **0.420** |
+| Recoverable from those sensors by any method | 0.607 |
+
+Three consequences, each documented in
+[Real-data validation](docs/real_data.md):
+
+- **The simulator is easier than reality even for an optimal method.** Its
+  0.816 sits above the 0.607 a supervised classifier reaches on the same
+  sensors, so simulator figures are not an estimate of real-world performance
+  and every number produced by it should be read with that in mind.
+- **The inference is not the bottleneck for the evidence it uses.** Given only
+  instantaneous per-room counts the ceiling is 0.397 and the pipeline scores
+  0.420. The shortfall is in time-of-day and recent history, neither of which
+  the formulation carries.
+- **Abstention does not work on real data, and cannot be fixed by tuning.**
+  Stated confidence separates right from wrong by 0.073 and inverts above 0.95,
+  so no threshold setting repairs it. This is the project's central safety
+  claim and it does not currently hold outside the simulator.
+
+Retained and unchanged: CSV/JSON/HDF5 loading, missing-data handling, Bernoulli
+autoregressive models, HMM variants, NHPP-PELT segmentation, change-point
+detectors, dependency analysis, reporting, the Flask app, and the original CLI.
 
 ## Capability Status by Theme
 
@@ -124,73 +143,94 @@ Design record: `docs/MULTIMODAL_ARCHITECTURE.md`, `docs/RESEARCH_QUESTIONS.md`,
 
 ### Longer-term research
 
-Outstanding, in priority order
+The item that dominated this list — validation against real annotated sensor
+data — has been done, and its results reshaped the rest. What follows is what
+the measurement left open, in priority order.
 
-The single most important outstanding item is **validation against real
-annotated sensor data**. Every quantitative result currently comes from the
-bundled simulator, and until that changes the numbers demonstrate that the
-framework behaves sensibly rather than saying anything about real deployments.
-
-In priority order:
-
-1. Evaluate against a public annotated smart-home dataset (CASAS, ARAS,
-   MARBLE) using the same metrics.
-2. Fit emission and dwell parameters from data rather than declaring them, and
-   compare the fitted values against the documented defaults.
-3. Model the dependency between the occupancy and state layers, which
-   currently share radar and beacon evidence and therefore have correlated
-   errors that the reported uncertainty does not reflect.
-4. Improve visitor recall, which is conservative by construction and currently
-   misses most short visits.
-5. Assess calibration across households rather than only within one.
-6. Reduce the pre-existing type-checking debt in the older modules and widen
-   the CI `mypy` gate beyond its current two files.
+1. **Reconnect abstention to something informative.** Confidence currently
+   inverts above 0.95, most likely because a sticky chain saturates the belief
+   during quiet periods: the posterior approaches certainty because no evidence
+   arrived, not because the evidence was strong. Until this is addressed the
+   project cannot claim a model that knows when it does not know.
+2. **Close the accuracy gap, or establish that this formulation cannot.**
+   0.420 against a 0.607 ceiling. Both principled additions tried so far, a
+   circadian prior and a fixed-lag smoother, recovered about a tenth of what a
+   discriminative model extracts from the same inputs, and the three components
+   that help individually do not combine. That consistency suggests a
+   formulation limit rather than a missing term.
+3. **Resolve the dwell-time tension.** Declared dwells are 3 to 9 times longer
+   than measured state durations, and correcting them *lowers* accuracy: they
+   are doing work as regularisation. The prior that stabilises the filter is
+   also the prior that saturates its confidence, and those cannot both be
+   right.
+4. **Fit emissions from data with held-out validation.** Fitting rates cut
+   calibration error from 0.312 to 0.202 on unseen homes without moving
+   accuracy, so the parameters explain the overconfidence and not the
+   discrimination.
+5. **Model the dependency between the occupancy and state layers**, which share
+   evidence and therefore have correlated errors the reported uncertainty does
+   not reflect.
+6. **Validate beyond CASAS.** Everything real measured so far comes from one
+   research group's instrumentation, so it is not 22 or 43 independent studies.
+7. **Reduce the pre-existing type-checking debt** in the older modules and
+   widen the CI `mypy` gate.
 
 ## Near-Term Roadmap
 
-### 0.2.0: API Stabilization and Documentation
+### 0.2.0: released
 
-Goal: make the toolkit easier to adopt by researchers who are not already
-familiar with the internals.
+Shipped, and not what this section originally planned. The release delivered
+the multimodal ambient-sensing platform rather than an API-stabilisation pass:
+canonical observations, sensor health, occupancy and attribution, continuous-time
+fusion, adaptive baselines, alerting, simulation, evaluation, the incremental
+pipeline, and FHIR-style export. Documentation moved to MkDocs and the release
+checklist now requires reading CI before tagging.
 
-Planned work:
+The API-stabilisation items that motivated the original plan remain worth doing
+and are folded into the maintenance backlog rather than a numbered release.
 
-- Define public API boundaries for `data`, `utils`, `analysis`, `models`,
-  `change_point`, `hmm`, and `visualization` modules.
-- Add docstring coverage for public classes and functions.
-- Expand quickstart examples into complete workflows: load data, validate data,
-  fit model, evaluate model, export report.
-- Document supported input data schemas and timestamp handling.
-- Add migration notes for renamed or clarified APIs.
-- Add a release checklist covering `develop` to `main` merge, tag creation,
-  GitHub release, Zenodo metadata, and documentation build.
+**Caveat carried forward.** The quantitative results distributed with `0.2.0`
+come from the simulator, which measurement has since shown sits above the
+ceiling real instrumentation supports. The repository documentation says so; the
+published PyPI page and Zenodo record for `0.2.0` carry the earlier wording and
+cannot be amended from here.
 
-Quality gates:
+### 0.3.0: External validation
 
-- Full test suite passes.
-- Pre-commit passes.
-- Documentation builds without warnings (`mkdocs build --strict`).
-- Public API changes are documented in the changelog.
+Goal: find out whether the platform transfers to homes it has never seen, under
+a design that cannot be adjusted after the result is known.
 
-### 0.3.0: Data Quality and Validation
+The candidate is **v0.2 inference plus the optional circadian state-dynamics
+profile**, with every other v0.2 choice retained. It was selected on development
+evidence alone: the circadian prior raised held-out balanced accuracy from 0.449
+to 0.460 across 11 homes, improving 10 of them, while fitted emission rates and
+fitted dwell times were considered and excluded because they worsen the
+pre-specified primary metric.
 
-Goal: make data problems visible before they affect model results.
+Frozen before any scoring:
 
-Planned work:
+- the candidate, in [the specification](docs/V03_CANDIDATE_SPECIFICATION.md);
+- the circadian profile `5f03753f...`, fitted on 20 single-resident development
+  homes, reproduced independently across implementations and machines;
+- the primary cohort of 43 single-resident homes outside the development panel,
+  with per-home checksums and a screening revision;
+- the interpretation boundaries, in
+  [cohort composition](docs/EXTERNAL_COHORT_COMPOSITION.md).
 
-- Add a formal data validation report object for temporal consistency, missing
-  values, duplicate timestamps, irregular sampling, and sensor range checks.
-- Improve sensor failure detection with configurable stuck-sensor, dropout, and
-  drift heuristics.
-- Add dataset summary exports for reproducibility appendices.
-- Add tests for malformed CSV, JSON, HDF5, and streaming records.
-- Add example notebooks for data cleaning and quality assessment.
+Remaining: the one-shot scoring. Its result stands whether positive, null or
+negative, and nothing may be changed in response and rescored as the same
+confirmatory validation.
 
-Quality gates:
+**Reading the result will require care.** Only 19% of the cohort comes from the
+`hh` family the candidate was developed on, so a null result is ambiguous
+between the prior failing to transfer and the adapter losing information on
+unfamiliar sensor vocabularies. And because v0.3 changes the transition prior,
+which is the mechanism implicated in the abstention saturation, the abstention
+secondary outcome may move for reasons unrelated to whether the circadian prior
+is a good idea.
 
-- Data validation outputs are deterministic and serializable.
-- Failure modes raise actionable exceptions or warnings.
-- Validation utilities have focused unit tests and integration examples.
+The data-quality and validation work that previously occupied this slot is not
+abandoned; it moves to the maintenance backlog.
 
 ### 0.4.0: Model Evaluation and Comparison
 
@@ -202,6 +242,11 @@ Planned work:
   components.
 - Expand time-series cross-validation utilities.
 - Add calibration metrics and uncertainty diagnostics for probability models.
+  This is now the highest-value item in the section rather than a routine one:
+  real-data measurement showed the pipeline's stated confidence separates
+  correct from incorrect answers by only 0.073 and inverts above 0.95, which no
+  aggregate calibration score would have revealed. A diagnostic that reports
+  accuracy *within* confidence bands would have caught it.
 - Add model comparison reports with structured machine-readable output.
 - Add benchmark datasets or synthetic benchmark recipes with fixed seeds.
 
