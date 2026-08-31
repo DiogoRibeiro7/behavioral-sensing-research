@@ -95,7 +95,7 @@ jobs:
           PY
           unzip -q casas-archive/labeled_data.zip -d casas-archive/extracted
 
-      - name: Reconstruct 22-home development cohort and fit profile
+      - name: Reconstruct 22-recording panel and fit 20 single-resident homes
         shell: bash
         run: |
           python scripts/freeze_v03_circadian_profile.py \
@@ -104,24 +104,12 @@ jobs:
             --source-record "$ZENODO_RECORD" \
             --fitting-revision "$GITHUB_SHA"
 
-      - name: Verify frozen output without scoring homes
+      - name: Validate frozen output independently
         shell: bash
         run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          payload = json.loads(Path("v03-profile-freeze/v03_circadian_profile.json").read_text())
-          assert payload["status"] == "frozen-development-fit"
-          assert payload["candidate"] == "v0.2 + circadian prior only"
-          assert payload["development_home_count"] == 22
-          assert len(payload["development_homes"]) == 22
-          assert len({row["id"] for row in payload["development_homes"]}) == 22
-          assert len({row["sha256"] for row in payload["development_homes"]}) == 22
-          assert len(payload["profile_sha256"]) == 64
-          assert payload["test_outcomes_inspected"] is False
-          assert payload["fitting_revision"] == "${{ github.sha }}"
-          PY
+          python scripts/validate_v03_profile_freeze.py \
+            "$OUTPUT_DIR/v03_circadian_profile.json" \
+            --expected-revision "$GITHUB_SHA"
 
       - name: Upload development-fit freeze artifact
         uses: actions/upload-artifact@v4
