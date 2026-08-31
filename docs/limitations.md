@@ -73,8 +73,13 @@ history term the ablation valued at +0.140 is not straightforwardly available to
 a recursive filter, which already carries history in its belief and would
 double-count evidence if given lagged observations as well.
 
-These are single-resident homes from one research group's instrumentation, so
-they are not 22 independent studies, and 0.607 is a ceiling for this
+Two of the 22, `hh107` and `hh121`, are two-occupant recordings by CASAS
+metadata, and every figure here was computed before that was noticed. Excluding
+them changes the medians by less than a thousandth, but the ontology models one
+resident, and `hh107`'s anomalous behaviour was a clue that went unexamined.
+
+The remaining homes are from one research group's instrumentation, so they are
+not 22 independent studies, and 0.607 is a ceiling for this
 instrumentation rather than for ambient sensing generally. The gap between 0.420
 and what is recoverable is real nonetheless.
 
