@@ -985,7 +985,7 @@
       "unmapped_locations": []
     }
   ],
-  "note": "Screened with the extended location normaliser. Every exclusion is now a contract criterion, not a parser defect. Not frozen: freezing the cohort is a deliberate act taken before scoring.",
+  "note": "Eligibility read from the resident registry rather than an inline copy. Every exclusion is a contract criterion; none is a parser defect. Not frozen: freezing the cohort is a deliberate act taken before scoring.",
   "purpose": "external-validation primary test cohort",
   "schema_version": 1,
   "scored": false,
@@ -2249,7 +2249,17 @@
   "source": {
     "provider": "CASAS / Zenodo",
     "record": "15708568",
-    "resident_counts": "Zenodo record description for the same record"
+    "registry_source": {
+      "archive": "labeled_data.zip",
+      "archive_bytes": 236037656,
+      "archive_checksum": "md5:ec37d679e85a6ae39e84994888afd514",
+      "doi": "10.5281/zenodo.15708568",
+      "provider": "Zenodo",
+      "published": "2025-06-20",
+      "record": "15708568",
+      "release_version": "v1"
+    },
+    "resident_counts": "artifacts/v03/casas_v1_resident_registry.json"
   },
   "status": "draft-not-frozen"
 }

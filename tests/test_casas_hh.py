@@ -314,3 +314,28 @@ class TestExtendedLocationVocabulary:
         """Existing names keep their explicit mapping rather than being parsed."""
         assert normalise_location("OutsideDoor") == HH_LOCATIONS["OutsideDoor"]
         assert normalise_location("LoungeChair") == HH_LOCATIONS["LoungeChair"]
+
+
+def test_the_cohort_screener_reads_the_resident_registry() -> None:
+    """Eligibility must come from the registry, not a transcribed copy.
+
+    An inline copy of the Zenodo resident table was a second source of truth for
+    the same facts. It had already drifted: two single-resident homes present in
+    the registry were missing from the transcription.
+    """
+    import importlib.util
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location(
+        "cohort", Path("scripts/build_external_cohort_manifest.py")
+    )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    panel, single, source = module.load_registry(module.REGISTRY_PATH)
+
+    assert len(panel) == 22
+    assert "hh107" not in single and "hh121" not in single
+    assert "hh104" in single
+    assert source.get("record") == "15708568"

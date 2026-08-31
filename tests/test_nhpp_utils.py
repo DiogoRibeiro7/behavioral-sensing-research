@@ -1,4 +1,5 @@
 """Tests for NHPP-PELT utilities."""
+
 import json
 
 import numpy as np

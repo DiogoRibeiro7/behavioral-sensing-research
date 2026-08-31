@@ -25,81 +25,28 @@ from zoneinfo import ZoneInfo
 
 from sensor_modeling.datasets import read_casas_hh
 
-#: Recordings the development panel already consumed. Permanently ineligible:
-#: their outcomes were inspected, which is sufficient to make them development
-#: data regardless of resident count.
-DEVELOPMENT_PANEL = frozenset(
-    f"hh{n}"
-    for n in [
-        101,
-        102,
-        103,
-        105,
-        106,
-        107,
-        108,
-        110,
-        111,
-        114,
-        118,
-        119,
-        120,
-        121,
-        122,
-        123,
-        124,
-        125,
-        126,
-        127,
-        129,
-        130,
-    ]
-)
+#: Machine-readable resident counts and development panel.
+#:
+#: Read rather than transcribed. An inline copy of the Zenodo table was a second
+#: source of truth for the same facts, and a second source of truth drifts: the
+#: transcription was already missing two single-resident homes when the registry
+#: was compared against it.
+REGISTRY_PATH = Path("artifacts/v03/casas_v1_resident_registry.json")
 
-#: Single-resident homes, transcribed from the Zenodo record description for
-#: record 15708568. Only families present in ``labeled_data.zip`` are listed.
-SINGLE_RESIDENT = frozenset(
-    [
-        f"hh{n}"
-        for n in list(range(101, 107)) + list(range(108, 121)) + list(range(122, 131))
-    ]
-    + ["rw101", "rw103", "rw105", "rw106", "rw107"]
-    + ["mv101"]
-    + [
-        f"tm{n:03d}"
-        for n in list(range(1, 4))
-        + list(range(5, 12))
-        + list(range(13, 23))
-        + [26, 29, 32]
-        + list(range(35, 44))
-    ]
-    + [
-        "ihs07",
-        "ihs11",
-        "ihs12",
-        "ihs21",
-        "ihs28",
-        "ihs35",
-        "ihs37",
-        "ihs38",
-        "ihs40",
-        "ihs58",
-        "ihs59",
-        "ihs68",
-        "ihs70",
-        "ihs75",
-        "ihs80",
-        "ihs84",
-        "ihs85",
-        "ihs95",
-        "ihs96",
-        "ihs107",
-        "ihs108",
-        "ihs114",
-        "ihs118",
-    ]
-    + ["mn57", "mn77", "mn82", "mn85"]
-)
+
+def load_registry(
+    path: Path,
+) -> tuple[frozenset[str], frozenset[str], dict[str, object]]:
+    """Return the development panel, single-resident ids, and provenance."""
+    if not path.exists():
+        raise SystemExit(f"resident registry not found at {path}")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    panel = frozenset(payload["development_only_home_ids"])
+    single = frozenset(payload["single_resident_home_ids"])
+    if not panel or not single:
+        raise SystemExit("resident registry is missing required id lists")
+    return panel, single, payload.get("source", {})
+
 
 #: The contract requires at least five of the seven frozen states to be mappable.
 MINIMUM_MAPPED_STATES = 5
@@ -115,7 +62,12 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def screen(path: Path, zone: ZoneInfo) -> dict[str, object]:
+def screen(
+    path: Path,
+    zone: ZoneInfo,
+    panel: frozenset[str],
+    single_resident: frozenset[str],
+) -> dict[str, object]:
     """Apply the contract's eligibility criteria to one recording.
 
     Returns the verdict and the evidence for it, including the reason for any
@@ -130,10 +82,10 @@ def screen(path: Path, zone: ZoneInfo) -> dict[str, object]:
         "sha256": _sha256(path),
     }
 
-    if home in DEVELOPMENT_PANEL:
+    if home in panel:
         row.update(eligible=False, reason="development panel; outcomes inspected")
         return row
-    if home not in SINGLE_RESIDENT:
+    if home not in single_resident:
         row.update(eligible=False, reason="not single-resident by Zenodo metadata")
         return row
 
@@ -174,8 +126,10 @@ def main() -> None:
     parser.add_argument("output", type=Path)
     parser.add_argument("--timezone", default="America/Los_Angeles")
     parser.add_argument("--source-record", default="15708568")
+    parser.add_argument("--registry", type=Path, default=REGISTRY_PATH)
     args = parser.parse_args()
 
+    panel, single_resident, registry_source = load_registry(args.registry)
     zone = ZoneInfo(args.timezone)
     paths = sorted(
         (p for p in args.archive_root.rglob("*.csv") if NAME.match(p.name)),
@@ -184,7 +138,7 @@ def main() -> None:
     if not paths:
         raise SystemExit(f"no candidate recordings found under {args.archive_root}")
 
-    screened = [screen(path, zone) for path in paths]
+    screened = [screen(path, zone, panel, single_resident) for path in paths]
     eligible = [row for row in screened if row["eligible"]]
 
     manifest = {
@@ -195,7 +149,8 @@ def main() -> None:
         "source": {
             "provider": "CASAS / Zenodo",
             "record": args.source_record,
-            "resident_counts": "Zenodo record description for the same record",
+            "resident_counts": "artifacts/v03/casas_v1_resident_registry.json",
+            "registry_source": registry_source,
         },
         "criteria": {
             "outside_development_panel": True,
@@ -205,7 +160,7 @@ def main() -> None:
             "non_zero_labelled_coverage": True,
             "size_cutoff": None,
         },
-        "development_panel": sorted(DEVELOPMENT_PANEL),
+        "development_panel": sorted(panel),
         "eligible_count": len(eligible),
         "eligible_homes": eligible,
         "screened": screened,
