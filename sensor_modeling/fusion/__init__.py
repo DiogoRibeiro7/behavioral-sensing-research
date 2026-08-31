@@ -25,8 +25,11 @@ from .filter import (
     MultimodalBayesFilter,
     NonMonotonicUpdateError,
 )
+from .smoothing import smooth_beliefs, smooth_estimates
 
 __all__ = [
+    "smooth_beliefs",
+    "smooth_estimates",
     "BernoulliEmission",
     "BetaEmission",
     "EmissionDefaults",
