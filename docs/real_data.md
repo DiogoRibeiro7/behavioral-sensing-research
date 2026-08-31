@@ -584,11 +584,27 @@ of the three.
 ## Status
 
 The adapters are implemented and tested, and 22 real homes have been scored.
-What has **not** been done: any dataset other than CASAS, any fitting of
-parameters to real data, and any paired comparison of the kind the simulator
-experiments use. These are all single-resident homes from one research group's
-instrumentation, so they are not independent of each other in the way 22
-households from different studies would be.
+What has **not** been done: any dataset other than CASAS, any paired comparison
+of the kind the simulator experiments use, and any evaluation on a cohort held
+back from every earlier experiment.
+
+**Two of the 22 are not single-resident.** CASAS resident-count metadata
+identify `hh107` and `hh121` as two-occupant recordings. Every figure on this
+page was computed over all 22 before that was noticed, which matters because the
+ontology models one monitored resident and treats other people as
+unattributable ambient activity.
+
+The headline numbers are unaffected: excluding both leaves median balanced
+accuracy at 0.420 and median calibration error at 0.314, unchanged to three
+decimals. But the omission left a clue unexamined. `hh107` had the worst
+calibration of any home at 0.517, and was the single largest outlier in the
+rate-fitting experiment, moving 0.379 to 0.549 where every other home moved by
+a fraction of that. A second unmodelled resident is a plausible explanation for
+both, and it was not investigated at the time.
+
+The remaining caveat still stands: these are homes from one research group's
+instrumentation, so they are not independent in the way 22 households from
+different studies would be.
 
 The obvious next steps are refitting emissions from a subset of homes and
 scoring on held-out ones, and checking whether the `home_inactive`/`away`
