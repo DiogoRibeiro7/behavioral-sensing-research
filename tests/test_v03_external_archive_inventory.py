@@ -36,9 +36,9 @@ def test_inventory_excludes_development_and_hashes_candidates(tmp_path: Path) ->
     assert set(homes) == {"aruba", "hh104"}
     assert homes["hh104"]["archive_member_found"] is True
     assert homes["hh104"]["files"][0]["sha256"]
-    assert homes["hh104"]["files"][0]["raw_text_audit"][
-        "annotation_marker_labels"
-    ] == {"Cook": 1}
+    assert homes["hh104"]["files"][0]["raw_text_audit"]["annotation_marker_labels"] == {
+        "Cook": 1
+    }
     assert homes["aruba"]["archive_member_found"] is False
     assert payload["model_inference_performed"] is False
     assert payload["performance_metrics_computed"] is False
@@ -47,9 +47,7 @@ def test_inventory_excludes_development_and_hashes_candidates(tmp_path: Path) ->
 def test_home_matching_requires_explicit_path_component() -> None:
     path = Path("root/not-hh104-ish/data.csv")
     assert inventory._home_matches(path, {"hh104"}) == []
-    assert inventory._home_matches(Path("root/hh104/data.csv"), {"hh104"}) == [
-        "hh104"
-    ]
+    assert inventory._home_matches(Path("root/hh104/data.csv"), {"hh104"}) == ["hh104"]
 
 
 def test_output_is_json_serialisable(tmp_path: Path) -> None:
