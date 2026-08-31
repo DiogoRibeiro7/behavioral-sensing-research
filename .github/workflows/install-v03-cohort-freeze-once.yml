@@ -1,0 +1,55 @@
+name: Install v0.3 cohort freeze once
+
+on:
+  push:
+    branches:
+      - freeze/v03-primary-external-cohort
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  install:
+    if: github.event.head_commit.message == 'ci: install immutable v0.3 cohort freeze once'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: freeze/v03-primary-external-cohort
+      - name: Download exact frozen cohort artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: v03-external-cohort-freeze
+          path: freeze-artifact
+          github-token: ${{ github.token }}
+          run-id: 33425821873
+      - name: Verify and install exact artifact
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          src = Path('freeze-artifact/external_cohort_manifest.json')
+          decl = Path('freeze-artifact/external_cohort_freeze_declaration.json')
+          payload = json.loads(src.read_text())
+          declaration = json.loads(decl.read_text())
+          sha = hashlib.sha256(src.read_bytes()).hexdigest()
+          assert sha == '6e3e157327c6eb40edfae498c2c4cc679a9e7c5b999899cf31683ed8161bc332'
+          assert declaration['manifest_sha256'] == sha
+          assert payload['eligible_count'] == 43
+          assert payload['status'] == 'frozen-primary-external-cohort'
+          assert payload['scored'] is False
+          assert payload['freeze']['primary_test_outcomes_inspected'] is False
+          assert payload['freeze']['raw_identity_match'] is True
+          target = Path('artifacts/v03')
+          target.mkdir(parents=True, exist_ok=True)
+          (target/'external_cohort_manifest.json').write_bytes(src.read_bytes())
+          (target/'external_cohort_freeze_declaration.json').write_bytes(decl.read_bytes())
+          PY
+          git rm .github/workflows/install-v03-cohort-freeze-once.yml
+          git config user.name 'Diogo Ribeiro'
+          git config user.email 'diogo_dj@hotmail.com'
+          git add artifacts/v03/external_cohort_manifest.json artifacts/v03/external_cohort_freeze_declaration.json
+          git commit -m 'research: freeze primary v0.3 external cohort'
+          git push origin HEAD:freeze/v03-primary-external-cohort
