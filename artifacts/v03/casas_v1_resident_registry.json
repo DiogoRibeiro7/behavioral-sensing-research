@@ -1,0 +1,53 @@
+{
+  "source": {
+    "provider": "Zenodo",
+    "record": "15708568",
+    "doi": "10.5281/zenodo.15708568",
+    "release_version": "v1",
+    "published": "2025-06-20",
+    "archive": "labeled_data.zip",
+    "archive_bytes": 236037656,
+    "archive_checksum": "md5:ec37d679e85a6ae39e84994888afd514"
+  },
+  "single_resident_home_ids": [
+    "aruba",
+    "hh101", "hh102", "hh103", "hh104", "hh105", "hh106", "hh108", "hh109", "hh110", "hh111", "hh112", "hh113", "hh114", "hh115", "hh116", "hh117", "hh118", "hh119", "hh120", "hh122", "hh123", "hh124", "hh125", "hh126", "hh127", "hh128", "hh129", "hh130",
+    "ihs07", "ihs11", "ihs12", "ihs21", "ihs28", "ihs35", "ihs37", "ihs38", "ihs40", "ihs58", "ihs59", "ihs68", "ihs70", "ihs75", "ihs80", "ihs84", "ihs85", "ihs95", "ihs96", "ihs107", "ihs108", "ihs114", "ihs118",
+    "mn57", "mn77", "mn82", "mn85",
+    "mv101",
+    "navan",
+    "rw101", "rw103", "rw105", "rw106", "rw107",
+    "tm001", "tm002", "tm003", "tm005", "tm006", "tm007", "tm008", "tm009", "tm010", "tm011", "tm013", "tm014", "tm015", "tm016", "tm017", "tm018", "tm019", "tm020", "tm021", "tm022", "tm026", "tm029", "tm032", "tm035", "tm036", "tm037", "tm038", "tm039", "tm040", "tm041", "tm042", "tm043"
+  ],
+  "two_resident_home_ids": [
+    "hh107", "hh121",
+    "ihs06", "ihs08", "ihs09", "ihs22", "ihs25", "ihs60", "ihs98", "ihs100", "ihs101", "ihs104", "ihs115", "ihs116", "ihs117", "ihs121",
+    "kyoto10", "kyoto11", "kyoto12", "kyoto13", "kyoto14", "kyoto15", "kyoto16", "kyoto17", "kyoto18", "kyoto19", "kyoto20", "kyoto21",
+    "milan",
+    "mn50", "mn62", "mn64", "mn79", "mn83", "mn86",
+    "rw104", "rw110",
+    "tm004", "tm024", "tm027", "tm030", "tm033",
+    "tulum"
+  ],
+  "more_than_two_resident_home_ids": [
+    "cairo",
+    "ihs14", "ihs31", "ihs93", "ihs99", "ihs109", "ihs119", "ihs120", "ihs123", "ihs124", "ihs125",
+    "laval",
+    "mn33", "mn51", "mn58", "mn59", "mn61", "mn71", "mn73", "mn76",
+    "paris"
+  ],
+  "unknown_resident_home_ids": [
+    "atmo1", "atmo2", "atmo4", "atmo6", "atmo7", "atmo8", "atmo9", "atmo10",
+    "mva001", "mva002",
+    "shib003", "shib004", "shib005", "shib006", "shib007", "shib008", "shib009", "shib010", "shib011", "shib012", "shib013", "shib014", "shib015", "shib016", "shib017", "shib018", "shib019", "shib020", "shib021", "shib022", "shib023", "shib024", "shiblsdf"
+  ],
+  "development_only_home_ids": [
+    "hh101", "hh102", "hh103", "hh105", "hh106", "hh107", "hh108", "hh110", "hh111", "hh114", "hh118", "hh119", "hh120", "hh121", "hh122", "hh123", "hh124", "hh125", "hh126", "hh127", "hh129", "hh130"
+  ],
+  "notes": [
+    "Resident counts are transcribed from the published Zenodo record metadata before primary external scoring.",
+    "Unknown resident count is not treated as single resident.",
+    "The 22 development-only homes remain excluded from the primary cohort regardless of resident count because their outcomes were previously inspected.",
+    "Archive membership and parser/mapping eligibility are separate prospective filters and are not encoded by this registry."
+  ]
+}
