@@ -16,12 +16,12 @@ and therefore cannot inspect external-test outcomes.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 import hashlib
 import json
 import math
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from ..states import BehaviouralState, StateOntology
 from .casas import CasasRecording
@@ -131,9 +131,7 @@ def fit_circadian_profile(
         raise ValueError("multiplier bounds must be positive and ordered")
 
     states = ontology or StateOntology()
-    per_state_hour = {
-        state: [0.0 for _ in range(24)] for state in states.states
-    }
+    per_state_hour = {state: [0.0 for _ in range(24)] for state in states.states}
     per_hour = [0.0 for _ in range(24)]
     per_state = {state: 0.0 for state in states.states}
     labelled_total = 0.0
@@ -167,13 +165,10 @@ def fit_circadian_profile(
                 lift = 1.0
             else:
                 conditional_share = (
-                    per_state_hour[state][hour]
-                    + shrinkage_seconds * overall_share
+                    per_state_hour[state][hour] + shrinkage_seconds * overall_share
                 ) / (hour_total + shrinkage_seconds)
                 lift = conditional_share / overall_share
-            values.append(
-                min(max(float(lift), minimum_multiplier), maximum_multiplier)
-            )
+            values.append(min(max(float(lift), minimum_multiplier), maximum_multiplier))
         profile[state] = tuple(values)
 
     return CircadianProfileFit(
