@@ -13,6 +13,7 @@ jobs:
       paper_only: ${{ steps.classify.outputs.paper_only }}
       paper_python: ${{ steps.classify.outputs.paper_python }}
       full_repo: ${{ steps.classify.outputs.full_repo }}
+      docs_only: ${{ steps.classify.outputs.docs_only }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -25,6 +26,7 @@ jobs:
             echo "paper_only=false" >> "$GITHUB_OUTPUT"
             echo "paper_python=false" >> "$GITHUB_OUTPUT"
             echo "full_repo=true" >> "$GITHUB_OUTPUT"
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -33,11 +35,17 @@ jobs:
             echo "paper_only=false" >> "$GITHUB_OUTPUT"
             echo "paper_python=false" >> "$GITHUB_OUTPUT"
             echo "full_repo=true" >> "$GITHUB_OUTPUT"
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           paper_only=true
           paper_python=false
+          # Prose only: nothing here can change what the test suite exercises.
+          # README.md and pyproject.toml are excluded because they feed the
+          # package metadata that `package` checks, and mkdocs.yml is included
+          # because `docs` still runs and would catch a broken nav.
+          docs_only=true
           for file in "${files[@]}"; do
             if [[ "$file" != papers/* ]]; then
               paper_only=false
@@ -45,9 +53,14 @@ jobs:
             if [[ "$file" == papers/*.py || "$file" == papers/**/*.py ]]; then
               paper_python=true
             fi
+            case "$file" in
+              docs/*.md|mkdocs.yml|CHANGELOG.md|ROADMAP.md|RELEASE.md|ZENODO.md) ;;
+              *) docs_only=false ;;
+            esac
           done
 
           echo "paper_only=$paper_only" >> "$GITHUB_OUTPUT"
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
           echo "paper_python=$paper_python" >> "$GITHUB_OUTPUT"
           if [[ "$paper_only" == "true" ]]; then
             echo "full_repo=false" >> "$GITHUB_OUTPUT"
@@ -118,7 +131,12 @@ jobs:
 
   test:
     needs: changes
-    if: needs.changes.outputs.full_repo == 'true'
+    # Skipped for prose-only changes: nothing in docs/*.md can alter what the
+    # suite exercises, and the three-version matrix is the expensive job. lint,
+    # docs and package still run, so a broken nav or link is still caught.
+    if: >-
+      needs.changes.outputs.full_repo == 'true'
+      && needs.changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -209,11 +227,27 @@ jobs:
             exit 0
           fi
 
-          results="${{ needs.lint.result }} ${{ needs.test.result }} ${{ needs.docs.result }} ${{ needs.package.result }}"
-          echo "lint test docs package -> $results"
-          for result in $results; do
+          docs_only="${{ needs.changes.outputs.docs_only }}"
+          echo "docs_only -> $docs_only"
+          echo "lint ${{ needs.lint.result }}  test ${{ needs.test.result }}"
+          echo "docs ${{ needs.docs.result }}  package ${{ needs.package.result }}"
+
+          required="lint docs package"
+          if [[ "$docs_only" != "true" || "${{ needs.test.result }}" != "skipped" ]]; then
+            # A prose-only change that somehow ran the matrix must still pass
+            # it, so a misclassification cannot turn a real failure into a pass.
+            required="$required test"
+          fi
+
+          for job in $required; do
+            case "$job" in
+              lint) result="${{ needs.lint.result }}" ;;
+              test) result="${{ needs.test.result }}" ;;
+              docs) result="${{ needs.docs.result }}" ;;
+              package) result="${{ needs.package.result }}" ;;
+            esac
             if [[ "$result" != "success" ]]; then
-              echo "::error::a required repository job did not succeed"
+              echo "::error::required job $job did not succeed ($result)"
               exit 1
             fi
           done
