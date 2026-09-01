@@ -5,6 +5,7 @@ as a lightweight stand-in for more sophisticated deep architectures.
 It trains on sliding windows of the input sequence and classifies whether
 the next time step contains a change point.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence

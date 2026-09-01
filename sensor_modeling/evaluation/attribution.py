@@ -25,7 +25,11 @@ from typing import Any
 
 import numpy as np
 
-from ..online.pipeline import BehaviouralSensingPipeline, PipelineConfig
+from ..online.pipeline import (
+    BehaviouralSensingPipeline,
+    PipelineConfig,
+    scoring_steps,
+)
 from ..simulation.faults import DegradationConfig, degrade, dropout, not_worn
 from ..simulation.household import HouseholdConfig, simulate
 from .metrics import BinaryMetrics, StateMetrics, binary_metrics, state_metrics
@@ -204,6 +208,9 @@ def _run_arm(
     )
     steps = pipeline.run(observations)
     steps.extend(pipeline.close(result.end))
+    # close() re-emits the final estimate; scoring it twice would weight that
+    # point double in every per-scenario metric.
+    steps = scoring_steps(steps)
     if not steps:
         raise ValueError("scenario produced no pipeline steps")
 

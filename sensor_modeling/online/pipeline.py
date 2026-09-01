@@ -470,6 +470,25 @@ def local_midnight(day: date, zone: tzinfo | None) -> datetime:
     return naive.replace(tzinfo=zone) if zone is not None else naive
 
 
+def scoring_steps(steps: "Sequence[PipelineStep]") -> "list[PipelineStep]":
+    """Return steps with the day-closing duplicate removed.
+
+    :meth:`BehaviouralSensingPipeline.close` re-emits the final estimate as a
+    reporting step so that the last day's summary, changes and alerts are not
+    lost. That step carries the *same* estimate object as the preceding one, so
+    code that extends its step list with it and then scores the result counts
+    that estimate twice.
+
+    Alert collection wants every step. Scoring wants each estimate once. This
+    returns the latter, dropping a trailing step whose estimate is the one
+    already present.
+    """
+    ordered = list(steps)
+    if len(ordered) >= 2 and ordered[-1].state is ordered[-2].state:
+        return ordered[:-1]
+    return ordered
+
+
 def collect_alerts(steps: Iterable[PipelineStep]) -> list[Alert]:
     """Return every alert raised across a run, in order."""
     return [alert for step in steps for alert in step.alerts]

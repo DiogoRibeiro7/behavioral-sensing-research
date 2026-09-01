@@ -20,6 +20,7 @@ from typing import Any
 
 from ..evaluation.metrics import StateMetrics, state_metrics
 from ..online import BehaviouralSensingPipeline, PipelineConfig
+from ..online.pipeline import scoring_steps
 from .casas import CasasRecording, truth_series
 
 logger = logging.getLogger(__name__)
@@ -107,6 +108,9 @@ def evaluate_recording(
     pipeline = BehaviouralSensingPipeline(recording.registry, config=settings)
     steps = pipeline.run(recording.observations)
     steps.extend(pipeline.close(recording.observations[-1].timestamp))
+    # close() re-emits the final estimate as a reporting step; scoring it as
+    # well would weight that one point twice.
+    steps = scoring_steps(steps)
     if not steps:
         raise ValueError("pipeline produced no steps for this recording")
 

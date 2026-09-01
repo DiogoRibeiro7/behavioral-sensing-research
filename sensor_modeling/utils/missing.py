@@ -168,9 +168,9 @@ def handle_missing_data(
 
     return MissingDataResult(
         data=data,
-        original_missing_mask=original_missing
-        if strategy != "drop"
-        else original_missing.loc[data.index],
+        original_missing_mask=(
+            original_missing if strategy != "drop" else original_missing.loc[data.index]
+        ),
         imputed_mask=imputed_mask,
         remaining_missing_mask=remaining_missing,
         long_gap_mask=long_gap,
