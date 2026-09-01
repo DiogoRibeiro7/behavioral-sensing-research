@@ -421,12 +421,13 @@ Missingness is not merely an efficiency problem. When record loss depends on act
 Some ambiguity is irreducible. An event-driven sensor without a heartbeat can become quieter because the resident is quieter or because events are being lost. No inference algorithm can identify which explanation is correct from that stream alone. The appropriate response is architectural: add heartbeat semantics, redundancy, or another modality, and represent residual uncertainty rather than inventing certainty.
 
 The real recordings show that this prescription is easier to state than to
-satisfy. In precisely the quiet periods this subsection identifies as
-irreducibly ambiguous, our own implementation did not represent residual
-uncertainty: the posterior drifted toward confidence because no evidence
-arrived to contradict it, which is the mechanism behind the abstention failure
-of \cref{sec:abstentionfailure}. The architectural response we recommend is
-therefore necessary but not sufficient. Representing residual uncertainty is a
+satisfy. Our own implementation did not represent residual uncertainty: stated
+confidence barely separated correct answers from incorrect ones, and was least
+reliable exactly where it was highest (\cref{sec:abstentionfailure}). That much
+is measured. Whether the failure is concentrated in the quiet, evidence-poor
+periods this subsection identifies as irreducibly ambiguous depends on the
+mechanism proposed there, which remains a hypothesis we have not isolated. The
+architectural response we recommend is therefore necessary but not sufficient. Representing residual uncertainty is a
 property a formulation must be shown to have on real data, not one it inherits
 by containing a term for it.
 
