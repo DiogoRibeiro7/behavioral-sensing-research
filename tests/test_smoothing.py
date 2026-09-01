@@ -32,7 +32,7 @@ def beliefs(*peaks: int, confidence: float = 0.8) -> np.ndarray:
     return np.vstack(rows)
 
 
-def estimates(array: np.ndarray) -> list[StateEstimate]:
+def estimates_from(array: np.ndarray) -> list[StateEstimate]:
     start = datetime(2011, 6, 15, 12, 0, tzinfo=UTC)
     return [
         StateEstimate(
@@ -97,7 +97,7 @@ class TestBeliefs:
 class TestEstimates:
     def test_evidence_is_left_untouched(self) -> None:
         """It records what the sensors argued at the time, not afterwards."""
-        original = estimates(beliefs(0, 3, 0))
+        original = estimates_from(beliefs(0, 3, 0))
         smoothed = smooth_estimates(original, lag=1)
 
         for before, after in zip(original, smoothed):
@@ -105,23 +105,84 @@ class TestEstimates:
             assert after.at == before.at
 
     def test_beliefs_are_revised(self) -> None:
-        original = estimates(beliefs(0, 3, 0))
+        original = estimates_from(beliefs(0, 3, 0))
         smoothed = smooth_estimates(original, lag=2)
 
         assert not np.allclose(smoothed[1].belief, original[1].belief)
 
     def test_zero_lag_returns_the_input(self) -> None:
-        original = estimates(beliefs(0, 3, 0))
+        original = estimates_from(beliefs(0, 3, 0))
         assert smooth_estimates(original, lag=0) == original
 
     def test_out_of_order_estimates_are_refused(self) -> None:
         """The backward recursion would otherwise mix unrelated moments."""
-        original = estimates(beliefs(0, 3, 0))
+        original = estimates_from(beliefs(0, 3, 0))
         shuffled = [original[2], original[0], original[1]]
 
         with pytest.raises(ValueError, match="ascending time order"):
             smooth_estimates(shuffled, lag=1)
 
     def test_a_single_estimate_is_returned_unchanged(self) -> None:
-        original = estimates(beliefs(0))
+        original = estimates_from(beliefs(0))
         assert smooth_estimates(original, lag=3) == original
+
+
+class TestScoringSteps:
+    """`close()` re-emits the final estimate, which scoring must not count twice.
+
+    The pipeline's closing step exists so the last day's summary, changes and
+    alerts are not lost. It carries the same estimate object as the step before
+    it, so code that extends its list and then scores the result weights that
+    one estimate double. Alert collection wants every step; scoring wants each
+    estimate once.
+    """
+
+    @staticmethod
+    def _steps(count: int, duplicate_last: bool):
+        from sensor_modeling.online.pipeline import PipelineStep
+
+        array = beliefs(*([0] * count))
+        estimates = estimates_from(array)
+        steps = [
+            PipelineStep(
+                at=e.at, state=e, context=None, health=None, alerts=(), changes=()
+            )
+            for e in estimates
+        ]
+        if duplicate_last:
+            last = steps[-1]
+            steps.append(
+                PipelineStep(
+                    at=last.at,
+                    state=last.state,
+                    context=None,
+                    health=None,
+                    alerts=(),
+                    changes=(),
+                )
+            )
+        return steps
+
+    def test_a_trailing_duplicate_estimate_is_dropped(self) -> None:
+        from sensor_modeling.online.pipeline import scoring_steps
+
+        steps = self._steps(4, duplicate_last=True)
+        assert len(steps) == 5
+        assert len(scoring_steps(steps)) == 4
+
+    def test_distinct_estimates_are_kept(self) -> None:
+        from sensor_modeling.online.pipeline import scoring_steps
+
+        steps = self._steps(4, duplicate_last=False)
+        assert len(scoring_steps(steps)) == 4
+
+    def test_a_single_step_is_unchanged(self) -> None:
+        from sensor_modeling.online.pipeline import scoring_steps
+
+        steps = self._steps(1, duplicate_last=False)
+        assert len(scoring_steps(steps)) == 1
+
+    def test_an_empty_sequence_is_unchanged(self) -> None:
+        from sensor_modeling.online.pipeline import scoring_steps
+
+        assert scoring_steps([]) == []

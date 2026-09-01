@@ -22,7 +22,7 @@ import hashlib
 import json
 import statistics
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -37,6 +37,22 @@ from sensor_modeling.states import BehaviouralState, StateOntology
 
 COHORT_PATH = Path("artifacts/v03/external_cohort_manifest.json")
 PROFILE_PATH = Path("artifacts/v03/v03_circadian_profile.json")
+DECLARATION_PATH = Path("artifacts/v03/external_cohort_freeze_declaration.json")
+
+#: Marker written after a successful primary run. Its existence is what makes
+#: the validation one-shot in practice rather than only in prose.
+CONSUMED_PATH = Path("artifacts/v03/external_primary_scored.json")
+
+#: Evaluation grid for the primary run.
+#:
+#: Neither the candidate specification nor the validation contract fixes a step
+#: size or timezone, which is a gap in the pre-registration. They are pinned
+#: here to the values every development result used, and overriding them is
+#: refused on the primary path: a different grid changes the circadian
+#: alignment and the number of scored points, so it would not be the
+#: pre-registered comparison.
+FROZEN_TIMEZONE = "America/Los_Angeles"
+FROZEN_STEP_MINUTES = 5
 
 #: A state is reported individually only if it appears in at least this many
 #: homes, per the contract's secondary-outcome definition.
@@ -82,21 +98,60 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _canonical_fit_sha256(fit: dict[str, Any]) -> str:
+    """Digest of the fit block, matching the freeze validator byte for byte."""
+    payload = json.dumps(
+        fit, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
 def load_profile(path: Path) -> dict[BehaviouralState, tuple[float, ...]]:
-    """Load the frozen circadian profile, checking its recorded digest."""
+    """Load the frozen circadian profile, recomputing its digest.
+
+    Reading ``profile_sha256`` and trusting it would accept an edited profile
+    carrying the old hash, which is precisely the substitution the digest exists
+    to prevent. The digest is recomputed from the fit block and compared.
+    """
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("status") != "frozen-development-fit":
         raise SystemExit(f"profile at {path} is not a frozen development fit")
     if payload.get("test_outcomes_inspected") is not False:
         raise SystemExit("profile claims test outcomes were inspected; refusing")
+
+    recorded = payload.get("profile_sha256")
+    actual = _canonical_fit_sha256(payload["fit"])
+    if recorded != actual:
+        raise SystemExit(
+            f"profile digest mismatch: recorded {recorded}, recomputed {actual}; "
+            "the profile has changed since it was frozen"
+        )
     return {
         BehaviouralState(name): tuple(values)
         for name, values in payload["fit"]["profile"].items()
     }
 
 
-def load_cohort(path: Path) -> list[dict[str, Any]]:
-    """Load the frozen cohort, refusing anything not frozen or already scored."""
+def load_cohort(path: Path, declaration: Path) -> list[dict[str, Any]]:
+    """Load the frozen cohort, checking it against its freeze declaration.
+
+    Trusting the manifest's own membership and hashes would let an edited
+    manifest be scored as frozen. The declaration records the manifest digest
+    separately, so the manifest is verified against it before any home is read.
+    """
+    if not declaration.exists():
+        raise SystemExit(f"freeze declaration not found at {declaration}")
+    freeze = json.loads(declaration.read_text(encoding="utf-8"))
+    expected = freeze.get("manifest_sha256")
+    actual = _sha256(path)
+    if expected != actual:
+        raise SystemExit(
+            f"cohort manifest digest mismatch: declaration records {expected}, "
+            f"file is {actual}; the frozen cohort has changed"
+        )
+    if freeze.get("scored") is not False:
+        raise SystemExit("freeze declaration already records the cohort as scored")
+
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("status") != "frozen-primary-external-cohort":
         raise SystemExit(f"cohort at {path} is not frozen")
@@ -141,17 +196,21 @@ def score_home(
             ontology=ontology,
             config=PipelineConfig(tz=zone, step=step),
         )
+        # close() re-emits the final estimate as a reporting step carrying the
+        # day summary. Extending with it would score that one point twice, so
+        # it is flushed for its side effects and discarded here.
         steps = pipeline.run(recording.observations)
-        steps.extend(pipeline.close(recording.observations[-1].timestamp))
+        pipeline.close(recording.observations[-1].timestamp)
         moments = [s.at for s in steps]
         truth = truth_series(recording.activities, moments)
-        outcomes.append(state_metrics(truth, [s.state for s in steps]))
 
-    scored = sum(
-        1 for label in truth_series(recording.activities, moments) if label is not None
-    )
-    if scored == 0:
-        return None
+        # Computed before scoring: state_metrics raises when nothing is
+        # labelled, so a later guard would never be reached and an unscoreable
+        # home would abort the whole run instead of being skipped.
+        scored = sum(1 for label in truth if label is not None)
+        if scored == 0:
+            return None
+        outcomes.append(state_metrics(truth, [s.state for s in steps]))
 
     return HomeResult(
         home=path.stem,
@@ -246,11 +305,24 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.cohort == "primary" and not args.i_understand_this_is_one_shot:
-        raise SystemExit(
-            "scoring the primary cohort is one-shot and unrepeatable; pass "
-            "--i-understand-this-is-one-shot to proceed"
-        )
+    if args.cohort == "primary":
+        if not args.i_understand_this_is_one_shot:
+            raise SystemExit(
+                "scoring the primary cohort is one-shot and unrepeatable; pass "
+                "--i-understand-this-is-one-shot to proceed"
+            )
+        if CONSUMED_PATH.exists():
+            raise SystemExit(
+                f"the primary cohort has already been scored; see {CONSUMED_PATH}. "
+                "Rescoring it would not be the same confirmatory validation."
+            )
+        if args.timezone != FROZEN_TIMEZONE or args.step_minutes != FROZEN_STEP_MINUTES:
+            raise SystemExit(
+                "the primary run uses the frozen evaluation grid "
+                f"({FROZEN_TIMEZONE}, {FROZEN_STEP_MINUTES} minutes); a different "
+                "grid changes the circadian alignment and the scored points, so "
+                "it would not be the pre-registered comparison"
+            )
 
     zone = ZoneInfo(args.timezone)
     step = timedelta(minutes=args.step_minutes)
@@ -258,7 +330,7 @@ def main() -> None:
 
     manifest = json.loads(COHORT_PATH.read_text(encoding="utf-8"))
     if args.cohort == "primary":
-        entries = load_cohort(COHORT_PATH)
+        entries = load_cohort(COHORT_PATH, DECLARATION_PATH)
     else:
         panel = manifest["development_panel"]
         entries = [
@@ -306,6 +378,27 @@ def main() -> None:
     args.output.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+
+    if args.cohort == "primary":
+        # Written after the result exists, so a crash mid-run does not burn the
+        # one shot, and before the summary is printed, so the marker cannot be
+        # skipped by someone interrupting at the last moment.
+        CONSUMED_PATH.write_text(
+            json.dumps(
+                {
+                    "status": "primary-external-cohort-scored",
+                    "scored_at": datetime.now(timezone.utc).isoformat(),
+                    "result_file": str(args.output),
+                    "result_sha256": _sha256(args.output),
+                    "profile_sha256": payload["profile_sha256"],
+                    "homes": payload["primary"]["homes"],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
     primary = payload["primary"]
     print()

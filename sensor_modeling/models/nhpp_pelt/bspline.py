@@ -75,9 +75,11 @@ def _basis_at_scalar(t: float, degree: int, knots: Array1D) -> Array1D:
             right = (
                 0.0
                 if right_den <= 0
-                else (knots[i + k + 1] - t) / right_den * N[k - 1, i + 1]
-                if i + 1 < n_basis
-                else 0.0
+                else (
+                    (knots[i + k + 1] - t) / right_den * N[k - 1, i + 1]
+                    if i + 1 < n_basis
+                    else 0.0
+                )
             )
             N[k, i] = left + right
 
