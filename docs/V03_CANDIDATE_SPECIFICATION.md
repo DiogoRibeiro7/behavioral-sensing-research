@@ -48,6 +48,30 @@ For the primary external comparison, v0.2 and v0.3 must use the same:
 
 Only the circadian profile differs.
 
+## Evaluation grid
+
+The list above requires v0.2 and v0.3 to share an evaluation grid, which makes
+the paired contrast internally valid whatever the grid is. It does not record
+what the grid *is*, so the absolute per-home figures were not reproducible from
+the specification alone. Recorded here before any primary scoring:
+
+| | Value |
+| --- | --- |
+| Inference step | 5 minutes |
+| Local timezone | `America/Los_Angeles` |
+
+These are the values every development result used, including the held-out
+comparison that selected the candidate. They are not a new choice; they are the
+existing one written down.
+
+The step size and timezone both matter beyond bookkeeping. The step sets how
+many points each home contributes and how much evidence each carries, and the
+timezone determines which local hour the circadian profile is indexed by — a
+displaced zone would silently misalign the very mechanism under test.
+
+`scripts/score_v03_external.py` refuses any other grid on the primary path, so
+the recorded values are enforced rather than merely documented.
+
 ## Development fitting of the final profile
 
 The previously analysed development panel contains 22 `hh` recordings. CASAS metadata identify `hh107` and `hh121` as two-resident homes. They remain permanently development-only because their outcomes were already inspected, but they are not eligible to estimate the final single-resident circadian profile.
