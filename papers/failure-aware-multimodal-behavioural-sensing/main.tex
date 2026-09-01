@@ -68,8 +68,35 @@ The paper makes five methodological contributions:
     \item a paired sensor-ablation design for estimating marginal and interaction effects of sensing modalities.
 \end{enumerate}
 
+Contribution (ii) is the one this manuscript is least able to support. The
+abstention mechanism is specified and implemented, but every measurement we have
+of whether it works is negative, and the two failures are of different kinds. On
+real recordings it abstained on 2.2\% of steps while its confidence carried
+almost no information about correctness (\cref{sec:abstentionfailure}). In the
+frozen confirmatory simulation, reported separately, it barely abstained at all:
+mean abstention rose only from $9.7\times10^{-6}$ to $5.3\times10^{-5}$ as
+random missingness went from 0\% to 40\%, so discarding two fifths of the
+evidence left the mechanism essentially silent. We report contribution (ii) as a
+contribution to the architecture and, in equal measure, as a negative result
+about the formulation.
+
 \paragraph{Evidence status.}
-All numerical results reported in this manuscript are exploratory results from a project-authored simulator. They are included to document current behaviour of the implementation, not to estimate real-home performance. The confirmatory simulation protocol in \cref{sec:confirmatory} and the external-validation programme in \cref{sec:external} are therefore part of the scientific design rather than optional future embellishments.
+This manuscript reports results at two evidential levels, and they should not be
+read as interchangeable. The simulator results in \cref{sec:pilotresults} are
+exploratory: they come from a project-authored generator and document the
+behaviour of the implementation rather than estimating field performance. The
+results in \cref{sec:realdev} come from 22 real annotated homes, which removes
+the circularity but not the selection: those recordings were inspected
+repeatedly while diagnosing failure modes, so they are development evidence and
+not a held-out test. Neither level supports a claim about deployment
+performance. The confirmatory simulation protocol in \cref{sec:confirmatory} and
+the frozen external-validation programme in \cref{sec:external} are therefore
+part of the scientific design rather than optional future embellishments. The
+confirmatory simulation has since been executed and is reported in full in a
+companion manuscript. One result from it is reported here: its abstention
+outcome, which bears directly on the claims this manuscript makes and is used
+below. No other confirmatory result, and no external-validation result, appears
+in what follows.
 
 \section{Related work}
 
@@ -463,8 +490,9 @@ Sixth, and most consequentially, the abstention mechanism did not function on
 real recordings (\cref{sec:abstentionfailure}). Because the confidence it
 thresholds is only weakly related to correctness and inverts above 0.95, no
 threshold setting repairs it. The framework's claim to know when its evidence is
-insufficient is therefore supported by the simulator and contradicted by the real
-recordings we have examined.
+insufficient is therefore contradicted by both bodies of evidence we have: the
+real recordings examined here, and the frozen confirmatory simulation, in which
+mean abstention stayed near $10^{-5}$ even after 40\% of records were removed.
 
 Seventh, the simulator does not merely flatter the framework; it represents an
 easier problem. Its balanced accuracy exceeds the ceiling a supervised
