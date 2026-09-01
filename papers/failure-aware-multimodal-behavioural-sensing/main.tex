@@ -68,8 +68,25 @@ The paper makes five methodological contributions:
     \item a paired sensor-ablation design for estimating marginal and interaction effects of sensing modalities.
 \end{enumerate}
 
+Contribution (ii) is the one this manuscript is least able to support. The
+abstention mechanism is specified and implemented, and it behaves as intended on
+the simulator, but \cref{sec:abstentionfailure} shows that it did not function on
+real recordings. We report it here as a contribution to the architecture and, in
+equal measure, as a negative result about the formulation.
+
 \paragraph{Evidence status.}
-All numerical results reported in this manuscript are exploratory results from a project-authored simulator. They are included to document current behaviour of the implementation, not to estimate real-home performance. The confirmatory simulation protocol in \cref{sec:confirmatory} and the external-validation programme in \cref{sec:external} are therefore part of the scientific design rather than optional future embellishments.
+This manuscript reports results at two evidential levels, and they should not be
+read as interchangeable. The simulator results in \cref{sec:pilotresults} are
+exploratory: they come from a project-authored generator and document the
+behaviour of the implementation rather than estimating field performance. The
+results in \cref{sec:realdev} come from 22 real annotated homes, which removes
+the circularity but not the selection: those recordings were inspected
+repeatedly while diagnosing failure modes, so they are development evidence and
+not a held-out test. Neither level supports a claim about deployment
+performance. The confirmatory simulation protocol in \cref{sec:confirmatory} and
+the frozen external-validation programme in \cref{sec:external} are therefore
+part of the scientific design rather than optional future embellishments, and no
+result from either is reported here.
 
 \section{Related work}
 
