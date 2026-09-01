@@ -441,6 +441,17 @@ Missingness is not merely an efficiency problem. When record loss depends on act
 
 Some ambiguity is irreducible. An event-driven sensor without a heartbeat can become quieter because the resident is quieter or because events are being lost. No inference algorithm can identify which explanation is correct from that stream alone. The appropriate response is architectural: add heartbeat semantics, redundancy, or another modality, and represent residual uncertainty rather than inventing certainty.
 
+The real recordings show that this prescription is easier to state than to
+satisfy. Our own implementation did not represent residual uncertainty: stated
+confidence barely separated correct answers from incorrect ones, and was least
+reliable exactly where it was highest (\cref{sec:abstentionfailure}). That much
+is measured. Whether the failure is concentrated in the quiet, evidence-poor
+periods this subsection identifies as irreducibly ambiguous depends on the
+mechanism proposed there, which remains a hypothesis we have not isolated. The
+architectural response we recommend is therefore necessary but not sufficient. Representing residual uncertainty is a
+property a formulation must be shown to have on real data, not one it inherits
+by containing a term for it.
+
 \subsection{Person attribution should be treated as a probabilistic nuisance variable}
 
 Visitor and carer contamination is not a rare edge case in realistic home monitoring. Multi-person activity-recognition work has shown that observation-to-resident association materially changes the problem \citep{wang2022multiperson}. Our narrower formulation treats occupancy context as a nuisance variable whose uncertainty attenuates ambient evidence. This is less ambitious than complete multi-resident tracking, but it is aligned with the longitudinal question: how much of the observed activity can reasonably be attributed to the person whose baseline is being updated?
@@ -458,7 +469,10 @@ The online implementation is incremental, snapshot-able, and bounded in retained
 
 The dominant limitation is external validity. The simulator was written by the same project as the estimator. Structural separation, guard tests, and distinct generative assumptions reduce circularity but cannot remove model-world bias. Simulator seeds vary stochastic realisations under one assumed world; they do not represent the structural heterogeneity of real households.
 
-Second, many inference parameters are declared rather than fitted, including emission rates, state dwell assumptions, occupancy priors, evidence weights, and alert thresholds. The resulting model is interpretable but parameter uncertainty is not propagated.
+Second, many inference parameters are declared rather than fitted, including emission rates, state dwell assumptions, occupancy priors, evidence weights, and alert thresholds. The resulting model is interpretable but parameter uncertainty is not propagated. On real recordings the cost of this is now
+measured rather than assumed: fitting emission rates removes about a third of
+the median calibration error, and declared dwell times are 3 to 9 times longer
+than measured state durations (\cref{sec:realdev}).
 
 Third, occupancy and behavioural-state layers share some evidence, notably radar and presence-beacon observations. Their errors are therefore correlated, while the current uncertainty calculation treats the stages sequentially. A joint or hierarchical model would be statistically cleaner but introduces a larger state space and should be justified by external data rather than by simulator fit.
 
