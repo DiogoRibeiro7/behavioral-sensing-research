@@ -36,7 +36,7 @@ Probabilistic State Inference, Person Attribution, and Sensor Reduction in Smart
 \maketitle
 
 \begin{abstract}
-Ambient assisted-living systems typically infer human behaviour from sparse, heterogeneous, and imperfect sensor streams. A recurring methodological weakness is that sensor activation is treated too directly as behavioural truth: an object interaction is interpreted as an activity, silence is interpreted as inactivity, and all ambient events are implicitly attributed to the monitored resident. We present a failure-aware multimodal framework that instead represents sensor events as uncertain observations of latent behavioural state. The framework combines a hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and resident attribution, continuous-time latent-state filtering, adaptive personal baselines, restrained alerting, and paired sensor-ablation experiments. Missing or failed sensors are represented as missing evidence rather than negative evidence, and the inference layer can abstain when coverage or posterior separation is insufficient. A synthetic household generator, deliberately structurally distinct from the estimator, provides controlled ground truth for stress testing sensor failure, visitor contamination, wearable non-adherence, asynchronous observations, and behavioural change. Exploratory simulator-only results indicate that the framework degrades gradually under missing observations, that occupancy-aware attribution is most useful when another person is present, and that reduced multimodal deployments can approach the state-inference performance of larger object-sensor configurations. These numbers are not estimates of field performance. We therefore define a pre-specified confirmatory simulation study and an external-validation programme using annotated public smart-home datasets. The contribution is methodological: a transparent architecture for asking not only whether behavioural state can be inferred, but whether the system knows when the evidence is insufficient and which sensors contribute information that is not redundant.
+Ambient assisted-living systems typically infer human behaviour from sparse, heterogeneous, and imperfect sensor streams. A recurring methodological weakness is that sensor activation is treated too directly as behavioural truth: an object interaction is interpreted as an activity, silence is interpreted as inactivity, and all ambient events are implicitly attributed to the monitored resident. We present a failure-aware multimodal framework that instead represents sensor events as uncertain observations of latent behavioural state. The framework combines a hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and resident attribution, continuous-time latent-state filtering, adaptive personal baselines, restrained alerting, and paired sensor-ablation experiments. Missing or failed sensors are represented as missing evidence rather than negative evidence, and the inference layer is designed to abstain when coverage or posterior separation is insufficient. A synthetic household generator, deliberately structurally distinct from the estimator, provides controlled ground truth for stress testing sensor failure, visitor contamination, wearable non-adherence, asynchronous observations, and behavioural change. Exploratory simulator-only results indicate that the framework degrades gradually under missing observations, that occupancy-aware attribution is most useful when another person is present, and that reduced multimodal deployments can approach the state-inference performance of larger object-sensor configurations. These numbers are not estimates of field performance. Development-stage evaluation on 22 real annotated homes shows why: median balanced accuracy falls to 0.420, a supervised classifier given the same sensor information reaches only 0.607, so the simulator represents an easier problem than the instrumentation supports for any method; and the abstention mechanism did not function, its stated confidence separating correct from incorrect answers by 0.073 and inverting above 0.95. We therefore define a pre-specified confirmatory simulation study and a frozen external-validation protocol on annotated public smart-home datasets. The contribution is methodological: a transparent architecture for asking not only whether behavioural state can be inferred, but whether the system knows when the evidence is insufficient and which sensors contribute information that is not redundant.
 \end{abstract}
 
 \noindent\textbf{Keywords:} ambient assisted living; behavioural sensing; sensor fusion; uncertainty; smart homes; missing data; multi-resident activity recognition; change detection; sensor ablation
@@ -327,6 +327,87 @@ The attribution pilot was consistent with H3: enabling occupancy-aware attributi
 
 For behavioural change, the exploratory study detected an abrupt synthetic change after about 5.0 days while producing approximately 0.010 false behavioural alerts per person-day on a stable trajectory. Under 30\% record loss, the observed delay increased to roughly 7.7 days without a corresponding increase in stable-record false-alert burden. Gradual change was more difficult than a step change, as expected.
 
+\section{Development results on real recordings}
+\label{sec:realdev}
+
+\paragraph{Interpretation.}
+This section reports \emph{development} results obtained on real annotated
+recordings. They are not the confirmatory external validation of
+\cref{sec:external}: the homes described here were inspected repeatedly while
+locating failure modes, and are therefore permanently development data. They are
+reported because they qualify several claims that the simulator alone supports.
+
+We adapted the CASAS \texttt{hh} recordings into the canonical observation
+representation without modifying downstream inference, and scored 22
+single-resident-panel homes with no parameter refitted. Median balanced accuracy
+was 0.420, against 0.816 on the simulator, over a median 90\% of each recording.
+
+\subsection{The simulator is easier than the instrumentation it represents}
+
+To separate model limitation from deployment limitation, we measured how much of
+the ontology is recoverable from these sensors at all. A gradient-boosted
+classifier given the same per-room event counts, three lagged steps, and time of
+day, trained on 11 homes and scored on 11 held-out homes, reached 0.607 balanced
+accuracy against a 0.143 majority-class baseline.
+
+Two consequences follow. The seven-state ontology \emph{is} identifiable from
+motion and door sensors, so the shortfall is a property of the inference rather
+than of the deployment. And the simulator's 0.816 lies \emph{above} the ceiling
+that real instrumentation supports for any method, so simulator figures should
+not be read as optimistic estimates of field performance but as estimates of a
+different and easier problem.
+
+\subsection{The inference is at the ceiling for the evidence it uses}
+
+Ablating the classifier's inputs locates the shortfall. Given only instantaneous
+per-room counts, the achievable ceiling is 0.397; the pipeline scores 0.420.
+On the evidence it actually consumes, the filter is already at or slightly above
+what a supervised model extracts. The missing accuracy lies in time of day
+(worth about $+0.105$ to the classifier) and recent history (about $+0.140$),
+neither of which the formulation carries.
+
+Two principled additions were fitted on development homes and scored on held-out
+ones. A time-inhomogeneous circadian prior raised median balanced accuracy from
+0.449 to 0.460, improving 10 of 11 homes. A fixed-lag smoother, which conditions
+on later evidence and therefore does not re-use observations the belief has
+already absorbed, gave $+0.014$ at a lag of one step, with longer lags adding
+nothing. Each recovered roughly a tenth of what the ablation attributed to the
+corresponding information, and the two do not combine with fitted emission rates:
+all three together score below the best single choice.
+
+\subsection{Declared parameters explain the overconfidence, not the accuracy}
+
+Measured activation rates differ from the declared defaults by an order of
+magnitude: real in-room sensors fire at 299/h during bathroom activity and 580/h
+during cooking, against a declared 40/h. Fitting emission rates on 11 homes and
+scoring on 11 held-out homes cut median calibration error from 0.312 to 0.202
+while leaving balanced accuracy unchanged. Declared dwell times are similarly
+wrong, 3 to 9 times longer than measured state durations, but fitting them
+\emph{lowered} balanced accuracy from 0.449 to 0.429: the long dwells are doing
+useful work as regularisation, and being empirically accurate is not the same
+property as being a useful prior.
+
+\subsection{Abstention did not function on real data}
+\label{sec:abstentionfailure}
+
+The framework presents abstention as the mechanism that makes the remaining
+claims defensible. On these recordings it abstained on 2.2\% of steps while
+being wrong more often than right.
+
+The natural explanation, that thresholds tuned on a simulator where the model is
+right 82\% of the time are simply too permissive, does not hold. Across 60{,}948
+scored steps, stated confidence separated correct from incorrect answers by
+$0.073$ (0.832 against 0.758), and the relationship is not monotonic where it
+matters: the 0.95--1.00 band, covering 39\% of steps, was \emph{less} accurate
+(0.561) than the 0.85--0.95 band (0.653). Raising the threshold therefore
+discards the best-performing band and retains the saturated one.
+
+The likely mechanism is that during quiet periods a sticky chain carries the
+posterior toward certainty because no evidence arrives to contradict it, rather
+than because the evidence is strong; the over-long dwell times above make this
+worse. This is a limitation of the formulation rather than of a parameter
+setting, and it is the most consequential negative result we report.
+
 \section{Discussion}
 
 \subsection{The main methodological distinction is semantic, not algorithmic}
@@ -364,7 +445,20 @@ Fourth, the behavioural ontology represents one monitored resident. Other occupa
 
 Fifth, late observations beyond the configured tolerance are dropped rather than replayed through past state. The online filter is therefore not a fixed-interval smoother and cannot revise history after a long communication outage.
 
-Finally, the current exploratory intervals for sensor ablation and attribution are based on too few independent trajectories for publication-level claims. This is why the confirmatory protocol is specified separately and must be executed only under the frozen experiment revision and artifact-acceptance rules.
+Sixth, and most consequentially, the abstention mechanism did not function on
+real recordings (\cref{sec:abstentionfailure}). Because the confidence it
+thresholds is only weakly related to correctness and inverts above 0.95, no
+threshold setting repairs it. The framework's claim to know when its evidence is
+insufficient is therefore supported by the simulator and contradicted by the real
+recordings we have examined.
+
+Seventh, the simulator does not merely flatter the framework; it represents an
+easier problem. Its balanced accuracy exceeds the ceiling a supervised
+classifier reaches on real instrumentation, so simulator figures cannot be read
+as optimistic estimates of the same quantity.
+
+Finally, the current exploratory intervals for sensor ablation and attribution
+are based on too few independent trajectories for publication-level claims. This is why the confirmatory protocol is specified separately and must be executed only under the frozen experiment revision and artifact-acceptance rules.
 
 \section{External validation}
 \label{sec:external}
@@ -381,7 +475,28 @@ The external-validation workflow will be:
     \item compare conclusions from the simulator against conclusions from real homes, including negative results.
 \end{enumerate}
 
-The scientifically interesting question is not whether simulator accuracy can be reproduced exactly, but whether the qualitative claims survive: graceful degradation, benefit of attribution under contamination, and a sensor-count/information frontier.
+The scientifically interesting question is not whether simulator accuracy can be
+reproduced exactly, but whether the qualitative claims survive: graceful
+degradation, benefit of attribution under contamination, and a
+sensor-count/information frontier.
+
+\paragraph{Current status.}
+Steps (1) and (2) are complete and steps (3) and (4) are frozen. The candidate is
+v0.2 inference plus the circadian prior of \cref{sec:realdev}, selected on
+development evidence alone. Its parameters were fitted on the 20 single-resident
+members of the already-inspected development panel and committed with the fitting
+revision, per-home checksums and a declaration that no test outcome was
+inspected. The primary cohort is 43 single-resident homes outside that panel,
+frozen with per-home checksums and screening provenance.
+
+Two properties of that cohort will govern how its result is read. Only 19\% of it
+comes from the instrumentation family the candidate was developed on, so a null
+result would be ambiguous between the prior failing to transfer and the adapter
+losing information on an unfamiliar sensor vocabulary. And because the candidate
+modifies the transition prior, which is the mechanism implicated in the
+abstention saturation of \cref{sec:abstentionfailure}, the abstention secondary
+outcome may move for reasons unrelated to whether the circadian prior is
+beneficial. The scoring has not been executed at the time of writing.
 
 \section{Reproducibility and software}
 
@@ -393,7 +508,22 @@ The software release used by the frozen experiment satisfied the experiment smok
 
 We have presented a methodological framework for failure-aware multimodal behavioural sensing in smart homes. Its central principle is simple but consequential: sensors provide uncertain evidence about human state, and both absence of evidence and uncertainty about who generated an event must remain visible to the model. By coupling canonical observation semantics, sensor-health reliability, occupancy-aware attribution, probabilistic state inference, adaptive personal baselines, and paired sensor ablation, the framework supports a different class of research question from conventional activity-classification benchmarks. It asks not only whether a state can be recognised, but whether the system remains calibrated when sensors disappear, whether an ambient event belongs to the monitored resident, and whether fewer sensors can preserve useful information.
 
-The exploratory simulator results motivate these questions but do not answer them definitively. The next two steps are therefore intentionally conservative: execute the frozen large simulation study and then test the frozen architecture against annotated public smart-home datasets. A negative result at either stage would be scientifically informative. The goal is not maximum apparent accuracy; it is a monitoring system whose uncertainty degrades as honestly as its evidence does.
+The exploratory simulator results motivate these questions; the development
+results on real recordings begin to answer them, and not favourably. Balanced
+accuracy falls by half, the simulator turns out to represent an easier problem
+than the instrumentation supports, and the abstention mechanism, on which the
+remaining claims rest, did not function. That last finding is the one we would
+highlight: a framework built to know when its evidence is insufficient did not,
+on real data, know.
+
+We report this because the alternative is worse. An architecture whose failure
+modes are visible is more useful than one whose numbers are higher, and a
+negative result located precisely is more actionable than a positive result that
+does not transfer. The remaining steps are unchanged: execute the frozen
+simulation study, then score the frozen architecture on the frozen external
+cohort. The goal is not maximum apparent accuracy; it is a monitoring system
+whose uncertainty degrades as honestly as its evidence does, and the honest
+position today is that this one does not yet.
 
 \printbibliography
 
