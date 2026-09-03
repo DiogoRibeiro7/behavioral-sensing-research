@@ -154,6 +154,12 @@ ignore the new packages entirely.
 | 7 | Simulation | Generative process independent of the estimator, enforced by test | Met |
 | 8 | Evaluation and ablation | Paired design structural; unpaired series refused | Met |
 | 9 | Online pipeline | Bounded memory; snapshot/restore round-trips through JSON | Met |
+
+These are delivery conditions, not empirical validation. Stage 3's criterion is
+that abstention is *available*, and it is implemented and wired in, so the stage
+is met as specified. Whether abstention is *informative* is a separate question,
+and on the evidence available the answer is no — see the measured behaviour in
+[uncertainty model](UNCERTAINTY_MODEL.md) and [real data](real_data.md).
 | 10 | Interoperability | Measurements and inferences distinguishable by provenance | Met |
 
 ## 6. Architectural risks
