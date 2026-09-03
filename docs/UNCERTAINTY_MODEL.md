@@ -126,6 +126,18 @@ evidence to be ambiguous about.
 an abstention, not an eighth behaviour, and `StateOntology` rejects any attempt
 to include it.
 
+**Measured behaviour: this mechanism does not currently work.** The rule above
+is what is implemented, not a description of behaviour that has been validated.
+Over 60,948 scored steps on real recordings, stated confidence separated correct
+from incorrect answers by only 0.073, and the 0.95–1.00 confidence band was
+*less* accurate at 0.561 than the 0.85–0.95 band at 0.653 while covering 39% of
+steps. Raising `min_confidence` therefore discards the better band and keeps the
+saturated one, so no threshold setting repairs it. The frozen confirmatory
+simulation fails from the other direction: mean abstention rose only from
+9.7e-06 to 5.3e-05 as random missingness went from 0% to 40%, so the mechanism
+barely fires at all. Treat `min_confidence` and `min_completeness` as
+unvalidated. See [real data](real_data.md).
+
 ### 7. Baseline
 
 Daily features are accumulated from the posterior:
