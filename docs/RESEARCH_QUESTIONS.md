@@ -49,6 +49,15 @@ accuracy. Fewer sensors cost accuracy and bought honesty about uncertainty.
 Which of those matters more depends on what the output is used for, and that
 is a question this repository can pose but not settle from simulation.
 
+**The frozen confirmatory study agrees in direction, at different values.**
+Its pre-specified 200-trajectory run puts the eight-sensor gap at 0.00529 and
+the five-sensor gap at 0.1548, against 0.0073 and 0.171 above. The figures in
+this section come from the 100-seed `sensor-modeling ablate` study and are not
+interchangeable with the confirmatory ones, which carry the pre-specified
+non-inferiority test: on that test the five-sensor deployment was **rejected**,
+its 95% CI of [0.1531, 0.1564] sitting far outside the 0.02 margin. Both studies
+are simulator-derived. See [ROADMAP.md](../ROADMAP.md).
+
 **Known threat.** The result depends on the simulator's assumed activity
 levels and sensor rates. See `limitations.md`.
 

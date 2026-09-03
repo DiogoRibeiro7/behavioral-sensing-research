@@ -58,13 +58,17 @@ negative. The frozen five-sensor deployment is **not** non-inferior to the
 ten-sensor deployment: it loses 0.1548 balanced accuracy, 95% CI
 [0.1531, 0.1564], against a 0.02 margin — nearly eight times the margin. A
 secondary eight-sensor configuration sits within 0.00529 of the full system
-(0.7405 against 0.7458), so the useful object is a sensor-information frontier
+(0.7405 against 0.7458). These are the frozen study's figures; the 100-seed
+`sensor-modeling ablate` study reported in
+[research questions](docs/RESEARCH_QUESTIONS.md) puts the same two contrasts at
+0.0073 and 0.171 under a different protocol and different seeds, and the two
+sets are not interchangeable. The useful object is a sensor-information frontier
 rather than a winning kit, and only that one kit is settled. All four
 pre-specified sensor interactions are positive.
 
 Two of its other results bear on the sections below. Failure-aware reliability
 weighting is a scoring trade-off rather than a win: it improves log loss by
-0.110 while worsening balanced accuracy by 0.0145, Brier by 0.0157 and
+0.110 while worsening balanced accuracy by 0.0145, Brier by 0.0156 and
 calibration error by 0.0039. And abstention barely moved — mean rates rose only
 from 9.7e-06 to 5.3e-05 as random missingness went from 0% to 40%, so the
 mechanism is effectively silent and hardly responds to losing two fifths of the
