@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from dataexcept import DataLoadingError, DataValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +29,26 @@ def read_sensor_csv(
     - an unnamed first column created by ``DataFrame.to_csv(index=True)``
     - a plain tabular sensor matrix with no timestamp index
     """
-    df = pd.read_csv(path, **kwargs)
+    try:
+        df = pd.read_csv(path, **kwargs)
+    except (
+        OSError,
+        TypeError,
+        UnicodeError,
+        ValueError,
+        pd.errors.ParserError,
+    ) as exc:
+        raise DataLoadingError(str(path), exc) from exc
+
     if timestamp_col in df.columns:
-        df[timestamp_col] = pd.to_datetime(df[timestamp_col])
+        parsed = pd.to_datetime(df[timestamp_col], errors="coerce")
+        if parsed.isna().any():
+            raise DataValidationError(
+                timestamp_col,
+                "<invalid timestamp>",
+                f"Timestamp field '{timestamp_col}' contains invalid timestamps",
+            )
+        df[timestamp_col] = parsed
         return df.set_index(timestamp_col).sort_index()
 
     first_col = df.columns[0] if len(df.columns) else None
