@@ -51,6 +51,37 @@ Three consequences, each documented in
   so no threshold setting repairs it. This is the project's central safety
   claim and it does not currently hold outside the simulator.
 
+The frozen confirmatory simulation also completed since release, at 200 paired
+household trajectories across 40 shards, with its Monte Carlo precision gate met
+(maximum observed MCSE 0.001125 against a 0.002 target). Its headline result is
+negative. The frozen five-sensor deployment is **not** non-inferior to the
+ten-sensor deployment: it loses 0.1548 balanced accuracy, 95% CI
+[0.1531, 0.1564], against a 0.02 margin — nearly eight times the margin. A
+secondary eight-sensor configuration sits within 0.00529 of the full system
+(0.7405 against 0.7458). These are the frozen study's figures; the 100-seed
+`sensor-modeling ablate` study reported in
+[research questions](docs/RESEARCH_QUESTIONS.md) puts the same two contrasts at
+0.0073 and 0.171 under a different protocol and different seeds, and the two
+sets are not interchangeable. The useful object is a sensor-information frontier
+rather than a winning kit, and only that one kit is settled. All four
+pre-specified sensor interactions are positive.
+
+Two of its other results bear on the sections below. Failure-aware reliability
+weighting is a scoring trade-off rather than a win: it improves log loss by
+0.110 while worsening balanced accuracy by 0.0145, Brier by 0.0156 and
+calibration error by 0.0039. And abstention barely moved — mean rates rose only
+from 9.7e-06 to 5.3e-05 as random missingness went from 0% to 40%, so the
+mechanism is effectively silent and hardly responds to losing two fifths of the
+evidence.
+
+**That last result changes the standing of the abstention failure.** It is no
+longer one observation on one kind of data. The mechanism fails in the
+simulator and on real recordings by different routes — near-silence in the
+first, uninformative confidence in the second — which removes the most
+comfortable reading, that it is an artefact of unfamiliar real-world data. All
+confirmatory outcomes remain simulator-derived and are not estimates of field
+performance.
+
 Retained and unchanged: CSV/JSON/HDF5 loading, missing-data handling, Bernoulli
 autoregressive models, HMM variants, NHPP-PELT segmentation, change-point
 detectors, dependency analysis, reporting, the Flask app, and the original CLI.
@@ -150,7 +181,12 @@ the measurement left open, in priority order.
 1. **Reconnect abstention to something informative.** Confidence currently
    inverts above 0.95, most likely because a sticky chain saturates the belief
    during quiet periods: the posterior approaches certainty because no evidence
-   arrived, not because the evidence was strong. Until this is addressed the
+   arrived, not because the evidence was strong. That mechanism remains a
+   hypothesis, but the failure itself is now measured twice over, in the
+   confirmatory simulation and on real recordings, so it cannot be attributed to
+   real-world data alone. RQ2 — can a system fail safely rather than silently —
+   is accordingly answered negatively, its own falsification condition met; see
+   [research questions](docs/RESEARCH_QUESTIONS.md). Until this is addressed the
    project cannot claim a model that knows when it does not know.
 2. **Close the accuracy gap, or establish that this formulation cannot.**
    0.420 against a 0.607 ceiling. Both principled additions tried so far, a
@@ -167,12 +203,19 @@ the measurement left open, in priority order.
    calibration error from 0.312 to 0.202 on unseen homes without moving
    accuracy, so the parameters explain the overconfidence and not the
    discrimination.
-5. **Model the dependency between the occupancy and state layers**, which share
+5. **Re-open sensor selection against the frontier rather than the frozen kit.**
+   The confirmatory study found the specific five-sensor deployment decisively
+   short of the non-inferiority criterion, but an eight-sensor configuration came within 0.00529 of the full
+   system while six, three and two sensors lost far more. The reduction question
+   is therefore still open and still worth answering; only the one frozen kit is
+   settled. Any successor kit should be chosen against the frontier and then
+   frozen before scoring, exactly as this one was.
+6. **Model the dependency between the occupancy and state layers**, which share
    evidence and therefore have correlated errors the reported uncertainty does
    not reflect.
-6. **Validate beyond CASAS.** Everything real measured so far comes from one
+7. **Validate beyond CASAS.** Everything real measured so far comes from one
    research group's instrumentation, so it is not 22 or 43 independent studies.
-7. **Reduce the pre-existing type-checking debt** in the older modules and
+8. **Reduce the pre-existing type-checking debt** in the older modules and
    widen the CI `mypy` gate.
 
 ## Near-Term Roadmap
@@ -247,7 +290,12 @@ Planned work:
   correct from incorrect answers by only 0.073 and inverts above 0.95, which no
   aggregate calibration score would have revealed. A diagnostic that reports
   accuracy *within* confidence bands would have caught it.
-- Add model comparison reports with structured machine-readable output.
+- Add model comparison reports with structured machine-readable output. The
+  confirmatory H4 result is the argument for reporting several scores together
+  rather than one: failure-aware weighting improved log loss by 0.110 while
+  worsening balanced accuracy, Brier and calibration error, so any single-metric
+  comparison would have declared it a straight win or a straight loss depending
+  only on which metric was chosen.
 - Add benchmark datasets or synthetic benchmark recipes with fixed seeds.
 
 Quality gates:
