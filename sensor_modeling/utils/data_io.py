@@ -11,7 +11,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from dataexcept import DataLoadingError, DataValidationError
+
+from sensor_modeling.data.exceptions import (
+    SensorDataLoadingError,
+    SensorDataValidationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +42,13 @@ def read_sensor_csv(
         ValueError,
         pd.errors.ParserError,
     ) as exc:
-        raise DataLoadingError(str(path), exc) from exc
+        legacy = ValueError(f"Unable to read CSV file: {path}")
+        raise SensorDataLoadingError(str(path), legacy) from exc
 
     if timestamp_col in df.columns:
         parsed = pd.to_datetime(df[timestamp_col], errors="coerce")
         if parsed.isna().any():
-            raise DataValidationError(
+            raise SensorDataValidationError(
                 timestamp_col,
                 "<invalid timestamp>",
                 f"Timestamp field '{timestamp_col}' contains invalid timestamps",
