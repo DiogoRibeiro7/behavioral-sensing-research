@@ -8,7 +8,7 @@ from collections.abc import Generator, Iterable, Mapping
 from os import PathLike
 
 import pandas as pd
-from dataexcept import DataExceptError
+from dataexcept import DataExceptError, DataLoadingError
 
 from sensor_modeling.data.exceptions import (
     SensorDataFormatError,
@@ -55,8 +55,12 @@ def load_csv(
     """
     try:
         df = read_sensor_csv(path, timestamp_col=timestamp_col, **kwargs)
-    except DataExceptError as exc:
+    except DataLoadingError as exc:
         logger.error("Failed to read CSV %s: %s", path, exc)
+        legacy = ValueError(f"Unable to read CSV file: {path}")
+        raise SensorDataLoadingError(str(path), legacy) from exc
+    except DataExceptError as exc:
+        logger.error("Failed to validate CSV %s: %s", path, exc)
         raise
     logger.info("Loaded CSV with shape %s from %s", df.shape, path)
     return SensorDataset(df)
