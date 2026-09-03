@@ -204,8 +204,8 @@ the measurement left open, in priority order.
    accuracy, so the parameters explain the overconfidence and not the
    discrimination.
 5. **Re-open sensor selection against the frontier rather than the frozen kit.**
-   The confirmatory study rejected the specific five-sensor deployment
-   decisively, but an eight-sensor configuration came within 0.00529 of the full
+   The confirmatory study found the specific five-sensor deployment decisively
+   short of the non-inferiority criterion, but an eight-sensor configuration came within 0.00529 of the full
    system while six, three and two sensors lost far more. The reduction question
    is therefore still open and still worth answering; only the one frozen kit is
    settled. Any successor kit should be chosen against the frontier and then
