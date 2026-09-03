@@ -22,6 +22,7 @@ from sensor_modeling.data.exceptions import (
     SensorDependencyError,
     SensorMissingDataError,
 )
+from sensor_modeling.utils.data_io import SensorDataset
 
 
 def test_unreadable_csv_uses_structured_loading_error(tmp_path) -> None:
@@ -32,6 +33,28 @@ def test_unreadable_csv_uses_structured_loading_error(tmp_path) -> None:
     assert isinstance(caught.value, DataLoadingError)
     assert isinstance(caught.value, ValueError)
     assert "Unable to read CSV file" in str(caught.value)
+
+
+def test_sensor_dataset_from_csv_preserves_loading_compatibility(tmp_path) -> None:
+    """The direct CSV constructor should expose the same compatibility contract."""
+    with pytest.raises(SensorDataLoadingError) as caught:
+        SensorDataset.from_csv(tmp_path / "missing.csv")
+
+    assert isinstance(caught.value, DataLoadingError)
+    assert isinstance(caught.value, ValueError)
+    assert "Unable to read CSV file" in str(caught.value)
+
+
+def test_sensor_dataset_from_csv_preserves_timestamp_compatibility(tmp_path) -> None:
+    """CSV timestamp validation should remain catchable as legacy ValueError."""
+    path = tmp_path / "invalid-timestamp.csv"
+    path.write_text("timestamp,sensor_0\nnot-a-date,1\n", encoding="utf-8")
+
+    with pytest.raises(SensorDataValidationError) as caught:
+        SensorDataset.from_csv(path)
+
+    assert isinstance(caught.value, DataValidationError)
+    assert isinstance(caught.value, ValueError)
 
 
 def test_malformed_json_uses_structured_loading_error(tmp_path) -> None:
