@@ -57,3 +57,25 @@ exactly the post-hoc selection the one-shot design exists to prevent.
 This page is a statement about interpretation, written before the outcome is
 known, so that a disappointing result is read carefully rather than explained
 away afterwards.
+
+## A known discrepancy in the recorded registry digest
+
+The frozen manifest records `source.registry_sha256` as
+`d5f0c1086ba06cbf095206019a3cff2bebfd6cedf09ecd6b496d703443393066`. Recomputing
+it from `artifacts/v03/casas_v1_resident_registry.json` as stored in the
+repository gives
+`2876c648a696baa8bf5f5ef5fed06cca2288113105919699e401ea7fad1a0ba1`.
+
+The registry has not changed. The two values are the same content with different
+line endings: the recorded digest was computed from a Windows working copy whose
+checkout had converted LF to CRLF, and the repository stores the file with LF.
+`build_external_cohort_manifest.py` now normalises line endings before hashing,
+so a rebuild would record the LF value, but the frozen manifest is left exactly
+as it was — editing it would change `manifest_sha256` and invalidate the freeze
+declaration that records it.
+
+This digest is recorded provenance and is not verified at scoring time, so it
+gates nothing. It is documented here because an auditor recomputing it would
+otherwise find a mismatch and reasonably suspect the registry had been altered.
+The cohort membership was determined by the registry's content, which is
+unaffected.
