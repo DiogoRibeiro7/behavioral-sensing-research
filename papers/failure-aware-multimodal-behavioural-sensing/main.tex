@@ -36,24 +36,24 @@ Probabilistic State Inference, Person Attribution, and Sensor Reduction in Smart
 \maketitle
 
 \begin{abstract}
-Ambient assisted-living systems typically infer human behaviour from sparse, heterogeneous, and imperfect sensor streams. A recurring methodological weakness is that sensor activation is treated too directly as behavioural truth: an object interaction is interpreted as an activity, silence is interpreted as inactivity, and all ambient events are implicitly attributed to the monitored resident. We present a failure-aware multimodal framework that instead represents sensor events as uncertain observations of latent behavioural state. The framework combines a hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and resident attribution, continuous-time latent-state filtering, adaptive personal baselines, restrained alerting, and paired sensor-ablation experiments. Missing or failed sensors are represented as missing evidence rather than negative evidence, and the inference layer is designed to abstain when coverage or posterior separation is insufficient. A synthetic household generator, deliberately structurally distinct from the estimator, provides controlled ground truth for stress testing sensor failure, visitor contamination, wearable non-adherence, asynchronous observations, and behavioural change. Exploratory simulator-only results indicate that the framework degrades gradually under missing observations, that occupancy-aware attribution is most useful when another person is present, and that reduced multimodal deployments can approach the state-inference performance of larger object-sensor configurations. These numbers are not estimates of field performance. Development-stage evaluation on 22 real annotated homes shows why: median balanced accuracy falls to 0.420, a supervised classifier given the same sensor information reaches only 0.607, so the simulator represents an easier problem than the instrumentation supports for any method; and the abstention mechanism did not function, its stated confidence separating correct from incorrect answers by 0.073 and inverting above 0.95. We therefore define a pre-specified confirmatory simulation study and a frozen external-validation protocol on annotated public smart-home datasets. The contribution is methodological: a transparent architecture for asking not only whether behavioural state can be inferred, but whether the system knows when the evidence is insufficient and which sensors contribute information that is not redundant.
+Ambient assisted-living systems typically infer human behaviour from sparse, heterogeneous, and imperfect sensor streams. A recurring methodological weakness is that sensor activation is treated too directly as behavioural truth: an object interaction is interpreted as an activity, silence is interpreted as inactivity, and all ambient events are implicitly attributed to the monitored resident. We present a failure-aware multimodal framework that instead represents sensor events as uncertain observations of latent behavioural state. The framework combines a hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and resident attribution, continuous-time latent-state filtering, adaptive personal baselines, restrained alerting, and paired sensor-ablation experiments. Missing or failed sensors are represented as missing evidence rather than negative evidence, and the inference layer is designed to abstain when coverage or posterior separation is insufficient. A synthetic household generator, deliberately structurally distinct from the estimator, provides controlled ground truth for stress testing sensor failure, visitor contamination, wearable non-adherence, asynchronous observations, and behavioural change. Exploratory simulator-only results indicate that the framework degrades gradually under missing observations, that occupancy-aware attribution is most useful when another person is present, and that reduced multimodal deployments can approach the state-inference performance of larger object-sensor configurations. These numbers are not estimates of field performance. Development-stage evaluation on 22 real annotated homes shows why: median balanced accuracy falls to 0.420, a supervised classifier given the same sensor information reaches only 0.607, so the simulator represents an easier problem than the instrumentation supports for any method; and the abstention mechanism did not function, its stated confidence separating correct from incorrect answers by 0.073 and inverting above 0.95. We therefore define a pre-specified confirmatory simulation study and a frozen external-validation protocol on annotated public smart-home datasets. The contribution is methodological: an architecture in which whether the evidence suffices, and which sensors carry non-redundant information, are answerable questions rather than assumptions.
 \end{abstract}
 
 \noindent\textbf{Keywords:} ambient assisted living; behavioural sensing; sensor fusion; uncertainty; smart homes; missing data; multi-resident activity recognition; change detection; sensor ablation
 
 \section{Introduction}
 
-Ambient assisted living (AAL) offers a route to continuous, low-burden monitoring in the home, but the useful signal is indirect. Motion detectors, contact switches, bed sensors, wearables, and radar systems measure physical phenomena; they do not directly observe activities of daily living, health states, or clinical deterioration. Recent reviews accordingly describe AAL design as a system-level trade-off between sensing quality, privacy, usability, reliability, communication, cost, and decision-making \citep{zieni2025aal}. Statistical work on passive sensing has shown that interpretable models can capture within-home temporal structure and cross-sensor dependence \citep{gillam2022athome}, while smart-home activity recognition has developed increasingly sophisticated sequential and multi-person models \citep{asghari2019hhmm,wang2022multiperson}. Nevertheless, four problems remain especially important for longitudinal monitoring.
+Ambient assisted living (AAL) offers a route to continuous, low-burden monitoring in the home, but the useful signal is indirect. Motion detectors, contact switches, bed sensors, wearables, and radar systems measure physical phenomena; they do not directly observe activities of daily living, health states, or clinical deterioration. Recent reviews accordingly describe AAL design as a system-level trade-off between sensing quality, privacy, usability, reliability, communication, cost, and decision-making \citep{zieni2025aal}. Statistical work on passive sensing has shown that interpretable models can capture within-home temporal structure and cross-sensor dependence \citep{gillam2022athome}, while smart-home activity recognition has developed increasingly sophisticated sequential and multi-person models \citep{asghari2019hhmm,wang2022multiperson}. Four problems remain acute for longitudinal monitoring.
 
 First, \emph{sensor semantics are often stronger than the evidence}. A refrigerator-door activation is evidence of kitchen or object interaction, not proof that food was consumed. A tap activation is not direct measurement of hydration. A bed-pressure state is not polysomnographic sleep. Treating proxy sensors as behavioural labels creates a semantic error before any statistical model is fitted.
 
-Second, \emph{missingness and failure are behaviourally confounded}. A quiet event stream may indicate inactivity, a changed routine, packet loss, battery degradation, gateway failure, or an uninstalled sensor. If missing records are silently represented as zeros, the system can become confidently wrong in the direction of reduced activity. This is particularly problematic in longitudinal monitoring, where deterioration and sensor under-delivery can produce superficially similar data.
+Second, \emph{missingness and failure are behaviourally confounded}. A quiet event stream may indicate inactivity, a changed routine, packet loss, battery degradation, gateway failure, or an uninstalled sensor. If missing records are silently represented as zeros, inference can become confidently wrong in the direction of reduced activity. Deterioration and sensor under-delivery then produce superficially similar data, which is precisely the discrimination longitudinal monitoring needs to make.
 
 Third, \emph{activity in the home is not necessarily activity by the monitored resident}. Multi-resident activity recognition is a known hard problem \citep{wang2022multiperson,alemdar2013aras}. Visitors and carers can trigger the same ambient sensors used to construct behavioural summaries. A single-resident model therefore needs either explicit attribution or explicit uncertainty about attribution.
 
-Fourth, \emph{more sensors are not automatically better}. Additional sensors increase installation burden, maintenance, cost, failure surfaces, and potentially privacy risk. Emerging privacy-preserving modalities such as millimetre-wave radar can provide richer presence, motion, posture, and tracking information without cameras \citep{chen2026mmwave,samimi2026fmcw}. The relevant design question is therefore not merely which model performs best, but which sensor subsets retain useful information and remain robust when components fail.
+Fourth, \emph{more sensors are not automatically better}. Additional sensors increase installation burden, maintenance, cost, failure surfaces, and potentially privacy risk. Emerging privacy-preserving modalities such as millimetre-wave radar can provide richer presence, motion, posture, and tracking information without cameras \citep{chen2026mmwave,samimi2026fmcw}. The design question is therefore which sensor subsets retain useful information and remain robust when components fail, not which model scores best on a fixed deployment.
 
-We address these issues through an uncertainty-aware research framework for multimodal behavioural sensing. The framework is deliberately interpretable and modular. Its central quantity is not a deterministic activity label produced from one sensor, but a posterior distribution over latent behavioural states,
+We address these issues through an uncertainty-aware research framework for multimodal behavioural sensing. The framework is deliberately interpretable and modular. Its central quantity is a posterior distribution over latent behavioural states,
 \begin{equation}
     \Prob(Z_t=z\mid \calO_{1:t}),
 \end{equation}
@@ -76,9 +76,8 @@ almost no information about correctness (\cref{sec:abstentionfailure}). In the
 frozen confirmatory simulation, reported separately, it barely abstained at all:
 mean abstention rose only from $9.7\times10^{-6}$ to $5.3\times10^{-5}$ as
 random missingness went from 0\% to 40\%, so discarding two fifths of the
-evidence left the mechanism essentially silent. We report contribution (ii) as a
-contribution to the architecture and, in equal measure, as a negative result
-about the formulation.
+evidence left the mechanism essentially silent. We therefore report (ii) as an
+architectural contribution and as a negative result about the formulation.
 
 \paragraph{Evidence status.}
 This manuscript reports results at two evidential levels, and they should not be
@@ -158,7 +157,7 @@ The temporal kind is essential. We distinguish:
     \item \textbf{states}: levels that persist until changed, with bounded carry-forward; and
     \item \textbf{samples}: measurements of continuously existing quantities, where an absent record means unobserved.
 \end{itemize}
-This prevents the common but consequential operation of forward-filling an event stream or converting communication failure into a sequence of behavioural zeros.
+It prevents forward-filling an event stream, and prevents communication failure from being recorded as a sequence of behavioural zeros.
 
 The semantic boundary is similarly explicit. A sensor can support a state such as \emph{kitchen activity}; it cannot by itself establish \emph{food consumption}. Higher-level interpretations require additional evidence and should retain uncertainty.
 
@@ -170,12 +169,12 @@ For sensor $s$ at time $t$, the health layer estimates a reliability weight
 \end{equation}
 Statuses include healthy, degraded, drifting, out-of-range, stuck, dropout, missing, and unknown. Reliability depends on declared reporting semantics. Silence from a purely event-driven contact sensor cannot by itself diagnose failure, whereas a sampled sensor that promised a one-minute cadence can be judged against that promise.
 
-A critical design rule is
+The governing rule is
 \begin{equation}
     r_s(t)=0 \quad \Longrightarrow \quad
     \text{sensor $s$ contributes no state preference}.
 \end{equation}
-Thus a missing sensor supplies missing evidence, not evidence for a low-activity state. Partial under-delivery is detectable for sensors with a declared cadence; for event-only sensors without a heartbeat, behavioural quiet and transport loss remain fundamentally confounded.
+A missing sensor supplies missing evidence, not evidence for a low-activity state. Partial under-delivery is detectable for sensors with a declared cadence; for event-only sensors without a heartbeat, behavioural quiet and transport loss remain fundamentally confounded.
 
 \subsection{Occupancy context and resident attribution}
 
@@ -323,7 +322,7 @@ This section reports development-stage results used to probe the framework and l
 
 A 90-day end-to-end demonstration incorporating visitors, a temporary bed-sensor dropout, five days of wearable non-adherence, random loss, duplication, late arrival, and clock drift produced a balanced accuracy of 0.824, macro F1 of 0.806, and ECE of 0.083. Recall for the synthetic \emph{sleeping} and \emph{away} states was 0.954 and 0.959, respectively, and 98.3\% of true state transitions were matched within the configured tolerance.
 
-Random record loss produced gradual rather than catastrophic degradation: balanced accuracy declined from 0.858 with no loss to 0.748 at 40\% loss, while ECE increased from 0.046 to 0.079. More revealingly, an adversarial activity-correlated loss experiment showed that 60\% loss concentrated during active periods reduced kitchen-activity recall from 0.705 to 0.180 while increasing home-inactive recall from 0.850 to 0.985. This demonstrates why missingness semantics matter: selective loss of active evidence can make a naive system appear more certain that the resident is inactive.
+Random record loss produced gradual rather than catastrophic degradation: balanced accuracy declined from 0.858 with no loss to 0.748 at 40\% loss, while ECE increased from 0.046 to 0.079. Activity-correlated loss is more damaging than the uniform case. With 60\% loss concentrated during active periods, kitchen-activity recall fell from 0.705 to 0.180 while home-inactive recall rose from 0.850 to 0.985. Selective loss of active evidence can therefore make a naive system appear more certain that the resident is inactive, which is the failure mode missingness semantics exist to prevent.
 
 \begin{table}[t]
 \centering
@@ -350,7 +349,7 @@ Online pipeline & Step latency p95 & 3.8 ms \\
 
 In a paired sensor-ablation pilot using four seeds, adding a wearable and person-bound beacon to six object sensors left a balanced-accuracy gap of approximately 0.012 relative to the ten-sensor deployment. A five-sensor radar/door/bed/wearable configuration exhibited lower accuracy than the full deployment but favourable calibration. The small replication count precludes strong inferential interpretation; the result is useful mainly because it motivates H2 and the larger design.
 
-The attribution pilot was consistent with H3: enabling occupancy-aware attribution had essentially no effect when no other person was present and its largest observed gain occurred during a carer regime. Again, the current attribution command uses a single seed per reported scenario, so the direction is more informative than the magnitude.
+The attribution pilot was consistent with H3: enabling occupancy-aware attribution had essentially no effect when no other person was present and its largest observed gain occurred during a carer regime. The current attribution command uses a single seed per reported scenario, so the direction is more informative than the magnitude.
 
 For behavioural change, the exploratory study detected an abrupt synthetic change after about 5.0 days while producing approximately 0.010 false behavioural alerts per person-day on a stable trajectory. Under 30\% record loss, the observed delay increased to roughly 7.7 days without a corresponding increase in stable-record false-alert burden. Gradual change was more difficult than a step change, as expected.
 
@@ -367,6 +366,12 @@ reported because they qualify several claims that the simulator alone supports.
 We adapted the CASAS \texttt{hh} recordings into the canonical observation
 representation without modifying downstream inference, and scored 22
 single-resident-panel homes with no parameter refitted. Median balanced accuracy
+% TODO[CONSISTENCY]: this section quotes 0.816 as the simulator figure, while
+% sec:pilotresults and tab:pilot report 0.824 for the 90-day end-to-end run.
+% They are different experiments, but the manuscript never says so and a reader
+% meets both as "the simulator". Resolve by naming the source of 0.816 or by
+% quoting a single figure throughout. Not changed here: both values are correct
+% as reported and 0.816 is the figure used across docs/limitations.md.
 was 0.420, against 0.816 on the simulator, over a median 90\% of each recording.
 
 \subsection{The simulator is easier than the instrumentation it represents}
@@ -410,9 +415,9 @@ during cooking, against a declared 40/h. Fitting emission rates on 11 homes and
 scoring on 11 held-out homes cut median calibration error from 0.312 to 0.202
 while leaving balanced accuracy unchanged. Declared dwell times are similarly
 wrong, 3 to 9 times longer than measured state durations, but fitting them
-\emph{lowered} balanced accuracy from 0.449 to 0.429: the long dwells are doing
-useful work as regularisation, and being empirically accurate is not the same
-property as being a useful prior.
+\emph{lowered} balanced accuracy from 0.449 to 0.429. The long dwells are doing
+useful work as regularisation: an empirically accurate prior is not necessarily
+a useful one.
 
 \subsection{Abstention did not function on real data}
 \label{sec:abstentionfailure}
@@ -433,7 +438,7 @@ The likely mechanism is that during quiet periods a sticky chain carries the
 posterior toward certainty because no evidence arrives to contradict it, rather
 than because the evidence is strong; the over-long dwell times above make this
 worse. This is a limitation of the formulation rather than of a parameter
-setting, and it is the most consequential negative result we report.
+setting.
 
 \section{Discussion}
 
@@ -443,7 +448,7 @@ The most important design choice is made before the Bayes filter: physical obser
 
 \subsection{Failure awareness changes the direction of error}
 
-Missingness is not merely an efficiency problem. When record loss depends on activity, the resulting bias can have a direction that is clinically or operationally consequential. The exploratory activity-correlated loss experiment demonstrates this mechanism sharply. Health monitoring should therefore be integrated into behavioural inference rather than reported on a separate engineering dashboard that the model itself ignores.
+When record loss depends on activity, the resulting bias has a direction, and in longitudinal monitoring that direction is the clinically consequential part. The activity-correlated loss experiment shows the mechanism within the simulator. Health monitoring therefore belongs inside behavioural inference rather than on a separate engineering dashboard the model does not read.
 
 Some ambiguity is irreducible. An event-driven sensor without a heartbeat can become quieter because the resident is quieter or because events are being lost. No inference algorithm can identify which explanation is correct from that stream alone. The appropriate response is architectural: add heartbeat semantics, redundancy, or another modality, and represent residual uncertainty rather than inventing certainty.
 
@@ -454,9 +459,9 @@ reliable exactly where it was highest (\cref{sec:abstentionfailure}). That much
 is measured. Whether the failure is concentrated in the quiet, evidence-poor
 periods this subsection identifies as irreducibly ambiguous depends on the
 mechanism proposed there, which remains a hypothesis we have not isolated. The
-architectural response we recommend is therefore necessary but not sufficient. Representing residual uncertainty is a
-property a formulation must be shown to have on real data, not one it inherits
-by containing a term for it.
+architectural response we recommend is therefore necessary but not sufficient.
+Representing residual uncertainty is a property a formulation must be shown to
+have on real data, not one it inherits by containing a term for it.
 
 \subsection{Person attribution should be treated as a probabilistic nuisance variable}
 
@@ -486,7 +491,7 @@ Fourth, the behavioural ontology represents one monitored resident. Other occupa
 
 Fifth, late observations beyond the configured tolerance are dropped rather than replayed through past state. The online filter is therefore not a fixed-interval smoother and cannot revise history after a long communication outage.
 
-Sixth, and most consequentially, the abstention mechanism did not function on
+Sixth, and with the widest consequences for the claims above, the abstention mechanism did not function on
 real recordings (\cref{sec:abstentionfailure}). Because the confidence it
 thresholds is only weakly related to correctness and inverts above 0.95, no
 threshold setting repairs it. The framework's claim to know when its evidence is
@@ -544,28 +549,31 @@ beneficial. The scoring has not been executed at the time of writing.
 
 The implementation is available as the public \texttt{behavioral-sensing-research} research repository. The confirmatory simulation is frozen to an exact Git revision, resolved experiment configuration, scientific contract, production seed formula, numerical environment, and machine-readable artifact-acceptance manifest. Manuscript-facing confirmatory results are admissible only after the production shards have been merged and the resulting artifact passes the frozen validator. Generated simulation data need not be committed because trajectories are deterministic conditional on the frozen code and seeds; derived results carry the provenance required to reproduce the run.
 
-The software release used by the frozen experiment satisfied the experiment smoke path before the freeze, and later documentation or validation changes do not move the pinned experiment revision. Confirmatory result values remain unexamined at the time of this manuscript alignment.
+The software release used by the frozen experiment satisfied the experiment smoke path before the freeze, and later documentation or validation changes do not move the pinned experiment revision. The confirmatory run has since been executed and accepted under those rules, and its values are reported in the companion manuscript. One outcome from it is used here, its abstention rate under increasing missingness, which we report alongside the separate real-data analysis of \cref{sec:abstentionfailure}.
 
 \section{Conclusion}
 
-We have presented a methodological framework for failure-aware multimodal behavioural sensing in smart homes. Its central principle is simple but consequential: sensors provide uncertain evidence about human state, and both absence of evidence and uncertainty about who generated an event must remain visible to the model. By coupling canonical observation semantics, sensor-health reliability, occupancy-aware attribution, probabilistic state inference, adaptive personal baselines, and paired sensor ablation, the framework supports a different class of research question from conventional activity-classification benchmarks. It asks not only whether a state can be recognised, but whether the system remains calibrated when sensors disappear, whether an ambient event belongs to the monitored resident, and whether fewer sensors can preserve useful information.
+We have presented a methodological framework for failure-aware multimodal behavioural sensing in smart homes. Its central principle is that sensors provide uncertain evidence about human state, and that both the absence of evidence and uncertainty about who generated an event must remain visible to the model. By coupling canonical observation semantics, sensor-health reliability, occupancy-aware attribution, probabilistic state inference, adaptive personal baselines, and paired sensor ablation, the framework supports a different class of research question from conventional activity-classification benchmarks. It asks not only whether a state can be recognised, but whether the system remains calibrated when sensors disappear, whether an ambient event belongs to the monitored resident, and whether fewer sensors can preserve useful information.
 
 The exploratory simulator results motivate these questions; the development
 results on real recordings begin to answer them, and not favourably. Balanced
 accuracy falls by half, the simulator turns out to represent an easier problem
 than the instrumentation supports, and the abstention mechanism, on which the
-remaining claims rest, did not function. That last finding is the one we would
-highlight: a framework built to know when its evidence is insufficient did not,
-on real data, know.
+remaining claims rest, did not function. The third is the most damaging: a system that
+cannot identify its own insufficient evidence cannot be trusted to degrade
+safely, whatever its accuracy.
 
-We report this because the alternative is worse. An architecture whose failure
-modes are visible is more useful than one whose numbers are higher, and a
-negative result located precisely is more actionable than a positive result that
-does not transfer. The remaining steps are unchanged: execute the frozen
-simulation study, then score the frozen architecture on the frozen external
-cohort. The goal is not maximum apparent accuracy; it is a monitoring system
-whose uncertainty degrades as honestly as its evidence does, and the honest
-position today is that this one does not yet.
+We report the negative results in full because they are locatable. The
+supervised ceiling separates a limit of the formulation from a limit of the
+instrumentation, and the confidence-band analysis identifies where abstention
+fails rather than only that it does. The frozen confirmatory simulation has now
+been executed and is reported separately; the frozen external cohort remains
+unscored. That cohort's pre-specified primary outcome is the paired
+balanced-accuracy difference between candidate and baseline, with abstention
+among its secondary outcomes, and that ordering stands; abstention is simply
+where the present evidence leaves the largest open question. On that evidence,
+the framework does not yet deliver the property it was built for: a monitoring
+system whose uncertainty degrades in step with its evidence.
 
 \printbibliography
 
