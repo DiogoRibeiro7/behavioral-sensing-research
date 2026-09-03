@@ -56,7 +56,7 @@ this section come from the 100-seed `sensor-modeling ablate` study and are not
 interchangeable with the confirmatory ones, which carry the pre-specified
 non-inferiority test: on that test the five-sensor deployment was **rejected**,
 its 95% CI of [0.1531, 0.1564] sitting far outside the 0.02 margin. Both studies
-are simulator-derived. See [ROADMAP.md](../ROADMAP.md).
+are simulator-derived. See the [roadmap](roadmap.md).
 
 **Known threat.** The result depends on the simulator's assumed activity
 levels and sensor rates. See `limitations.md`.
