@@ -83,7 +83,7 @@ jobs:
                   raise SystemExit(f'{hypothesis} produced no rows')
           PY
       - name: Upload smoke outputs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: paper-experiment-smoke
           path: paper-smoke-results/

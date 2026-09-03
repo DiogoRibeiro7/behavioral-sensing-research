@@ -112,7 +112,7 @@ jobs:
             --expected-revision "$GITHUB_SHA"
 
       - name: Upload development-fit freeze artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: v03-circadian-profile-freeze
           path: v03-profile-freeze/
