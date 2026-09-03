@@ -266,7 +266,7 @@ jobs:
           python -m pip install -c /tmp/paper-production-constraints.txt -e .
 
       - name: Download all production shards
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           pattern: production-shard-*
           path: production-shards
