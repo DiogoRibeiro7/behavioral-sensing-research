@@ -8,15 +8,15 @@ from collections.abc import Generator, Iterable, Mapping
 from os import PathLike
 
 import pandas as pd
-from dataexcept import (
-    DataExceptError,
-    DataFormatError,
-    DataLoadingError,
-    DataValidationError,
-    DependencyError,
-    MissingDataError,
-)
+from dataexcept import DataExceptError
 
+from sensor_modeling.data.exceptions import (
+    SensorDataFormatError,
+    SensorDataLoadingError,
+    SensorDataValidationError,
+    SensorDependencyError,
+    SensorMissingDataError,
+)
 from sensor_modeling.utils.data_io import SensorDataset, read_sensor_csv
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def _parse_timestamps(values: object, field_name: str) -> pd.Series:
     """Parse timestamp values and reject missing or invalid entries."""
     timestamps = pd.to_datetime(values, errors="coerce")
     if pd.isna(timestamps).any():
-        raise DataValidationError(
+        raise SensorDataValidationError(
             field_name,
             "<invalid timestamp>",
             f"Timestamp field '{field_name}' contains invalid timestamps",
@@ -71,7 +71,8 @@ def load_json(
             records = json.load(f)
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         logger.error("Failed to read JSON %s: %s", path, exc)
-        raise DataLoadingError(str(path), exc) from exc
+        legacy = ValueError(f"Unable to read JSON file: {path}")
+        raise SensorDataLoadingError(str(path), legacy) from exc
 
     df = _records_to_frame(records, timestamp_field=timestamp_field)
     logger.info("Loaded JSON with shape %s from %s", df.shape, path)
@@ -81,24 +82,24 @@ def load_json(
 def _records_to_frame(records: object, timestamp_field: str) -> pd.DataFrame:
     """Convert JSON records into a timestamp-indexed DataFrame."""
     if not isinstance(records, list):
-        raise DataFormatError(["JSON list of records"], type(records).__name__)
+        raise SensorDataFormatError(["JSON list of records"], type(records).__name__)
     if any(not isinstance(record, Mapping) for record in records):
-        raise DataFormatError(
+        raise SensorDataFormatError(
             ["JSON list of object records"],
-            "list containing non-object entries",
+            "Invalid JSON structure for tabular data",
         )
 
     try:
         df = pd.DataFrame(records)
     except (TypeError, ValueError) as exc:
         logger.error("JSON structure invalid: %s", exc)
-        raise DataFormatError(
+        raise SensorDataFormatError(
             ["JSON list of object records"],
-            f"invalid tabular structure ({exc})",
+            f"Invalid JSON structure for tabular data ({exc})",
         ) from exc
 
     if timestamp_field not in df.columns:
-        raise MissingDataError(
+        raise SensorMissingDataError(
             timestamp_field,
             f"Timestamp field '{timestamp_field}' missing from JSON records",
         )
@@ -112,12 +113,14 @@ def load_hdf5(path: str | PathLike[str], key: str = "data") -> SensorDataset:
     try:
         import h5py
     except ImportError as exc:  # pragma: no cover - dependency is installed in CI
-        raise DependencyError("h5py", "h5py is required for HDF5 support") from exc
+        raise SensorDependencyError(
+            "h5py", "h5py is required for HDF5 support"
+        ) from exc
 
     try:
         with h5py.File(path, "r") as h5:
             if key not in h5:
-                raise MissingDataError(
+                raise SensorMissingDataError(
                     key,
                     f"Dataset '{key}' not found in HDF5 file",
                 )
@@ -129,7 +132,8 @@ def load_hdf5(path: str | PathLike[str], key: str = "data") -> SensorDataset:
                 )
     except OSError as exc:
         logger.error("Failed to read HDF5 %s: %s", path, exc)
-        raise DataLoadingError(str(path), exc) from exc
+        legacy = ValueError(f"Unable to read HDF5 file: {path}")
+        raise SensorDataLoadingError(str(path), legacy) from exc
     logger.info("Loaded HDF5 dataset '%s' with shape %s from %s", key, data.shape, path)
     return SensorDataset(data)
 
@@ -153,11 +157,11 @@ def stream_data(source: Iterable[object]) -> Generator[SensorDataset, None, None
 def _stream_item_to_dataset(item: object) -> SensorDataset:
     """Convert one streaming record into a single-row dataset."""
     if not isinstance(item, Mapping):
-        raise DataFormatError(["mapping"], type(item).__name__)
+        raise SensorDataFormatError(["mapping"], type(item).__name__)
 
     timestamp = item.get("timestamp")
     if timestamp is None:
-        raise MissingDataError(
+        raise SensorMissingDataError(
             "timestamp",
             "Streaming item missing 'timestamp' field",
         )
