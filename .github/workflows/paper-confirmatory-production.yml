@@ -208,7 +208,7 @@ jobs:
           PY
 
       - name: Upload raw shard
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: production-shard-${{ matrix.shard }}
           path: frozen/production-shards/*.json
@@ -301,7 +301,7 @@ jobs:
 
       - name: Upload merged confirmatory bundle
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: paper-confirmatory-n200
           path: production-results/

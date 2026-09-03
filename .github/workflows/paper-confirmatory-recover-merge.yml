@@ -189,7 +189,7 @@ jobs:
 
       - name: Upload recovered merged bundle
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: paper-confirmatory-n200-recovered
           path: production-results/
