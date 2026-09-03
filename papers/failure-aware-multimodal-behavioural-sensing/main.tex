@@ -47,7 +47,7 @@ Ambient assisted living (AAL) offers a route to continuous, low-burden monitorin
 
 First, \emph{sensor semantics are often stronger than the evidence}. A refrigerator-door activation is evidence of kitchen or object interaction, not proof that food was consumed. A tap activation is not direct measurement of hydration. A bed-pressure state is not polysomnographic sleep. Treating proxy sensors as behavioural labels creates a semantic error before any statistical model is fitted.
 
-Second, \emph{missingness and failure are behaviourally confounded}. A quiet event stream may indicate inactivity, a changed routine, packet loss, battery degradation, gateway failure, or an uninstalled sensor. If missing records are silently represented as zeros, inference becomes confidently wrong in the direction of reduced activity. Deterioration and sensor under-delivery then produce superficially similar data, which is precisely the discrimination longitudinal monitoring needs to make.
+Second, \emph{missingness and failure are behaviourally confounded}. A quiet event stream may indicate inactivity, a changed routine, packet loss, battery degradation, gateway failure, or an uninstalled sensor. If missing records are silently represented as zeros, inference can become confidently wrong in the direction of reduced activity. Deterioration and sensor under-delivery then produce superficially similar data, which is precisely the discrimination longitudinal monitoring needs to make.
 
 Third, \emph{activity in the home is not necessarily activity by the monitored resident}. Multi-resident activity recognition is a known hard problem \citep{wang2022multiperson,alemdar2013aras}. Visitors and carers can trigger the same ambient sensors used to construct behavioural summaries. A single-resident model therefore needs either explicit attribution or explicit uncertainty about attribution.
 
@@ -549,7 +549,7 @@ beneficial. The scoring has not been executed at the time of writing.
 
 The implementation is available as the public \texttt{behavioral-sensing-research} research repository. The confirmatory simulation is frozen to an exact Git revision, resolved experiment configuration, scientific contract, production seed formula, numerical environment, and machine-readable artifact-acceptance manifest. Manuscript-facing confirmatory results are admissible only after the production shards have been merged and the resulting artifact passes the frozen validator. Generated simulation data need not be committed because trajectories are deterministic conditional on the frozen code and seeds; derived results carry the provenance required to reproduce the run.
 
-The software release used by the frozen experiment satisfied the experiment smoke path before the freeze, and later documentation or validation changes do not move the pinned experiment revision. The confirmatory run has since been executed and accepted under those rules; its values are reported in the companion manuscript, and the single outcome used here is the abstention result of \cref{sec:abstentionfailure}.
+The software release used by the frozen experiment satisfied the experiment smoke path before the freeze, and later documentation or validation changes do not move the pinned experiment revision. The confirmatory run has since been executed and accepted under those rules, and its values are reported in the companion manuscript. One outcome from it is used here, its abstention rate under increasing missingness, which we report alongside the separate real-data analysis of \cref{sec:abstentionfailure}.
 
 \section{Conclusion}
 
@@ -559,18 +559,18 @@ The exploratory simulator results motivate these questions; the development
 results on real recordings begin to answer them, and not favourably. Balanced
 accuracy falls by half, the simulator turns out to represent an easier problem
 than the instrumentation supports, and the abstention mechanism, on which the
-remaining claims rest, did not function. The third of these is the most damaging, because
-abstention is what the other claims rest on: a system that cannot identify its
-own insufficient evidence cannot be trusted to degrade safely, whatever its
-accuracy.
+remaining claims rest, did not function. The third is the most damaging: a system that
+cannot identify its own insufficient evidence cannot be trusted to degrade
+safely, whatever its accuracy.
 
 We report the negative results in full because they are locatable. The
 supervised ceiling separates a limit of the formulation from a limit of the
 instrumentation, and the confidence-band analysis identifies where abstention
 fails rather than only that it does. The frozen confirmatory simulation has now
 been executed and is reported separately; the frozen external cohort remains
-unscored, and it is the abstention behaviour, not the accuracy figures, that
-most needs that result. On the present evidence the framework does not yet
+unscored. Balanced accuracy is its pre-specified primary outcome and abstention
+a secondary one, and that ordering stands; abstention is simply where the
+present evidence leaves the largest open question. On the present evidence the framework does not yet
 deliver the property it was built for: a monitoring system whose uncertainty
 degrades in step with its evidence.
 
