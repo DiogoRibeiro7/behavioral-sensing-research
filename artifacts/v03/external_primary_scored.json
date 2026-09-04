@@ -1,0 +1,8 @@
+{
+  "homes": 43,
+  "profile_sha256": "5f03753feddc90f379fada7802c18ce932ffad7bd9ee9774bb88828fde80d539",
+  "result_file": "artifacts/v03/external_primary_result.json",
+  "result_sha256": "66501d48099f48ce7c834839988830090812414b24ce76b193f84ed70783f23f",
+  "scored_at": "2026-09-04T11:08:38.830859+00:00",
+  "status": "primary-external-cohort-scored"
+}

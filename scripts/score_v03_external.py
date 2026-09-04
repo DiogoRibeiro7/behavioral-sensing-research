@@ -376,8 +376,14 @@ def main() -> None:
         **summarise(results, seed=args.bootstrap_seed),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    # Written with explicit LF newlines. The marker below records a digest of
+    # this file, and the repository stores these artifacts with LF, so letting
+    # the platform choose the line ending would bind the marker to bytes that
+    # no longer exist once the result is committed.
     args.output.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
     if args.cohort == "primary":
@@ -389,7 +395,7 @@ def main() -> None:
                 {
                     "status": "primary-external-cohort-scored",
                     "scored_at": datetime.now(timezone.utc).isoformat(),
-                    "result_file": str(args.output),
+                    "result_file": args.output.as_posix(),
                     "result_sha256": _sha256(args.output),
                     "profile_sha256": payload["profile_sha256"],
                     "homes": payload["primary"]["homes"],
@@ -399,6 +405,7 @@ def main() -> None:
             )
             + "\n",
             encoding="utf-8",
+            newline="\n",
         )
 
     primary = payload["primary"]
