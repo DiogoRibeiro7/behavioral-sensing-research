@@ -8,7 +8,7 @@ LaTeX source for the methodological paper:
 
 - `manuscript_confirmatory.tex` — current results-bearing publication candidate.
 - `confirmatory_results.tex` — confirmatory H1–H5 result section, traceable to the accepted frozen result snapshot.
-- `main.tex` — pre-results manuscript retained for provenance; it still contains exploratory/pre-execution wording and is no longer the publication candidate.
+- `main.tex` — the longer development manuscript. It began as a pre-results snapshot retained for provenance, but has since been maintained alongside the candidate rather than frozen: it now carries the real-recording development results, the confirmatory abstention outcome and the external-validation result. It is **not** a record of what the project claimed before those results existed; use git history for that. It remains the more detailed treatment of the real-data work, and the candidate is the submission target.
 - `references.bib` — bibliography used by both manuscript versions.
 - `experiments/` — frozen experiment specification, executable production route, validator, and repository-retained accepted N=200 result snapshot.
 
