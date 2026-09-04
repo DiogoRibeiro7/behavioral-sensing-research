@@ -5,6 +5,7 @@ from .data_io import (
     export_analysis_results,
     simulate_sensor_data,
 )
+from .digests import text_file_sha256
 from .logging_config import setup_logging
 from .missing import (
     MissingDataResult,
@@ -34,6 +35,7 @@ __all__ = [
     "validate_model_predictions",
     "create_model_comparison_report",
     "setup_logging",
+    "text_file_sha256",
     "MissingDataResult",
     "forward_fill",
     "handle_missing_data",
