@@ -98,6 +98,23 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _text_sha256(path: Path) -> str:
+    """Digest of a tracked text file, independent of checkout line endings.
+
+    The frozen manifest digest was computed on LF content. Git rewrites line
+    endings on checkout for platforms that ask for CRLF, so hashing the raw
+    bytes makes verification depend on where the repository was cloned rather
+    than on what the file says. That turns a genuine integrity check into a
+    platform check: it passes in Linux CI and refuses on a Windows working
+    copy whose manifest is byte-identical once normalised. Normalising first
+    keeps the recorded digest valid everywhere.
+
+    Only for files git may rewrite. Archive data and result files are hashed
+    with :func:`_sha256`, where every byte is meant to be exactly as written.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def _canonical_fit_sha256(fit: dict[str, Any]) -> str:
     """Digest of the fit block, matching the freeze validator byte for byte."""
     payload = json.dumps(
@@ -143,7 +160,7 @@ def load_cohort(path: Path, declaration: Path) -> list[dict[str, Any]]:
         raise SystemExit(f"freeze declaration not found at {declaration}")
     freeze = json.loads(declaration.read_text(encoding="utf-8"))
     expected = freeze.get("manifest_sha256")
-    actual = _sha256(path)
+    actual = _text_sha256(path)
     if expected != actual:
         raise SystemExit(
             f"cohort manifest digest mismatch: declaration records {expected}, "

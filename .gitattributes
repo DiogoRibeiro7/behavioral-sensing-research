@@ -1,0 +1,4 @@
+# The frozen v0.3 artifacts carry recorded SHA-256 digests computed on LF
+# content. Letting git rewrite their line endings on checkout would make those
+# digests verify or fail depending on the platform rather than on the content.
+artifacts/v03/*.json text eol=lf

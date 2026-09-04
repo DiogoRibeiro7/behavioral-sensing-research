@@ -72,6 +72,17 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _text_sha256(path: Path) -> str:
+    """Digest of a tracked text file, independent of checkout line endings.
+
+    Git rewrites line endings on checkout for platforms that ask for CRLF, so
+    hashing raw bytes records where the file was cloned rather than what it
+    says. Use this for repository artifacts; keep :func:`_sha256` for archive
+    data, whose bytes are meant to be exactly as distributed.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def screen(
     path: Path,
     zone: ZoneInfo,
@@ -176,7 +187,7 @@ def main() -> None:
             "record": args.source_record,
             "resident_counts": "artifacts/v03/casas_v1_resident_registry.json",
             "registry_source": registry_source,
-            "registry_sha256": _sha256(args.registry),
+            "registry_sha256": _text_sha256(args.registry),
         },
         "criteria": {
             "outside_development_panel": True,
