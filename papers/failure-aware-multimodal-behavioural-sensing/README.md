@@ -6,32 +6,55 @@ LaTeX source for the methodological paper:
 
 ## Manuscript sources
 
-- `manuscript_confirmatory.tex` — current results-bearing publication candidate.
-- `confirmatory_results.tex` — confirmatory H1–H5 result section, traceable to the accepted frozen result snapshot.
-- `main.tex` — the longer development manuscript. It began as a pre-results snapshot retained for provenance, but has since been maintained alongside the candidate rather than frozen: it now carries the real-recording development results, the confirmatory abstention outcome and the external-validation result. It is **not** a record of what the project claimed before those results existed; use git history for that. It remains the more detailed treatment of the real-data work, and the candidate is the submission target.
-- `references.bib` — bibliography used by both manuscript versions.
-- `experiments/` — frozen experiment specification, executable production route, validator, and repository-retained accepted N=200 result snapshot.
+- `main.tex` — the manuscript. One document, carrying every level of evidence the
+  project has: exploratory simulator results, the frozen confirmatory simulation,
+  development results on 22 real annotated homes, and the one-shot external
+  validation.
+- `confirmatory_results.tex` — confirmatory H1-H5 result section, `\input` by
+  `main.tex` and traceable to the accepted frozen result snapshot.
+- `references.bib` — bibliography.
+- `experiments/` — frozen experiment specification, executable production route,
+  validator, and repository-retained accepted N=200 result snapshot.
 
-All confirmatory numerical results are simulator-derived and must not be interpreted as estimates of real-home performance.
+There was previously a second manuscript, `manuscript_confirmatory.tex`, holding
+the confirmatory results while `main.tex` was meant to stay frozen as a
+pre-results snapshot. That split did not survive contact with the work: `main.tex`
+was maintained rather than frozen, so it stopped being a record of what the
+project claimed before the results existed, and the two documents drifted — a
+correction applied to one could sit unapplied in the other, which happened. The
+manuscripts are now consolidated into `main.tex`. Use git history for what the
+paper said at any earlier point; that is what history is for.
 
-## Build the confirmatory manuscript
+Confirmatory results are simulator-derived. The external-validation result is
+confirmatory on real data. Development results on real recordings are neither,
+and are labelled as such in the text.
+
+## Build
 
 The paper uses `biblatex` with the `biber` backend. Run from this directory:
 
 ```bash
-pdflatex manuscript_confirmatory.tex
-biber manuscript_confirmatory
-pdflatex manuscript_confirmatory.tex
-pdflatex manuscript_confirmatory.tex
+latexmk -pdf main.tex
 ```
 
-The confirmatory manuscript inputs `confirmatory_results.tex`, whose values are copied from the accepted repository snapshot at:
+or equivalently:
+
+```bash
+pdflatex main.tex
+biber main
+pdflatex main.tex
+pdflatex main.tex
+```
+
+`main.tex` inputs `confirmatory_results.tex`, whose values are copied from the
+accepted repository snapshot at:
 
 ```text
 experiments/results/confirmatory_n200/accepted_summary.json
 ```
 
-That snapshot records the frozen experiment revision, config digest, accepted workflow provenance, MCSE gate, primary H2 decision, and H1–H5 summaries.
+That snapshot records the frozen experiment revision, config digest, accepted
+workflow provenance, MCSE gate, primary H2 decision, and H1-H5 summaries.
 
 ## Confirmatory status
 
