@@ -1,6 +1,9 @@
 # v0.3 external sampling frame
 
-Status: **prospectively frozen before primary external scoring or test-home enumeration**.
+Status: **historical — frozen prospectively, and the primary scoring has since been executed.**
+This document records the sampling frame as it stood before any test home was
+enumerated or scored. It is retained unchanged as the pre-registration record.
+The scoring ran once on 2026-09-04; see `artifacts/v03/external_primary_result.json`.
 
 This document narrows the external-validation sampling frame to one finite public release so the eligible cohort cannot later expand or contract opportunistically.
 
