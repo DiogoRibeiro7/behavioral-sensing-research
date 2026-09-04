@@ -29,7 +29,7 @@
 \title{Failure-Aware Multimodal Behavioural Sensing:\\
 Probabilistic State Inference, Person Attribution, and Sensor Reduction in Smart Homes}
 \author{Diogo Ribeiro\\
-\small \textit{Affiliation to be confirmed before submission}}
+\small \textit{Faculty of Media Arts and Design, Technical University of Porto}}
 \date{}
 
 \begin{document}
@@ -73,7 +73,8 @@ abstention mechanism is specified and implemented, but every measurement we have
 of whether it works is negative, and the two failures are of different kinds. On
 real recordings it abstained on 2.2\% of steps while its confidence carried
 almost no information about correctness (\cref{sec:abstentionfailure}). In the
-frozen confirmatory simulation, reported separately, it barely abstained at all:
+frozen confirmatory simulation of \cref{sec:confirmatory-results} it barely
+abstained at all:
 mean abstention rose only from $9.7\times10^{-6}$ to $5.3\times10^{-5}$ as
 random missingness went from 0\% to 40\%, so discarding two fifths of the
 evidence left the mechanism essentially silent. We therefore report (ii) as an
@@ -88,14 +89,16 @@ results in \cref{sec:realdev} come from 22 real annotated homes, which removes
 the circularity but not the selection: those recordings were inspected
 repeatedly while diagnosing failure modes, so they are development evidence and
 not a held-out test. Neither level supports a claim about deployment
-performance. The confirmatory simulation protocol in \cref{sec:confirmatory} and
-the frozen external-validation programme in \cref{sec:external} are therefore
-part of the scientific design rather than optional future embellishments. The
-confirmatory simulation has since been executed and is reported in full in a
-companion manuscript. One result from it is reported here: its abstention
-outcome, which bears directly on the claims this manuscript makes and is used
-below. No other confirmatory result, and no external-validation result, appears
-in what follows.
+performance.
+
+The other two levels are confirmatory, and were frozen before execution. The
+simulation study of \cref{sec:confirmatory-results} was run once under the
+protocol in \cref{sec:confirmatory}; its outcomes are simulator-derived and
+estimate nothing about field performance. The external validation of
+\cref{sec:external} was scored once against a cohort of homes frozen before any
+outcome was seen, and is the only result here that is confirmatory on real
+data. Where the four levels disagree, the weaker one does not soften the
+stronger.
 
 \section{Related work}
 
@@ -353,6 +356,8 @@ The attribution pilot was consistent with H3: enabling occupancy-aware attributi
 
 For behavioural change, the exploratory study detected an abrupt synthetic change after about 5.0 days while producing approximately 0.010 false behavioural alerts per person-day on a stable trajectory. Under 30\% record loss, the observed delay increased to roughly 7.7 days without a corresponding increase in stable-record false-alert burden. Gradual change was more difficult than a step change, as expected.
 
+\input{confirmatory_results.tex}
+
 \section{Development results on real recordings}
 \label{sec:realdev}
 
@@ -543,13 +548,49 @@ losing information on an unfamiliar sensor vocabulary. And because the candidate
 modifies the transition prior, which is the mechanism implicated in the
 abstention saturation of \cref{sec:abstentionfailure}, the abstention secondary
 outcome may move for reasons unrelated to whether the circadian prior is
-beneficial. The scoring has not been executed at the time of writing.
+beneficial.
+
+\paragraph{Result.}
+The scoring has since been executed, once, against the frozen cohort and grid.
+The median paired difference in household balanced accuracy was $+0.0091$, with
+a 95\% household bootstrap interval of $[+0.0054, +0.0117]$; 37 of the 43 homes
+improved, 6 worsened, none was unscoreable. The interval excludes zero, so the
+circadian prior transfers to homes the candidate was not developed on. It
+transfers across instrumentation as well as across homes: 81\% of the cohort
+comes from families outside the development panel's \texttt{hh}, so the first
+ambiguity
+above did not arise. Secondary outcomes moved consistently, with balanced
+accuracy $0.496\to0.504$, calibration error $0.343\to0.328$, Brier
+$0.842\to0.812$ and log loss $4.302\to4.168$.
+
+Two qualifications carry more weight than the sign of the result. The effect is
+small: nine thousandths of balanced accuracy against a supervised ceiling of
+0.607 on the same instrumentation, so it closes a sliver of the gap in
+\cref{sec:realdev} rather than the gap. And abstention did not improve, moving
+from $0.0009$ to $0.0013$ and so continuing not to fire; the second ambiguity
+above resolved by the secondary outcome barely moving at all. Median labelled
+coverage on this cohort was 75.9\%, against 89.9\% on the development panel.
 
 \section{Reproducibility and software}
 
+
+\begin{table}[h]
+\centering
+\small
+\caption{Frozen provenance of the accepted confirmatory run.}
+\label{tab:provenance}
+\begin{tabular}{@{}l p{7.2cm}@{}}
+\toprule
+Git revision & \texttt{bd5a9b10\allowbreak 068b69fc\allowbreak 75cc6f80\allowbreak 69044306\allowbreak 33ce7408} \\
+Configuration SHA-256 & \texttt{7b48ec89\allowbreak 155f78ae\allowbreak 7965ac59\allowbreak c9b17a6b\allowbreak f164889e\allowbreak d7f38194\allowbreak c35ba157\allowbreak 6aedfae4} \\
+Python & 3.11.16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 The implementation is available as the public \texttt{behavioral-sensing-research} research repository. The confirmatory simulation is frozen to an exact Git revision, resolved experiment configuration, scientific contract, production seed formula, numerical environment, and machine-readable artifact-acceptance manifest. Manuscript-facing confirmatory results are admissible only after the production shards have been merged and the resulting artifact passes the frozen validator. Generated simulation data need not be committed because trajectories are deterministic conditional on the frozen code and seeds; derived results carry the provenance required to reproduce the run.
 
-The software release used by the frozen experiment satisfied the experiment smoke path before the freeze, and later documentation or validation changes do not move the pinned experiment revision. The confirmatory run has since been executed and accepted under those rules, and its values are reported in the companion manuscript. One outcome from it is used here, its abstention rate under increasing missingness, which we report alongside the separate real-data analysis of \cref{sec:abstentionfailure}.
+The software release used by the frozen experiment satisfied the experiment smoke path before the freeze, and later documentation or validation changes do not move the pinned experiment revision. The confirmatory run has been executed and accepted under those rules, and its values are reported in \cref{sec:confirmatory-results}. The external validation was scored once under the same discipline, against the cohort frozen in \cref{sec:external}.
 
 \section{Conclusion}
 
@@ -566,14 +607,17 @@ safely, whatever its accuracy.
 We report the negative results in full because they are locatable. The
 supervised ceiling separates a limit of the formulation from a limit of the
 instrumentation, and the confidence-band analysis identifies where abstention
-fails rather than only that it does. The frozen confirmatory simulation has now
-been executed and is reported separately; the frozen external cohort remains
-unscored. That cohort's pre-specified primary outcome is the paired
-balanced-accuracy difference between candidate and baseline, with abstention
-among its secondary outcomes, and that ordering stands; abstention is simply
-where the present evidence leaves the largest open question. On that evidence,
-the framework does not yet deliver the property it was built for: a monitoring
-system whose uncertainty degrades in step with its evidence.
+fails rather than only that it does. The frozen confirmatory simulation has been
+executed, and the frozen external cohort has now been scored. Its pre-specified primary outcome, the paired balanced-accuracy
+difference, improved by $+0.0091$ with an interval excluding zero: the one
+component carried forward from the development work does transfer. Its
+secondary abstention outcome did not move. That pairing is the state of the
+evidence. A prior fitted on real recordings generalises to unfamiliar homes and
+unfamiliar instrumentation, by an amount too small to close the gap to what the
+sensors support, while the mechanism the framework depends on to know when its
+evidence is insufficient remains inert on every body of data we have. The
+architecture is transferable; the property it was built for is still not
+demonstrated.
 
 \printbibliography
 

@@ -2,7 +2,15 @@
 
 ## Status
 
-**Prospective candidate specification — primary external test outcomes remain uninspected.**
+**Scored.** The primary external validation was executed once on 2026-09-04 and its
+outcomes have been inspected. Everything below the Status heading is the
+specification as frozen *before* that run, and is retained unchanged as the
+pre-registration record; nothing in it was revised in response to the outcome.
+
+Result: median paired difference in household balanced accuracy $+0.0091$, 95%
+interval $[+0.0054, +0.0117]$, 37 of 43 homes improved. Recorded in
+`artifacts/v03/external_primary_result.json` with the one-shot marker in
+`artifacts/v03/external_primary_scored.json`.
 
 This document selects the model form that will be frozen for the one-shot external validation defined in `papers/failure-aware-multimodal-behavioural-sensing/EXTERNAL_VALIDATION_CONTRACT.md`. It uses only evidence already obtained from the 22-home CASAS `hh` development panel.
 

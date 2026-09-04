@@ -1,6 +1,9 @@
 # External validation contract
 
-Status: **pre-specified, not yet scored on the primary test cohort**.
+Status: **pre-specified, and scored once on the primary test cohort on 2026-09-04.**
+The contract below is retained exactly as frozen; it governed that run and was not
+amended in response to it. The outcome is recorded in
+`artifacts/v03/external_primary_result.json`.
 
 This contract governs the real-home external validation of the paper **Failure-Aware Multimodal Behavioural Sensing**. It is frozen after the N=200 simulator result has been accepted and before any primary external-test outcomes are inspected.
 
