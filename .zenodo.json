@@ -6,8 +6,8 @@
   "creators": [
     {
       "name": "Ribeiro, Diogo",
-      "orcid": "0009-0001-2022-7072",
-      "affiliation": "ESMAD - Instituto Politécnico do Porto"
+      "affiliation": "Faculty of Media Arts and Design, Technical University of Porto",
+      "orcid": "0009-0001-2022-7072"
     }
   ],
   "contributors": [
@@ -15,7 +15,7 @@
       "name": "Ribeiro, Diogo",
       "type": "ContactPerson",
       "orcid": "0009-0001-2022-7072",
-      "affiliation": "ESMAD - Instituto Politécnico do Porto"
+      "affiliation": "Faculty of Media Arts and Design, Technical University of Porto"
     }
   ],
   "access_right": "open",

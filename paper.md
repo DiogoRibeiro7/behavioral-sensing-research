@@ -14,7 +14,7 @@ authors:
     email: dfr@esmad.ipp.pt
     affiliation: 1
 affiliations:
-  - name: ESMAD — Instituto Politécnico do Porto
+  - name: Faculty of Media Arts and Design, Technical University of Porto
     index: 1
 date: 2025-08-28
 bibliography: paper.bib
@@ -111,6 +111,6 @@ The emphasis of this library is a **readable, end‑to‑end** pipeline tuned fo
 
 # Acknowledgements
 
-I thank colleagues and students at ESMAD for early feedback and discussions on sensor modeling in smart‑home deployments.
+I thank colleagues and students at the Faculty of Media Arts and Design for early feedback and discussions on sensor modeling in smart‑home deployments.
 
 # References

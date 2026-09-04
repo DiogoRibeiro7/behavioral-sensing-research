@@ -8,7 +8,7 @@ authors:
   - family-names: "Ribeiro"
     given-names: "Diogo"
     email: "dfr@esmad.ipp.pt"
-    affiliation: "ESMAD - Instituto Politécnico do Porto"
+    affiliation: "Faculty of Media Arts and Design, Technical University of Porto"
     orcid: "https://orcid.org/0009-0001-2022-7072"
     alias: "DiogoRibeiro7"
 
@@ -135,7 +135,7 @@ preferred-citation:
     - family-names: "Ribeiro"
       given-names: "Diogo"
       email: "dfr@esmad.ipp.pt"
-      affiliation: "ESMAD - Instituto Politécnico do Porto"
+      affiliation: "Faculty of Media Arts and Design, Technical University of Porto"
       orcid: "https://orcid.org/0009-0001-2022-7072"
   year: 2026
   version: "0.2.0"
@@ -148,7 +148,7 @@ contact:
   - family-names: "Ribeiro"
     given-names: "Diogo"
     email: "dfr@esmad.ipp.pt"
-    affiliation: "ESMAD - Instituto Politécnico do Porto"
+    affiliation: "Faculty of Media Arts and Design, Technical University of Porto"
     orcid: "https://orcid.org/0009-0001-2022-7072"
 
 # Funding information (if applicable)

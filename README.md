@@ -556,7 +556,7 @@ Distributed under the [MIT License](LICENSE). This allows for both academic and 
 ## 📞 Contact & Support
 
 - **Primary Author**: Diogo Ribeiro (<dfr@esmad.ipp.pt>)
-- **Institution**: ESMAD - Instituto Politécnico do Porto
+- **Institution**: Faculty of Media Arts and Design, Technical University of Porto
 - **Issues**: Use GitHub Issues for bug reports and feature requests
 - **Discussions**: GitHub Discussions for questions and community support
 - **Security**: Follow [`SECURITY.md`](SECURITY.md) for private vulnerability reports
