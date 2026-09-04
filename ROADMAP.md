@@ -260,9 +260,21 @@ Frozen before any scoring:
 - the interpretation boundaries, in
   [cohort composition](docs/EXTERNAL_COHORT_COMPOSITION.md).
 
-Remaining: the one-shot scoring. Its result stands whether positive, null or
-negative, and nothing may be changed in response and rescored as the same
-confirmatory validation.
+**The scoring has been executed.** It ran once, against the frozen cohort and
+grid, and the result stands: median paired difference in household balanced
+accuracy **+0.0091**, 95% bootstrap interval [+0.0054, +0.0117], with 37 of 43
+homes improved and none unscoreable. The interval excludes zero, so the
+circadian prior transfers to homes and instrumentation the candidate was not
+developed on. Secondary outcomes moved with it: balanced accuracy 0.496 to
+0.504, calibration error 0.343 to 0.328, Brier 0.842 to 0.812, log loss 4.302 to
+4.168. Recorded in `artifacts/v03/external_primary_result.json`, with the
+one-shot marker in `artifacts/v03/external_primary_scored.json`.
+
+Two things temper it. The effect is small — nine thousandths against the 0.607
+ceiling real instrumentation supports — so it closes a sliver of the accuracy
+gap rather than the gap. And abstention did not improve, moving 0.0009 to
+0.0013 and continuing not to fire, which leaves item 1 below exactly where it
+was.
 
 **Reading the result will require care.** Only 19% of the cohort comes from the
 `hh` family the candidate was developed on, so a null result is ambiguous

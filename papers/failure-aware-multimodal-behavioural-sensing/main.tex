@@ -543,7 +543,27 @@ losing information on an unfamiliar sensor vocabulary. And because the candidate
 modifies the transition prior, which is the mechanism implicated in the
 abstention saturation of \cref{sec:abstentionfailure}, the abstention secondary
 outcome may move for reasons unrelated to whether the circadian prior is
-beneficial. The scoring has not been executed at the time of writing.
+beneficial.
+
+\paragraph{Result.}
+The scoring has since been executed, once, against the frozen cohort and grid.
+The median paired difference in household balanced accuracy was $+0.0091$, with
+a 95\% household bootstrap interval of $[+0.0054, +0.0117]$; 37 of the 43 homes
+improved, 6 worsened, none was unscoreable. The interval excludes zero, so the
+circadian prior transfers to homes the candidate was not developed on. It
+transfers across instrumentation as well as across homes: 81\% of the cohort
+comes from families outside the development panel's, so the first ambiguity
+above did not arise. Secondary outcomes moved consistently, with balanced
+accuracy $0.496\to0.504$, calibration error $0.343\to0.328$, Brier
+$0.842\to0.812$ and log loss $4.302\to4.168$.
+
+Two qualifications carry more weight than the sign of the result. The effect is
+small: nine thousandths of balanced accuracy against a supervised ceiling of
+0.607 on the same instrumentation, so it closes a sliver of the gap in
+\cref{sec:realdev} rather than the gap. And abstention did not improve, moving
+from $0.0009$ to $0.0013$ and so continuing not to fire; the second ambiguity
+above resolved by the secondary outcome barely moving at all. Median labelled
+coverage on this cohort was 75.9\%, against 89.9\% on the development panel.
 
 \section{Reproducibility and software}
 
@@ -567,13 +587,17 @@ We report the negative results in full because they are locatable. The
 supervised ceiling separates a limit of the formulation from a limit of the
 instrumentation, and the confidence-band analysis identifies where abstention
 fails rather than only that it does. The frozen confirmatory simulation has now
-been executed and is reported separately; the frozen external cohort remains
-unscored. That cohort's pre-specified primary outcome is the paired
-balanced-accuracy difference between candidate and baseline, with abstention
-among its secondary outcomes, and that ordering stands; abstention is simply
-where the present evidence leaves the largest open question. On that evidence,
-the framework does not yet deliver the property it was built for: a monitoring
-system whose uncertainty degrades in step with its evidence.
+been executed and is reported separately, and the frozen external cohort has now
+been scored. Its pre-specified primary outcome, the paired balanced-accuracy
+difference, improved by $+0.0091$ with an interval excluding zero: the one
+component carried forward from the development work does transfer. Its
+secondary abstention outcome did not move. That pairing is the state of the
+evidence. A prior fitted on real recordings generalises to unfamiliar homes and
+unfamiliar instrumentation, by an amount too small to close the gap to what the
+sensors support, while the mechanism the framework depends on to know when its
+evidence is insufficient remains inert on every body of data we have. The
+architecture is transferable; the property it was built for is still not
+demonstrated.
 
 \printbibliography
 
