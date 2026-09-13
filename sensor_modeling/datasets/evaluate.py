@@ -42,6 +42,8 @@ class UncertaintyDiagnostics:
     median_normalised_entropy_incorrect: float | None
     median_evidence_strength_correct: float | None
     median_evidence_strength_incorrect: float | None
+    median_information_gain_correct: float | None
+    median_information_gain_incorrect: float | None
 
     def to_dict(self) -> dict[str, int | float | None]:
         """Return a serialisable representation."""
@@ -56,6 +58,8 @@ class UncertaintyDiagnostics:
             "median_normalised_entropy_incorrect": self.median_normalised_entropy_incorrect,
             "median_evidence_strength_correct": self.median_evidence_strength_correct,
             "median_evidence_strength_incorrect": self.median_evidence_strength_incorrect,
+            "median_information_gain_correct": self.median_information_gain_correct,
+            "median_information_gain_incorrect": self.median_information_gain_incorrect,
         }
 
 
@@ -83,7 +87,7 @@ def _evidence_strength(step: PipelineStep) -> float:
 def uncertainty_diagnostics(
     truth: list[BehaviouralState | None], steps: list[PipelineStep]
 ) -> UncertaintyDiagnostics:
-    """Summarise confidence and evidence strength on scored positions."""
+    """Summarise uncertainty diagnostics on scored positions."""
     if len(truth) != len(steps):
         raise ValueError("truth and steps must have the same length")
 
@@ -95,6 +99,8 @@ def uncertainty_diagnostics(
     incorrect_entropy: list[float] = []
     correct_evidence: list[float] = []
     incorrect_evidence: list[float] = []
+    correct_information_gain: list[float] = []
+    incorrect_information_gain: list[float] = []
 
     scored = 0
     correct = 0
@@ -111,17 +117,22 @@ def uncertainty_diagnostics(
         margin = step.state.margin
         entropy = step.state.normalised_entropy
         evidence = _evidence_strength(step)
+        information_gain = step.state.information_gain
 
         if is_correct:
             correct_confidence.append(confidence)
             correct_margin.append(margin)
             correct_entropy.append(entropy)
             correct_evidence.append(evidence)
+            if information_gain is not None:
+                correct_information_gain.append(information_gain)
         else:
             incorrect_confidence.append(confidence)
             incorrect_margin.append(margin)
             incorrect_entropy.append(entropy)
             incorrect_evidence.append(evidence)
+            if information_gain is not None:
+                incorrect_information_gain.append(information_gain)
 
     return UncertaintyDiagnostics(
         scored=scored,
@@ -134,6 +145,8 @@ def uncertainty_diagnostics(
         median_normalised_entropy_incorrect=_median(incorrect_entropy),
         median_evidence_strength_correct=_median(correct_evidence),
         median_evidence_strength_incorrect=_median(incorrect_evidence),
+        median_information_gain_correct=_median(correct_information_gain),
+        median_information_gain_incorrect=_median(incorrect_information_gain),
     )
 
 
