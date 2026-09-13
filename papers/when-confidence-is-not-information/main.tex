@@ -1,0 +1,213 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\emergencystretch=2em
+
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\KL}{D_{\mathrm{KL}}}
+
+\title{When Confidence Is Not Information:\\
+Failure Modes of Abstention in Ambient Behavioural Sensing}
+\author{Diogo Ribeiro\\
+\small \textit{Faculty of Media Arts and Design, Technical University of Porto}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Probabilistic behavioural-sensing systems often use posterior confidence as a proxy for whether a prediction is trustworthy. That proxy can fail when model structure accumulates certainty even though little genuinely new information arrives. We study this failure in an interpretable smart-home state-inference system using five threshold-free diagnostics: posterior confidence, posterior margin, normalised entropy, interval-level evidence strength, and per-update information gain. The empirical design compares correct and incorrect predictions within each household and summarises separation by a common-language AUC statistic, giving each home equal weight. The motivating evidence is already negative for confidence: on real CASAS recordings the model is often confidently wrong, while confirmatory simulation shows that abstention remains almost silent even under substantial missingness. Controlled quiet-period experiments further show that transition dynamics alone do not create extreme certainty; instead, complementary state-dependent Poisson silence likelihoods from working sensor streams can jointly drive posterior concentration. The central question is therefore not whether confidence is high, but whether the current update actually contains information that discriminates correct from incorrect inference. The paper is diagnostic rather than prescriptive: no new abstention threshold or replacement decision rule is introduced until the failure mechanism is characterised on real recordings.
+\end{abstract}
+
+\noindent\textbf{Keywords:} uncertainty; abstention; confidence; information gain; ambient sensing; smart homes; behavioural inference; calibration
+
+\section{Introduction}
+
+An abstaining classifier makes a stronger claim than an ordinary probabilistic classifier. It claims not only to rank hypotheses, but also to recognise when the evidence is insufficient to justify a decision. In ambient behavioural sensing this distinction matters because missing or quiet sensors, sparse observations, and persistent latent-state models can all produce concentrated posteriors without necessarily producing reliable predictions.
+
+The system studied here already exposes an abstention mechanism based on posterior confidence and sensor completeness. Real-data evaluation, however, showed that stated confidence only weakly separates correct from incorrect predictions, while the highest-confidence band performs worse than the band immediately below it. In confirmatory simulation, abstention remains effectively silent even as random missingness rises substantially. Those two failures differ in form but agree in implication: confidence alone is not a reliable proxy for whether the current prediction should be trusted.
+
+This paper asks a narrower question:
+\begin{quote}
+When the model is correct rather than incorrect, does the current update contain systematically more information, or does high confidence mostly reflect accumulated model structure?
+\end{quote}
+
+The contribution is empirical and diagnostic. We compare five quantities that are already available from the inference trace:
+\begin{enumerate}[label=(\roman*)]
+    \item posterior confidence;
+    \item posterior margin;
+    \item normalised entropy;
+    \item interval-level evidence strength; and
+    \item per-update information gain.
+\end{enumerate}
+
+No threshold is tuned. No abstention rule is changed. The aim is to determine which, if any, of these quantities genuinely separates correct from incorrect predictions on real recordings.
+
+\section{Model quantities}
+
+Let $p_{t|t-1}$ denote the predicted latent-state distribution after the transition update and before processing the observations at time $t$, and let $p_t$ denote the posterior after the observation likelihoods are applied.
+
+\subsection{Confidence and posterior margin}
+
+For latent state space $\mathcal{S}$, define posterior confidence as
+\begin{equation}
+    C_t = \max_{z\in\mathcal{S}} p_t(z).
+\end{equation}
+
+If $p_t^{(1)}$ and $p_t^{(2)}$ are the largest and second-largest posterior masses, define the posterior margin
+\begin{equation}
+    M_t = p_t^{(1)} - p_t^{(2)}.
+\end{equation}
+
+Both are functions of the final posterior only. Neither distinguishes confidence inherited from prior structure from confidence created by the current observation interval.
+
+\subsection{Normalised entropy}
+
+The posterior entropy is
+\begin{equation}
+    H_t = -\sum_{z\in\mathcal{S}} p_t(z)\log p_t(z),
+\end{equation}
+with normalised form
+\begin{equation}
+    \widetilde H_t = \frac{H_t}{\log |\mathcal{S}|}.
+\end{equation}
+
+Lower $\widetilde H_t$ means a more concentrated posterior.
+
+\subsection{Interval-level evidence strength}
+
+Each informative sensor contributes a log-likelihood support value relative to the winning state. Let $s_{jt}$ denote that support for sensor $j$ at time $t$. The interval-level evidence-strength diagnostic is
+\begin{equation}
+    E_t = \frac{1}{|J_t|}\sum_{j\in J_t}|s_{jt}|,
+\end{equation}
+where $J_t$ contains sensors whose likelihood was actually applied. A working event sensor that reports zero activations can still be informative under the Poisson model; a sensor with zero reliability is excluded.
+
+\subsection{Per-update information gain}
+
+The update information gain is
+\begin{equation}
+    I_t = \KL\!\left(p_t\,\|\,p_{t|t-1}\right)
+    = \sum_{z\in\mathcal{S}} p_t(z)
+      \log\frac{p_t(z)}{p_{t|t-1}(z)}.
+\end{equation}
+
+Unlike $C_t$, $M_t$, and $\widetilde H_t$, this quantity measures how much the current observation interval moved the predicted belief. If the posterior is already concentrated before observing the interval, then $I_t$ can remain small even when $C_t$ is large.
+
+\section{Why quiet periods matter}
+
+Controlled quiet-period experiments show that the transition model alone does not drive the posterior to certainty when initialised at stationarity. With event likelihoods disabled, the posterior remains close to the stationary distribution. Extreme confidence appears only when state-dependent Poisson silence likelihoods from working sensor streams are applied repeatedly.
+
+The mechanism is complementary rather than attributable to one stream in isolation. Silence from room-motion streams suppresses active in-home states and can shift mass toward away-like states. Silence from entrance-door streams suppresses away and some active alternatives. When both families remain quiet, different competing states are penalised simultaneously and sleeping can dominate. Persistence then carries that concentration forward.
+
+This matters because a high value of $C_t$ may therefore reflect the accumulated interaction of prior persistence and repeated silence likelihoods rather than strong positive evidence in the current interval.
+
+\section{Empirical design}
+
+\subsection{Development panel}
+
+The analysis uses the 22 single-resident CASAS `hh` homes previously used for real-data development and failure analysis. These homes are not held out from earlier investigation, so the results are mechanistic development evidence rather than confirmatory external validation.
+
+The frozen 43-home primary external cohort from the `0.3.0` validation is not rescored in this paper's exploratory analysis.
+
+Each home is processed through the existing CASAS adapter and the ordinary default inference path on the established five-minute grid. Only positions with mapped behavioural annotation are scored.
+
+\subsection{Correctness separation}
+
+For a diagnostic $X_t$, let $X^+$ denote its values on correct predictions and $X^-$ its values on incorrect predictions. For confidence, margin, evidence strength, and information gain, define
+\begin{equation}
+    A_X = \Prob(X^+ > X^-) + \frac{1}{2}\Prob(X^+ = X^-).
+\end{equation}
+
+For entropy the favourable direction is reversed:
+\begin{equation}
+    A_H = \Prob(\widetilde H^+ < \widetilde H^-)
+    + \frac{1}{2}\Prob(\widetilde H^+ = \widetilde H^-).
+\end{equation}
+
+The interpretation is uniform:
+\begin{equation}
+    A=0.5 \text{ means no separation},\qquad
+    A>0.5 \text{ favours correct predictions},\qquad
+    A<0.5 \text{ indicates inversion}.
+\end{equation}
+
+This is a common-language/AUC-style estimand and is invariant to monotone rescaling of a diagnostic.
+
+\subsection{Household-level estimand}
+
+The household is the unit of aggregation. For each diagnostic we compute $A_{X,h}$ within household $h$, then report
+\begin{equation}
+    \operatorname{median}_{h}\left(A_{X,h}\right).
+\end{equation}
+
+Each household therefore contributes at most one value per diagnostic regardless of recording length. Missing information-gain diagnostics remain missing; they are not replaced with zero. The number of contributing homes is reported for every metric.
+
+\section{Results}
+
+\subsection{Previously established confidence failure}
+
+The earlier real-data analysis already establishes that confidence is a poor correctness signal. Across 60,948 scored real-data steps, the difference between correct and incorrect confidence was small, and the highest-confidence band performed worse than the band immediately below it. The present analysis re-expresses this failure using the same household-weighted correctness-separation scale applied to all five diagnostics.
+
+\subsection{Household-level separation}
+
+\begin{table}[ht]
+\centering
+\caption{Household-level correctness separation on the 22-home CASAS development panel. Values are the median within-home common-language AUC. This table is intentionally pending execution of \texttt{scripts/analyse\_uncertainty\_panel.py}; no value is inserted before the machine-readable result exists.}
+\label{tab:separation}
+\begin{tabular}{lcc}
+\toprule
+Diagnostic & Median correctness AUC & Homes \\
+\midrule
+Confidence & pending & pending \\
+Posterior margin & pending & pending \\
+Normalised entropy & pending & pending \\
+Evidence strength & pending & pending \\
+Information gain & pending & pending \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The primary descriptive question is whether information gain separates correctness more strongly than confidence. A positive result would require a median information-gain AUC materially above $0.5$ across contributing households. A result near $0.5$ would show that the current update itself contains little information about whether the reported state is correct. A value below $0.5$ would indicate an even stronger failure: incorrect predictions would, on average, move the predicted belief more than correct predictions.
+
+\section{Interpretation}
+
+Three interpretations are possible.
+
+First, if confidence is weak or inverted while information gain separates correctness, then the main failure is a mismatch between accumulated posterior concentration and update-level evidence. That would support redesigning abstention around information supplied by the current interval rather than posterior mass alone.
+
+Second, if confidence and information gain are both weak, then the problem is deeper. The observation model itself may not contain enough interval-level information to distinguish right from wrong predictions, and replacing one threshold statistic with another would not solve the problem.
+
+Third, if evidence strength separates correctness while information gain does not, then the update geometry rather than raw evidential magnitude may be responsible. Large sensor log-likelihood contrasts may still move the posterior only weakly when the prior is already concentrated.
+
+None of these outcomes justifies choosing a threshold after inspecting the same development data. This paper therefore stops at diagnosis.
+
+\section{Limitations}
+
+The analysis is development-stage evidence. The 22 homes were repeatedly inspected while earlier failure modes were diagnosed, so no p-value or confidence interval should be read as confirmatory evidence of external performance. All homes come from the same CASAS research ecosystem, which limits instrumentation diversity and external independence.
+
+The information-gain diagnostic is conditional on the model's own predicted and posterior distributions. It can diagnose how much the model updates itself, but it is not an external measure of information in the Shannon-channel sense and does not establish causal informativeness of a sensor stream.
+
+Finally, the five diagnostics are descriptive summaries of correctness separation. They do not by themselves define an abstention policy, loss function, or deployment threshold.
+
+\section{Reproducibility}
+
+The analysis is implemented by `scripts/analyse_uncertainty_panel.py`. The script reads the 22-home development-panel membership already stored in `artifacts/v03/external_cohort_manifest.json`, evaluates each home using the existing default inference path, writes the complete household uncertainty diagnostics, and records the equal-household panel summary in a machine-readable JSON file.
+
+The paper table in \cref{tab:separation} must be populated from that artifact only. The manuscript should not contain manually transcribed values that cannot be traced back to the JSON output.
+
+\section{Conclusion}
+
+A probabilistic system can be highly confident without receiving much new information. In ambient behavioural sensing this distinction is especially important because quiet working sensors produce state-dependent evidence, persistence carries posterior concentration forward, and missingness can coexist with near-zero abstention. The analysis developed here therefore asks a more defensible question than whether confidence is high: does the current diagnostic quantity actually distinguish correct from incorrect inference across homes? Until that question is answered, replacing one confidence threshold with another would merely change the surface of the same problem.
+
+\end{document}
