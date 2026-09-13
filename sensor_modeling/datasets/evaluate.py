@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 from bisect import bisect_left, bisect_right
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import timedelta
 from statistics import median
@@ -203,6 +204,35 @@ def uncertainty_diagnostics(
             correct_information_gain, incorrect_information_gain
         ),
     )
+
+
+def uncertainty_panel_summary(
+    diagnostics: Sequence[UncertaintyDiagnostics],
+) -> dict[str, int | float | None]:
+    """Aggregate correctness separation across homes with equal household weight.
+
+    Each household contributes at most one AUC value per diagnostic. Missing
+    values are excluded for that diagnostic rather than replaced with zero, and
+    the corresponding ``*_homes`` field records how many households contributed.
+    """
+    metrics = {
+        "confidence": "confidence_correctness_auc",
+        "margin": "margin_correctness_auc",
+        "normalised_entropy": "normalised_entropy_correctness_auc",
+        "evidence_strength": "evidence_strength_correctness_auc",
+        "information_gain": "information_gain_correctness_auc",
+    }
+
+    summary: dict[str, int | float | None] = {"homes": len(diagnostics)}
+    for name, attribute in metrics.items():
+        values = [
+            value
+            for item in diagnostics
+            if (value := getattr(item, attribute)) is not None
+        ]
+        summary[f"{name}_homes"] = len(values)
+        summary[f"median_{name}_correctness_auc"] = _median(values)
+    return summary
 
 
 @dataclass(frozen=True)
