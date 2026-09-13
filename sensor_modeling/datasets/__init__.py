@@ -31,6 +31,7 @@ from .evaluate import (
     UncertaintyDiagnostics,
     evaluate_recording,
     uncertainty_diagnostics,
+    uncertainty_panel_summary,
 )
 from .rates import (
     RateReport,
@@ -57,6 +58,7 @@ __all__ = [
     "pooled_rate_report",
     "evaluate_recording",
     "uncertainty_diagnostics",
+    "uncertainty_panel_summary",
     "CASAS_ACTIVITY_STATES",
     "CasasReadError",
     "CasasRecording",
