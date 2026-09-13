@@ -83,10 +83,11 @@ def test_uncertainty_diagnostics_split_correct_from_incorrect() -> None:
     assert result.median_evidence_strength_incorrect == pytest.approx(0.2)
     assert result.median_information_gain_correct == pytest.approx(0.12)
     assert result.median_information_gain_incorrect == pytest.approx(0.03)
-    assert result.median_margin_correct is not None
-    assert result.median_margin_incorrect is not None
-    assert result.median_normalised_entropy_correct is not None
-    assert result.median_normalised_entropy_incorrect is not None
+    assert result.confidence_correctness_auc == pytest.approx(0.0)
+    assert result.margin_correctness_auc == pytest.approx(0.0)
+    assert result.normalised_entropy_correctness_auc == pytest.approx(0.0)
+    assert result.evidence_strength_correctness_auc == pytest.approx(1.0)
+    assert result.information_gain_correctness_auc == pytest.approx(1.0)
 
 
 def test_uncertainty_diagnostics_ignore_unlabelled_steps() -> None:
@@ -115,6 +116,8 @@ def test_uncertainty_diagnostics_ignore_unlabelled_steps() -> None:
     assert result.median_confidence_incorrect is None
     assert result.median_evidence_strength_incorrect is None
     assert result.median_information_gain_incorrect is None
+    assert result.confidence_correctness_auc is None
+    assert result.information_gain_correctness_auc is None
 
 
 def test_uncertainty_diagnostics_preserve_missing_information_gain() -> None:
@@ -134,3 +137,31 @@ def test_uncertainty_diagnostics_preserve_missing_information_gain() -> None:
 
     assert result.median_information_gain_correct is None
     assert result.median_information_gain_incorrect == pytest.approx(0.0)
+    assert result.information_gain_correctness_auc is None
+
+
+def test_uncertainty_diagnostics_auc_gives_half_credit_for_ties() -> None:
+    """Tied diagnostic values should contribute half a favourable comparison."""
+    steps = [
+        _step(
+            [0.80],
+            support=1.0,
+            state=S.HOME_ACTIVE,
+            information_gain=0.2,
+        ),
+        _step(
+            [0.80],
+            support=1.0,
+            state=S.KITCHEN_ACTIVITY,
+            information_gain=0.2,
+        ),
+    ]
+    truth = [S.HOME_ACTIVE, S.BATHROOM_ACTIVITY]
+
+    result = uncertainty_diagnostics(truth, steps)
+
+    assert result.confidence_correctness_auc == pytest.approx(0.5)
+    assert result.margin_correctness_auc == pytest.approx(0.5)
+    assert result.normalised_entropy_correctness_auc == pytest.approx(0.5)
+    assert result.evidence_strength_correctness_auc == pytest.approx(0.5)
+    assert result.information_gain_correctness_auc == pytest.approx(0.5)

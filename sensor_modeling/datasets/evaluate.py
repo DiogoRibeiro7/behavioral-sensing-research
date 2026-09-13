@@ -14,6 +14,7 @@ measure of how far the declared defaults transfer.
 from __future__ import annotations
 
 import logging
+from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
 from datetime import timedelta
 from statistics import median
@@ -44,6 +45,11 @@ class UncertaintyDiagnostics:
     median_evidence_strength_incorrect: float | None
     median_information_gain_correct: float | None
     median_information_gain_incorrect: float | None
+    confidence_correctness_auc: float | None
+    margin_correctness_auc: float | None
+    normalised_entropy_correctness_auc: float | None
+    evidence_strength_correctness_auc: float | None
+    information_gain_correctness_auc: float | None
 
     def to_dict(self) -> dict[str, int | float | None]:
         """Return a serialisable representation."""
@@ -60,12 +66,48 @@ class UncertaintyDiagnostics:
             "median_evidence_strength_incorrect": self.median_evidence_strength_incorrect,
             "median_information_gain_correct": self.median_information_gain_correct,
             "median_information_gain_incorrect": self.median_information_gain_incorrect,
+            "confidence_correctness_auc": self.confidence_correctness_auc,
+            "margin_correctness_auc": self.margin_correctness_auc,
+            "normalised_entropy_correctness_auc": self.normalised_entropy_correctness_auc,
+            "evidence_strength_correctness_auc": self.evidence_strength_correctness_auc,
+            "information_gain_correctness_auc": self.information_gain_correctness_auc,
         }
 
 
 def _median(values: list[float]) -> float | None:
     """Return the median, or ``None`` when no values are available."""
     return float(median(values)) if values else None
+
+
+def _correctness_auc(
+    correct: list[float],
+    incorrect: list[float],
+    *,
+    lower_is_better: bool = False,
+) -> float | None:
+    """Return scale-free correct/incorrect separation with half-credit for ties.
+
+    The result is the probability that a randomly chosen correct prediction has
+    a more favourable diagnostic value than a randomly chosen incorrect one,
+    with ties contributing one half. Thus 0.5 means no separation, values above
+    0.5 are useful, and values below 0.5 are inverted. Entropy uses
+    ``lower_is_better=True`` because lower entropy is the favourable direction.
+    """
+    if not correct or not incorrect:
+        return None
+
+    reference = sorted(incorrect)
+    favourable = 0.0
+    for value in correct:
+        left = bisect_left(reference, value)
+        right = bisect_right(reference, value)
+        ties = right - left
+        if lower_is_better:
+            favourable += len(reference) - right + 0.5 * ties
+        else:
+            favourable += left + 0.5 * ties
+
+    return favourable / (len(correct) * len(incorrect))
 
 
 def _evidence_strength(step: PipelineStep) -> float:
@@ -147,6 +189,19 @@ def uncertainty_diagnostics(
         median_evidence_strength_incorrect=_median(incorrect_evidence),
         median_information_gain_correct=_median(correct_information_gain),
         median_information_gain_incorrect=_median(incorrect_information_gain),
+        confidence_correctness_auc=_correctness_auc(
+            correct_confidence, incorrect_confidence
+        ),
+        margin_correctness_auc=_correctness_auc(correct_margin, incorrect_margin),
+        normalised_entropy_correctness_auc=_correctness_auc(
+            correct_entropy, incorrect_entropy, lower_is_better=True
+        ),
+        evidence_strength_correctness_auc=_correctness_auc(
+            correct_evidence, incorrect_evidence
+        ),
+        information_gain_correctness_auc=_correctness_auc(
+            correct_information_gain, incorrect_information_gain
+        ),
     )
 
 
