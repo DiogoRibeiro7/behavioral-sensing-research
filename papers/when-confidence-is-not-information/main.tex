@@ -9,6 +9,8 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{enumitem}
+\usepackage[backend=biber,style=authoryear,natbib=true,maxcitenames=2,maxbibnames=99]{biblatex}
+\addbibresource{references.bib}
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
 \emergencystretch=2em
@@ -53,6 +55,22 @@ The contribution is empirical and diagnostic. We compare five quantities that ar
 \end{enumerate}
 
 No threshold is tuned. No abstention rule is changed. The aim is to determine which, if any, of these quantities genuinely separates correct from incorrect predictions on real recordings.
+
+\section{Related work}
+
+\subsection{Selective prediction and reject options}
+
+Abstention is usually studied as selective classification or classification with a reject option: the model trades coverage for lower error on the examples it elects to classify. Modern selective-prediction work makes this trade-off explicit through risk--coverage control rather than assuming that a fixed posterior threshold is intrinsically meaningful. \citet{geifman2017selective} construct a selective classifier around a trained network and control selective risk by rejecting predictions until a target risk level is met. \citet{geifman2019selectivenet} go further and optimise prediction and rejection jointly rather than treating the reject decision as a post-processing threshold over a pre-trained model.
+
+Our setting differs in two ways. First, the system is an interpretable latent-state filter rather than a discriminative neural classifier. Second, we do not attempt to optimise a new rejection policy in this paper. The existing abstention rule is itself the object of diagnosis. The immediate question is whether its underlying confidence quantities carry any information about correctness before a risk--coverage policy is designed around them.
+
+\subsection{Calibration and failure prediction}
+
+Calibration asks whether stated probabilities correspond to empirical correctness frequencies. Poor calibration has been documented even in high-performing classifiers, motivating post-hoc procedures such as temperature scaling \citep{guo2017calibration}. Calibration, however, is not the same object as failure prediction. A system can be globally calibrated yet still provide weak ranking of individual failures, while a confidence score can separate correct from incorrect predictions without being numerically calibrated.
+
+This distinction is central here. The real-data failure that motivates the present paper is not merely that confidence values are too large; it is that high confidence carries little information about whether a prediction is correct, and the highest-confidence region can be worse than the region immediately below it. Work on explicit failure prediction has made the same conceptual distinction. \citet{corbiere2019failure} show that maximum class probability can be a poor failure-prediction signal and introduce a learned confidence target designed specifically to separate correct from incorrect predictions.
+
+Our analysis remains model-internal and non-learned. Rather than adding another confidence estimator, we compare quantities already present in the probabilistic trace and ask which of them, if any, separate correctness. The goal is to distinguish posterior concentration from update-level information before introducing a new abstention mechanism.
 
 \section{Model quantities}
 
@@ -155,9 +173,29 @@ Each household therefore contributes at most one value per diagnostic regardless
 
 \section{Results}
 
-\subsection{Previously established confidence failure}
+\subsection{Established failure evidence}
 
-The earlier real-data analysis already establishes that confidence is a poor correctness signal. Across 60,948 scored real-data steps, the difference between correct and incorrect confidence was small, and the highest-confidence band performed worse than the band immediately below it. The present analysis re-expresses this failure using the same household-weighted correctness-separation scale applied to all five diagnostics.
+Several facts are already fixed before the new five-metric panel analysis is run. They motivate the paper but are not re-estimated here.
+
+\begin{table}[ht]
+\centering
+\caption{Previously established evidence motivating the new correctness-separation analysis. These quantities were obtained before the present manuscript and therefore are not outcomes selected after seeing the new five-metric panel result.}
+\label{tab:established}
+\begin{tabular}{p{0.43\linewidth}p{0.48\linewidth}}
+\toprule
+Finding & Established result \\
+\midrule
+Real-data confidence separation & Correct versus incorrect confidence differs only weakly; the previously reported separation is approximately $0.073$. \\
+Highest-confidence band & Accuracy in the $0.95$--$1.00$ confidence band is about $0.561$, below the roughly $0.653$ accuracy in the $0.85$--$0.95$ band. \\
+Coverage of highest-confidence band & Approximately $39\%$ of scored real-data positions. \\
+Confirmatory missingness stress test & Mean abstention rises only from approximately $9.7\times 10^{-6}$ to $5.3\times10^{-5}$ as random missingness increases from $0\%$ to $40\%$. \\
+Quiet-period transition-only control & Starting from stationarity, disabling event likelihoods leaves posterior confidence near the stationary maximum rather than driving it toward certainty. \\
+Quiet-period working-sensor condition & Repeated state-dependent silence likelihoods can drive confidence above $0.95$ without any activation events. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The previous real-data study contains 60,948 scored steps. The present analysis does not pool those steps across homes because a long recording would then dominate a short one. Instead, it converts each diagnostic to a within-home correctness-separation statistic and aggregates homes equally.
 
 \subsection{Household-level separation}
 
@@ -190,6 +228,8 @@ Second, if confidence and information gain are both weak, then the problem is de
 
 Third, if evidence strength separates correctness while information gain does not, then the update geometry rather than raw evidential magnitude may be responsible. Large sensor log-likelihood contrasts may still move the posterior only weakly when the prior is already concentrated.
 
+These cases connect directly to selective prediction. If none of the available diagnostics rank failures meaningfully, then optimising a reject threshold over them can only trade coverage against a weak ordering of risk. Conversely, if one diagnostic separates correctness substantially better than confidence, then a later study can define and validate a risk--coverage policy around that quantity. The present paper deliberately stops before that policy-selection step.
+
 None of these outcomes justifies choosing a threshold after inspecting the same development data. This paper therefore stops at diagnosis.
 
 \section{Limitations}
@@ -197,6 +237,8 @@ None of these outcomes justifies choosing a threshold after inspecting the same 
 The analysis is development-stage evidence. The 22 homes were repeatedly inspected while earlier failure modes were diagnosed, so no p-value or confidence interval should be read as confirmatory evidence of external performance. All homes come from the same CASAS research ecosystem, which limits instrumentation diversity and external independence.
 
 The information-gain diagnostic is conditional on the model's own predicted and posterior distributions. It can diagnose how much the model updates itself, but it is not an external measure of information in the Shannon-channel sense and does not establish causal informativeness of a sensor stream.
+
+The common-language AUC is a ranking measure, not a calibration measure. A diagnostic may rank correct predictions above incorrect ones while still being numerically miscalibrated, and a calibrated probability need not provide strong failure ranking. The paper therefore reports correctness separation rather than treating AUC as a substitute for calibration analysis.
 
 Finally, the five diagnostics are descriptive summaries of correctness separation. They do not by themselves define an abstention policy, loss function, or deployment threshold.
 
@@ -210,4 +252,5 @@ The paper table in \cref{tab:separation} must be populated from that artifact on
 
 A probabilistic system can be highly confident without receiving much new information. In ambient behavioural sensing this distinction is especially important because quiet working sensors produce state-dependent evidence, persistence carries posterior concentration forward, and missingness can coexist with near-zero abstention. The analysis developed here therefore asks a more defensible question than whether confidence is high: does the current diagnostic quantity actually distinguish correct from incorrect inference across homes? Until that question is answered, replacing one confidence threshold with another would merely change the surface of the same problem.
 
+\printbibliography
 \end{document}
