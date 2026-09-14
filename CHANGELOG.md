@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-14
+
+Turns the uncertainty diagnostics introduced in 0.3.0 into a reproducible,
+threshold-free correctness-separation workflow for real-data research. This
+release is diagnostic: it does not change inference, abstention thresholds,
+transition dynamics, emissions, the ontology, or the frozen v0.3 external
+validation result.
+
+### Added
+- Added correct/incorrect median summaries for per-update information gain to `UncertaintyDiagnostics`. Missing information-gain values remain missing rather than being coerced to zero, while a genuine measured zero remains a valid observation.
+- Added a common-language/AUC-style correctness-separation statistic for posterior confidence, posterior margin, normalised entropy, interval-level evidence strength, and per-update information gain. The statistic gives half credit for ties, uses the favourable direction for each metric, and has the common interpretation `0.5` = no separation, `>0.5` = correct-favouring separation, `<0.5` = inversion.
+- Added `uncertainty_panel_summary(...)`, aggregating the five separation diagnostics across households with one value per home so long recordings do not dominate short ones. Missing information-gain diagnostics reduce only the information-gain coverage count.
+- Added `scripts/analyse_uncertainty_panel.py`, a reproducible Paper 1 analysis entry point for the recorded 22-home CASAS development panel. It runs the existing default inference path, records household uncertainty diagnostics, and writes a machine-readable equal-household panel summary without touching the frozen 43-home primary external cohort.
+- Added byte-exact provenance checks to the Paper 1 panel runner. Every development recording must match the frozen manifest filename, development-only status, byte size, and SHA-256 digest before it can be analysed; the verified source identity is written into the result artifact. Focused tests lock the exact 22-home membership and rejection of missing identities, size mismatches, and digest mismatches.
+- Added a GitHub Actions execution path for the Paper 1 panel analysis. The workflow downloads the frozen CASAS Zenodo archive, verifies its recorded size and MD5, relies on the runner to verify all 22 household files again, and uploads only the resulting JSON artifact.
+- Added the first post-v0.3 follow-up manuscript, `papers/when-confidence-is-not-information/`, with the uncertainty quantities, household-level estimand, selective-prediction context, previously established abstention failures, and a pre-result analysis contract fixed before inserting new panel values.
+
+### Changed
+- Refocused `ROADMAP.md` on three post-v0.3 research papers: confidence/information failure, recoverable-information versus formulation limits, and the sensor-information frontier. Software work is now explicitly subordinate to those scientific questions rather than to a pre-declared next package release.
+- Simplified release documentation so the matching `CHANGELOG.md` version section is the single source of GitHub Release notes. Separate per-version release-note files are no longer maintained, and ancestry-only `main` to `develop` merges are not required when the released file tree is unchanged.
+
 ## [0.3.0] - 2026-09-12
 
 Moves the ambient-sensing work from simulator-only claims to measured real-data
