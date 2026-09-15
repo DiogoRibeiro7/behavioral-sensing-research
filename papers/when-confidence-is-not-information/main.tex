@@ -2,7 +2,7 @@
 \usepackage[a4paper,margin=2.6cm]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{lmodern,microtype,amsmath,amssymb,booktabs,array,enumitem}
+\usepackage{lmodern,microtype,amsmath,amssymb,booktabs,array,enumitem,graphicx}
 \usepackage[backend=biber,style=authoryear,natbib=true,maxcitenames=2,maxbibnames=99]{biblatex}
 \addbibresource{references.bib}
 \usepackage[hidelinks]{hyperref}
@@ -88,6 +88,13 @@ Information gain & 0.3875 & 22 \\
 \end{tabular}
 \end{table}
 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\linewidth]{uncertainty_panel_auc.pdf}
+\caption{Within-home correctness AUC for all 22 development homes and all five diagnostics. Each point is one household. The dashed horizontal line marks the fixed no-separation reference $A=0.5$. No fitted trend, threshold line, post-hoc filtering, or household weighting is applied.}
+\label{fig:uncertainty-panel}
+\end{figure}
+
 Confidence, margin, and entropy are all close to the no-separation value of 0.5. Confidence is the largest of the three, but only at 0.5193.
 
 The update-level diagnostics are not merely weak. Information gain has median AUC 0.3875 and evidence strength 0.3719, so their ordering is inverted: stronger updates and larger evidence magnitude are associated with incorrect predictions more often than with correct predictions in the common-language ranking sense.
@@ -115,7 +122,7 @@ Information gain measures how much the model updates itself; it is not an extern
 \section{Reproducibility}
 The analysis is implemented by \texttt{scripts/analyse\_uncertainty\_panel.py}. It reads the frozen 22-home development-panel membership, verifies each source recording against its stored byte size and SHA-256 digest, evaluates each home using the default inference path, and records the equal-household summary.
 
-The executed workflow artifact is frozen at \texttt{artifacts/paper1/uncertainty\_panel.json}. It is the source of truth for every value in \cref{tab:separation}.
+The executed workflow artifact is frozen at \texttt{artifacts/paper1/uncertainty\_panel.json}. It is the source of truth for every value in \cref{tab:separation}. The pre-specified household-distribution figure in \cref{fig:uncertainty-panel} is rendered deterministically from the same artifact by \texttt{scripts/plot\_uncertainty\_panel.py}.
 
 \section{Conclusion}
 Posterior confidence is not a strong correctness-ranking signal in this ambient behavioural-sensing system, but the natural update-level alternatives perform worse rather than better. Across 22 development homes, confidence, margin, and normalised entropy have median correctness AUCs only slightly above 0.5, while evidence strength and information gain are inverted at 0.3719 and 0.3875. All three directional hypotheses specified before execution fail.
