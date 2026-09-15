@@ -52,7 +52,8 @@ def render(homes: list[dict[str, object]], output: Path) -> None:
     fig.tight_layout()
 
     output.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output, bbox_inches="tight")
+    # Omitting the creation timestamp keeps re-renders byte-identical.
+    fig.savefig(output, bbox_inches="tight", metadata={"CreationDate": None})
     plt.close(fig)
 
 
