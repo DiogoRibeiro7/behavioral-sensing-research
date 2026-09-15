@@ -14,6 +14,8 @@ measure of how far the declared defaults transfer.
 from __future__ import annotations
 
 import logging
+from bisect import bisect_left, bisect_right
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import timedelta
 from statistics import median
@@ -42,6 +44,13 @@ class UncertaintyDiagnostics:
     median_normalised_entropy_incorrect: float | None
     median_evidence_strength_correct: float | None
     median_evidence_strength_incorrect: float | None
+    median_information_gain_correct: float | None
+    median_information_gain_incorrect: float | None
+    confidence_correctness_auc: float | None
+    margin_correctness_auc: float | None
+    normalised_entropy_correctness_auc: float | None
+    evidence_strength_correctness_auc: float | None
+    information_gain_correctness_auc: float | None
 
     def to_dict(self) -> dict[str, int | float | None]:
         """Return a serialisable representation."""
@@ -56,12 +65,50 @@ class UncertaintyDiagnostics:
             "median_normalised_entropy_incorrect": self.median_normalised_entropy_incorrect,
             "median_evidence_strength_correct": self.median_evidence_strength_correct,
             "median_evidence_strength_incorrect": self.median_evidence_strength_incorrect,
+            "median_information_gain_correct": self.median_information_gain_correct,
+            "median_information_gain_incorrect": self.median_information_gain_incorrect,
+            "confidence_correctness_auc": self.confidence_correctness_auc,
+            "margin_correctness_auc": self.margin_correctness_auc,
+            "normalised_entropy_correctness_auc": self.normalised_entropy_correctness_auc,
+            "evidence_strength_correctness_auc": self.evidence_strength_correctness_auc,
+            "information_gain_correctness_auc": self.information_gain_correctness_auc,
         }
 
 
 def _median(values: list[float]) -> float | None:
     """Return the median, or ``None`` when no values are available."""
     return float(median(values)) if values else None
+
+
+def _correctness_auc(
+    correct: list[float],
+    incorrect: list[float],
+    *,
+    lower_is_better: bool = False,
+) -> float | None:
+    """Return scale-free correct/incorrect separation with half-credit for ties.
+
+    The result is the probability that a randomly chosen correct prediction has
+    a more favourable diagnostic value than a randomly chosen incorrect one,
+    with ties contributing one half. Thus 0.5 means no separation, values above
+    0.5 are useful, and values below 0.5 are inverted. Entropy uses
+    ``lower_is_better=True`` because lower entropy is the favourable direction.
+    """
+    if not correct or not incorrect:
+        return None
+
+    reference = sorted(incorrect)
+    favourable = 0.0
+    for value in correct:
+        left = bisect_left(reference, value)
+        right = bisect_right(reference, value)
+        ties = right - left
+        if lower_is_better:
+            favourable += len(reference) - right + 0.5 * ties
+        else:
+            favourable += left + 0.5 * ties
+
+    return favourable / (len(correct) * len(incorrect))
 
 
 def _evidence_strength(step: PipelineStep) -> float:
@@ -83,7 +130,7 @@ def _evidence_strength(step: PipelineStep) -> float:
 def uncertainty_diagnostics(
     truth: list[BehaviouralState | None], steps: list[PipelineStep]
 ) -> UncertaintyDiagnostics:
-    """Summarise confidence and evidence strength on scored positions."""
+    """Summarise uncertainty diagnostics on scored positions."""
     if len(truth) != len(steps):
         raise ValueError("truth and steps must have the same length")
 
@@ -95,6 +142,8 @@ def uncertainty_diagnostics(
     incorrect_entropy: list[float] = []
     correct_evidence: list[float] = []
     incorrect_evidence: list[float] = []
+    correct_information_gain: list[float] = []
+    incorrect_information_gain: list[float] = []
 
     scored = 0
     correct = 0
@@ -111,17 +160,22 @@ def uncertainty_diagnostics(
         margin = step.state.margin
         entropy = step.state.normalised_entropy
         evidence = _evidence_strength(step)
+        information_gain = step.state.information_gain
 
         if is_correct:
             correct_confidence.append(confidence)
             correct_margin.append(margin)
             correct_entropy.append(entropy)
             correct_evidence.append(evidence)
+            if information_gain is not None:
+                correct_information_gain.append(information_gain)
         else:
             incorrect_confidence.append(confidence)
             incorrect_margin.append(margin)
             incorrect_entropy.append(entropy)
             incorrect_evidence.append(evidence)
+            if information_gain is not None:
+                incorrect_information_gain.append(information_gain)
 
     return UncertaintyDiagnostics(
         scored=scored,
@@ -134,7 +188,51 @@ def uncertainty_diagnostics(
         median_normalised_entropy_incorrect=_median(incorrect_entropy),
         median_evidence_strength_correct=_median(correct_evidence),
         median_evidence_strength_incorrect=_median(incorrect_evidence),
+        median_information_gain_correct=_median(correct_information_gain),
+        median_information_gain_incorrect=_median(incorrect_information_gain),
+        confidence_correctness_auc=_correctness_auc(
+            correct_confidence, incorrect_confidence
+        ),
+        margin_correctness_auc=_correctness_auc(correct_margin, incorrect_margin),
+        normalised_entropy_correctness_auc=_correctness_auc(
+            correct_entropy, incorrect_entropy, lower_is_better=True
+        ),
+        evidence_strength_correctness_auc=_correctness_auc(
+            correct_evidence, incorrect_evidence
+        ),
+        information_gain_correctness_auc=_correctness_auc(
+            correct_information_gain, incorrect_information_gain
+        ),
     )
+
+
+def uncertainty_panel_summary(
+    diagnostics: Sequence[UncertaintyDiagnostics],
+) -> dict[str, int | float | None]:
+    """Aggregate correctness separation across homes with equal household weight.
+
+    Each household contributes at most one AUC value per diagnostic. Missing
+    values are excluded for that diagnostic rather than replaced with zero, and
+    the corresponding ``*_homes`` field records how many households contributed.
+    """
+    metrics = {
+        "confidence": "confidence_correctness_auc",
+        "margin": "margin_correctness_auc",
+        "normalised_entropy": "normalised_entropy_correctness_auc",
+        "evidence_strength": "evidence_strength_correctness_auc",
+        "information_gain": "information_gain_correctness_auc",
+    }
+
+    summary: dict[str, int | float | None] = {"homes": len(diagnostics)}
+    for name, attribute in metrics.items():
+        values = [
+            value
+            for item in diagnostics
+            if (value := getattr(item, attribute)) is not None
+        ]
+        summary[f"{name}_homes"] = len(values)
+        summary[f"median_{name}_correctness_auc"] = _median(values)
+    return summary
 
 
 @dataclass(frozen=True)

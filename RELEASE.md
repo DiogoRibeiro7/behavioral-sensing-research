@@ -40,9 +40,13 @@ Confirm the release metadata is ready:
 - `sensor_modeling/__init__.py` version is correct.
 - `CITATION.cff` version and DOI metadata are correct.
 - `.zenodo.json` is current.
-- `CHANGELOG.md` has an entry for the release.
+- `CHANGELOG.md` has a dated entry for the release and a fresh `Unreleased`
+  section.
 - `README.md` badges, DOI, and citation text are current.
 - `ROADMAP.md` still reflects the next planned work.
+
+`CHANGELOG.md` is the single source of truth for release notes. Do not maintain
+per-release `RELEASE_NOTES_*.md` files.
 
 ## Merge to Main
 
@@ -82,17 +86,23 @@ git show --no-patch --decorate vX.Y.Z
 
 ## Publish the GitHub Release
 
-Use the tag created on `main`:
+Use the tag created on `main`. The GitHub Release body must be the matching
+version section from `CHANGELOG.md`, not a separately maintained notes file.
+
+For example, extract the `X.Y.Z` section into a temporary file and publish it:
 
 ```bash
+awk '/^## \[X.Y.Z\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > /tmp/release-notes.md
+
 gh release create vX.Y.Z \
   --target main \
   --title "vX.Y.Z" \
-  --notes-file RELEASE_NOTES.md
+  --notes-file /tmp/release-notes.md
 ```
 
-If using the GitHub web UI, verify the target branch or commit is the `main`
-commit for the tag.
+If using the GitHub web UI, copy the matching `CHANGELOG.md` release section
+verbatim and verify the target branch or commit is the `main` commit for the
+tag.
 
 ## Zenodo Verification
 
@@ -110,20 +120,17 @@ After GitHub publishes the release:
 
 ## After Release
 
-Return to `develop`:
+Continue development from `develop`.
 
-```bash
-git checkout develop
-git pull origin develop
-git merge --ff-only main
-git push origin develop
-```
+A merge from `main` back into `develop` is required only when `main` contains
+substantive file changes that are not already present on `develop`, for example
+a hotfix made directly from the stable branch. A release promotion merge with
+an identical file tree does not need to be merged back solely for ancestry.
 
 Then:
 
-- Move released changelog notes out of `Unreleased`, if needed.
-- Start the next `Unreleased` section.
-- Open follow-up issues for deferred roadmap items.
+- Keep the fresh `Unreleased` section for subsequent work.
+- Open follow-up issues for deferred roadmap items when useful.
 
 ## Emergency Fix Releases
 
@@ -134,6 +141,6 @@ For hotfixes:
 3. Run the relevant tests and pre-commit.
 4. Merge the hotfix into `main`.
 5. Tag and release from `main`.
-6. Merge `main` back into `develop`.
+6. Bring the substantive hotfix changes back into `develop`.
 
 The rule still holds: release from `main`, never from `develop`.
