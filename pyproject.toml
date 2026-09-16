@@ -9,7 +9,7 @@ description = "Interpretable, probabilistic, privacy-preserving multimodal ambie
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.11,<3.15"
 
 authors = [
     {name = "Diogo Ribeiro", email = "dfr@esmad.ipp.pt"},
@@ -56,9 +56,10 @@ classifiers = [
     
     # Programming Language
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     
     # Operating System
@@ -239,7 +240,7 @@ exclude = ["tests*", "docs*", "examples*", "benchmarking*"]
 # Black configuration
 [tool.black]
 line-length = 88
-target-version = ['py310', 'py311', 'py312']
+target-version = ['py311', 'py312', 'py313', 'py314']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -269,7 +270,7 @@ known_third_party = [
 
 # mypy configuration
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -360,7 +361,7 @@ skips = ["B101", "B601"]
 
 # Ruff configuration (alternative to flake8)
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 88
 
 [tool.ruff.lint]
