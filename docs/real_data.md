@@ -140,8 +140,9 @@ observable.
 
 ## Results on 22 real homes
 
-Every CASAS `hh` recording under 12 MB was scored: 22 homes, one resident each,
-motion and door sensors, **nothing refitted**. Only annotated time was scored.
+Every CASAS `hh` recording under 12 MB was scored: 22 homes with motion and door
+sensors, **nothing refitted**. Twenty are single-resident; `hh107` and `hh121`
+are two-occupant recordings (see below). Only annotated time was scored.
 No location and no activity label goes unmapped, so nothing is silently
 discarded.
 
@@ -544,7 +545,8 @@ do by default given three separate features each documented as an improvement.
 
 ### Why abstention does not fire, and why raising the threshold will not fix it
 
-The pipeline abstained on 2.2% of steps while being wrong more often than right.
+Across the 22 homes the pipeline abstained on a median 2.5% of steps, and on at
+most 3.9% in any home, while being wrong more often than right.
 The obvious reading is that the thresholds were set for the simulator, where the
 model is right about 82% of the time, and are simply too low for real data. That
 reading is wrong.

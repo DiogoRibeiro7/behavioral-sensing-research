@@ -26,10 +26,11 @@ measured rates doubles to triples `home_inactive` recall but costs sleeping
 recall and calibration, so it points the work somewhere specific without
 resolving it.
 
-**Abstention cannot be repaired by raising its threshold.** It fired on 2.2% of
-steps while the model was wrong more often than right, and the obvious fix —
-thresholds tuned for a simulator where the model is right 82% of the time — does
-not work. Over 60,948 scored steps, stated confidence separates right from wrong
+**Abstention cannot be repaired by raising its threshold.** Across the 22 homes
+it fired on a median 2.5% of steps, and on at most 3.9% in any home, while the
+model was wrong more often than right, and the obvious fix — thresholds tuned
+for a simulator where the model is right 82% of the time — does not work. Over
+60,948 scored steps from five homes, stated confidence separates right from wrong
 by only 0.073, and the relationship inverts where it matters: the 0.95-1.00
 band, covering 39% of all steps, is *less* accurate (0.561) than the 0.85-0.95
 band (0.653). Raising the threshold discards the pipeline's best band and keeps

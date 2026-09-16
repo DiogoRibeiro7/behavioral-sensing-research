@@ -130,7 +130,7 @@ to include it.
 
 **Measured behaviour: this mechanism does not currently work.** The rule above
 is what is implemented, not a description of behaviour that has been validated.
-Over 60,948 scored steps on real recordings, stated confidence separated correct
+Over 60,948 scored steps from five real homes, stated confidence separated correct
 from incorrect answers by only 0.073, and the 0.95–1.00 confidence band was
 *less* accurate at 0.561 than the 0.85–0.95 band at 0.653 while covering 39% of
 steps. Raising `min_confidence` therefore discards the better band and keeps the
