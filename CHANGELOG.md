@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Moved both manuscripts (`papers/`), the Paper 1 analysis scripts, their tests, `artifacts/paper1/` and the five paper workflows to the private `research-articles` repository. They were copied byte for byte from commit `012f22b` and are pinned there to `sensor-modeling` `v0.4.0`. No package code changes, and the history of those files remains in this repository. `artifacts/v03/` stays here because the documentation cites it.
 
+### Fixed
+- Documentation now gives the scope of three real-data figures. The 60,948-step confidence analysis covers five homes, not the 22-home panel (`docs/limitations.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/UNCERTAINTY_MODEL.md`). The unscoped 2.2% abstention figure is replaced by the 22-home median of 2.5%, at most 3.9% in any home, from the results table in `docs/real_data.md` (`docs/limitations.md`, `docs/real_data.md`). `docs/real_data.md` no longer says all 22 homes are single-resident; `hh107` and `hh121` are two-occupant recordings, as the same page already records further down.
+
 ## [0.4.0] - 2026-09-15
 
 Turns the uncertainty diagnostics introduced in 0.3.0 into a reproducible,
