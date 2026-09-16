@@ -18,7 +18,7 @@
 \maketitle
 
 \begin{abstract}
-Probabilistic behavioural-sensing systems often use posterior confidence as a proxy for whether a prediction is trustworthy. We test that proxy in an interpretable smart-home state-inference system using posterior confidence, posterior margin, normalised entropy, interval-level evidence strength, and per-update information gain. Correct and incorrect predictions are compared within each household using a common-language AUC and households are weighted equally. Across 22 CASAS development homes, median correctness AUC is 0.519 for confidence, 0.518 for posterior margin, and 0.514 for normalised entropy. Evidence strength and information gain are inverted, with median AUCs of 0.372 and 0.388. Thus all three directional hypotheses fixed before execution fail: information gain does not exceed 0.5, does not outperform confidence, and evidence strength does not carry positive correctness information. The result rules out a simple replacement of posterior confidence by update-level information gain as an abstention statistic on this development panel. No new threshold or deployment rule is selected.
+Probabilistic behavioural-sensing systems often use posterior confidence as a proxy for whether a prediction is trustworthy. We test that proxy in an interpretable smart-home state-inference system using posterior confidence, posterior margin, normalised entropy, interval-level evidence strength, and per-update information gain. Correct and incorrect predictions are compared within each household using a common-language AUC, and households are weighted equally. Across 22 CASAS development homes, median correctness AUC is 0.519 for confidence, 0.518 for posterior margin, and 0.514 for normalised entropy, each above 0.5 in 12 of 22 homes. Evidence strength and information gain are inverted, with median AUCs of 0.372 and 0.388, below 0.5 in 20 and 18 homes. All three directional hypotheses fixed before execution therefore fail: information gain does not exceed 0.5, does not outperform confidence, and evidence strength does not carry positive correctness information. The update-level diagnostics are not uninformative but have the opposite sign to the one hypothesised; because neither records whether an update supports or contradicts the prediction, this panel does not identify why. The result rules out a simple replacement of posterior confidence by update-level information gain as an abstention statistic on this development panel. No new threshold or deployment rule is selected.
 \end{abstract}
 
 \section{Introduction}
@@ -40,15 +40,21 @@ and posterior margin is the gap between the two largest posterior probabilities.
 \[
 \widetilde H_t=-\frac{1}{\log|\mathcal S|}\sum_z p_t(z)\log p_t(z).
 \]
-If $s_{jt}$ is the log-likelihood support contributed by informative sensor $j$, interval-level evidence strength is
+Let $\hat z_t=\arg\max_z p_t(z)$ be the predicted state, and let $\ell_{jt}(z)$ be the log-likelihood, after reliability and attribution weighting, that sensor $j$ assigns to state $z$ over the interval ending at $t$. The support of sensor $j$ for the prediction is
 \[
-E_t=\frac{1}{|J_t|}\sum_{j\in J_t}|s_{jt}|.
+s_{jt}=\ell_{jt}(\hat z_t)-\max_{z\neq\hat z_t}\ell_{jt}(z),
 \]
+which is positive when the sensor favours the predicted state and negative when it favours an alternative. Interval-level evidence strength averages the magnitude of that support,
+\[
+E_t=\frac{1}{|J_t|}\sum_{j\in J_t}|s_{jt}|,
+\]
+over the set $J_t$ of sensors whose likelihood was applied, with $E_t=0$ when $J_t$ is empty. A working sensor that reported no events belongs to $J_t$, because under the Poisson observation model its silence penalises the states that would have triggered it; only sensors discounted to zero reliability are excluded. Because of the absolute value, supporting and contradicting evidence raise $E_t$ equally.
+
 Per-update information gain is
 \[
-I_t=\KL\!\left(p_t\,\|\,p_{t|t-1}\right).
+I_t=\KL\!\left(p_t\,\|\,p_{t|t-1}\right),
 \]
-Unlike confidence, margin, and entropy, $I_t$ measures how much the current observation interval moved the predicted belief.
+the Bayesian surprise of the interval \citep{itti2009surprise}. Unlike confidence, margin, and entropy, $I_t$ measures how much the current observation interval moved the predicted belief. It does not record whether that movement was toward or away from the true state.
 
 \section{Empirical design}
 The analysis uses the 22 CASAS \texttt{hh} homes previously used for development and failure analysis, taken from the published labelled CASAS archive \citep{cook2013casas,cook2025casasdata}. By the resident counts in that archive's metadata, 20 are single-resident and two, hh107 and hh121, are two-resident recordings; both are retained because panel membership was fixed before this analysis. These homes are not independent confirmatory data. The frozen 43-home primary external cohort from the 0.3.0 validation is not rescored here.
@@ -111,22 +117,23 @@ Consequently, H1 fails because $0.388<0.5$, H2 fails because $0.388<0.519$, and 
 One home, hh124, is anomalous. Only 666 of its 17,064 scored positions are correct (3.9\%), its source recording is 0.53\,MB against 2.0--11.9\,MB for the other 21 homes, and it holds the lowest AUC for confidence, margin, and entropy and the highest for evidence strength and information gain. Its cause has not been investigated. As a post-hoc check, excluding hh124, the two two-resident homes, or all three moves no median by more than 0.021 and leaves H1, H2, and H3 failing.
 
 \section{Interpretation}
-The executed result follows the negative branch of the pre-result contract.
+\label{sec:interpretation}
+The executed result follows the negative branches of the contract in \cref{app:contract}. H1 fails, so replacing confidence with information gain is not supported by this panel; and because confidence and information gain are both weak or inverted, exchanging one scalar threshold statistic for the other is not a sufficient repair. The remaining branches do not apply: H1 and H2 do not hold, information gain is itself inverted, and H3 fails.
 
-First, information gain is not a replacement for confidence. The original motivation was that a posterior can remain concentrated while the current interval adds little new information, making $I_t$ a plausible alternative. The real panel rejects that proposal: larger information gain is associated with incorrect predictions more often than with correct ones at the household median.
+First, information gain is not a replacement for confidence. The original motivation was that a posterior can remain concentrated while the current interval adds little new information, making $I_t$ a plausible alternative. The panel rejects that proposal in its pre-specified direction: larger information gain is associated with incorrect predictions in 18 of 22 homes. This does not show that updates move the belief in the wrong direction. $I_t$ is unsigned, so a large value is equally consistent with an update toward the labelled state that has not yet overtaken the prior, as could occur shortly after a real change of state. Separating these cases needs a signed quantity, such as the change in posterior mass on the labelled state, which was not pre-specified.
 
-Second, evidence strength is also inverted. The problem is therefore not simply that useful raw evidence is transformed badly by the Bayesian update; the magnitude of the applied evidence itself does not provide a favourable correctness ranking under the current formulation.
+Second, evidence strength is also inverted, but its construction limits what the inversion shows. Because $E_t$ averages absolute support, a sensor that contradicts the predicted state raises it as much as one that supports it, and contradicting evidence is itself a plausible marker of a wrong prediction. The inversion therefore does not establish that the magnitude of supporting evidence is uninformative about correctness. That would need a signed summary of support, which was also not pre-specified.
 
-Third, confidence, margin, and entropy are only weakly informative. None of the five existing scalar diagnostics emerges as a credible abstention statistic. The failure is therefore deeper than a badly chosen confidence threshold: the present observation and inference formulation can produce strong updates in the wrong direction while posterior concentration itself carries little correctness information.
+Third, confidence, margin, and entropy are only weakly informative at the median, with large variation between homes. Under the pre-specified directions, none of the five diagnostics is a credible abstention statistic. Reversing the sign of $I_t$ or $E_t$ would be a choice made after inspecting these homes, and whether such a score ranks failures elsewhere can only be judged on data not used here.
 
-This does not imply that the sensors contain no useful information. In earlier development analyses, a gradient-boosted classifier given per-room event counts for the current and three preceding steps together with time of day, trained on 11 of these homes and scored on the other 11, reached balanced accuracy 0.607, against a median of 0.420 for the inference pipeline across the 22 homes \citep{ribeiro2026toolkit}. The present claim is narrower: these five internal uncertainty summaries do not reliably rank prediction correctness across the development homes.
+This does not imply that the sensors contain no useful information. In earlier development analyses, a gradient-boosted classifier given per-room event counts for the current and three preceding steps together with time of day, trained on 11 of these homes and scored on the other 11, reached balanced accuracy 0.607, against a median of 0.420 for the inference pipeline across the 22 homes \citep{ribeiro2026toolkit}. The present claim is narrower: these five internal uncertainty summaries do not rank prediction correctness in the hypothesised direction across the development homes.
 
 No post-hoc abstention threshold is selected. Any future selective-prediction policy first requires a candidate score with defensible ranking behaviour and then an independent validation design.
 
 \section{Limitations}
-The 22 homes are development-stage evidence and were repeatedly inspected during earlier failure analysis. The results should not be read as confirmatory external performance. All homes come from the same CASAS research ecosystem.
+The 22 homes are development-stage evidence and were repeatedly inspected during earlier failure analysis. The results should not be read as confirmatory external performance. All homes come from the same CASAS research ecosystem, two are two-resident recordings although the model assumes one monitored resident, and the anomaly in hh124 is unexplained.
 
-Information gain measures how much the model updates itself; it is not an external measure of information in the Shannon-channel sense. The common-language AUC is a ranking measure, not a calibration measure. The inversion of evidence strength and information gain is therefore a property of these diagnostics under this observation model, inference formulation, state ontology, and development panel, not a universal property of those quantities.
+Information gain measures how much the model updates itself; it is not an external measure of information in the Shannon-channel sense. The common-language AUC is a ranking measure, not a calibration measure. The contract fixed unsigned diagnostics and their directions, so the mechanisms suggested in \cref{sec:interpretation} for the two inversions are untested here. The inversions are properties of these diagnostics under this observation model, inference formulation, state ontology, and development panel, not universal properties of those quantities.
 
 \section{Reproducibility}
 The analysis is implemented by \texttt{scripts/analyse\_uncertainty\_panel.py}. It reads the frozen 22-home development-panel membership, verifies each source recording against its stored byte size and SHA-256 digest, evaluates each home using the default inference path, and records per-home diagnostics and the equal-household summary.
@@ -136,9 +143,9 @@ The executed workflow artifact is frozen at \texttt{artifacts/paper1/uncertainty
 The workflow does not pin dependency versions, so results are reproducible to numerical tolerance rather than bit for bit. An earlier execution of the same analysis code on the same day differs from the frozen artifact by at most $2\times10^{-6}$ in any per-home value and yields identical medians.
 
 \section{Conclusion}
-Posterior confidence is not a strong correctness-ranking signal in this ambient behavioural-sensing system, but the natural update-level alternatives perform worse rather than better. Across 22 development homes, confidence, margin, and normalised entropy have median correctness AUCs only slightly above 0.5, while evidence strength and information gain are inverted at 0.3719 and 0.3875. All three directional hypotheses specified before execution fail.
+Posterior confidence is not a strong correctness-ranking signal in this ambient behavioural-sensing system, and the natural update-level alternatives do not repair it. Across 22 development homes, confidence, margin, and normalised entropy have median correctness AUCs only slightly above 0.5, while evidence strength and information gain are inverted at 0.372 and 0.388, in 20 and 18 homes respectively. All three directional hypotheses specified before execution fail.
 
-The practical implication is narrow but important: the abstention problem cannot be repaired by simply replacing a confidence threshold with an information-gain or evidence-strength threshold. The next research question is structural: which representation of recent evidence, temporal context, or model discrepancy can distinguish reliable from unreliable inference before any new reject policy is designed?
+The practical implication is narrow but important: the abstention problem cannot be repaired by simply replacing a confidence threshold with an information-gain or evidence-strength threshold in the hypothesised direction. The consistent inversions show that update-level quantities do carry correctness information, but not in a form this study can yet interpret. The next research question is structural: which representation of recent evidence, temporal context, or model discrepancy, including signed measures of whether an update supports or contradicts the prediction, can distinguish reliable from unreliable inference before any new reject policy is designed?
 
 \printbibliography
 
