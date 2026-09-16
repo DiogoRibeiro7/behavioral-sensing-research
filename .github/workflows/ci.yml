@@ -87,7 +87,7 @@ jobs:
       - name: Install metadata test dependencies
         run: pip install pytest pyyaml
       - name: Run release metadata tests
-        run: pytest -q --noconftest tests/test_project_metadata.py
+        run: pytest -q -o addopts='' --noconftest tests/test_project_metadata.py
 
   paper:
     name: paper checks
