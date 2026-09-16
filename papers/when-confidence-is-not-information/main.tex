@@ -62,7 +62,7 @@ the Bayesian surprise of the interval \citep{itti2009surprise}. Unlike confidenc
 \section{Empirical design}
 The analysis uses the 22 CASAS \texttt{hh} homes previously used for development and failure analysis, taken from the published labelled CASAS archive \citep{cook2013casas,cook2025casasdata}. By the resident counts in that archive's metadata, 20 are single-resident and two, hh107 and hh121, are two-resident recordings; both are retained because panel membership was fixed before this analysis. These homes are not independent confirmatory data. The frozen 43-home primary external cohort from the 0.3.0 validation is not rescored here.
 
-Each recording is run through the default inference path, with the circadian profile disabled, on a five-minute grid with timestamps read in the America/Los\_Angeles time zone. Only positions with a mapped behavioural label are scored, 242,681 positions in total, and a prediction is correct when the most probable state equals the label.
+Each recording is run through the default inference path, with the circadian profile disabled, on a five-minute grid with timestamps read in the America/Los\_Angeles time zone. Only positions with a mapped behavioural label are scored, 242,681 positions in total. A position is correct when the reported state equals the label. An abstaining step reports no state, so it counts as incorrect even when its most probable state matches the label.
 
 For a diagnostic $X$, let $X^+$ and $X^-$ be values on correct and incorrect predictions. For confidence, margin, evidence strength, and information gain,
 \[
