@@ -50,7 +50,7 @@ jobs:
             echo "::error::version must be MAJOR.MINOR.PATCH without a v prefix"
             exit 1
           fi
-          pytest -q --noconftest tests/test_project_metadata.py
+          pytest -q -o addopts='' --noconftest tests/test_project_metadata.py
           python - <<'PY'
           import json
           import os
