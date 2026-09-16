@@ -3,12 +3,15 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern,microtype,amsmath,amssymb,booktabs,array,enumitem,graphicx}
-\usepackage[backend=biber,style=authoryear,natbib=true,maxcitenames=2,maxbibnames=99]{biblatex}
+\usepackage[backend=biber,style=authoryear,natbib=true,maxcitenames=2,maxbibnames=99,uniquename=false]{biblatex}
 \addbibresource{references.bib}
 \usepackage[hidelinks]{hyperref}
-\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage[nameinlink,noabbrev,capitalise]{cleveref}
 \newcommand{\Prob}{\mathbb{P}}
 \newcommand{\KL}{D_{\mathrm{KL}}}
+% Let long repository paths break after underscores instead of running into the margin.
+\renewcommand{\_}{\textunderscore\allowbreak}
+\emergencystretch=2em
 
 \title{When Confidence Is Not Information:\\Failure Modes of Abstention in Ambient Behavioural Sensing}
 \author{Diogo Ribeiro\\\small\textit{Faculty of Media Arts and Design, Technical University of Porto}}
@@ -151,7 +154,7 @@ The practical implication is narrow but important: the abstention problem cannot
 
 \appendix
 \section{Frozen analysis contract}
-\label{app:contract}
+\label[appendix]{app:contract}
 The text below is the contract as committed in \texttt{34f9797} on 13 September 2026, before the analysis was first executed. It is reproduced verbatim apart from the removal of its cross-reference label, so its tense and references to pending results reflect the manuscript at that point.
 
 \subsection*{Pre-result hypotheses and interpretation contract}
