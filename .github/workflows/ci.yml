@@ -14,6 +14,7 @@ jobs:
       paper_python: ${{ steps.classify.outputs.paper_python }}
       full_repo: ${{ steps.classify.outputs.full_repo }}
       docs_only: ${{ steps.classify.outputs.docs_only }}
+      metadata_only: ${{ steps.classify.outputs.metadata_only }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -27,6 +28,7 @@ jobs:
             echo "paper_python=false" >> "$GITHUB_OUTPUT"
             echo "full_repo=true" >> "$GITHUB_OUTPUT"
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "metadata_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -36,16 +38,14 @@ jobs:
             echo "paper_python=false" >> "$GITHUB_OUTPUT"
             echo "full_repo=true" >> "$GITHUB_OUTPUT"
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "metadata_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           paper_only=true
           paper_python=false
-          # Prose only: nothing here can change what the test suite exercises.
-          # README.md and pyproject.toml are excluded because they feed the
-          # package metadata that `package` checks, and mkdocs.yml is included
-          # because `docs` still runs and would catch a broken nav.
           docs_only=true
+          metadata_only=true
           for file in "${files[@]}"; do
             if [[ "$file" != papers/* ]]; then
               paper_only=false
@@ -57,16 +57,37 @@ jobs:
               docs/*.md|mkdocs.yml|CHANGELOG.md|ROADMAP.md|RELEASE.md|ZENODO.md) ;;
               *) docs_only=false ;;
             esac
+            case "$file" in
+              CITATION.cff|.zenodo.json|CHANGELOG.md|ZENODO.md|RELEASE.md) ;;
+              *) metadata_only=false ;;
+            esac
           done
 
           echo "paper_only=$paper_only" >> "$GITHUB_OUTPUT"
           echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
           echo "paper_python=$paper_python" >> "$GITHUB_OUTPUT"
-          if [[ "$paper_only" == "true" ]]; then
+          echo "metadata_only=$metadata_only" >> "$GITHUB_OUTPUT"
+          if [[ "$paper_only" == "true" || "$metadata_only" == "true" ]]; then
             echo "full_repo=false" >> "$GITHUB_OUTPUT"
           else
             echo "full_repo=true" >> "$GITHUB_OUTPUT"
           fi
+
+  metadata:
+    name: metadata checks
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.metadata_only == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Install metadata test dependencies
+        run: pip install pytest pyyaml
+      - name: Run release metadata tests
+        run: pytest -q tests/test_project_metadata.py
 
   paper:
     name: paper checks
@@ -131,9 +152,6 @@ jobs:
 
   test:
     needs: changes
-    # Skipped for prose-only changes: nothing in docs/*.md can alter what the
-    # suite exercises, and the three-version matrix is the expensive job. lint,
-    # docs and package still run, so a broken nav or link is still caught.
     if: >-
       needs.changes.outputs.full_repo == 'true'
       && needs.changes.outputs.docs_only != 'true'
@@ -210,7 +228,7 @@ jobs:
   gate:
     name: all checks passed
     runs-on: ubuntu-latest
-    needs: [changes, paper, lint, test, docs, package]
+    needs: [changes, metadata, paper, lint, test, docs, package]
     if: always()
     steps:
       - name: Verify required checks for this change class
@@ -219,6 +237,12 @@ jobs:
           if [[ "${{ needs.changes.result }}" != "success" ]]; then
             echo "::error::change classification failed"
             exit 1
+          fi
+
+          if [[ "${{ needs.changes.outputs.metadata_only }}" == "true" ]]; then
+            echo "metadata -> ${{ needs.metadata.result }}"
+            [[ "${{ needs.metadata.result }}" == "success" ]] || exit 1
+            exit 0
           fi
 
           if [[ "${{ needs.changes.outputs.paper_only }}" == "true" ]]; then
@@ -234,8 +258,6 @@ jobs:
 
           required="lint docs package"
           if [[ "$docs_only" != "true" || "${{ needs.test.result }}" != "skipped" ]]; then
-            # A prose-only change that somehow ran the matrix must still pass
-            # it, so a misclassification cannot turn a real failure into a pass.
             required="$required test"
           fi
 
