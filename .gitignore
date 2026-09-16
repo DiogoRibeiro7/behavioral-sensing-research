@@ -13,4 +13,6 @@ coverage.xml
 .ipynb_checkpoints/
 site/
 results/
+# Manuscripts and paper-specific analyses live in the private research-articles
+# repository. Keeping this ignored stops them being added back here by accident.
 papers/
