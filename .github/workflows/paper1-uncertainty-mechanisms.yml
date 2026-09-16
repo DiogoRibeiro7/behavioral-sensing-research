@@ -1,0 +1,88 @@
+name: Paper 1 uncertainty mechanisms
+
+# Manual dispatch only. The declared plan freezes the first successful run as the
+# artifact, so no pull request, push or schedule may start one.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paper1-uncertainty-mechanisms
+  cancel-in-progress: false
+
+jobs:
+  analyse:
+    name: run declared mechanism analyses on the 22-home development panel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Check out revision
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Download and verify frozen CASAS source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p casas-archive paper1-output
+          python - <<'PY'
+          import hashlib
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          record = "15708568"
+          expected_size = 236037656
+          expected_md5 = "ec37d679e85a6ae39e84994888afd514"
+
+          with urllib.request.urlopen(f"https://zenodo.org/api/records/{record}") as response:
+              meta = json.load(response)
+
+          matches = [item for item in meta.get("files", []) if item.get("key") == "labeled_data.zip"]
+          if len(matches) != 1:
+              raise SystemExit(f"expected one labeled_data.zip, found {len(matches)}")
+          item = matches[0]
+          target = Path("casas-archive/labeled_data.zip")
+          urllib.request.urlretrieve(item["links"]["self"], target)
+
+          if target.stat().st_size != expected_size:
+              raise SystemExit(
+                  f"archive size mismatch: {target.stat().st_size} != {expected_size}"
+              )
+
+          digest = hashlib.md5()
+          with target.open("rb") as handle:
+              for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(chunk)
+          if digest.hexdigest() != expected_md5:
+              raise SystemExit(
+                  f"archive MD5 mismatch: {digest.hexdigest()} != {expected_md5}"
+              )
+          PY
+          unzip -q casas-archive/labeled_data.zip -d casas-archive/extracted
+
+      - name: Run declared mechanism analyses
+        run: |
+          python scripts/analyse_uncertainty_mechanisms.py \
+            casas-archive/extracted \
+            paper1-output/uncertainty_mechanisms.json
+
+      - name: Upload machine-readable result
+        uses: actions/upload-artifact@v7
+        with:
+          name: paper1-uncertainty-mechanisms
+          path: paper1-output/uncertainty_mechanisms.json
+          retention-days: 90
+          if-no-files-found: error
