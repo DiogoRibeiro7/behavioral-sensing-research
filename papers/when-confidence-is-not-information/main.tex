@@ -78,17 +78,17 @@ The panel runner had been committed 84 minutes before the contract. Between the 
 \section{Results}
 \begin{table}[ht]
 \centering
-\caption{Median within-home correctness AUC on the 22-home CASAS development panel.}
+\caption{Within-home correctness AUC on the 22-home CASAS development panel. Homes counts the households in which the diagnostic is defined; the last column counts those with $A>0.5$. No household has $A=0.5$ exactly.}
 \label{tab:separation}
-\begin{tabular}{lcc}
+\begin{tabular}{lcccc}
 \toprule
-Diagnostic & Median AUC & Homes \\
+Diagnostic & Median AUC & Homes & Range & Homes with $A>0.5$ \\
 \midrule
-Confidence & 0.5193 & 22 \\
-Posterior margin & 0.5184 & 22 \\
-Normalised entropy & 0.5135 & 22 \\
-Evidence strength & 0.3719 & 22 \\
-Information gain & 0.3875 & 22 \\
+Confidence & 0.519 & 22 & 0.164--0.707 & 12 \\
+Posterior margin & 0.518 & 22 & 0.166--0.693 & 12 \\
+Normalised entropy & 0.514 & 22 & 0.160--0.714 & 12 \\
+Evidence strength & 0.372 & 22 & 0.103--0.740 & 2 \\
+Information gain & 0.388 & 22 & 0.111--0.911 & 4 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -100,11 +100,15 @@ Information gain & 0.3875 & 22 \\
 \label{fig:uncertainty-panel}
 \end{figure}
 
-Confidence, margin, and entropy are all close to the no-separation value of 0.5. Confidence is the largest of the three, but only at 0.5193.
+Median within-home accuracy is 0.489, ranging from 0.039 to 0.586.
 
-The update-level diagnostics are not merely weak. Information gain has median AUC 0.3875 and evidence strength 0.3719, so their ordering is inverted: stronger updates and larger evidence magnitude are associated with incorrect predictions more often than with correct predictions in the common-language ranking sense.
+Confidence, margin, and entropy are close to the no-separation value at the median, with confidence the largest of the three at 0.519. They are not uniformly uninformative: each exceeds 0.5 in 12 of 22 homes, and confidence ranges from 0.164 to 0.707 across homes.
 
-Consequently, H1 fails because $0.3875<0.5$, H2 fails because $0.3875<0.5193$, and H3 fails because $0.3719<0.5$. All five diagnostics are defined in all 22 homes.
+The update-level diagnostics are consistently inverted. Information gain is below 0.5 in 18 of 22 homes, with median 0.388, and evidence strength in 20 of 22, with median 0.372: larger updates and larger evidence magnitude are associated with incorrect predictions more often than with correct ones in the common-language ranking sense. Their medians lie 0.112 and 0.128 below 0.5, against 0.019 above it for confidence, so at the median they rank correctness more strongly than confidence does, but with the opposite sign to the one hypothesised.
+
+Consequently, H1 fails because $0.388<0.5$, H2 fails because $0.388<0.519$, and H3 fails because $0.372<0.5$. All five diagnostics are defined in all 22 homes.
+
+One home, hh124, is anomalous. Only 666 of its 17,064 scored positions are correct (3.9\%), its source recording is 0.53\,MB against 2.0--11.9\,MB for the other 21 homes, and it holds the lowest AUC for confidence, margin, and entropy and the highest for evidence strength and information gain. Its cause has not been investigated. As a post-hoc check, excluding hh124, the two two-resident homes, or all three moves no median by more than 0.021 and leaves H1, H2, and H3 failing.
 
 \section{Interpretation}
 The executed result follows the negative branch of the pre-result contract.
@@ -125,9 +129,11 @@ The 22 homes are development-stage evidence and were repeatedly inspected during
 Information gain measures how much the model updates itself; it is not an external measure of information in the Shannon-channel sense. The common-language AUC is a ranking measure, not a calibration measure. The inversion of evidence strength and information gain is therefore a property of these diagnostics under this observation model, inference formulation, state ontology, and development panel, not a universal property of those quantities.
 
 \section{Reproducibility}
-The analysis is implemented by \texttt{scripts/analyse\_uncertainty\_panel.py}. It reads the frozen 22-home development-panel membership, verifies each source recording against its stored byte size and SHA-256 digest, evaluates each home using the default inference path, and records the equal-household summary.
+The analysis is implemented by \texttt{scripts/analyse\_uncertainty\_panel.py}. It reads the frozen 22-home development-panel membership, verifies each source recording against its stored byte size and SHA-256 digest, evaluates each home using the default inference path, and records per-home diagnostics and the equal-household summary.
 
-The executed workflow artifact is frozen at \texttt{artifacts/paper1/uncertainty\_panel.json}. It is the source of truth for every value in \cref{tab:separation}. The pre-specified household-distribution figure in \cref{fig:uncertainty-panel} is rendered deterministically from the same artifact by \texttt{scripts/plot\_uncertainty\_panel.py}.
+The executed workflow artifact is frozen at \texttt{artifacts/paper1/uncertainty\_panel.json}. It is the source of truth for every value in \cref{tab:separation} and for the accuracy, outlier, and exclusion values in the text, which are computed from its per-home entries. The pre-specified household-distribution figure in \cref{fig:uncertainty-panel} is rendered deterministically from the same artifact by \texttt{scripts/plot\_uncertainty\_panel.py}.
+
+The workflow does not pin dependency versions, so results are reproducible to numerical tolerance rather than bit for bit. An earlier execution of the same analysis code on the same day differs from the frozen artifact by at most $2\times10^{-6}$ in any per-home value and yields identical medians.
 
 \section{Conclusion}
 Posterior confidence is not a strong correctness-ranking signal in this ambient behavioural-sensing system, but the natural update-level alternatives perform worse rather than better. Across 22 development homes, confidence, margin, and normalised entropy have median correctness AUCs only slightly above 0.5, while evidence strength and information gain are inverted at 0.3719 and 0.3875. All three directional hypotheses specified before execution fail.
