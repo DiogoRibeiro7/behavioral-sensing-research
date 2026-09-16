@@ -17,11 +17,11 @@ non-homogeneous Poisson processes.
 > 43-home cohort, with the evidence boundaries described below.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.10--3.12-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.11--3.14-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/sensor-modeling/badge/?version=latest)](https://sensor-modeling.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21337272.svg)](https://doi.org/10.5281/zenodo.21337272)
-[![Version](https://img.shields.io/badge/version-0.4.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.0-informational.svg)](CHANGELOG.md)
 
 ## 🎯 Overview
 
@@ -288,6 +288,8 @@ configuration remained within 0.00529 of the full ten-sensor system.
 - RESTful API for integration with existing systems
 
 ## 🚀 Installation
+
+Python 3.11, 3.12, 3.13 and 3.14 are supported.
 
 ```bash
 # Basic installation
@@ -583,12 +585,12 @@ Distributed under the [MIT License](LICENSE). This allows for both academic and 
 If you use this software in your research, please cite it as:
 
 ```bibtex
-@software{ribeiro2025sensor,
+@software{ribeiro2026sensor,
   title={Sensor Modeling Research Toolkit},
   author={Ribeiro, Diogo},
   year={2026},
   url={https://github.com/DiogoRibeiro7/behavioral-sensing-research},
-  version={0.4.0},
+  version={0.5.0},
   doi={10.5281/zenodo.21337272}
 }
 ```

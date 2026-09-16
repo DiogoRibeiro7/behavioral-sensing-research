@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-16
+
+A platform and support-policy release. It modernises the supported Python range,
+reduces pull-request CI latency, automates guarded GitHub releases, and separates
+manuscript-specific research assets from the software package repository. It
+does not change inference, abstention thresholds, transition dynamics,
+emissions, the behavioural ontology, or the frozen external-validation result.
+
+### Added
+- Added Python 3.13 and Python 3.14 to the supported and tested interpreter matrix. The fast regression suite now runs on Python 3.11, 3.12, 3.13 and 3.14, while the expensive research/performance regression runs once on Python 3.14 after pushes to shared branches.
+- Added a guarded manual GitHub Actions release workflow. It runs from `main` only, verifies semantic version input, release metadata, a dated changelog section and tag target, creates or reuses the exact annotated tag, and publishes the GitHub Release from the matching `CHANGELOG.md` section.
+- Added a metadata-only pull-request fast path that runs `tests/test_project_metadata.py` once on Python 3.11 without loading the repository-wide pytest conftest or installing the full development environment.
+
+### Changed
+- Changed the supported Python contract from 3.10-3.12 to 3.11-3.14. `requires-python` is now `>=3.11,<3.15`; Python 3.10 is no longer supported, and package classifiers now advertise 3.11, 3.12, 3.13 and 3.14.
+- Split ordinary pull-request testing from heavy research/performance regression. Pull requests keep broad interpreter coverage without rerunning the slow studies on every Python version; shared-branch pushes retain the slow backstop.
+- Updated Black to 26.5.1 and aligned formatting with the minimum supported syntax, Python 3.11, while runtime compatibility remains tested through Python 3.14.
+- Made the GitHub Actions release workflow the canonical release mechanism, with manual Git/CLI commands retained only as a fallback.
+- Moved both manuscripts (`papers/`), the Paper 1 analysis scripts, their tests, `artifacts/paper1/` and the five paper workflows to the private `research-articles` repository. They were copied byte for byte from commit `012f22b` and are pinned there to `sensor-modeling` `v0.4.0`. No package code changes resulted from the move, and the repository history remains intact. `artifacts/v03/` stays here because the documentation cites it.
+
+### Fixed
+- Fixed the metadata fast path so the self-contained release-metadata test does not load `tests/conftest.py` and therefore does not require Matplotlib merely to validate citation/version files.
+- Fixed the release workflow to use the same isolated metadata-test invocation, preventing the first automated release from failing for the same conftest dependency reason.
+- Fixed shared-branch lint after the Python support expansion: the old Black hook did not recognise Python 3.13/3.14 targets, and Black's safety check cannot validate Python 3.14-targeted formatting while itself running under Python 3.11. The formatter now targets the minimum supported syntax and the one newly formatted benchmark file is committed.
+- Documentation now gives the scope of three real-data figures. The 60,948-step confidence analysis covers five homes, not the 22-home panel (`docs/limitations.md`, `docs/RESEARCH_QUESTIONS.md`, `docs/UNCERTAINTY_MODEL.md`). The unscoped 2.2% abstention figure is replaced by the 22-home median of 2.5%, at most 3.9% in any home, from the results table in `docs/real_data.md` (`docs/limitations.md`, `docs/real_data.md`). `docs/real_data.md` no longer says all 22 homes are single-resident; `hh107` and `hh121` are two-occupant recordings, as the same page already records further down.
+
 ## [0.4.0] - 2026-09-15
 
 Turns the uncertainty diagnostics introduced in 0.3.0 into a reproducible,

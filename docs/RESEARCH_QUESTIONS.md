@@ -84,7 +84,8 @@ accuracy collapses. This is the failure mode the platform exists to prevent,
 and it is tested adversarially rather than assumed.
 
 **This falsification condition has been met.** On real recordings, over 60,948
-scored steps, stated confidence separates correct from incorrect answers by only
+scored steps from five homes, stated confidence separates correct from incorrect
+answers by only
 +0.073, and the most confident band (0.95–1.00) is *less* accurate at 0.561 than
 the band beneath it at 0.653 while covering 39% of all steps. That is confidence
 staying high while accuracy collapses, measured rather than hypothesised, and no

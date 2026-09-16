@@ -12,7 +12,7 @@ interval $[+0.0054, +0.0117]$, 37 of 43 homes improved. Recorded in
 `artifacts/v03/external_primary_result.json` with the one-shot marker in
 `artifacts/v03/external_primary_scored.json`.
 
-This document selects the model form that will be frozen for the one-shot external validation defined in `papers/failure-aware-multimodal-behavioural-sensing/EXTERNAL_VALIDATION_CONTRACT.md`. It uses only evidence already obtained from the 22-home CASAS `hh` development panel.
+This document selects the model form that will be frozen for the one-shot external validation defined in the [external validation contract](https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/012f22b3ba0e9f43cb8f0cf43c3687363c1d68a7/papers/failure-aware-multimodal-behavioural-sensing/EXTERNAL_VALIDATION_CONTRACT.md), as it stood when the manuscripts moved out of this repository. It uses only evidence already obtained from the 22-home CASAS `hh` development panel.
 
 ## Candidate
 
