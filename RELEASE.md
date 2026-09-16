@@ -17,16 +17,10 @@ Do not publish a release from `develop`.
 
 **First, read the status of the latest CI run on `develop`.**
 
-```bash
-gh run list --branch develop --limit 1
-```
+The `all checks passed` job must be green. A local run is not a substitute for
+required Actions checks.
 
-The `all checks passed` job must be green. A local run is not a substitute:
-these checks execute on one interpreter, and the 3.11 import failure that held
-up `0.2.0` was invisible to every local run while the matrix was red. If the
-local suite passes and Actions is red, Actions is right.
-
-Then run these on `develop` as a fast pre-check:
+Then run these on `develop` as a fast pre-check when useful:
 
 ```bash
 pre-commit run --all-files
@@ -50,59 +44,60 @@ per-release `RELEASE_NOTES_*.md` files.
 
 ## Merge to Main
 
+Promote the finalized release tree from `develop` to `main` through a pull
+request. After merge, verify that the intended stable commit is the current
+`main` head and that the required `all checks passed` status is green.
+
+Do not create a tag before the release tree is on `main`.
+
+## Publish the Release
+
+The canonical release path is the GitHub Actions **Release** workflow in
+`.github/workflows/release.yml`.
+
+1. Open **Actions** in GitHub.
+2. Select **Release**.
+3. Choose **Run workflow**.
+4. Select the `main` branch.
+5. Enter the semantic version without the `v` prefix, for example `0.5.0`.
+6. Run the workflow.
+
+The workflow performs the release contract mechanically. It:
+
+- refuses to publish from anything except `main`;
+- checks out the exact stable `main` commit with full history;
+- runs the release metadata consistency tests;
+- verifies the requested version against `pyproject.toml`,
+  `sensor_modeling/__init__.py`, `CITATION.cff`, `.zenodo.json`, and README
+  citation metadata;
+- requires a dated matching version section in `CHANGELOG.md`;
+- uses that changelog section verbatim as the GitHub Release body;
+- creates an annotated `vMAJOR.MINOR.PATCH` tag on the checked-out `main`
+  commit, or verifies that an existing tag already points there;
+- refuses conflicting tags or duplicate GitHub Releases;
+- publishes the GitHub Release using the repository `GITHUB_TOKEN`.
+
+A successful workflow run is the release publication record. Do not create a
+second tag or duplicate release manually after it succeeds.
+
+## Manual Fallback
+
+Use manual git and GitHub CLI commands only if the Release workflow is
+unavailable. The same invariants still apply: release from `main`, use an
+annotated tag on the exact stable commit, and use the matching `CHANGELOG.md`
+version section verbatim as the release body.
+
+Example fallback:
+
 ```bash
 git checkout main
 git pull origin main
-git merge --no-ff develop
-git push origin main
-```
-
-Verify the merge target:
-
-```bash
-git branch --show-current
-git log -1 --oneline
-```
-
-The branch must be `main` before tagging.
-
-## Tag the Release
-
-Create an annotated tag on `main`:
-
-```bash
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
-Verify the tag points to `main`:
-
-```bash
-git branch --contains vX.Y.Z
-git show --no-patch --decorate vX.Y.Z
-```
-
-`main` must be listed by `git branch --contains`.
-
-## Publish the GitHub Release
-
-Use the tag created on `main`. The GitHub Release body must be the matching
-version section from `CHANGELOG.md`, not a separately maintained notes file.
-
-For example, extract the `X.Y.Z` section into a temporary file and publish it:
-
-```bash
-awk '/^## \[X.Y.Z\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > /tmp/release-notes.md
-
-gh release create vX.Y.Z \
-  --target main \
-  --title "vX.Y.Z" \
-  --notes-file /tmp/release-notes.md
-```
-
-If using the GitHub web UI, copy the matching `CHANGELOG.md` release section
-verbatim and verify the target branch or commit is the `main` commit for the
-tag.
+Then create the GitHub Release for that exact tag/commit using the matching
+changelog section. Verify the tag before publishing.
 
 ## Zenodo Verification
 
@@ -140,7 +135,7 @@ For hotfixes:
 2. Apply the minimal fix.
 3. Run the relevant tests and pre-commit.
 4. Merge the hotfix into `main`.
-5. Tag and release from `main`.
+5. Run the **Release** workflow for the hotfix version.
 6. Bring the substantive hotfix changes back into `develop`.
 
 The rule still holds: release from `main`, never from `develop`.
