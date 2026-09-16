@@ -1,7 +1,6 @@
 # Project Roadmap
 
-The canonical roadmap is maintained in [`ROADMAP.md`](../ROADMAP.md) at the
-repository root.
+The canonical roadmap is maintained in [`ROADMAP.md`](https://github.com/DiogoRibeiro7/behavioral-sensing-research/blob/develop/ROADMAP.md) at the repository root.
 
 That file is the single source of truth for the project's research priorities,
 maintenance backlog, release policy, and planned software work. This rendered
