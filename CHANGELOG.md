@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.0] - 2026-09-14
+## [0.4.0] - 2026-09-15
 
 Turns the uncertainty diagnostics introduced in 0.3.0 into a reproducible,
 threshold-free correctness-separation workflow for real-data research. This
@@ -22,7 +22,9 @@ validation result.
 - Added `scripts/analyse_uncertainty_panel.py`, a reproducible Paper 1 analysis entry point for the recorded 22-home CASAS development panel. It runs the existing default inference path, records household uncertainty diagnostics, and writes a machine-readable equal-household panel summary without touching the frozen 43-home primary external cohort.
 - Added byte-exact provenance checks to the Paper 1 panel runner. Every development recording must match the frozen manifest filename, development-only status, byte size, and SHA-256 digest before it can be analysed; the verified source identity is written into the result artifact. Focused tests lock the exact 22-home membership and rejection of missing identities, size mismatches, and digest mismatches.
 - Added a GitHub Actions execution path for the Paper 1 panel analysis. The workflow downloads the frozen CASAS Zenodo archive, verifies its recorded size and MD5, relies on the runner to verify all 22 household files again, and uploads only the resulting JSON artifact.
-- Added the first post-v0.3 follow-up manuscript, `papers/when-confidence-is-not-information/`, with the uncertainty quantities, household-level estimand, selective-prediction context, previously established abstention failures, and a pre-result analysis contract fixed before inserting new panel values.
+- Executed the frozen 22-home development-panel analysis and committed the machine-readable result at `artifacts/paper1/uncertainty_panel.json`. Median within-home correctness AUC is `0.5193` for posterior confidence, `0.5184` for posterior margin, `0.5135` for normalised entropy, `0.3719` for evidence strength, and `0.3875` for per-update information gain; all 22 homes contribute to every diagnostic. All three directional hypotheses fixed before execution fail.
+- Completed the first post-v0.3 follow-up manuscript, `papers/when-confidence-is-not-information/`, with the executed result and its pre-specified negative interpretation: information gain does not rescue confidence-based abstention, evidence strength is also inverted, and no new threshold or deployment rule is selected.
+- Added `scripts/plot_uncertainty_panel.py` and the corresponding paper figure `papers/when-confidence-is-not-information/uncertainty_panel_auc.pdf`, showing one household point per diagnostic with the fixed `AUC = 0.5` reference and no fitted trend, threshold line, post-hoc filtering, or weighting.
 
 ### Changed
 - Refocused `ROADMAP.md` on three post-v0.3 research papers: confidence/information failure, recoverable-information versus formulation limits, and the sensor-information frontier. Software work is now explicitly subordinate to those scientific questions rather than to a pre-declared next package release.
