@@ -64,13 +64,16 @@ For entropy the favourable direction is reversed. Thus $A=0.5$ means no separati
 The household is the aggregation unit. We compute $A_{X,h}$ within each household and report the median across households, so long recordings do not dominate short ones.
 
 \subsection{Pre-result contract}
-Before execution we fixed three directional hypotheses:
+\label{sec:contract}
+The hypotheses and their interpretation were committed to the project repository before the analysis was first executed, in commit \texttt{34f9797} on 13 September 2026. \Cref{app:contract} reproduces that text verbatim. It fixed three directional hypotheses:
 \begin{enumerate}[label=H\arabic*.,leftmargin=*]
 \item $\operatorname{median}_h(A_{I,h})>0.5$;
 \item $\operatorname{median}_h(A_{I,h})>\operatorname{median}_h(A_{C,h})$;
 \item $\operatorname{median}_h(A_{E,h})>0.5$.
 \end{enumerate}
-No significance threshold, equivalence margin, or post-hoc cutoff is introduced after execution. If H1 fails, replacing confidence with information gain is not supported by this panel. If confidence and information gain are both weak or inverted, a scalar-threshold swap is not a sufficient repair.
+It also fixed that no significance threshold, equivalence margin, or post-hoc cutoff would be introduced after the panel was run, and that no abstention threshold, coverage target, or deployment rule would be selected from these 22 homes.
+
+The panel runner had been committed 84 minutes before the contract. Between the contract commit and the executed run, the analysis code changed only to verify each source recording against its stored digest, and the package version number changed. The earliest recorded execution is a continuous-integration run on 14 September 2026. Local executions are not logged, so the repository history alone cannot rule out an earlier unrecorded run.
 
 \section{Results}
 \begin{table}[ht]
@@ -132,4 +135,42 @@ Posterior confidence is not a strong correctness-ranking signal in this ambient 
 The practical implication is narrow but important: the abstention problem cannot be repaired by simply replacing a confidence threshold with an information-gain or evidence-strength threshold. The next research question is structural: which representation of recent evidence, temporal context, or model discrepancy can distinguish reliable from unreliable inference before any new reject policy is designed?
 
 \printbibliography
+
+\appendix
+\section{Frozen analysis contract}
+\label{app:contract}
+The text below is the contract as committed in \texttt{34f9797} on 13 September 2026, before the analysis was first executed. It is reproduced verbatim apart from the removal of its cross-reference label, so its tense and references to pending results reflect the manuscript at that point.
+
+\subsection*{Pre-result hypotheses and interpretation contract}
+
+The following diagnostic hypotheses are fixed before the new panel result is inserted into this manuscript:
+\begin{enumerate}[label=H\arabic*.,leftmargin=*]
+    \item The median household information-gain separation exceeds the no-separation value, $\operatorname{median}_h(A_{I,h})>0.5$.
+    \item Information gain separates correctness more strongly than posterior confidence, $\operatorname{median}_h(A_{I,h})>\operatorname{median}_h(A_{C,h})$.
+    \item Interval-level evidence strength carries positive correctness information, $\operatorname{median}_h(A_{E,h})>0.5$.
+\end{enumerate}
+
+These are descriptive directional hypotheses, not null-hypothesis significance tests. No equivalence margin, significance threshold, or post-hoc cut-off will be introduced after the panel is run. The natural reference point $A=0.5$ and the pre-stated metric ordering are the only decision anchors.
+
+The interpretation is also fixed in advance:
+\begin{itemize}
+    \item If H1 and H2 hold, posterior concentration and update-level information are empirically distinct, and information gain becomes a candidate quantity for a later selective-prediction study.
+    \item If H1 fails, replacing confidence with information gain is not supported by this development panel, regardless of whether information gain is numerically larger than confidence.
+    \item If confidence is inverted while information gain is not, the failure is consistent with accumulated posterior structure carrying confidence beyond what the current update justifies.
+    \item If both confidence and information gain are weak or inverted, the failure cannot be repaired by exchanging one scalar threshold statistic for the other; the observation/inference formulation itself requires further study.
+    \item If H3 holds while H1 fails, raw evidential magnitude contains correctness information that is being transformed poorly by the Bayesian update geometry.
+\end{itemize}
+
+The paper will not select a preferred abstention threshold, optimise coverage, or define a new deployment rule from these 22 development homes. Any such policy belongs to a subsequent study with its own validation design.
+
+\subsection*{Pre-specified outputs}
+
+The machine-readable JSON generated by \texttt{scripts/analyse\_uncertainty\_panel.py} is the source of truth for all new empirical values in this paper. The analysis has two pre-specified paper-facing outputs:
+\begin{enumerate}[label=(\roman*)]
+    \item \cref{tab:separation}, containing the median within-home correctness AUC and contributing-home count for all five diagnostics;
+    \item a household-distribution figure showing one point per home for each diagnostic, with a horizontal reference at $A=0.5$ and no fitted trend or threshold line.
+\end{enumerate}
+
+The figure is descriptive: it is intended to show heterogeneity and direction across homes, not to convert the development panel into a confirmatory test. If the JSON artifact does not exist, both the table values and the figure remain pending rather than being reconstructed manually from console output.
+
 \end{document}
