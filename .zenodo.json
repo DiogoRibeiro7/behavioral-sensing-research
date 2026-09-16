@@ -1,7 +1,7 @@
 {
   "title": "Sensor Modeling Research Toolkit",
   "upload_type": "software",
-  "publication_date": "2026-09-15",
+  "publication_date": "2026-09-16",
   "description": "A research-grade Python toolkit for interpretable, probabilistic, privacy-preserving analysis of behavioural sensor data, and for multimodal ambient sensing in assisted-living and digital-health research. Alongside its established modelling core -- Bernoulli autoregressive models, hidden Markov models, change-point detection and non-homogeneous Poisson processes -- it provides an end-to-end pipeline from heterogeneous sensor observations to explained alerts: a canonical hardware-neutral observation model, online sensor-health estimation, probabilistic occupancy and person attribution from anonymous evidence, continuous-time multimodal fusion into latent behavioural states with explicit abstention, adaptive non-stationary personal baselines, restrained alerting, a synthetic household simulator with controlled ground truth, and a paired sensor-ablation framework. The design treats sensor failure, missing data, visitors and uncertainty as first-class modelling concerns rather than operational afterthoughts: a missing observation is never read as evidence of inactivity, and ambient activity is never automatically attributed to the monitored resident. No cameras, microphones or biometric identification are used anywhere in the design. This is research software and not a medical device; no claim of clinical effectiveness is made or supported.",
   "creators": [
     {
@@ -20,7 +20,7 @@
   ],
   "access_right": "open",
   "license": "mit",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "language": "eng",
   "keywords": [
     "Python",
@@ -68,5 +68,5 @@
     "Dadi, K. (2021). Embedding-based real-time change point detection with application to activity segmentation in smart home time series data. Expert Systems with Applications, 182. https://doi.org/10.1016/j.eswa.2021.115217",
     "Cook, D. (2020). Easing Power Consumption of Wearable Activity Monitoring with Change Point Detection. Sensors, 20(1). https://doi.org/10.3390/s20010310"
   ],
-  "notes": "Research software. Not a medical device. Version 0.4.0 turns the uncertainty diagnostics introduced in 0.3.0 into a threshold-free correctness-separation workflow for real-data research. The frozen 22-home CASAS development-panel analysis was executed and preserved as a machine-readable artifact. Median within-home correctness AUC was 0.5193 for posterior confidence, 0.5184 for posterior margin, 0.5135 for normalised entropy, 0.3719 for evidence strength, and 0.3875 for per-update information gain, with all 22 homes contributing to every diagnostic. All three directional hypotheses fixed before execution failed: information gain did not exceed 0.5, did not outperform confidence, and evidence strength did not carry positive correctness information. The completed Paper 1 manuscript and reproducible household-distribution figure report this negative result without selecting a new threshold or deployment rule. These additions are diagnostic only: they do not change inference, abstention thresholds, transition dynamics, emissions, ontology, or frozen external-validation results. The bundled simulator remains a research instrument rather than an estimate of field performance. The current project concept DOI is 10.5281/zenodo.21337272. No version-specific 0.4.0 DOI is recorded until Zenodo creates the archived release record."
+  "notes": "Research software. Not a medical device. Version 0.5.0 is a platform and support-policy release. It changes the supported Python range from 3.10-3.12 to 3.11-3.14, adds Python 3.13 and 3.14 CI coverage, moves the expensive research and performance regressions out of the pull-request matrix while retaining them as a shared-branch backstop on Python 3.14, adds a guarded GitHub Actions release workflow, and moves manuscript-specific research assets out of the software package repository. It also corrects documentation scope statements for the real-data confidence and abstention summaries. Version 0.5.0 does not change inference, abstention thresholds, transition dynamics, emissions, the behavioural ontology, or the frozen external-validation result. The bundled simulator remains a research instrument rather than an estimate of field performance. The current project concept DOI is 10.5281/zenodo.21337272. No version-specific 0.5.0 DOI is recorded until Zenodo creates the archived release record."
 }
