@@ -1,4 +1,5 @@
 """Runtime and memory benchmarks for sensor modeling."""
+
 from __future__ import annotations
 
 import time
