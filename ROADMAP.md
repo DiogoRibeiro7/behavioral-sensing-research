@@ -176,9 +176,10 @@ calibration and failure robustness.
 
 ## Existing Paper
 
-The current manuscript,
-`papers/failure-aware-multimodal-behavioural-sensing/`, remains the primary
-system paper. It should describe the platform, frozen confirmatory simulation,
+The current manuscript, *Failure-Aware Multimodal Behavioural Sensing*, remains
+the primary system paper. It and the follow-up papers are maintained outside this
+repository, in the private `research-articles` repository, each pinned to a
+released version of this package. It should describe the platform, frozen confirmatory simulation,
 real-data validation and the limits established by `0.3.0`.
 
 The three papers above should not duplicate that manuscript. They are intended

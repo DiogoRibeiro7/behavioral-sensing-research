@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- Moved both manuscripts (`papers/`), the Paper 1 analysis scripts, their tests, `artifacts/paper1/` and the five paper workflows to the private `research-articles` repository. They were copied byte for byte from commit `012f22b` and are pinned there to `sensor-modeling` `v0.4.0`. No package code changes, and the history of those files remains in this repository. `artifacts/v03/` stays here because the documentation cites it.
+
 ## [0.4.0] - 2026-09-15
 
 Turns the uncertainty diagnostics introduced in 0.3.0 into a reproducible,
