@@ -104,6 +104,10 @@ development households only.
 
 ## Using it against the filter
 
+To compare fitted models under one set, use the
+[matched evaluation runner](MATCHED_EVALUATION.md), which builds these tables
+itself. To align features with the filter's own estimates:
+
 ```python
 from datetime import timedelta
 

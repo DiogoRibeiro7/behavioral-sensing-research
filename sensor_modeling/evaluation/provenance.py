@@ -84,6 +84,10 @@ METRIC_DEFINITIONS: dict[str, str] = {
         "0.9 means anything."
     ),
     "per_class_recall": "Recall for each state present in the ground truth.",
+    "confusion": (
+        "Counts of labelled true state (rows) against reported state "
+        "(columns). The final column is UNKNOWN, so abstentions stay visible."
+    ),
     "precision": "True positives divided by predicted positives.",
     "recall": "True positives divided by actual positives.",
     "f1": "Harmonic mean of precision and recall.",
@@ -235,6 +239,13 @@ class ExperimentRecord:
         Sensors the experiment ran over, when it varies them.
     notes
         Anything a reader needs in order not to over-read the result.
+    data_source
+        Where the observations came from. Only ``"simulator"`` records carry
+        the note that the result was not validated on real data; saying so of
+        a real-data result would be false provenance.
+    metric_definitions
+        Definitions of the metrics this record reports. Defaults to
+        :data:`METRIC_DEFINITIONS`.
     """
 
     experiment: str
@@ -243,11 +254,15 @@ class ExperimentRecord:
     results: Mapping[str, Any] = field(default_factory=dict)
     sensor_subset: Sequence[str] | None = None
     notes: Sequence[str] = field(default_factory=list)
+    data_source: str = "simulator"
+    metric_definitions: Mapping[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Validate that the record is self-describing."""
         if not str(self.experiment).strip():
             raise ValueError("an experiment record needs a name")
+        if not str(self.data_source).strip():
+            raise ValueError("an experiment record needs a data source")
 
     def to_dict(self) -> dict[str, Any]:
         """Return the full artefact, results and provenance together."""
@@ -262,12 +277,23 @@ class ExperimentRecord:
             "sensor_subset": (
                 list(self.sensor_subset) if self.sensor_subset is not None else None
             ),
-            "metric_definitions": METRIC_DEFINITIONS,
+            "data_source": self.data_source,
+            "metric_definitions": dict(
+                self.metric_definitions
+                if self.metric_definitions is not None
+                else METRIC_DEFINITIONS
+            ),
             "results": dict(self.results),
             "notes": [
                 *self.notes,
-                "Generated from the bundled simulator. Not validated against "
-                "real sensor data; see docs/limitations.md.",
+                *(
+                    [
+                        "Generated from the bundled simulator. Not validated "
+                        "against real sensor data; see docs/limitations.md."
+                    ]
+                    if self.data_source == "simulator"
+                    else []
+                ),
             ],
         }
 
