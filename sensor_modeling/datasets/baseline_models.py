@@ -7,20 +7,25 @@ information set, so it is scored on the same information as every other model.
 None of them is proposed as a new model.
 
 - :class:`StateFrequencyBaseline` uses the training labels only and reports
-  the training state frequencies for every row.
+  the smoothed training state frequencies for every row.
 - :class:`PersistenceBaseline` uses the previous window's evidence and reports
   its inner model's probabilities for that window.
 - :class:`LogisticBaseline` is regularised multinomial logistic regression on
   every permitted column.
 - :class:`TreeBaseline` is one depth-limited decision tree on every permitted
-  column; its probabilities are leaf frequencies.
+  column; its probabilities are smoothed leaf frequencies.
 
 Shared conventions
 ------------------
 - Fitting uses the training rows only. No baseline reads the development rows.
   Every setting is declared in advance, so there is nothing to select.
-- Probabilities cover every state in the label space, in its order. A state
-  with no training rows gets probability zero and is never predicted.
+- Probabilities cover every state in the label space, in its order, and none is
+  ever zero. Wherever a baseline estimates a probability by counting, it adds
+  one pseudo-observation of every state in the label space. This is Laplace's
+  rule of succession, the conventional parameter-free choice, not a tuned
+  setting. The logistic model cannot represent a state with no training rows;
+  such a state gets the same add-one probability, ``1 / (N + K)`` for ``N``
+  training rows and ``K`` states. It is never predicted, but never ruled out.
 - When two states are equally probable, the one earlier in the label space is
   reported.
 - Missing evidence is encoded, not imputed away. Each evidence column
@@ -55,6 +60,9 @@ from .matched_evaluation import FeatureRows, LabelledRows, ModelSpec, StatePredi
 #: Levels of the hour-of-day column.
 HOURS = 24
 
+#: Pseudo-observations of each state added wherever a probability is counted.
+PSEUDO_COUNT = 1.0
+
 
 def encode_rows(rows: FeatureRows, *, one_hot_hour: bool) -> np.ndarray:
     """Turn permitted columns into a complete numeric matrix, row by row.
@@ -86,6 +94,13 @@ def _label_codes(training: LabelledRows) -> np.ndarray:
     """Position of each training label in the label space."""
     index = {state: position for position, state in enumerate(training.states)}
     return np.array([index[label] for label in training.labels], dtype=int)
+
+
+def _add_one(counts: np.ndarray) -> np.ndarray:
+    """Laplace-smoothed probabilities from per-state counts on the last axis."""
+    total = counts.sum(axis=-1, keepdims=True) + PSEUDO_COUNT * counts.shape[-1]
+    smoothed: np.ndarray = (counts + PSEUDO_COUNT) / total
+    return smoothed
 
 
 def _expand(classes: np.ndarray, scores: np.ndarray, size: int) -> np.ndarray:
@@ -161,7 +176,7 @@ class Baseline(ABC):
 
 
 class StateFrequencyBaseline(Baseline):
-    """The training state frequencies, reported for every row.
+    """The add-one smoothed training state frequencies, reported for every row.
 
     Its reported state is the majority training state. Its probabilities are
     the reference a model must improve on to show that it extracted any
@@ -170,14 +185,14 @@ class StateFrequencyBaseline(Baseline):
 
     def _fit(self, training: LabelledRows) -> None:
         counts = np.bincount(_label_codes(training), minlength=len(training.states))
-        self._frequencies = counts / counts.sum()
+        self._frequencies = _add_one(counts.astype(float))
 
     def _probabilities(self, rows: FeatureRows) -> np.ndarray:
         return np.tile(self._frequencies, (len(rows), 1))
 
     def configuration(self) -> dict[str, object]:
         """Every setting except the seed."""
-        return {"model": "StateFrequencyBaseline", "smoothing": None}
+        return {"model": "StateFrequencyBaseline", "smoothing": "add-one"}
 
 
 class LogisticBaseline(Baseline):
@@ -192,6 +207,10 @@ class LogisticBaseline(Baseline):
         Iteration limit for the L-BFGS solver.
     seed
         Random state passed to the estimator.
+
+    A state with no training rows cannot be represented by the fitted model.
+    It gets the add-one probability ``1 / (N + K)``, and the probabilities of
+    the states the model does represent are scaled so each row sums to one.
     """
 
     def __init__(self, *, C: float = 1.0, max_iter: int = 1000, seed: int = 0) -> None:
@@ -217,10 +236,19 @@ class LogisticBaseline(Baseline):
             ),
         )
         self._model.fit(encode_rows(training, one_hot_hour=True), codes)
+        self._unseen = np.ones(len(training.states), dtype=bool)
+        self._unseen[np.asarray(self._model.classes_, dtype=int)] = False
+        self._unseen_mass = PSEUDO_COUNT / (
+            len(training) + PSEUDO_COUNT * len(training.states)
+        )
 
     def _probabilities(self, rows: FeatureRows) -> np.ndarray:
         scores = self._model.predict_proba(encode_rows(rows, one_hot_hour=True))
-        return _expand(self._model.classes_, scores, len(rows.states))
+        probabilities = _expand(self._model.classes_, scores, len(rows.states))
+        if self._unseen.any():
+            probabilities *= 1.0 - self._unseen_mass * self._unseen.sum()
+            probabilities[:, self._unseen] = self._unseen_mass
+        return probabilities
 
     def configuration(self) -> dict[str, object]:
         """Every setting except the seed."""
@@ -233,11 +261,17 @@ class LogisticBaseline(Baseline):
             "standardised": True,
             "hour_of_day": "one-hot",
             "missing": "zero plus indicator",
+            "states_without_training_rows": "add-one probability",
         }
 
 
 class TreeBaseline(Baseline):
-    """One depth-limited decision tree; probabilities are leaf frequencies.
+    """One depth-limited decision tree with add-one smoothed leaf frequencies.
+
+    A leaf's probabilities are its training counts with one pseudo-observation
+    of every state added: the Laplace correction for probability estimation
+    trees. Without it, a leaf reports zero for every state it happens not to
+    contain.
 
     Parameters
     ----------
@@ -259,18 +293,24 @@ class TreeBaseline(Baseline):
         self.seed = int(seed)
 
     def _fit(self, training: LabelledRows) -> None:
+        design = encode_rows(training, one_hot_hour=False)
+        codes = _label_codes(training)
         self._model = DecisionTreeClassifier(
             max_depth=self.max_depth,
             min_samples_leaf=self.min_samples_leaf,
             random_state=self.seed,
         )
-        self._model.fit(
-            encode_rows(training, one_hot_hour=False), _label_codes(training)
-        )
+        self._model.fit(design, codes)
+        # Counted here rather than read from the fitted tree, whose stored
+        # values changed from counts to fractions between scikit-learn versions.
+        counts = np.zeros((self._model.tree_.node_count, len(training.states)))
+        np.add.at(counts, (self._model.apply(design), codes), 1.0)
+        self._leaf_probabilities = _add_one(counts)
 
     def _probabilities(self, rows: FeatureRows) -> np.ndarray:
-        scores = self._model.predict_proba(encode_rows(rows, one_hot_hour=False))
-        return _expand(self._model.classes_, scores, len(rows.states))
+        leaves = self._model.apply(encode_rows(rows, one_hot_hour=False))
+        probabilities: np.ndarray = self._leaf_probabilities[leaves]
+        return probabilities
 
     def configuration(self) -> dict[str, object]:
         """Every setting except the seed."""
@@ -280,6 +320,7 @@ class TreeBaseline(Baseline):
             "min_samples_leaf": self.min_samples_leaf,
             "hour_of_day": "ordinal",
             "missing": "zero plus indicator",
+            "leaf_probabilities": "add-one",
         }
 
 
