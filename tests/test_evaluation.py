@@ -9,12 +9,15 @@ import numpy as np
 import pytest
 
 from sensor_modeling.evaluation import (
+    ConfusionMatrix,
     SensorConfiguration,
     binary_metrics,
+    confusion_matrix,
     detection_metrics,
     leave_one_out,
     named_subsets,
     paired_difference,
+    prediction_metrics,
     run_ablation,
     state_metrics,
     summarise,
@@ -408,3 +411,90 @@ class TestAblation:
         # Each sensor alone is worth 0.05; together they are worth 0.40, so
         # the pair is strongly complementary.
         assert report.interaction("all", "without_a", "without_b", "without_both") > 0.2
+
+
+class TestPredictionMetrics:
+    """Model-agnostic scoring shares the filter's definitions and code."""
+
+    def test_agrees_with_state_metrics_on_the_same_beliefs(self) -> None:
+        rng = np.random.default_rng(4)
+        states = list(ONTOLOGY.states)
+        estimates = [
+            StateEstimate(
+                at=T0 + timedelta(minutes=i),
+                ontology=ONTOLOGY,
+                belief=rng.dirichlet(np.full(ONTOLOGY.size, 0.6)),
+                evidence=(),
+                completeness=1.0,
+                min_confidence=0.5,
+                min_completeness=0.25,
+            )
+            for i in range(120)
+        ]
+        truth = [states[i] for i in rng.integers(0, len(states), 120)]
+        truth[::7] = [None] * len(truth[::7])
+
+        reference = state_metrics(truth, estimates).to_dict()
+        general = prediction_metrics(
+            truth,
+            [e.state for e in estimates],
+            np.vstack([e.belief for e in estimates]),
+            states=ONTOLOGY.states,
+        ).to_dict()
+        assert {k: general[k] for k in reference} == reference
+
+    def test_labels_alone_leave_probabilistic_scores_empty(self) -> None:
+        metrics = prediction_metrics([S.SLEEPING, S.AWAY], [S.SLEEPING, S.SLEEPING])
+        assert metrics.balanced_accuracy == pytest.approx(0.5)
+        assert not metrics.probabilistic
+        assert metrics.log_loss is None and metrics.brier is None
+        assert metrics.calibration_error is None
+
+    def test_unlabelled_positions_are_skipped_and_nothing_labelled_is_an_error(
+        self,
+    ) -> None:
+        metrics = prediction_metrics([S.SLEEPING, None], [S.SLEEPING, S.AWAY])
+        assert metrics.n == 1 and metrics.accuracy == 1.0
+        with pytest.raises(ValueError, match="no labelled"):
+            prediction_metrics([None], [S.SLEEPING])
+
+    @pytest.mark.parametrize(
+        "probabilities",
+        [
+            np.full((2, 6), 1 / 6),
+            np.array([[1.0, 0, 0, 0, 0, 0, 0], [0.5, 0, 0, 0, 0, 0, 0]]),
+            np.array([[1.5, -0.5, 0, 0, 0, 0, 0], [1.0, 0, 0, 0, 0, 0, 0]]),
+            np.array([[np.nan, 1.0, 0, 0, 0, 0, 0], [1.0, 0, 0, 0, 0, 0, 0]]),
+        ],
+    )
+    def test_malformed_probabilities_are_rejected(
+        self, probabilities: np.ndarray
+    ) -> None:
+        with pytest.raises(ValueError):
+            prediction_metrics([S.AWAY, S.AWAY], [S.AWAY, S.AWAY], probabilities)
+
+    def test_labels_outside_the_label_space_are_rejected(self) -> None:
+        with pytest.raises(ValueError, match="outside the label space"):
+            prediction_metrics([S.AWAY], [S.AWAY], states=[S.SLEEPING])
+        with pytest.raises(ValueError, match="UNKNOWN"):
+            prediction_metrics([S.AWAY], [S.AWAY], states=[S.AWAY, S.UNKNOWN])
+
+
+class TestConfusionMatrix:
+    def test_abstentions_have_their_own_column(self) -> None:
+        matrix = confusion_matrix(
+            [S.SLEEPING, S.SLEEPING, S.AWAY, None],
+            [S.SLEEPING, S.UNKNOWN, S.SLEEPING, S.AWAY],
+            states=[S.AWAY, S.SLEEPING],
+        )
+        assert matrix.predicted == (S.AWAY, S.SLEEPING, S.UNKNOWN)
+        assert matrix.counts == ((0, 1, 0), (0, 1, 1))
+        assert matrix.to_dict()["predicted"] == ["away", "sleeping", "unknown"]
+
+    def test_matrices_over_one_label_space_sum(self) -> None:
+        space = [S.AWAY, S.SLEEPING]
+        one = confusion_matrix([S.AWAY], [S.AWAY], space)
+        two = confusion_matrix([S.AWAY, S.SLEEPING], [S.SLEEPING, S.SLEEPING], space)
+        assert ConfusionMatrix.total([one, two]).counts == ((1, 1, 0), (0, 1, 0))
+        with pytest.raises(ValueError, match="label space"):
+            ConfusionMatrix.total([one, confusion_matrix([S.AWAY], [S.AWAY], [S.AWAY])])

@@ -35,7 +35,7 @@ from datetime import datetime, timedelta
 import numpy as np
 
 from ..fusion.estimate import StateEstimate
-from ..states.ontology import BehaviouralState, StateOntology
+from ..states.ontology import DEFAULT_STATES, BehaviouralState, StateOntology
 
 EPSILON = 1e-12
 
@@ -150,33 +150,58 @@ def state_metrics(
         raise ValueError("no labelled estimates to score")
 
     ontology: StateOntology = pairs[0][1].ontology
-    states = ontology.states
-    index = {state: position for position, state in enumerate(states)}
-
-    reported = [estimate.state for _, estimate in pairs]
     actuals = [actual for actual, _ in pairs]
-    beliefs = np.vstack([estimate.belief for _, estimate in pairs])
-    confidences = np.array([estimate.confidence for _, estimate in pairs])
-    argmax_correct = np.array(
-        [actual is estimate.most_likely for actual, estimate in pairs],
-        dtype=float,
+    labels = _label_scores(actuals, [estimate.state for _, estimate in pairs])
+    probabilistic = _probability_scores(
+        actuals,
+        np.vstack([estimate.belief for _, estimate in pairs]),
+        ontology.states,
+        calibration_bins,
     )
 
+    return StateMetrics(
+        n=len(pairs),
+        accuracy=labels.accuracy,
+        selective_accuracy=labels.selective_accuracy,
+        abstention_rate=labels.abstention_rate,
+        balanced_accuracy=labels.balanced_accuracy,
+        macro_f1=labels.macro_f1,
+        log_loss=probabilistic.log_loss,
+        brier=probabilistic.brier,
+        calibration_error=probabilistic.calibration_error,
+        per_class_recall=labels.per_class_recall,
+    )
+
+
+@dataclass(frozen=True)
+class _LabelScores:
+    """Scores that need only the reported state."""
+
+    accuracy: float
+    selective_accuracy: float
+    abstention_rate: float
+    balanced_accuracy: float
+    macro_f1: float
+    per_class_recall: dict[BehaviouralState, float]
+
+
+@dataclass(frozen=True)
+class _ProbabilityScores:
+    """Scores that need a full probability vector per estimate."""
+
+    log_loss: float
+    brier: float
+    calibration_error: float
+
+
+def _label_scores(
+    actuals: Sequence[BehaviouralState], reported: Sequence[BehaviouralState]
+) -> _LabelScores:
+    """Score reported states against labelled truth, abstentions as errors."""
+    n = len(actuals)
     correct = sum(1 for actual, said in zip(actuals, reported) if actual is said)
     abstained = sum(1 for said in reported if said is BehaviouralState.UNKNOWN)
-    decided = len(pairs) - abstained
-
-    truth_positions = np.array(
-        [index[actual] for actual in actuals if actual in index], dtype=int
-    )
-    scored = np.array([actual in index for actual in actuals], dtype=bool)
-    true_probability = np.full(len(pairs), EPSILON)
-    true_probability[scored] = beliefs[scored, truth_positions]
-    log_loss = float(-np.log(np.maximum(true_probability, EPSILON)).mean())
-
-    one_hot = np.zeros_like(beliefs)
-    one_hot[np.arange(len(pairs))[scored], truth_positions] = 1.0
-    brier = float(((beliefs - one_hot) ** 2).sum(axis=1).mean())
+    decided = n - abstained
 
     recalls: dict[BehaviouralState, float] = {}
     f1_scores: list[float] = []
@@ -195,9 +220,8 @@ def state_metrics(
             else 0.0
         )
 
-    return StateMetrics(
-        n=len(pairs),
-        accuracy=correct / len(pairs),
+    return _LabelScores(
+        accuracy=correct / n,
         selective_accuracy=(
             sum(
                 1
@@ -208,15 +232,247 @@ def state_metrics(
             if decided
             else 0.0
         ),
-        abstention_rate=abstained / len(pairs),
+        abstention_rate=abstained / n,
         balanced_accuracy=(float(np.mean(list(recalls.values()))) if recalls else 0.0),
         macro_f1=float(np.mean(f1_scores)) if f1_scores else 0.0,
+        per_class_recall=recalls,
+    )
+
+
+def _probability_scores(
+    actuals: Sequence[BehaviouralState],
+    beliefs: np.ndarray,
+    states: Sequence[BehaviouralState],
+    calibration_bins: int,
+) -> _ProbabilityScores:
+    """Score probability vectors whose columns follow *states*.
+
+    A true state outside *states* was given no probability at all, so it is
+    scored at the floor probability rather than skipped.
+    """
+    index = {state: position for position, state in enumerate(states)}
+    n = len(actuals)
+    winners = np.argmax(beliefs, axis=1)
+    confidences = beliefs.max(axis=1)
+    argmax_correct = np.array(
+        [actual is states[int(winner)] for actual, winner in zip(actuals, winners)],
+        dtype=float,
+    )
+
+    truth_positions = np.array(
+        [index[actual] for actual in actuals if actual in index], dtype=int
+    )
+    scored = np.array([actual in index for actual in actuals], dtype=bool)
+    true_probability = np.full(n, EPSILON)
+    true_probability[scored] = beliefs[scored, truth_positions]
+    log_loss = float(-np.log(np.maximum(true_probability, EPSILON)).mean())
+
+    one_hot = np.zeros_like(beliefs)
+    one_hot[np.arange(n)[scored], truth_positions] = 1.0
+    brier = float(((beliefs - one_hot) ** 2).sum(axis=1).mean())
+
+    return _ProbabilityScores(
         log_loss=log_loss,
         brier=brier,
         calibration_error=_expected_calibration_error(
             confidences, argmax_correct, calibration_bins
         ),
-        per_class_recall=recalls,
+    )
+
+
+@dataclass(frozen=True)
+class ConfusionMatrix:
+    """Counts of labelled truth (rows) against reported state (columns).
+
+    Columns are the label space followed by ``UNKNOWN``, so abstentions stay
+    visible instead of being folded into an error column.
+    """
+
+    states: tuple[BehaviouralState, ...]
+    counts: tuple[tuple[int, ...], ...]
+
+    @property
+    def predicted(self) -> tuple[BehaviouralState, ...]:
+        """Column labels: the label space, then ``UNKNOWN``."""
+        return (*self.states, BehaviouralState.UNKNOWN)
+
+    @classmethod
+    def total(cls, matrices: Sequence[ConfusionMatrix]) -> ConfusionMatrix:
+        """Sum matrices over the same label space."""
+        if not matrices:
+            raise ValueError("at least one confusion matrix is required")
+        states = matrices[0].states
+        if any(matrix.states != states for matrix in matrices):
+            raise ValueError("confusion matrices must share one label space")
+        summed = np.sum([np.asarray(matrix.counts) for matrix in matrices], axis=0)
+        return cls(states, tuple(tuple(int(v) for v in row) for row in summed))
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a serialisable form, with row and column labels."""
+        return {
+            "truth": [state.value for state in self.states],
+            "predicted": [state.value for state in self.predicted],
+            "counts": [list(row) for row in self.counts],
+        }
+
+
+def confusion_matrix(
+    truth: Sequence[BehaviouralState | None],
+    predicted: Sequence[BehaviouralState],
+    states: Sequence[BehaviouralState] = DEFAULT_STATES,
+) -> ConfusionMatrix:
+    """Count labelled truth against reported state; unlabelled positions are skipped."""
+    if len(truth) != len(predicted):
+        raise ValueError("truth and predicted must be the same length")
+    space = _label_space(states)
+    rows = {state: position for position, state in enumerate(space)}
+    columns = {state: position for position, state in enumerate(space)}
+    columns[BehaviouralState.UNKNOWN] = len(space)
+
+    counts = np.zeros((len(space), len(space) + 1), dtype=int)
+    for actual, said in zip(truth, predicted):
+        if actual is None:
+            continue
+        if actual not in rows:
+            raise ValueError(f"true state {actual!r} is outside the label space")
+        if said not in columns:
+            raise ValueError(f"reported state {said!r} is outside the label space")
+        counts[rows[actual], columns[said]] += 1
+    return ConfusionMatrix(space, tuple(tuple(int(v) for v in row) for row in counts))
+
+
+def _label_space(states: Sequence[BehaviouralState]) -> tuple[BehaviouralState, ...]:
+    """Validate a label space: unique states, never ``UNKNOWN``."""
+    space = tuple(BehaviouralState(state) for state in states)
+    if not space:
+        raise ValueError("the label space needs at least one state")
+    if len(set(space)) != len(space):
+        raise ValueError("the label space must not repeat a state")
+    if BehaviouralState.UNKNOWN in space:
+        raise ValueError("UNKNOWN is an abstention, not a state to predict")
+    return space
+
+
+@dataclass(frozen=True)
+class PredictionMetrics:
+    """Quality of state predictions from any model, not only the filter.
+
+    The same definitions as :class:`StateMetrics`, computed by the same code.
+    The probabilistic scores are ``None`` when the model reported labels
+    without probabilities, rather than a number computed from nothing.
+
+    Attributes
+    ----------
+    confusion
+        Truth against reported state, abstentions in their own column.
+    """
+
+    n: int
+    accuracy: float
+    selective_accuracy: float
+    abstention_rate: float
+    balanced_accuracy: float
+    macro_f1: float
+    per_class_recall: dict[BehaviouralState, float]
+    confusion: ConfusionMatrix
+    log_loss: float | None = None
+    brier: float | None = None
+    calibration_error: float | None = None
+
+    @property
+    def probabilistic(self) -> bool:
+        """Whether probability-based scores are available."""
+        return self.log_loss is not None
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a serialisable form of the metrics."""
+        return {
+            "n": self.n,
+            "accuracy": self.accuracy,
+            "selective_accuracy": self.selective_accuracy,
+            "abstention_rate": self.abstention_rate,
+            "balanced_accuracy": self.balanced_accuracy,
+            "macro_f1": self.macro_f1,
+            "log_loss": self.log_loss,
+            "brier": self.brier,
+            "calibration_error": self.calibration_error,
+            "per_class_recall": {
+                state.value: value for state, value in self.per_class_recall.items()
+            },
+            "confusion": self.confusion.to_dict(),
+        }
+
+
+def prediction_metrics(
+    truth: Sequence[BehaviouralState | None],
+    predicted: Sequence[BehaviouralState],
+    probabilities: np.ndarray | None = None,
+    *,
+    states: Sequence[BehaviouralState] = DEFAULT_STATES,
+    calibration_bins: int = 10,
+) -> PredictionMetrics:
+    """Score predictions from any model against labelled truth.
+
+    Parameters
+    ----------
+    truth
+        True state at each position, or ``None`` where unlabelled. Unlabelled
+        positions are skipped, as in :func:`state_metrics`.
+    predicted
+        Reported state at each position. ``UNKNOWN`` is an abstention and is
+        never correct.
+    probabilities
+        Optional ``(len(truth), len(states))`` array of probabilities, columns
+        in the order of *states*, each row summing to one.
+    states
+        The label space. Every labelled true state must belong to it.
+
+    Raises
+    ------
+    ValueError
+        If the inputs disagree in length, a label falls outside the label
+        space, the probabilities are malformed, or nothing is labelled.
+    """
+    space = _label_space(states)
+    if len(truth) != len(predicted):
+        raise ValueError("truth and predicted must be the same length")
+    beliefs: np.ndarray | None = None
+    if probabilities is not None:
+        beliefs = np.asarray(probabilities, dtype=float)
+        if beliefs.shape != (len(truth), len(space)):
+            raise ValueError(
+                f"probabilities have shape {beliefs.shape}, expected "
+                f"{(len(truth), len(space))}"
+            )
+        if not np.all(np.isfinite(beliefs)) or (beliefs < 0.0).any():
+            raise ValueError("probabilities must be finite and non-negative")
+        if beliefs.size and not np.allclose(beliefs.sum(axis=1), 1.0, atol=1e-6):
+            raise ValueError("each row of probabilities must sum to one")
+
+    confusion = confusion_matrix(truth, predicted, space)
+    keep = [position for position, actual in enumerate(truth) if actual is not None]
+    actuals = [actual for actual in truth if actual is not None]
+    if not actuals:
+        raise ValueError("no labelled predictions to score")
+    labels = _label_scores(actuals, [predicted[position] for position in keep])
+    probabilistic = (
+        _probability_scores(actuals, beliefs[keep], space, calibration_bins)
+        if beliefs is not None
+        else None
+    )
+
+    return PredictionMetrics(
+        n=len(keep),
+        accuracy=labels.accuracy,
+        selective_accuracy=labels.selective_accuracy,
+        abstention_rate=labels.abstention_rate,
+        balanced_accuracy=labels.balanced_accuracy,
+        macro_f1=labels.macro_f1,
+        per_class_recall=labels.per_class_recall,
+        confusion=confusion,
+        log_loss=probabilistic.log_loss if probabilistic else None,
+        brier=probabilistic.brier if probabilistic else None,
+        calibration_error=probabilistic.calibration_error if probabilistic else None,
     )
 
 
@@ -477,7 +733,11 @@ def paired_difference(
     resamples: int = 2000,
     seed: int = 0,
 ) -> PairedDifference:
-    """Compare two methods evaluated on the same simulated trajectories.
+    """Compare two methods evaluated on the same units.
+
+    The units are simulated trajectories in the ablation studies and held-out
+    households in a matched real-data comparison. Either way each pair must
+    come from the same observations.
 
     Pairing matters more than it might seem. Simulated households differ from
     each other far more than two sensor configurations differ on one
