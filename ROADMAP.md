@@ -21,6 +21,8 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Current Stable Baseline
 
+`0.6.0` adds matched-information evaluation: information sets, the matched runner, four pre-declared baselines, household-level comparison, and the first exploratory Phase 1 run. Like `0.5.0`, it does not change inference, the ontology or the frozen external-validation result.
+
 `0.5.0` was released on 2026-09-16. It is a platform and support-policy release:
 Python 3.11--3.14 are supported, release automation is guarded, CI is split into
 fast and slow paths, and manuscript-specific assets live outside the package
@@ -339,7 +341,7 @@ unless it blocks reproducibility or supported users.
 
 ## Release Policy
 
-`0.5.0` is the current stable release.
+`0.6.0` is the current stable release.
 
 Future versions are created only when the research programme produces a
 coherent user-facing software increment. Paper milestones do not automatically
