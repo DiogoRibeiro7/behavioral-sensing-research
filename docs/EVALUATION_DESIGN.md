@@ -132,6 +132,67 @@ study of the same size would not resolve. A detectable difference is not
 automatically an important one. Both the raw mean difference and the interval
 are reported so magnitude stays visible.
 
+### Households, not timestamps, are the unit
+
+A real recording yields tens of thousands of scored timestamps per home. They
+are not tens of thousands of experiments. Timestamps in one home share a
+resident, a routine, a sensor layout and an annotator, and a state persists
+across many consecutive steps. What the data can support is a statement about
+households, and the question a comparison answers is about households too:
+would this model do better in another home like these?
+
+Treating timestamps as independent does not only make an interval somewhat too
+narrow. With `m` timestamps per home and within-home correlation `rho`, the
+variance of a pooled estimate is understated by the design effect
+`1 + (m - 1) * rho`. At `m = 15,000` even `rho = 0.01` gives a design effect of
+about 150, so the interval would be roughly twelve times too narrow. A
+difference confined to one or two unusual homes would then look like a
+population-wide effect. Pooling also weights each home by its length, so the
+longest recording dominates the estimate.
+
+Every comparison therefore keeps three layers apart:
+
+| Layer | Function | Unit |
+| --- | --- | --- |
+| Timestamp level | `prediction_metrics` | scores the timestamps of **one** household |
+| Household level | `score_households`, `household_values`, `summarise_households` | one value per household, each counted once however long it is |
+| Across households | `compare_households` | paired household differences, resampled by household |
+
+`compare_households` pairs two models' values household by household and
+reports:
+
+- the mean and median difference, each with a bootstrap interval and standard
+  error;
+- how many households favour each model or tie;
+- Cohen's *dz*;
+- every household's own difference.
+
+The same household resamples are used for the mean and the median. Intervals
+are percentile by default, or BCa on request. BCa falls back to percentile
+where its correction is undefined, and says so in `note`. Results are
+reproducible from the seed. No p-value is reported.
+
+Edge cases are reported, not hidden:
+
+- **Missing values.** A household without a value from both models is listed
+  in `excluded`, never imputed or counted as zero. An example is a state that
+  never occurred in that home.
+- **One household.** The difference is reported, but with no interval or
+  standard error: one home carries no information about variation between
+  homes.
+- **Degenerate samples.** When every household differs by the same amount, the
+  interval has zero width and *dz* is undefined, and `note` says so.
+
+With the eleven or so held-out homes of the development panel, household
+intervals are wide. That width is the real uncertainty, not a defect to engineer
+away; report `n` alongside every interval.
+
+Simulation studies resample seeds, not households. There, `paired_difference`
+and `monte_carlo_standard_error` report the Monte Carlo standard error
+`s / sqrt(n)`, the precision the replication count bought; see
+[Simulation protocols](SIMULATION_PROTOCOLS.md). Both kinds of study draw
+resamples from the same engine, `sensor_modeling.evaluation.resampling`.
+
 ## Ablation protocol
 
 Configurations are **registry subsets**, not code variants. The pipeline is

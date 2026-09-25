@@ -98,6 +98,12 @@ It deliberately does not report a p-value. With simulations, any effect can be
 made "significant" simply by running more seeds, so the size of the difference
 and its uncertainty are the informative quantities.
 
+Real-data comparisons use `compare_households`, which resamples households
+rather than timestamps. It reports the mean and median household difference
+with bootstrap intervals and the share of households favouring each model. See
+[Evaluation design](EVALUATION_DESIGN.md#households-not-timestamps-are-the-unit)
+for why the household, not the timestamp, is the unit.
+
 ## Sensor ablation
 
 The research question is whether useful behavioural inference survives with

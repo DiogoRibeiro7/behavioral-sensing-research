@@ -352,11 +352,13 @@ class TestScoring:
                 if metric == "balanced_accuracy"
                 else np.subtract(prior, rule)
             )
-            assert comparison.difference.mean_difference == pytest.approx(
-                improvement.mean()
-            )
-            assert comparison.difference.wins == int((improvement > 0).sum())
-            assert comparison.difference.mean_difference > 0
+            difference = comparison.difference
+            assert difference.differences == pytest.approx(tuple(improvement))
+            assert difference.mean.value == pytest.approx(improvement.mean())
+            assert difference.median.value == pytest.approx(np.median(improvement))
+            assert difference.favours_model == int((improvement > 0).sum())
+            assert difference.mean.value > 0
+            assert difference.mean.interval is not None
 
     def test_probabilistic_metrics_need_probabilities_from_both_models(self) -> None:
         result = run(models=[spec("prior", Prior), spec("labels", LabelsOnly)])
@@ -369,14 +371,24 @@ class TestScoring:
         assert summary["log_loss"] is None
         assert summary["balanced_accuracy"]["n"] == len(SPLIT.test)
 
-    def test_one_held_out_household_is_scored_but_not_paired(self) -> None:
+    def test_one_held_out_household_gets_an_estimate_without_an_interval(
+        self,
+    ) -> None:
         split = HouseholdSplit("one", train=("h1",), test=("h2",))
         result = run(split=split)
-        assert all(c.difference is None for c in result.comparisons)
-        assert {c.skipped for c in result.comparisons} == {
-            "fewer than two held-out households"
-        }
+        for comparison in result.comparisons:
+            assert comparison.difference is not None
+            assert comparison.difference.n == 1
+            assert comparison.difference.mean.interval is None
+            assert "one household" in (comparison.difference.note or "")
         assert set(result.household_metrics["rule"]) == {"h2"}
+
+    def test_bca_intervals_can_be_requested(self) -> None:
+        comparison = run(interval="bca").comparisons[0].difference
+        assert comparison is not None and comparison.mean.interval is not None
+        assert comparison.mean.interval.method in {"bca", "percentile"}
+        with pytest.raises(ValueError, match="interval"):
+            run(interval="studentised")
 
     def test_an_unlabelled_held_out_household_is_recorded_not_scored(self) -> None:
         recordings = {**RECORDINGS, "blank": home(9, labelled=False)}
@@ -419,7 +431,8 @@ class TestRecord:
         assert payload["recorded_at"]
         assert {"git_commit", "sensor_modeling"} <= set(payload["environment"])
         configuration = payload["configuration"]
-        assert configuration["result_schema"] == "matched-evaluation/1"
+        assert configuration["result_schema"] == "matched-evaluation/2"
+        assert configuration["bootstrap"]["unit"] == "household"
         assert configuration["information_set"]["sha256"] == CURRENT.sha256()
         assert configuration["information_set"]["columns"] == list(CURRENT.columns)
         assert configuration["split"]["sha256"] == SPLIT.sha256()

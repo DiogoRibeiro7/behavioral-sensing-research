@@ -36,6 +36,12 @@ import numpy as np
 
 from ..fusion.estimate import StateEstimate
 from ..states.ontology import DEFAULT_STATES, BehaviouralState, StateOntology
+from .resampling import (
+    check_settings,
+    monte_carlo_standard_error,
+    percentile_interval,
+    resample_indices,
+)
 
 EPSILON = 1e-12
 
@@ -750,31 +756,33 @@ def paired_difference(
     p-value: with simulations, any effect can be made "significant" simply by
     running more seeds, so the size of the difference and its uncertainty are
     the informative quantities.
+
+    Resampling uses :mod:`~sensor_modeling.evaluation.resampling`, the same
+    engine as :func:`~sensor_modeling.evaluation.compare_households`. For
+    named households with missing values, a median difference or a BCa
+    interval, use that function instead.
     """
     if len(treatment) != len(control):
         raise ValueError("paired comparison requires equal-length sequences")
     if len(treatment) < 2:
         raise ValueError("paired comparison requires at least two pairs")
-    if not 0.0 < confidence < 1.0:
-        raise ValueError("confidence must lie in (0, 1)")
-    if resamples < 100:
-        raise ValueError("resamples must be at least 100")
+    check_settings(confidence, resamples)
 
     differences = np.asarray(treatment, dtype=float) - np.asarray(control, dtype=float)
     if not np.all(np.isfinite(differences)):
         raise ValueError("paired values must be finite")
 
-    rng = np.random.default_rng(seed)
-    draws = rng.choice(differences, size=(resamples, differences.size), replace=True)
-    means = draws.mean(axis=1)
-    tail = (1.0 - confidence) / 2.0
+    means = differences[resample_indices(differences.size, resamples, seed)].mean(
+        axis=1
+    )
+    interval = percentile_interval(means, confidence)
     spread = float(differences.std(ddof=1))
 
     return PairedDifference(
         n=differences.size,
         mean_difference=float(differences.mean()),
-        ci_low=float(np.quantile(means, tail)),
-        ci_high=float(np.quantile(means, 1.0 - tail)),
+        ci_low=interval.low,
+        ci_high=interval.high,
         effect_size=(
             float(differences.mean() / spread)
             if spread > 0
@@ -782,7 +790,7 @@ def paired_difference(
         ),
         wins=int((differences > 0).sum()),
         losses=int((differences < 0).sum()),
-        mcse=float(spread / math.sqrt(differences.size)) if spread > 0 else 0.0,
+        mcse=monte_carlo_standard_error(differences),
     )
 
 
