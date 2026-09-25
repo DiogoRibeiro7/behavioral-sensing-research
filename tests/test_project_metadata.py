@@ -137,3 +137,43 @@ def test_every_archived_release_has_a_version_doi():
     assert rows, "no archived releases listed"
     for row in rows:
         assert "10.5281/zenodo." in row, row
+
+
+#: Every top-level key the Citation File Format 1.2.0 schema allows.
+#:
+#: The schema forbids any other key, and GitHub silently hides its "Cite this
+#: repository" button for a file that fails validation. Three extra keys kept
+#: this repository's CITATION.cff invalid from its first version until 0.6.0.
+CFF_1_2_0_KEYS = frozenset(
+    {
+        "abstract",
+        "authors",
+        "cff-version",
+        "commit",
+        "contact",
+        "date-released",
+        "doi",
+        "identifiers",
+        "keywords",
+        "license",
+        "license-url",
+        "message",
+        "preferred-citation",
+        "references",
+        "repository",
+        "repository-artifact",
+        "repository-code",
+        "title",
+        "type",
+        "url",
+        "version",
+    }
+)
+
+
+def test_citation_file_uses_only_cff_keys():
+    """A key outside the schema makes GitHub drop the citation entirely."""
+    citation = yaml.safe_load(_read("CITATION.cff"))
+
+    assert citation["cff-version"] == "1.2.0"
+    assert set(citation) <= CFF_1_2_0_KEYS, sorted(set(citation) - CFF_1_2_0_KEYS)

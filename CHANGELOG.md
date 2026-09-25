@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- `CITATION.cff` is now valid Citation File Format 1.2.0. Since its first version it had carried three keys the schema forbids (`programming-languages`, `operating-systems`, `subjects`). GitHub therefore never showed a "Cite this repository" button, and tools reading the file, Zenodo among them, could not rely on it. The subject headings not already present are kept as keywords. A new test fails if a non-CFF top-level key returns.
 - `ZENODO.md` now matches the archive. The table of archived releases lists every version Zenodo holds, 0.1.0 to 0.5.0, including both 0.1.3 records. The account of the two concept DOIs is corrected: the current concept began with `v0.1.1` on 2026-07-13, not with `0.2.0` as this page and the 0.3.0 changelog entry stated, and the `0.2.0` record declares `isVersionOf 10.5281/zenodo.17070041`, not `isNewVersionOf 10.5281/zenodo.17070042`. The page also no longer claims that release results are simulator-only; real CASAS results have been documented since 0.3.0.
 
 ## [0.6.0] - 2026-09-25
