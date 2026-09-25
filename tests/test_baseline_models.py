@@ -249,22 +249,65 @@ class TestProbabilities:
             ),
             None,
         )
-        expected = {S.HOME_ACTIVE: 0.75, S.SLEEPING: 0.25}
+        # Add-one over five states: (count + 1) / (4 + 5).
+        expected = {S.HOME_ACTIVE: 4 / 9, S.SLEEPING: 2 / 9}
         probabilities = model.predict_proba(rows(np.zeros((1, 5))))[0]
         for column, state in enumerate(STATES):
-            assert probabilities[column] == expected.get(state, 0.0)
+            assert probabilities[column] == pytest.approx(expected.get(state, 1 / 9))
+
+    @ALL
+    def test_no_probability_is_ever_zero(self, name: str) -> None:
+        values = synthetic(120, seed=20)[0]
+        values[::4, 3:] = np.nan
+        assert (fitted(name).predict_proba(rows(values)) > 0).all()
 
 
 class TestUnseenAndRareStates:
     @ALL
-    def test_states_without_training_rows_get_zero_and_are_never_reported(
+    def test_states_without_training_rows_are_never_reported_or_ruled_out(
         self, name: str
     ) -> None:
         predictions = fitted(name).predict(rows(synthetic(80, seed=11)[0]))
         assert predictions.probabilities is not None
         for state in (S.AWAY, S.BED_AWAKE):
-            assert (predictions.probabilities[:, STATES.index(state)] == 0).all()
+            assert (predictions.probabilities[:, STATES.index(state)] > 0).all()
             assert state not in predictions.labels
+
+    @pytest.mark.parametrize("name", ["state_frequency", "persistence", "logistic"])
+    def test_states_without_training_rows_get_the_add_one_probability(
+        self, name: str
+    ) -> None:
+        values = synthetic(80, seed=21)[0]
+        values[:5, 3:] = np.nan  # first timestamps, for persistence
+        probabilities = fitted(name).predict_proba(rows(values))
+        add_one = 1 / (300 + len(STATES))
+        for state in (S.AWAY, S.BED_AWAKE):
+            np.testing.assert_allclose(probabilities[:, STATES.index(state)], add_one)
+
+    def test_logistic_keeps_its_odds_among_the_states_it_represents(self) -> None:
+        values, labels = synthetic(seed=22)
+        full = fitted("logistic", labelled(values, labels))
+        seen = fitted("logistic", labelled(values, labels, states=SEEN))
+        probe = synthetic(40, seed=23)[0]
+        represented = [STATES.index(state) for state in SEEN]
+        np.testing.assert_allclose(
+            full.predict_proba(rows(probe))[:, represented] / (1 - 2 / 305),
+            seen.predict_proba(rows(probe, states=SEEN)),
+            atol=1e-9,
+        )
+
+    def test_tree_leaves_are_laplace_corrected(self) -> None:
+        values = np.zeros((20, 5))
+        values[:10, 1] = 8.0
+        labels = [S.KITCHEN_ACTIVITY] * 10 + [S.SLEEPING] * 10
+        tree = TreeBaseline(max_depth=1, min_samples_leaf=1)
+        tree.fit(labelled(values, labels), None)
+        probabilities = tree.predict_proba(rows(values[[0, 19]]))
+        # Two pure leaves of ten rows: (10 + 1) / (10 + 5) and 1 / 15 elsewhere.
+        kitchen, sleeping = STATES.index(S.KITCHEN_ACTIVITY), STATES.index(S.SLEEPING)
+        assert probabilities[0, kitchen] == pytest.approx(11 / 15)
+        assert probabilities[1, sleeping] == pytest.approx(11 / 15)
+        assert probabilities[0, sleeping] == pytest.approx(1 / 15)
 
     @ALL
     def test_a_state_with_a_single_training_row_is_handled(self, name: str) -> None:
@@ -280,11 +323,17 @@ class TestUnseenAndRareStates:
             LogisticBaseline().fit(labelled(values, [S.SLEEPING] * 10), None)
 
     @pytest.mark.parametrize("name", ["state_frequency", "tree"])
-    def test_one_training_state_is_reported_with_certainty(self, name: str) -> None:
+    def test_one_training_state_is_reported_but_not_with_certainty(
+        self, name: str
+    ) -> None:
         values, _ = synthetic(10)
         model = fitted(name, labelled(values, [S.SLEEPING] * 10))
-        probabilities = model.predict_proba(rows(values))
-        assert (probabilities[:, STATES.index(S.SLEEPING)] == 1.0).all()
+        predictions = model.predict(rows(values))
+        assert set(predictions.labels) == {S.SLEEPING}
+        assert predictions.probabilities is not None
+        np.testing.assert_allclose(
+            predictions.probabilities[:, STATES.index(S.SLEEPING)], 11 / 15
+        )
 
 
 class TestMissingFeatures:
