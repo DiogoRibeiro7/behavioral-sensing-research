@@ -11,9 +11,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 #: Concept DOI resolving to the latest archived version.
 #:
-#: Zenodo minted a new concept lineage when 0.2.0 was archived through the
+#: Zenodo started a new concept lineage when v0.1.1 was archived through the
 #: GitHub integration, so 0.1.0 remains under 10.5281/zenodo.17070041 while
-#: everything from 0.2.0 onwards lives here. See ZENODO.md.
+#: everything from 0.1.1 onwards lives here. See ZENODO.md.
 CONCEPT_DOI = "10.5281/zenodo.21337272"
 LEGACY_CONCEPT_DOI = "10.5281/zenodo.17070041"
 
@@ -106,7 +106,7 @@ def test_zenodo_metadata_has_required_repository_linkage():
 def test_the_superseded_concept_doi_is_not_a_citation_target():
     """0.1.0's concept DOI must not be offered as the project's DOI.
 
-    Zenodo minted a new concept lineage when 0.2.0 was archived, so the older
+    Zenodo started a new concept lineage when v0.1.1 was archived, so the older
     concept resolves to 0.1.0 alone. Presenting it as the "all versions" DOI
     would send anyone citing this work to an archive that predates the release
     they are using. It may still appear as historical context, but never as the

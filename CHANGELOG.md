@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `ZENODO.md` now matches the archive. The table of archived releases lists every version Zenodo holds, 0.1.0 to 0.5.0, including both 0.1.3 records. The account of the two concept DOIs is corrected: the current concept began with `v0.1.1` on 2026-07-13, not with `0.2.0` as this page and the 0.3.0 changelog entry stated, and the `0.2.0` record declares `isVersionOf 10.5281/zenodo.17070041`, not `isNewVersionOf 10.5281/zenodo.17070042`. The page also no longer claims that release results are simulator-only; real CASAS results have been documented since 0.3.0.
+
 ## [0.6.0] - 2026-09-25
 
 Adds the matched-information evaluation needed for Phases 1 and 2 of the roadmap, and records its first real-data result. It provides:
