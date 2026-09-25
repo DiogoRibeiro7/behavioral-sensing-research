@@ -33,6 +33,17 @@ from .evaluate import (
     uncertainty_diagnostics,
     uncertainty_panel_summary,
 )
+from .information_sets import (
+    HH_EVIDENCE_CHANNELS,
+    EvidenceChannel,
+    EvidenceResolution,
+    FeatureTable,
+    InformationComponent,
+    InformationSet,
+    build_feature_table,
+    build_panel_features,
+    nested_information_sets,
+)
 from .rates import (
     RateReport,
     RateSample,
@@ -45,6 +56,15 @@ __all__ = [
     "ActivityInterval",
     "CircadianProfileFit",
     "DatasetEvaluation",
+    "EvidenceChannel",
+    "EvidenceResolution",
+    "FeatureTable",
+    "HH_EVIDENCE_CHANNELS",
+    "InformationComponent",
+    "InformationSet",
+    "build_feature_table",
+    "build_panel_features",
+    "nested_information_sets",
     "UncertaintyDiagnostics",
     "HH_ACTIVITY_STATES",
     "HH_LOCATIONS",
