@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-25
+
+Adds the matched-information evaluation needed for Phases 1 and 2 of the roadmap, and records its first real-data result. It provides:
+
+- information sets that declare what a model may condition on;
+- a runner that fits and scores models on identical rows under one information set and household split;
+- four pre-declared baselines that plug into the runner;
+- household-level statistics that compare models by resampling households, never timestamps;
+- a first exploratory run on 20 real development homes, measuring what time of day and recent history are worth to the baselines.
+
+It does not change inference, abstention thresholds, transition dynamics, emissions, the behavioural ontology, or the frozen external-validation result.
+
 ### Added
 - Added matched information sets for the Phase 1 recoverable-information study (`sensor_modeling.datasets.information_sets`). An `InformationSet` declares what a model may condition on: current per-channel activation counts, the local hour, and recent per-channel history, at a shared step, channel vocabulary and history depth. `nested_information_sets()` returns the four Phase 1 sets. `build_feature_table` and `build_panel_features` build per-household features at given prediction moments. Every window closes at or before its moment, annotations are never read, and households are never pooled. An uninstrumented channel or a window before the recording starts is reported as NaN, never as zero. Nothing here changes inference, the ontology, the evaluation splits or the frozen validation results. The contract is documented in `docs/INFORMATION_SETS.md`.
 - Added a matched-information evaluation runner, `run_matched_evaluation` in `sensor_modeling.datasets.matched_evaluation`. It fits and scores several models under one information set on a declared training, development and held-out household split. Every model receives identical feature rows in seeded random order, and fitting never sees a held-out household. A model whose prediction for a row depends on other rows is refused. Results are per held-out household: balanced accuracy, per-state recall, confusion matrix, and log loss and Brier score where probabilities exist. Paired household-level differences between models come with bootstrap intervals over households. The output is an `ExperimentRecord` carrying the git commit, package version, information-set and split declarations with digests, model configurations, seed, timestamp and metric definitions. It is documented in `docs/MATCHED_EVALUATION.md`, with an executable example that the test suite runs.
