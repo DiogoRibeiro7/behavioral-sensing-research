@@ -209,7 +209,8 @@ def environment() -> dict[str, str]:
         "python": sys.version.split()[0],
         "platform": platform.platform(),
     }
-    for name in ("numpy", "scipy", "pandas", "sensor_modeling"):
+    # scikit-learn fits the baseline models, so its version changes their numbers.
+    for name in ("numpy", "scipy", "pandas", "sklearn", "sensor_modeling"):
         try:
             module = __import__(name)
             versions[name] = str(getattr(module, "__version__", "unknown"))

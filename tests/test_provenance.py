@@ -69,7 +69,13 @@ class TestSelfDescription:
 
     def test_library_versions_are_captured(self) -> None:
         captured = environment()
-        assert set(captured) >= {"python", "platform", "numpy", "sensor_modeling"}
+        assert set(captured) >= {
+            "python",
+            "platform",
+            "numpy",
+            "sklearn",
+            "sensor_modeling",
+        }
 
     def test_a_record_needs_a_name(self) -> None:
         with pytest.raises(ValueError, match="needs a name"):

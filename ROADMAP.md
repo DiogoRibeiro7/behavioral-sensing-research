@@ -115,6 +115,14 @@ Produce a reproducible decomposition of:
 The exact decomposition need not be additive in a strict causal sense, but the
 experimental design must make clear which information each model receives.
 
+### First result
+
+An exploratory first run on the 20 single-resident development homes is
+recorded in `docs/PHASE1_MATCHED_BASELINES.md`. For the pre-declared linear
+and tree baselines, time of day is worth +0.09 to +0.13 household balanced
+accuracy and recent history +0.02 to +0.04. The filter is not yet in the
+comparison, so the formulation gap remains to be measured.
+
 ### Boundary
 
 The supervised diagnostic remains a measurement instrument, not a production

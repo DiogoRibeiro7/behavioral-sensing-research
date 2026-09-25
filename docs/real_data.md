@@ -345,6 +345,13 @@ does not have:
 Together they account for +0.210, which is the whole of the gap and slightly
 more, so the two overlap.
 
+**Re-measured under matched information sets.** A pre-declared matched run on
+20 development homes found time of day worth +0.09 to +0.13 to linear and tree
+baselines, consistent with the figure above. It found recent history worth only
++0.02 to +0.04. The +0.140 here came from a gradient-boosted diagnostic whose
+code was not retained, and has not been reproduced. See
+[Phase 1: matched baselines](PHASE1_MATCHED_BASELINES.md).
+
 Time of day alone, with no sensor information whatsoever, reaches 0.262 against
 a 0.143 baseline. Daily rhythm is genuinely informative and the pipeline
 currently ignores it, but it is not a shortcut: a clock alone lands far below
