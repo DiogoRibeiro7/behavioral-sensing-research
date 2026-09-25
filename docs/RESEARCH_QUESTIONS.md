@@ -164,18 +164,23 @@ them.
   never a biometric identification.
 - **Multi-resident state tracking.** The ontology models one person; others
   are detected but not tracked.
-- **Real-world performance.** Every quantitative result here comes from a
-  simulator written by this project.
+- **Clinical or prospective performance.** The repository now contains
+  quantitative evidence from both simulation and annotated CASAS recordings,
+  but neither retrospective smart-home evaluation nor simulation establishes
+  prospective clinical effectiveness.
 
 ## What would make these answers trustworthy
 
-In priority order, and until the first is done, all answers above are
-conditional on the simulator:
+The project has completed annotated CASAS evaluation, so the remaining
+credibility gates are no longer simulator-only. In priority order:
 
-1. Evaluation on a public annotated smart-home dataset (CASAS, ARAS, MARBLE).
-2. Emission and dwell parameters fitted from data rather than declared.
-3. A second, independently written simulator with different structural
-   assumptions.
-4. Calibration assessed across households, not only within one.
+1. External validation on an independently collected annotated smart-home
+   dataset with materially different sensing semantics or layout.
+2. Matched-information comparisons that separate sensing limitations from
+   formulation limitations on frozen household splits.
+3. Population-level and household-level parameter estimation with explicit
+   partial pooling where the data support it.
+4. Calibration and uncertainty assessment across households and across
+   datasets, not only within one ecosystem.
 5. Prospective assessment of alert burden with people who would act on the
    alerts.
