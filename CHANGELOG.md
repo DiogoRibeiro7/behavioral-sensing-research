@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added matched information sets for the Phase 1 recoverable-information study (`sensor_modeling.datasets.information_sets`). An `InformationSet` declares what a model may condition on: current per-channel activation counts, the local hour, and recent per-channel history, at a shared step, channel vocabulary and history depth. `nested_information_sets()` returns the four Phase 1 sets. `build_feature_table` and `build_panel_features` build per-household features at given prediction moments. Every window closes at or before its moment, annotations are never read, and households are never pooled. An uninstrumented channel or a window before the recording starts is reported as NaN, never as zero. Nothing here changes inference, the ontology, the evaluation splits or the frozen validation results. The contract is documented in `docs/INFORMATION_SETS.md`.
+
 ## [0.5.0] - 2026-09-16
 
 A platform and support-policy release. It modernises the supported Python range,

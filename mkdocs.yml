@@ -61,6 +61,7 @@ nav:
       - Sensor data model: SENSOR_DATA_MODEL.md
       - Uncertainty model: UNCERTAINTY_MODEL.md
       - Evaluation design: EVALUATION_DESIGN.md
+      - Information-set contract: INFORMATION_SETS.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md
       - v0.3 freeze verification: V03_PROFILE_FREEZE_VERIFICATION.md
