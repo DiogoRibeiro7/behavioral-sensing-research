@@ -61,6 +61,8 @@ from .matched_evaluation import (
     PairedComparison,
     StateModel,
     StatePredictions,
+    compare_information_sets,
+    held_out_metrics,
     run_matched_evaluation,
 )
 from .rates import (
@@ -95,6 +97,8 @@ __all__ = [
     "PairedComparison",
     "StateModel",
     "StatePredictions",
+    "compare_information_sets",
+    "held_out_metrics",
     "run_matched_evaluation",
     "build_feature_table",
     "build_panel_features",

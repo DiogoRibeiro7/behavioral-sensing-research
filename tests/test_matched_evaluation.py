@@ -31,10 +31,13 @@ from sensor_modeling.datasets import (
     InformationComponent,
     InformationSet,
     LabelledRows,
+    LogisticBaseline,
     MatchedEvaluation,
     ModelSpec,
     StatePredictions,
     build_feature_table,
+    compare_information_sets,
+    held_out_metrics,
     run_matched_evaluation,
     truth_series,
 )
@@ -63,6 +66,20 @@ RESOLUTION = EvidenceResolution(
 )
 CURRENT = InformationSet(
     "current", frozenset({InformationComponent.CURRENT_EVIDENCE}), RESOLUTION
+)
+HISTORY = InformationSet(
+    "current+history",
+    frozenset(
+        {InformationComponent.CURRENT_EVIDENCE, InformationComponent.RECENT_HISTORY}
+    ),
+    RESOLUTION,
+)
+TIMED = InformationSet(
+    "current+time_of_day",
+    frozenset(
+        {InformationComponent.CURRENT_EVIDENCE, InformationComponent.TIME_OF_DAY}
+    ),
+    RESOLUTION,
 )
 KITCHEN = "events_kitchen_motion_lag0"
 
@@ -413,6 +430,100 @@ class TestScoring:
                     first.household_metrics[model][household].to_dict()
                     == second.household_metrics[model][household].to_dict()
                 )
+
+
+FOLD_A = HouseholdSplit("a", train=("h1", "h2", "h3"), test=("h4", "h5", "h6"))
+FOLD_B = HouseholdSplit("b", train=("h4", "h5", "h6"), test=("h1", "h2", "h3"))
+
+
+class TestAcrossInformationSets:
+    def test_a_model_ignoring_the_extra_information_gains_nothing(self) -> None:
+        result = compare_information_sets(
+            run(information_set=CURRENT),
+            run(information_set=HISTORY),
+            model="rule",
+            metric="balanced_accuracy",
+        )
+        assert result.households == SPLIT.test
+        assert result.tied == result.n and result.mean.value == 0.0
+
+    def test_differences_are_the_larger_set_against_the_smaller(self) -> None:
+        models = [ModelSpec("logistic", lambda seed: LogisticBaseline(seed=seed))]
+        small = run(information_set=CURRENT, models=models)
+        large = run(information_set=HISTORY, models=models)
+        result = compare_information_sets(
+            small, large, model="logistic", metric="log_loss"
+        )
+
+        def loss(evaluation: MatchedEvaluation, household: str) -> float:
+            value = evaluation.household_metrics["logistic"][household].log_loss
+            assert value is not None
+            return value
+
+        expected = [loss(small, h) - loss(large, h) for h in SPLIT.test]
+        assert result.differences == pytest.approx(tuple(expected))
+
+    def test_cross_fitted_folds_are_pooled_so_every_household_is_held_out_once(
+        self,
+    ) -> None:
+        small = [run(information_set=CURRENT, split=fold) for fold in (FOLD_A, FOLD_B)]
+        large = [run(information_set=HISTORY, split=fold) for fold in (FOLD_A, FOLD_B)]
+        assert set(held_out_metrics(small, "rule")) == set(RECORDINGS)
+        result = compare_information_sets(small, large, model="rule", metric="accuracy")
+        assert result.households == tuple(sorted(RECORDINGS))
+
+    def test_a_household_held_out_in_two_folds_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="more than one fold"):
+            held_out_metrics([run(), run()], "rule")
+
+    @pytest.mark.parametrize(
+        ("smaller", "larger", "message"),
+        [
+            ({"information_set": TIMED}, {"information_set": HISTORY}, "nested"),
+            ({}, {}, "nested"),
+            ({"information_set": HISTORY}, {}, "nested"),
+            ({}, {"information_set": HISTORY, "split": FOLD_A}, "same household split"),
+            (
+                {},
+                {
+                    "information_set": HISTORY,
+                    "moments": {
+                        h: list(build(h).moments)[::2] for h in SPLIT.households
+                    },
+                },
+                "identical moments",
+            ),
+            (
+                {},
+                {
+                    "information_set": HISTORY,
+                    "models": [
+                        spec("prior", Prior),
+                        spec("rule", KitchenRule, depth=2),
+                    ],
+                },
+                "specified differently",
+            ),
+        ],
+    )
+    def test_mismatched_runs_are_refused(
+        self, smaller: dict[str, Any], larger: dict[str, Any], message: str
+    ) -> None:
+        with pytest.raises(ValueError, match=message):
+            compare_information_sets(
+                run(**smaller), run(**larger), model="rule", metric="accuracy"
+            )
+
+    def test_an_unknown_model_metric_or_fold_count_is_refused(self) -> None:
+        small, large = run(), run(information_set=HISTORY)
+        with pytest.raises(ValueError, match="not part of the run"):
+            compare_information_sets(small, large, model="absent", metric="accuracy")
+        with pytest.raises(ValueError, match="metric"):
+            compare_information_sets(small, large, model="rule", metric="auc")
+        with pytest.raises(ValueError, match="one run per fold"):
+            compare_information_sets(
+                [small], [large, large], model="rule", metric="accuracy"
+            )
 
 
 class TestRecord:

@@ -152,11 +152,29 @@ training rows. For a development-phase experiment, use a split whose held-out
 households are development homes; the frozen external cohort is reserved for
 final claims.
 
+## Comparing across information sets
+
+Each run uses exactly one information set, so the runner never compares
+across sets. That comparison is how an information gap is measured: what extra
+information is worth to one model. It is made deliberately, with
+`compare_information_sets(smaller, larger, model=..., metric=...)`, and only
+when the two runs are comparable. It is refused unless:
+
+- the smaller set is strictly nested in the larger one, at the same
+  resolution;
+- both use the same household split;
+- both scored identical moments in every held-out household;
+- the model has the same specification in both runs.
+
+A positive difference means the model did better with the larger set.
+
+For a cross-fitted design, pass one run per fold on each side. For example,
+two folds with the training and held-out roles swapped, so that every
+household is held out once. `held_out_metrics` pools a model's held-out
+households across folds and refuses a household held out twice.
+
 ## What the runner does not do
 
-- **It does not run the generative filter.** The filter is recursive and reads
-  raw observations, so it cannot be restricted to a declared information set.
-- **It does not compare across information sets.** Each run uses exactly one
-  set. Estimating an information gap means comparing runs over nested sets.
-  The recorded information-set, split and moment digests make it possible to
-  check that two runs used the same split and scored the same positions.
+The runner does not run the generative filter. The filter is recursive and
+reads raw observations, so it cannot be restricted to a declared information
+set.

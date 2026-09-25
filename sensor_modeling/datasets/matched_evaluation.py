@@ -402,6 +402,11 @@ class MatchedEvaluation:
         Metrics per model, then per scored held-out household.
     comparisons
         Paired household-level comparisons between every pair of models.
+    information_set, split, models, states
+        What the run was given, so that runs can be checked against each
+        other before their results are combined.
+    moments
+        SHA-256 of each scored held-out household's prediction moments.
     path
         Where the record was written, if an output directory was given.
     """
@@ -409,6 +414,11 @@ class MatchedEvaluation:
     record: ExperimentRecord
     household_metrics: Mapping[str, Mapping[str, PredictionMetrics]]
     comparisons: tuple[PairedComparison, ...]
+    information_set: InformationSet
+    split: HouseholdSplit
+    models: tuple[ModelSpec, ...]
+    states: tuple[BehaviouralState, ...]
+    moments: Mapping[str, str]
     path: Path | None = None
 
 
@@ -432,15 +442,20 @@ class _Household:
         labels = tuple(label for label in truth if label is not None)
         return cls(name, role, table, np.array(rows, dtype=int), labels)
 
+    @property
+    def moments_sha256(self) -> str:
+        """Digest of the prediction moments, to check two runs scored the same."""
+        return hashlib.sha256(
+            "\n".join(m.isoformat() for m in self.table.moments).encode("utf-8")
+        ).hexdigest()
+
     def summary(self) -> dict[str, object]:
         """Return what was built for this household."""
         return {
             "role": self.role,
             "moments": len(self.table.moments),
             "labelled": int(self.labelled.size),
-            "moments_sha256": hashlib.sha256(
-                "\n".join(m.isoformat() for m in self.table.moments).encode("utf-8")
-            ).hexdigest(),
+            "moments_sha256": self.moments_sha256,
             "uninstrumented": [c.name for c in self.table.uninstrumented],
             "excluded_sensors": list(self.table.excluded_sensors),
         }
@@ -860,5 +875,126 @@ def run_matched_evaluation(
         record=record,
         household_metrics=household_metrics,
         comparisons=comparisons,
+        information_set=information_set,
+        split=split,
+        models=tuple(models),
+        states=space,
+        moments={name: households[name].moments_sha256 for name in scored},
         path=path,
+    )
+
+
+def _runs(
+    runs: MatchedEvaluation | Sequence[MatchedEvaluation],
+) -> tuple[MatchedEvaluation, ...]:
+    """Accept one run or one run per fold."""
+    folds = (runs,) if isinstance(runs, MatchedEvaluation) else tuple(runs)
+    if not folds:
+        raise ValueError("at least one run is required")
+    return folds
+
+
+def _spec_of(run: MatchedEvaluation, model: str) -> dict[str, object]:
+    """The recorded specification of *model* in *run*."""
+    for spec in run.models:
+        if spec.name == model:
+            return spec.to_dict()
+    raise ValueError(f"model {model!r} was not part of the run")
+
+
+def held_out_metrics(
+    runs: MatchedEvaluation | Sequence[MatchedEvaluation], model: str
+) -> dict[str, PredictionMetrics]:
+    """One model's held-out household metrics, pooled over cross-fitted folds.
+
+    Each run is one fold. Every fold must use the same information set, label
+    space and model specification, and no household may be held out in more
+    than one fold, so each household is scored exactly once, by a model that
+    was never fitted on it.
+    """
+    folds = _runs(runs)
+    first = folds[0]
+    specification = _spec_of(first, model)
+    pooled: dict[str, PredictionMetrics] = {}
+    for fold in folds:
+        if fold.information_set != first.information_set:
+            raise ValueError("folds must use the same information set")
+        if fold.states != first.states:
+            raise ValueError("folds must use the same label space")
+        if _spec_of(fold, model) != specification:
+            raise ValueError(f"model {model!r} is specified differently across folds")
+        repeated = sorted(set(pooled) & set(fold.household_metrics[model]))
+        if repeated:
+            raise ValueError(f"households held out in more than one fold: {repeated}")
+        pooled.update(fold.household_metrics[model])
+    return dict(sorted(pooled.items()))
+
+
+def compare_information_sets(
+    smaller: MatchedEvaluation | Sequence[MatchedEvaluation],
+    larger: MatchedEvaluation | Sequence[MatchedEvaluation],
+    *,
+    model: str,
+    metric: str,
+    confidence: float = 0.95,
+    resamples: int = 2000,
+    seed: int = 0,
+    interval: str = "percentile",
+) -> HouseholdComparison:
+    """What the extra information in *larger* is worth to one model.
+
+    This is the deliberate way to compare across information sets, which the
+    runner never does within a run. The comparison is refused unless:
+    - the smaller set is strictly nested in the larger one, at the same
+      resolution;
+    - the two sides use the same split in each fold;
+    - they score identical moments in every held-out household;
+    - they use the same label space and model specification.
+
+    Differences are oriented so that a positive value means the model did
+    better with the larger set.
+
+    Parameters
+    ----------
+    smaller, larger
+        One run each, or one run per cross-fitted fold. The i-th smaller run
+        is paired with the i-th larger run.
+    model
+        Name of the model, as in its :class:`ModelSpec`.
+    metric
+        One of :data:`COMPARABLE_METRICS`.
+    confidence, resamples, seed, interval
+        As in :func:`~sensor_modeling.evaluation.compare_households`.
+    """
+    if metric not in COMPARABLE_METRICS:
+        raise ValueError(f"metric must be one of {sorted(COMPARABLE_METRICS)}")
+    small, large = _runs(smaller), _runs(larger)
+    if len(small) != len(large):
+        raise ValueError("both sides need one run per fold")
+    reference, candidate = small[0].information_set, large[0].information_set
+    if reference == candidate or not reference.is_nested_in(candidate):
+        raise ValueError(
+            f"information set {reference.name!r} is not strictly nested in "
+            f"{candidate.name!r} at the same resolution"
+        )
+    for low, high in zip(small, large):
+        if low.split != high.split:
+            raise ValueError("paired folds must use the same household split")
+        if low.states != high.states:
+            raise ValueError("paired folds must use the same label space")
+        if low.moments != high.moments:
+            raise ValueError(
+                "paired folds must score identical moments in every held-out "
+                "household"
+            )
+        if _spec_of(low, model) != _spec_of(high, model):
+            raise ValueError(f"model {model!r} is specified differently across sets")
+    return compare_households(
+        household_values(held_out_metrics(large, model), metric),
+        household_values(held_out_metrics(small, model), metric),
+        higher_is_better=COMPARABLE_METRICS[metric],
+        confidence=confidence,
+        resamples=resamples,
+        seed=seed,
+        interval=interval,
     )
