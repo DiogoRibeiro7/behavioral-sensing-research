@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-25
+
+Adds the matched-information evaluation needed for Phases 1 and 2 of the roadmap, and records its first real-data result. It provides:
+
+- information sets that declare what a model may condition on;
+- a runner that fits and scores models on identical rows under one information set and household split;
+- four pre-declared baselines that plug into the runner;
+- household-level statistics that compare models by resampling households, never timestamps;
+- a first exploratory run on 20 real development homes, measuring what time of day and recent history are worth to the baselines.
+
+It does not change inference, abstention thresholds, transition dynamics, emissions, the behavioural ontology, or the frozen external-validation result.
+
+### Added
+- Added matched information sets for the Phase 1 recoverable-information study (`sensor_modeling.datasets.information_sets`). An `InformationSet` declares what a model may condition on: current per-channel activation counts, the local hour, and recent per-channel history, at a shared step, channel vocabulary and history depth. `nested_information_sets()` returns the four Phase 1 sets. `build_feature_table` and `build_panel_features` build per-household features at given prediction moments. Every window closes at or before its moment, annotations are never read, and households are never pooled. An uninstrumented channel or a window before the recording starts is reported as NaN, never as zero. Nothing here changes inference, the ontology, the evaluation splits or the frozen validation results. The contract is documented in `docs/INFORMATION_SETS.md`.
+- Added a matched-information evaluation runner, `run_matched_evaluation` in `sensor_modeling.datasets.matched_evaluation`. It fits and scores several models under one information set on a declared training, development and held-out household split. Every model receives identical feature rows in seeded random order, and fitting never sees a held-out household. A model whose prediction for a row depends on other rows is refused. Results are per held-out household: balanced accuracy, per-state recall, confusion matrix, and log loss and Brier score where probabilities exist. Paired household-level differences between models come with bootstrap intervals over households. The output is an `ExperimentRecord` carrying the git commit, package version, information-set and split declarations with digests, model configurations, seed, timestamp and metric definitions. It is documented in `docs/MATCHED_EVALUATION.md`, with an executable example that the test suite runs.
+- Added `prediction_metrics` and `confusion_matrix` for predictions from any model. They share their code with `state_metrics`, which now delegates to the same label- and probability-based helpers; its outputs are unchanged, verified identical to the previous implementation.
+- Added four pre-declared Phase 2 baselines in `sensor_modeling.datasets.baseline_models`, behind one `Baseline` interface that plugs into the matched evaluation runner:
+  - state frequency / majority;
+  - persistence, which carries forward the state inferred from the previous window's evidence and reports the training frequencies at a recording's first timestamp;
+  - L2-regularised multinomial logistic regression;
+  - one depth-limited decision tree.
+
+  `baseline_suite(information_set)` returns them with fixed settings; nothing is tuned and no baseline reads the development rows. Every baseline reports probabilities in label-space order and encodes missing evidence as a value plus an indicator rather than as zero. No baseline reports a probability of zero: counted probabilities (state frequencies and tree leaves) use Laplace's add-one rule over the label space, and a state the logistic model cannot represent, because it has no training rows, gets the same add-one probability, `1 / (N + K)`. The log loss of a state absent from training is therefore set by the training data, not by the metric's `1e-12` floor. Reported states are unchanged by this smoothing. A fitted baseline refuses rows from a different information set. Documented in `docs/BASELINES.md`, including which metrics are meaningful for each model; no model is claimed to perform better. Inference is unchanged.
+- Added `evidence_column` and `parse_evidence_column`, which name and parse the information-set feature columns from one definition.
+- Added household-level statistics in `sensor_modeling.evaluation.households`. They keep three layers apart:
+  1. timestamps are scored within one household (`prediction_metrics`);
+  2. households are summarised with each counted once, whatever their length (`score_households`, `household_values`, `summarise_households`);
+  3. models are compared by resampling households, never timestamps (`compare_households`).
+
+  `compare_households` reports the mean and median paired difference with bootstrap intervals and standard errors, the number and share of households favouring each model or tied, Cohen's dz, and each household's difference. It gives no p-value. Intervals are percentile or, optionally, BCa, which falls back to percentile where undefined and says so. Missing values are excluded and listed, never imputed. A single household gets an estimate without an interval, and a constant difference gets a zero-width interval. On synthetic panels at nominal 90% coverage, household intervals cover the true effect about 90% of the time; intervals treating timestamps as independent cover it about 14% of the time. The rationale is documented in `docs/EVALUATION_DESIGN.md`.
+- Added `sensor_modeling.evaluation.resampling`, the single seeded resampling engine behind every comparison, with `monte_carlo_standard_error` for simulation summaries.
+- Added `compare_information_sets`, the deliberate way to measure what extra information is worth to one model. It is refused unless the smaller information set is strictly nested in the larger, and both runs share the split, the scored moments, the label space and the model specification. It accepts one run per cross-fitted fold. `held_out_metrics` pools a model's held-out households across folds and refuses a household held out twice. `MatchedEvaluation` now carries the information set, split, models, label space and moment digests needed for these checks.
+- Added the first Phase 1 run, `scripts/run_phase1_matched_baselines.py`, with results in `docs/PHASE1_MATCHED_BASELINES.md`. The protocol was committed before any household was scored: the 20 frozen single-resident development homes, two cross-fitted folds, the four information sets, and the pre-declared baselines. It is exploratory. For linear and tree baselines, time of day is worth +0.09 to +0.13 household balanced accuracy in every home, and recent history +0.02 to +0.04. That does not reproduce the +0.140 an earlier gradient-boosted diagnostic attributed to history. Two runs from a clean commit gave identical results.
+
+### Changed
+- Experiment records now store the scikit-learn version, since it changes the fitted baselines.
+- `paired_difference` now draws its resamples through the shared engine. Its output is identical to the previous implementation, verified byte for byte, so simulation results are unchanged.
+- The matched evaluation runner compares models with `compare_households` and summarises with `summarise_households`. Comparisons now report the median difference and the share of households favouring each model, take an `interval` option (`"percentile"` or `"bca"`), and report a single held-out household instead of skipping it. The result schema is now `matched-evaluation/2`.
+- `ExperimentRecord` takes a `data_source` and optional `metric_definitions`. Only `"simulator"` records, the default, carry the note that they were not validated on real data, so a real-data record no longer claims to be simulated.
+
 ## [0.5.0] - 2026-09-16
 
 A platform and support-policy release. It modernises the supported Python range,

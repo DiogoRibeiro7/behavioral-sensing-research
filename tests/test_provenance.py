@@ -54,9 +54,28 @@ class TestSelfDescription:
         notes = record().to_dict()["notes"]
         assert any("simulator" in note for note in notes)  # type: ignore[union-attr]
 
+    def test_a_real_data_record_does_not_claim_to_be_simulated(self) -> None:
+        payload = record(data_source="casas-hh").to_dict()
+        assert payload["data_source"] == "casas-hh"
+        assert not any("simulator" in note for note in payload["notes"])
+
+    def test_a_record_can_carry_its_own_metric_definitions(self) -> None:
+        payload = record(metric_definitions={"brier": "defined here"}).to_dict()
+        assert payload["metric_definitions"] == {"brier": "defined here"}
+
+    def test_a_record_needs_a_data_source(self) -> None:
+        with pytest.raises(ValueError, match="data source"):
+            record(data_source=" ")
+
     def test_library_versions_are_captured(self) -> None:
         captured = environment()
-        assert set(captured) >= {"python", "platform", "numpy", "sensor_modeling"}
+        assert set(captured) >= {
+            "python",
+            "platform",
+            "numpy",
+            "sklearn",
+            "sensor_modeling",
+        }
 
     def test_a_record_needs_a_name(self) -> None:
         with pytest.raises(ValueError, match="needs a name"):

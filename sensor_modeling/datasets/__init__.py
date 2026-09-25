@@ -15,6 +15,14 @@ No dataset is redistributed here. Each adapter documents where to obtain the
 recording and under what terms.
 """
 
+from .baseline_models import (
+    Baseline,
+    LogisticBaseline,
+    PersistenceBaseline,
+    StateFrequencyBaseline,
+    TreeBaseline,
+    baseline_suite,
+)
 from .casas import (
     CASAS_ACTIVITY_STATES,
     ActivityInterval,
@@ -33,6 +41,30 @@ from .evaluate import (
     uncertainty_diagnostics,
     uncertainty_panel_summary,
 )
+from .information_sets import (
+    HH_EVIDENCE_CHANNELS,
+    EvidenceChannel,
+    EvidenceResolution,
+    FeatureTable,
+    InformationComponent,
+    InformationSet,
+    build_feature_table,
+    build_panel_features,
+    nested_information_sets,
+)
+from .matched_evaluation import (
+    FeatureRows,
+    HouseholdSplit,
+    LabelledRows,
+    MatchedEvaluation,
+    ModelSpec,
+    PairedComparison,
+    StateModel,
+    StatePredictions,
+    compare_information_sets,
+    held_out_metrics,
+    run_matched_evaluation,
+)
 from .rates import (
     RateReport,
     RateSample,
@@ -43,8 +75,34 @@ from .rates import (
 
 __all__ = [
     "ActivityInterval",
+    "Baseline",
+    "LogisticBaseline",
+    "PersistenceBaseline",
+    "StateFrequencyBaseline",
+    "TreeBaseline",
+    "baseline_suite",
     "CircadianProfileFit",
     "DatasetEvaluation",
+    "EvidenceChannel",
+    "EvidenceResolution",
+    "FeatureRows",
+    "FeatureTable",
+    "HH_EVIDENCE_CHANNELS",
+    "InformationComponent",
+    "InformationSet",
+    "HouseholdSplit",
+    "LabelledRows",
+    "MatchedEvaluation",
+    "ModelSpec",
+    "PairedComparison",
+    "StateModel",
+    "StatePredictions",
+    "compare_information_sets",
+    "held_out_metrics",
+    "run_matched_evaluation",
+    "build_feature_table",
+    "build_panel_features",
+    "nested_information_sets",
     "UncertaintyDiagnostics",
     "HH_ACTIVITY_STATES",
     "HH_LOCATIONS",
