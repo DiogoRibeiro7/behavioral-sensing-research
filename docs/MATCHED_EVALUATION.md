@@ -108,8 +108,8 @@ result = run_matched_evaluation(
     output_dir=Path("results"),
 )
 for comparison in result.comparisons:
-    d = comparison.difference
-    print(comparison.metric, f"{d.mean_difference:+.3f} [{d.ci_low:+.3f}, {d.ci_high:+.3f}]")
+    mean = comparison.difference.mean
+    print(comparison.metric, f"{mean.value:+.3f} [{mean.interval.low:+.3f}, {mean.interval.high:+.3f}]")
 ```
 
 The record is written to `results/matched_evaluation.json`.
@@ -130,14 +130,19 @@ in this package. It contains:
 | `results.households` | Per household: role, number of moments, number labelled, a digest of the moments, and uninstrumented channels |
 | `results.models.<name>.households` | Per held-out household: balanced accuracy, per-state recall, confusion matrix, and log loss, Brier score and calibration where probabilities exist |
 | `results.models.<name>.summary` | Median, mean, spread and range across households, each household counted once |
-| `results.comparisons` | Paired household-level differences for every pair of models on every requested metric |
+| `results.comparisons` | For every pair of models on every requested metric: each household's difference, the mean and median difference with bootstrap intervals, and how many households favour each model |
 
 Each comparison sets `model` to the later-declared model and `reference` to the
 earlier one, so declare the reference model first. The difference is oriented
-so that a positive value favours `model`. The interval comes from a bootstrap
-over households. A comparison that cannot be made records why in `skipped`,
-for example when a model reported no probabilities or fewer than two held-out
-households were scored. `confusion_summed` is descriptive only.
+so that a positive value favours `model`. Intervals come from a bootstrap over
+households, never timestamps: percentile by default, or BCa with
+`interval="bca"`. With a single held-out household the difference is reported
+without an interval. A comparison that cannot be made, because a model
+reported no probabilities, records why in `skipped`. `confusion_summed` is
+descriptive only. The statistics are those of
+`sensor_modeling.evaluation.compare_households`; see
+[Evaluation design](EVALUATION_DESIGN.md#households-not-timestamps-are-the-unit)
+for why households are the unit.
 
 ## Held-out households and tuning
 

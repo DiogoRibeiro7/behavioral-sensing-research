@@ -19,8 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   `baseline_suite(information_set)` returns them with fixed settings; nothing is tuned and no baseline reads the development rows. Every baseline reports probabilities in label-space order and encodes missing evidence as a value plus an indicator rather than as zero. No baseline reports a probability of zero: counted probabilities (state frequencies and tree leaves) use Laplace's add-one rule over the label space, and a state the logistic model cannot represent, because it has no training rows, gets the same add-one probability, `1 / (N + K)`. The log loss of a state absent from training is therefore set by the training data, not by the metric's `1e-12` floor. Reported states are unchanged by this smoothing. A fitted baseline refuses rows from a different information set. Documented in `docs/BASELINES.md`, including which metrics are meaningful for each model; no model is claimed to perform better. Inference is unchanged.
 - Added `evidence_column` and `parse_evidence_column`, which name and parse the information-set feature columns from one definition.
+- Added household-level statistics in `sensor_modeling.evaluation.households`. They keep three layers apart:
+  1. timestamps are scored within one household (`prediction_metrics`);
+  2. households are summarised with each counted once, whatever their length (`score_households`, `household_values`, `summarise_households`);
+  3. models are compared by resampling households, never timestamps (`compare_households`).
+
+  `compare_households` reports the mean and median paired difference with bootstrap intervals and standard errors, the number and share of households favouring each model or tied, Cohen's dz, and each household's difference. It gives no p-value. Intervals are percentile or, optionally, BCa, which falls back to percentile where undefined and says so. Missing values are excluded and listed, never imputed. A single household gets an estimate without an interval, and a constant difference gets a zero-width interval. On synthetic panels at nominal 90% coverage, household intervals cover the true effect about 90% of the time; intervals treating timestamps as independent cover it about 14% of the time. The rationale is documented in `docs/EVALUATION_DESIGN.md`.
+- Added `sensor_modeling.evaluation.resampling`, the single seeded resampling engine behind every comparison, with `monte_carlo_standard_error` for simulation summaries.
 
 ### Changed
+- `paired_difference` now draws its resamples through the shared engine. Its output is identical to the previous implementation, verified byte for byte, so simulation results are unchanged.
+- The matched evaluation runner compares models with `compare_households` and summarises with `summarise_households`. Comparisons now report the median difference and the share of households favouring each model, take an `interval` option (`"percentile"` or `"bca"`), and report a single held-out household instead of skipping it. The result schema is now `matched-evaluation/2`.
 - `ExperimentRecord` takes a `data_source` and optional `metric_definitions`. Only `"simulator"` records, the default, carry the note that they were not validated on real data, so a real-data record no longer claims to be simulated.
 
 ## [0.5.0] - 2026-09-16

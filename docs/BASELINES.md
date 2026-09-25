@@ -18,6 +18,7 @@ makes no claim about which performs better.
 | `tree` | `TreeBaseline` | every permitted column | add-one smoothed leaf frequencies of one depth-limited tree |
 
 All four implement one interface, `Baseline`:
+
 - `predict_proba(rows)` returns a probability for every state in the label
   space, in the label space's order;
 - `predict(rows)` reports the most probable state with those probabilities.

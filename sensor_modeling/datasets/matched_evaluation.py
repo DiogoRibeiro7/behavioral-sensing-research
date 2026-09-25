@@ -43,14 +43,18 @@ from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
+from ..evaluation.households import (
+    INTERVAL_METHODS,
+    HouseholdComparison,
+    compare_households,
+    household_values,
+    summarise_households,
+)
 from ..evaluation.metrics import (
     ConfusionMatrix,
-    PairedDifference,
     PredictionMetrics,
     _label_space,
-    paired_difference,
     prediction_metrics,
-    summarise,
 )
 from ..evaluation.provenance import METRIC_DEFINITIONS, ExperimentRecord
 from ..states.ontology import DEFAULT_STATES, BehaviouralState
@@ -58,7 +62,9 @@ from .casas import CasasRecording, truth_series
 from .information_sets import FeatureTable, InformationSet, build_feature_table
 
 #: Identifier of the ``results`` layout. Bump when a field changes meaning.
-RESULT_SCHEMA = "matched-evaluation/1"
+#: Version 2 reports mean and median household differences, the share of
+#: households favouring each model, and a household with no pair partner.
+RESULT_SCHEMA = "matched-evaluation/2"
 
 #: Metrics the runner can summarise and compare, and whether higher is better.
 COMPARABLE_METRICS: Mapping[str, bool] = {
@@ -93,9 +99,10 @@ MATCHED_METRIC_DEFINITIONS: dict[str, str] = {
         )
     },
     "household_summary": (
-        "Median, mean, standard deviation, minimum and maximum of a metric "
-        "across held-out households, each household counted once. "
-        "Observations are never pooled across households."
+        "Mean, median, standard deviation, minimum and maximum of a metric "
+        "across held-out households, each household counted once however many "
+        "timestamps it has. Households without a value are listed as missing, "
+        "not counted as zero. Observations are never pooled across households."
     ),
     "confusion_summed": (
         "Sum of the per-household confusion matrices. Descriptive only; no "
@@ -106,22 +113,30 @@ MATCHED_METRIC_DEFINITIONS: dict[str, str] = {
         "favours the model over the reference: model minus reference where "
         "higher is better, reference minus model where lower is better."
     ),
-    "mean_difference": (
-        "Mean improvement across held-out households, every model scored on "
-        "identical observations."
+    "differences": "The improvement in each paired held-out household.",
+    "mean, median": (
+        "Mean and median improvement across paired held-out households, every "
+        "model scored on identical observations."
     ),
-    "ci_low, ci_high": (
-        "Percentile bootstrap interval on mean_difference, resampling "
-        "households rather than observations."
+    "standard_error": (
+        "Standard deviation of the statistic across household resamples; null "
+        "with a single household."
+    ),
+    "interval": (
+        "Bootstrap interval resampling households, never timestamps, with the "
+        "same resamples for the mean and the median. The method is percentile "
+        "or BCa. BCa falls back to percentile where it is undefined, and the "
+        "note says so."
+    ),
+    "favours_model, favours_reference, tied": (
+        "Households where the model did better, worse, or exactly as well as "
+        "the reference, with their proportions."
     ),
     "effect_size": (
-        "Cohen's dz of the household improvements; null when every household "
-        "improved by the same non-zero amount."
+        "Cohen's dz of the household improvements; null with one household or "
+        "when every household improved by the same amount."
     ),
-    "wins, losses": (
-        "Households where the model did better, or worse, than the reference."
-    ),
-    "mcse": "Standard error of mean_difference across households.",
+    "excluded": "Held-out households lacking a value from either model.",
 }
 
 
@@ -354,7 +369,7 @@ class PairedComparison:
     reference: str
     metric: str
     households: tuple[str, ...]
-    difference: PairedDifference | None
+    difference: HouseholdComparison | None
     skipped: str | None = None
 
     def to_dict(self) -> dict[str, object]:
@@ -554,6 +569,7 @@ def _compare(
     seed: int,
     resamples: int,
     confidence: float,
+    interval: str,
 ) -> PairedComparison:
     """Pair two models on one metric across the scored held-out households."""
     if metric in PROBABILISTIC_METRICS and not all(
@@ -569,27 +585,19 @@ def _compare(
             None,
             "a model reported no probabilities",
         )
-    if len(households) < 2:
-        return PairedComparison(
-            model,
-            reference,
-            metric,
-            households,
-            None,
-            "fewer than two held-out households",
-        )
-    ours = [float(getattr(scores[model][h], metric)) for h in households]
-    theirs = [float(getattr(scores[reference][h], metric)) for h in households]
-    treatment, control = (
-        (ours, theirs) if COMPARABLE_METRICS[metric] else (theirs, ours)
-    )
     return PairedComparison(
         model,
         reference,
         metric,
         households,
-        paired_difference(
-            treatment, control, confidence=confidence, resamples=resamples, seed=seed
+        compare_households(
+            household_values(scores[model], metric),
+            household_values(scores[reference], metric),
+            higher_is_better=COMPARABLE_METRICS[metric],
+            confidence=confidence,
+            resamples=resamples,
+            seed=seed,
+            interval=interval,
         ),
     )
 
@@ -600,18 +608,8 @@ def _summary(
     """Summarise household metrics, each household counted once."""
     summary: dict[str, object] = {}
     for metric in metrics:
-        values = [
-            float(value)
-            for household in sorted(scores)
-            if (value := getattr(scores[household], metric)) is not None
-        ]
-        if len(values) < len(scores):
-            summary[metric] = None
-            continue
-        summary[metric] = {
-            "median": float(np.median(values)),
-            **summarise({metric: values})[metric],
-        }
+        described = summarise_households(household_values(scores, metric))
+        summary[metric] = described.to_dict() if described.n else None
     return summary
 
 
@@ -630,6 +628,7 @@ def run_matched_evaluation(
     states: Sequence[BehaviouralState] = DEFAULT_STATES,
     resamples: int = 2000,
     confidence: float = 0.95,
+    interval: str = "percentile",
 ) -> MatchedEvaluation:
     """Fit and score several models under one information set.
 
@@ -665,6 +664,9 @@ def run_matched_evaluation(
         The label space. Defaults to the ontology's states.
     resamples, confidence
         Household bootstrap settings for the paired comparisons.
+    interval
+        ``"percentile"`` or ``"bca"``; see
+        :func:`~sensor_modeling.evaluation.compare_households`.
 
     Raises
     ------
@@ -673,6 +675,8 @@ def run_matched_evaluation(
         depends on rows other than its own, or nothing held out is labelled.
     """
     space = _label_space(states)
+    if interval not in INTERVAL_METHODS:
+        raise ValueError(f"interval must be one of {INTERVAL_METHODS}")
     if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
         raise ValueError("seed must be a non-negative integer")
     if not models:
@@ -781,6 +785,7 @@ def run_matched_evaluation(
             seed=seed,
             resamples=resamples,
             confidence=confidence,
+            interval=interval,
         )
         for earlier in range(len(names))
         for later in range(earlier + 1, len(names))
@@ -808,7 +813,8 @@ def run_matched_evaluation(
         ),
         "bootstrap": {
             "unit": "household",
-            "statistic": "mean paired improvement",
+            "statistics": ["mean", "median"],
+            "interval": interval,
             "resamples": resamples,
             "confidence": confidence,
         },
