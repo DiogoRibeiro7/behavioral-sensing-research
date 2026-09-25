@@ -15,6 +15,14 @@ No dataset is redistributed here. Each adapter documents where to obtain the
 recording and under what terms.
 """
 
+from .baseline_models import (
+    Baseline,
+    LogisticBaseline,
+    PersistenceBaseline,
+    StateFrequencyBaseline,
+    TreeBaseline,
+    baseline_suite,
+)
 from .casas import (
     CASAS_ACTIVITY_STATES,
     ActivityInterval,
@@ -65,6 +73,12 @@ from .rates import (
 
 __all__ = [
     "ActivityInterval",
+    "Baseline",
+    "LogisticBaseline",
+    "PersistenceBaseline",
+    "StateFrequencyBaseline",
+    "TreeBaseline",
+    "baseline_suite",
     "CircadianProfileFit",
     "DatasetEvaluation",
     "EvidenceChannel",

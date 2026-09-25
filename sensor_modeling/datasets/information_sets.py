@@ -51,6 +51,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 from bisect import bisect_right
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -122,6 +123,21 @@ HH_EVIDENCE_CHANNELS: tuple[EvidenceChannel, ...] = tuple(
 #: Column holding the local hour of the prediction moment, 0 to 23.
 HOUR_OF_DAY = "hour_of_day"
 
+_EVIDENCE_COLUMN = re.compile(r"^events_(?P<channel>.+)_lag(?P<lag>\d+)$")
+
+
+def evidence_column(channel: str, lag: int) -> str:
+    """Name of the column counting *channel* activations *lag* windows back."""
+    return f"events_{channel}_lag{lag}"
+
+
+def parse_evidence_column(name: str) -> tuple[str, int] | None:
+    """Return ``(channel, lag)`` for an evidence column, ``None`` for any other."""
+    match = _EVIDENCE_COLUMN.match(name)
+    if match is None:
+        return None
+    return match.group("channel"), int(match.group("lag"))
+
 
 @dataclass(frozen=True)
 class EvidenceResolution:
@@ -184,7 +200,7 @@ class _Column:
         """Public column name."""
         if self.channel is None:
             return HOUR_OF_DAY
-        return f"events_{self.channel.name}_lag{self.lag}"
+        return evidence_column(self.channel.name, self.lag)
 
 
 @dataclass(frozen=True)
