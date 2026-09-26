@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-26
+
+Completes the first Phase 1 measurement of the recoverable-information gap. It provides:
+
+- a versioned, validated schema for experiment records, which migrates earlier records;
+- a cyclic time-of-day encoding and interpretable recent-history summaries for matched experiments;
+- a declared gradient-boosted supervised diagnostic;
+- the generative filter's model restricted to the information sets it can consume, so it can be compared with supervised models on identical information;
+- an exploratory run on the 20 development homes under frozen folds. It separates what added information is worth to a fixed model from what a formulation is worth on fixed information, and it records every comparison it could not make.
+
+It does not change inference, abstention thresholds, transition dynamics, emissions, the behavioural ontology, or the frozen external-validation result.
+
 ### Added
 - Added the Phase 1 recoverable-information-gap experiment, which separates what added information is worth to a fixed model from what a formulation is worth on fixed information. The protocol and design are in `docs/PHASE1_RECOVERABLE_GAP.md`.
   - `sensor_modeling.datasets.recoverable_gap` runs the four nested sets under frozen folds, with every setting fixed and no household used for tuning. It reports household-level metrics, per-state recall and calibration summaries with bootstrap intervals, and paired information gains, formulation gaps, interactions and comparisons with the production filter. The result is one experiment record. `gap_summary.render_summary` generates a Markdown summary from the written record alone.
