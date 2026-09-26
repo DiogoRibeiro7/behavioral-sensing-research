@@ -374,3 +374,44 @@ class TestExperiment:
         payload["results"] = {"result_schema": "time-prior-results/1"}
         with pytest.raises(ValueError, match="history-results"):
             render_summary(payload)
+
+
+class TestPublishedResult:
+    """The published development-panel result, and the page that reports it."""
+
+    def test_it_ran_the_frozen_protocol_on_a_clean_tree(self) -> None:
+        payload = load_record(PUBLISHED)
+        splits = load_frozen_splits(SPLITS)
+        declared = declared_protocol(splits)
+        assert payload["configuration"]["protocol_sha256"] == declared.sha256()
+        assert payload["environment"]["git_dirty"] == "false"
+        inputs = {item["name"]: item["sha256"] for item in payload["inputs"]}
+        assert inputs.pop(PROTOCOL.name) == check_frozen_protocol(declared, PROTOCOL)
+        assert inputs.pop(SPLITS.name) == splits.sha256
+        assert inputs == {
+            entry["filename"]: entry["sha256"] for entry in splits.homes.values()
+        }
+        assert sorted(payload["results"]["households"]) == sorted(splits.homes)
+
+    @pytest.mark.parametrize(
+        "earlier",
+        [
+            ROOT / "artifacts" / "phase1" / "phase1-recoverable-information-gap.json",
+            ROOT / "artifacts" / "phase3" / "phase3-hierarchical-time-prior.json",
+        ],
+    )
+    def test_models_without_the_history_state_reproduce_earlier_records(
+        self, earlier: Path
+    ) -> None:
+        published = load_record(PUBLISHED)["household_metrics"]
+        before = load_record(earlier)["household_metrics"]
+        shared = set(published) & set(before)
+        assert shared
+        for cell in shared:
+            assert published[cell] == before[cell], cell
+
+    def test_the_page_carries_the_summary_generated_from_it(self) -> None:
+        text = DOC.read_text(encoding="utf-8")
+        block = text.split("<!-- generated-summary:start -->")[1]
+        block = block.split("<!-- generated-summary:end -->")[0]
+        assert block.strip() == render_summary(load_record(PUBLISHED), level=3).strip()

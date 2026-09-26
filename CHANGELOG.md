@@ -35,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Models.** The original generative model is scored in `I0` and `I2`, and the history-state model in `I2`. The Phase 3.1 time-prior model is scored in `I1` and `I3`, and the time-prior model with the history state, declared before any result, in `I3`. The diagnostic, logistic regression and the no-information reference are scored in every set.
   - **Estimands.** Formulation estimands compare two models on one set. Information estimands compare one model family across nested sets. No estimand changes both. H1, the history state against the original model in `I2`, is exactly the difference between the two models' history gains, so the earlier +0.021 is re-measured on the same homes rather than used as a threshold. A time-by-history interaction is reported for each model family.
   - **Output.** The run writes a versioned record, and `history_summary.render_summary` generates the Markdown summary from it. `scripts/run_phase3_history.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Result.** The run is published in `artifacts/phase3/phase3-explicit-history.json`, made from the protocol commit on a clean tree. It is on the 20 development homes, so it is not a held-out claim.
+    - On identical information the history state lowers balanced accuracy by 0.042 [0.026, 0.060] in `I2`, and by 0.044 [0.028, 0.060] with the hour in `I3`. Both are pre-specified failures.
+    - Recent history is worth −0.021 to the model with the history state, against +0.021 to the original model re-measured in the same run.
+    - The loss is mostly `home_active` recall, down 0.164. Log loss improves by 0.726, but Brier score and calibration error do not.
+    - The history gain is 0.013 to 0.021 smaller when the hour is known, in every model family.
 
 ## [0.7.0] - 2026-09-26
 
