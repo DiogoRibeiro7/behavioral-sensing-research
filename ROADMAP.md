@@ -241,7 +241,31 @@ An explicit history state is implemented; see `docs/HISTORY_STATE.md`.
 - **Diagnostics.** Each prediction splits exactly into prior and transitions,
   the current window, and recent history.
 - **Matched sets.** It can be scored in `I2` and `I3`.
-- **Evaluation.** Its evaluation is still to be run.
+
+Its pre-specified development-panel evaluation is in
+`docs/PHASE3_HISTORY_STATE.md`. The measured conclusions, all on the
+development panel, which earlier work has inspected, and none a held-out
+claim:
+
+- **On identical information.** The history state lowers balanced accuracy by
+  0.042 [0.026, 0.060] in `I2`, and by 0.044 [0.028, 0.060] in `I3` with the
+  hour. At most 3 of 20 homes improve. Both are pre-specified failures.
+- **Recent history.** It is worth −0.021 to the model with the history state,
+  against +0.021 to the original model re-measured in the same run. The
+  history state recovers less from recent history, not more.
+- **Where the loss is.** It is mostly `home_active`, whose recall falls by
+  0.164. More of its moments are reported as `away`.
+- **Probabilities.** Log loss improves by 0.726, but Brier score and
+  calibration error do not, and log loss stays about twice the no-information
+  value.
+- **The formulation gap.** The diagnostic now leads by +0.158 at `I2` and
+  +0.123 at `I3`.
+- **Time and history.** The history gain is 0.013 to 0.021 smaller when the
+  hour is known, in every model family.
+- **What is not known.** The fitted coefficients are positive in nearly every
+  state, so recent activity raises the expected rate everywhere. Whether they
+  also absorb errors in the declared rates is not separated by this
+  experiment.
 
 ### 3.3 Correlated silence model
 

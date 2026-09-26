@@ -69,6 +69,7 @@ nav:
       - Periodic state prior: PERIODIC_STATE_PRIOR.md
       - "Phase 3.1: hierarchical time prior": PHASE3_TIME_PRIOR.md
       - Recent-history state: HISTORY_STATE.md
+      - "Phase 3.2: explicit history state": PHASE3_HISTORY_STATE.md
       - Experiment artifacts: EXPERIMENT_ARTIFACTS.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md

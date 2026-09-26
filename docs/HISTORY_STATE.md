@@ -157,7 +157,10 @@ declared set.
 - **With the periodic prior.** In `I3` it combines with the periodic state
   prior.
 
-No development-panel or held-out evaluation is part of this change.
+Its pre-specified development-panel evaluation is
+[Phase 3.2](PHASE3_HISTORY_STATE.md). On identical information it lowers
+balanced accuracy by 0.042: a pre-specified failure. No held-out evaluation has
+been run.
 
 ## Assumptions and limits
 
