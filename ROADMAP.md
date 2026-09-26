@@ -232,6 +232,17 @@ Represent recent event history directly rather than relying on the current
 filter state to absorb all temporal structure. The representation must remain
 interpretable enough to audit which historical evidence changed a posterior.
 
+An explicit history state is implemented; see `docs/HISTORY_STATE.md`.
+
+- **The model.** Each channel's activations over the three previous windows
+  condition its current Poisson rate, relative to what the memoryless model
+  expects in each state. There are eleven coefficients, fitted on training
+  labels.
+- **Diagnostics.** Each prediction splits exactly into prior and transitions,
+  the current window, and recent history.
+- **Matched sets.** It can be scored in `I2` and `I3`.
+- **Evaluation.** Its evaluation is still to be run.
+
 ### 3.3 Correlated silence model
 
 Replace the product of many independent room-level silence likelihoods only if

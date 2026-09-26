@@ -164,17 +164,22 @@ class PoissonEventEmission(EmissionModel):
         if not math.isfinite(self.default_rate) or self.default_rate < 0.0:
             raise ValueError("default_rate must be finite and non-negative")
 
+    def rates_per_second(self, ontology: StateOntology) -> np.ndarray:
+        """Activations per second in each ontology state, as the likelihood uses them."""
+        per_second = (
+            np.maximum(self._per_state(ontology, self.rates, self.default_rate), 0.0)
+            / 3600.0
+        )
+        floored: np.ndarray = np.maximum(per_second, MIN_RATE)
+        return floored
+
     def _raw_log_likelihood(
         self,
         ontology: StateOntology,
         observations: Sequence[Observation],
         elapsed: timedelta,
     ) -> np.ndarray:
-        per_second = (
-            np.maximum(self._per_state(ontology, self.rates, self.default_rate), 0.0)
-            / 3600.0
-        )
-        per_second = np.maximum(per_second, MIN_RATE)
+        per_second = self.rates_per_second(ontology)
         count = sum(1 for obs in observations if obs.value != 0.0)
         duration = max(elapsed.total_seconds(), 0.0)
         loglik: np.ndarray = count * np.log(per_second) - per_second * duration

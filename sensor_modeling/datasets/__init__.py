@@ -42,6 +42,7 @@ from .evaluate import (
     uncertainty_diagnostics,
     uncertainty_panel_summary,
 )
+from .history_fit import fit_history_model
 from .information_sets import (
     HH_EVIDENCE_CHANNELS,
     EvidenceChannel,
@@ -125,6 +126,7 @@ __all__ = [
     "RateReport",
     "RateSample",
     "fit_circadian_profile",
+    "fit_history_model",
     "PeriodicPriorConfig",
     "PeriodicStatePrior",
     "fit_periodic_prior",

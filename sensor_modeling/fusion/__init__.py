@@ -25,6 +25,13 @@ from .filter import (
     MultimodalBayesFilter,
     NonMonotonicUpdateError,
 )
+from .history import (
+    ChannelHistory,
+    HistoryAwareBayesFilter,
+    HistoryConfig,
+    HistoryModel,
+    PosteriorDecomposition,
+)
 from .smoothing import smooth_beliefs, smooth_estimates
 
 __all__ = [
@@ -38,6 +45,11 @@ __all__ = [
     "Explanation",
     "FusionConfig",
     "GaussianEmission",
+    "ChannelHistory",
+    "HistoryAwareBayesFilter",
+    "HistoryConfig",
+    "HistoryModel",
+    "PosteriorDecomposition",
     "MultimodalBayesFilter",
     "NonMonotonicUpdateError",
     "PoissonEventEmission",
