@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - At `I1` the model is within +0.006 [−0.022, +0.030] of the diagnostic, but its log loss stays above the no-information reference.
     - Recent history still adds nothing to it.
     - Household adaptation improves log loss and calibration, but its balanced-accuracy gain is below the declared minimal difference: pre-specified inconclusive.
+- Added the pre-specified Phase 3.2 experiment for the explicit history state, `sensor_modeling.datasets.history_experiment`, with its frozen protocol, `artifacts/phase3/history_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_HISTORY_STATE.md`.
+  - **Models.** The original generative model is scored in `I0` and `I2`, and the history-state model in `I2`. The Phase 3.1 time-prior model is scored in `I1` and `I3`, and the time-prior model with the history state, declared before any result, in `I3`. The diagnostic, logistic regression and the no-information reference are scored in every set.
+  - **Estimands.** Formulation estimands compare two models on one set. Information estimands compare one model family across nested sets. No estimand changes both. H1, the history state against the original model in `I2`, is exactly the difference between the two models' history gains, so the earlier +0.021 is re-measured on the same homes rather than used as a threshold. A time-by-history interaction is reported for each model family.
+  - **Output.** The run writes a versioned record, and `history_summary.render_summary` generates the Markdown summary from it. `scripts/run_phase3_history.py` refuses to run unless the code's protocol equals the frozen file.
 
 ## [0.7.0] - 2026-09-26
 
