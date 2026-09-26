@@ -21,6 +21,8 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Current Stable Baseline
 
+`0.7.0` records the first complete Phase 1 recoverable-information-gap result. It adds a versioned experiment-record schema, a cyclic time-of-day encoding, interpretable history summaries, a declared supervised diagnostic, and the generative filter's model restricted to the information sets it can consume. Like `0.6.0`, it does not change inference, abstention, the ontology or the frozen external-validation result.
+
 `0.6.0` adds matched-information evaluation: information sets, the matched runner, four pre-declared baselines, household-level comparison, and the first exploratory Phase 1 run. Like `0.5.0`, it does not change inference, the ontology or the frozen external-validation result.
 
 `0.5.0` was released on 2026-09-16. It is a platform and support-policy release:
@@ -357,7 +359,7 @@ unless it blocks reproducibility or supported users.
 
 ## Release Policy
 
-`0.6.0` is the current stable release.
+`0.7.0` is the current stable release.
 
 Future versions are created only when the research programme produces a
 coherent user-facing software increment. Paper milestones do not automatically
