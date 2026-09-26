@@ -30,8 +30,8 @@ repository-code: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
 repository-artifact: "https://zenodo.org/records/21337272"
 url: "https://sensor-modeling.readthedocs.io"
 
-version: "0.6.0"
-date-released: "2026-09-25"
+version: "0.7.0"
+date-released: "2026-09-26"
 license: MIT
 license-url: "https://opensource.org/licenses/MIT"
 
@@ -117,7 +117,7 @@ preferred-citation:
       affiliation: "Faculty of Media Arts and Design, Technical University of Porto"
       orcid: "https://orcid.org/0009-0001-2022-7072"
   year: 2026
-  version: "0.6.0"
+  version: "0.7.0"
   doi: "10.5281/zenodo.21337272"
   url: "https://github.com/DiogoRibeiro7/behavioral-sensing-research"
   abstract: "A research-grade Python toolkit for interpretable, probabilistic, privacy-preserving analysis of behavioural sensor data, and for multimodal ambient sensing in assisted-living and digital-health research. It provides an end-to-end pipeline from heterogeneous sensor observations to explained alerts, alongside an established modelling core of Bernoulli autoregressive models, hidden Markov models, change-point detection and non-homogeneous Poisson processes. Sensor failure, missing data, visitors and uncertainty are treated as first-class modelling concerns: a missing observation is never read as evidence of inactivity, and ambient activity is never automatically attributed to the monitored resident. Research software, not a medical device."
