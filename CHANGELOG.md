@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Experiment records now follow a versioned, validated schema, 1.1, documented in `docs/EXPERIMENT_ARTIFACTS.md`. `ExperimentRecord` gains typed fields for input provenance (`InputArtifact`, identified by SHA-256), household split, information set, preprocessing, models and their hyperparameters (`ModelRecord`), household-level metrics, quotable intervals (`ReportedInterval`) and simulation MCSE. `write()` validates before writing; `load_record()` and `ExperimentRecord.load()` validate on reading; `validate_record()` reports every problem at once through `ArtifactError`. Files are strict, deterministic JSON: sorted keys, LF endings, the time and environment fixed when the record is created, non-finite numbers written as `null`, and unknown objects refused. Schema 1.0 files are migrated on load with their results unchanged; a newer or foreign version is refused.
+
+### Changed
+- The matched evaluation runner fills the new record fields and accepts `inputs`. Per-household metrics, models, split and information set move out of `results` and `configuration` into the record's own fields, and every paired interval is listed in `intervals`. Its result layout is now `matched-evaluation/3`.
+
 ### Fixed
 - `CITATION.cff` is now valid Citation File Format 1.2.0. Since its first version it had carried three keys the schema forbids (`programming-languages`, `operating-systems`, `subjects`). GitHub therefore never showed a "Cite this repository" button, and tools reading the file, Zenodo among them, could not rely on it. The subject headings not already present are kept as keywords. A new test fails if a non-CFF top-level key returns.
 - `ZENODO.md` now matches the archive. The table of archived releases lists every version Zenodo holds, 0.1.0 to 0.6.0, including both 0.1.3 records. The account of the two concept DOIs is corrected: the current concept began with `v0.1.1` on 2026-07-13, not with `0.2.0` as this page and the 0.3.0 changelog entry stated, and the `0.2.0` record declares `isVersionOf 10.5281/zenodo.17070041`, not `isNewVersionOf 10.5281/zenodo.17070042`. The page also no longer claims that release results are simulator-only; real CASAS results have been documented since 0.3.0.

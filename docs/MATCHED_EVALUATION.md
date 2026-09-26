@@ -116,19 +116,22 @@ The record is written to `results/matched_evaluation.json`.
 
 ## The record
 
-The output is an `ExperimentRecord`, the same format as every other experiment
-in this package. It contains:
+The output is an [`ExperimentRecord`](EXPERIMENT_ARTIFACTS.md) at schema 1.1,
+the same format as every other experiment in this package. It contains:
 
 | Field | Contents |
 | --- | --- |
 | `environment` | Git commit and dirty flag, package and library versions |
 | `recorded_at`, `seeds`, `data_source` | When the run happened, its seed, and where the recordings came from |
-| `configuration.information_set` | The full declaration and its `sha256` |
-| `configuration.split` | Every household's role and the split's `sha256` |
-| `configuration.models` | Each model's name, builder and configuration |
+| `inputs` | The files the recordings were read from, when passed to the runner |
+| `information_set` | The full declaration and its `sha256` |
+| `split` | Every household's role and the split's `sha256` |
+| `models` | Each model's name, builder and configuration |
+| `preprocessing` | How prediction moments were chosen and labelled |
 | `metric_definitions` | A written definition of every reported quantity |
+| `household_metrics.<model>` | Per held-out household: balanced accuracy, per-state recall, confusion matrix, and log loss, Brier score and calibration where probabilities exist |
+| `intervals` | Every paired comparison's mean and median estimate with its household bootstrap interval, ready to quote |
 | `results.households` | Per household: role, number of moments, number labelled, a digest of the moments, and uninstrumented channels |
-| `results.models.<name>.households` | Per held-out household: balanced accuracy, per-state recall, confusion matrix, and log loss, Brier score and calibration where probabilities exist |
 | `results.models.<name>.summary` | Median, mean, spread and range across households, each household counted once |
 | `results.comparisons` | For every pair of models on every requested metric: each household's difference, the mean and median difference with bootstrap intervals, and how many households favour each model |
 
