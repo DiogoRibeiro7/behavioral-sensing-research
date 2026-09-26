@@ -272,11 +272,25 @@ class StateOntology:
         With no circadian profile set, *at* is ignored and the chain stays
         time-homogeneous, identical to earlier releases.
         """
-        if self.circadian is None or at is None:
-            return transition_matrix(self.generator, elapsed.total_seconds())
-        return transition_matrix(
-            self._circadian_generator(at.hour), elapsed.total_seconds()
-        )
+        return self.transition_at_hour(elapsed, None if at is None else at.hour)
+
+    def generator_at_hour(self, hour: int | None) -> np.ndarray:
+        """The generator in force during local *hour*.
+
+        With no circadian profile, or no hour, this is :attr:`generator`.
+        """
+        if self.circadian is None or hour is None:
+            return self.generator
+        return self._circadian_generator(hour)
+
+    def transition_at_hour(self, elapsed: timedelta, hour: int | None) -> np.ndarray:
+        """``P(Z_{t+elapsed} | Z_t)`` under the generator of local *hour*.
+
+        :meth:`transition` reads the hour from a moment. This takes the hour
+        itself, for callers that know the hour but not the moment, such as a
+        model restricted to an information set that declares only the hour.
+        """
+        return transition_matrix(self.generator_at_hour(hour), elapsed.total_seconds())
 
     def _circadian_generator(self, hour: int) -> np.ndarray:
         """Return the generator with exit rates scaled for *hour*.

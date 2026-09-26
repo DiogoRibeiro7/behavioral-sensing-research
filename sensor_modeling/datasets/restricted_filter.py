@@ -37,14 +37,22 @@ exactly the likelihood of the separate sensor counts. The coefficients are read
 from the filter's own emission models, not re-derived, and a registry where
 pooling would not be exact is refused.
 
-Where it cannot go
-------------------
-The current generative model has no time-of-day input, so sets with time of day
-are unsupported (:func:`unsupported_reason`). Its default ontology is
-time-homogeneous. Its optional circadian term rescales transition rates by
-hour, which acts only through the recursion and does not state how probable a
-state is at an hour. The one fitted profile, v0.3, was fitted on every
-development home, so it has no held-out score on that panel.
+Time of day
+-----------
+The original generative model has no time-of-day input, so on its own it is
+unsupported in sets with time of day (:func:`unsupported_reason`). Its default
+ontology is time-homogeneous. Its optional circadian term rescales transition
+rates by hour. That acts only through the recursion and does not state how
+probable a state is at an hour. The one fitted profile, v0.3, was fitted on
+every development home, so it has no held-out score on that panel.
+
+A :class:`~sensor_modeling.datasets.periodic_prior.PeriodicStatePrior` supplies
+that statement. With one, the model starts from ``π_h`` instead of ``π``, and
+steps with the prior's circadian generator, whose equilibrium at hour ``h`` is
+``π_h``. ``h`` is the row's declared ``hour_of_day``, so the model reads the
+hour exactly as the set declares it and nothing finer. Sets with time of day
+are then supported, and sets without it are not, because the prior needs the
+hour.
 """
 
 from __future__ import annotations
@@ -62,6 +70,7 @@ from ..online.pipeline import BehaviouralSensingPipeline, PipelineConfig, scorin
 from ..states.ontology import BehaviouralState, StateOntology
 from .casas import CasasRecording
 from .information_sets import (
+    HOUR_OF_DAY,
     EvidenceChannel,
     EvidenceResolution,
     FeatureTable,
@@ -70,6 +79,8 @@ from .information_sets import (
     _route_sensors,
     evidence_column,
 )
+from .periodic_prior import PeriodicStatePrior
+from .time_features import HOURS_PER_DAY
 
 #: Components the current generative model can consume exactly.
 SUPPORTED_COMPONENTS = frozenset(
@@ -88,14 +99,35 @@ TIME_OF_DAY_UNSUPPORTED = (
 _PROBE_TIME = datetime(2000, 1, 1, tzinfo=timezone.utc)
 
 
-def unsupported_reason(information_set: InformationSet) -> str | None:
-    """Why the generative model cannot consume *information_set*, or ``None``."""
+#: Why a periodic prior cannot be used in a set without time of day.
+PERIODIC_PRIOR_NEEDS_HOUR = (
+    "the periodic state prior conditions on the local hour, which this set does "
+    "not declare; the original generative model is the one scored here"
+)
+
+
+def unsupported_reason(
+    information_set: InformationSet, *, periodic_prior: bool = False
+) -> str | None:
+    """Why the generative model cannot consume *information_set*, or ``None``.
+
+    With *periodic_prior*, the question is about the generative model with a
+    :class:`~sensor_modeling.datasets.periodic_prior.PeriodicStatePrior`. It
+    consumes the hour, so it is supported exactly where the set declares time
+    of day.
+    """
     components = information_set.components
     if InformationComponent.CURRENT_EVIDENCE not in components:
         return "the generative model conditions on the current window by construction"
-    if InformationComponent.TIME_OF_DAY in components:
+    has_hour = InformationComponent.TIME_OF_DAY in components
+    if has_hour and not periodic_prior:
         return TIME_OF_DAY_UNSUPPORTED
-    extra = sorted(c.value for c in components - SUPPORTED_COMPONENTS)
+    if periodic_prior and not has_hour:
+        return PERIODIC_PRIOR_NEEDS_HOUR
+    supported = SUPPORTED_COMPONENTS | (
+        {InformationComponent.TIME_OF_DAY} if periodic_prior else set()
+    )
+    extra = sorted(c.value for c in components - supported)
     if extra:
         return f"the generative model has no input for {', '.join(extra)}"
     return None
@@ -227,6 +259,9 @@ def restricted_posteriors(
     table: FeatureTable,
     likelihoods: Mapping[EvidenceChannel, ChannelLikelihood],
     ontology: StateOntology | None = None,
+    *,
+    periodic_prior: PeriodicStatePrior | None = None,
+    household: str | None = None,
 ) -> np.ndarray:
     """The generative model's posterior at each row, given only the row's windows.
 
@@ -237,8 +272,17 @@ def restricted_posteriors(
     likelihoods
         :func:`channel_likelihoods` for the same household.
     ontology
-        The time-homogeneous ontology whose prior and transitions are used.
-        Defaults to the filter's default.
+        The time-homogeneous base ontology. Defaults to the filter's default.
+    periodic_prior
+        A periodic state prior, required for a set with time of day and refused
+        without one. The row's declared hour, its ``hour_of_day`` column,
+        chooses the starting belief ``π_h`` and the prior's circadian
+        transitions for every declared window. The set does not declare the
+        windows' own hours, so the prediction moment's hour stands for all of
+        them.
+    household
+        Whose deviation of *periodic_prior* to use. ``None``, or a household
+        the prior has no deviation for, uses the population prior.
 
     Returns
     -------
@@ -246,11 +290,13 @@ def restricted_posteriors(
         ``(rows, states)`` posteriors in the ontology's state order.
 
     A window that closes before the recording starts carries no evidence and is
-    skipped. The belief there is the stationary prior, which the transition
-    leaves unchanged.
+    skipped. Without a periodic prior, the belief there is the stationary
+    prior, which the transition leaves unchanged.
     """
     information_set = table.information_set
-    reason = unsupported_reason(information_set)
+    reason = unsupported_reason(
+        information_set, periodic_prior=periodic_prior is not None
+    )
     if reason is not None:
         raise ValueError(f"information set {information_set.name!r}: {reason}")
     ontology = ontology or StateOntology()
@@ -268,10 +314,26 @@ def restricted_posteriors(
         if InformationComponent.RECENT_HISTORY in information_set.components
         else 0
     )
-    transition = ontology.transition(resolution.step)
-    belief = np.tile(ontology.stationary(), (len(table.moments), 1))
+    transition: np.ndarray
+    if periodic_prior is None:
+        transition = ontology.transition(resolution.step)
+        belief = np.tile(ontology.stationary(), (len(table.moments), 1))
+    else:
+        hours = table.column(HOUR_OF_DAY).astype(int)
+        model = periodic_prior.ontology(ontology, household)
+        by_hour = np.stack(
+            [
+                model.transition_at_hour(resolution.step, hour)
+                for hour in range(HOURS_PER_DAY)
+            ]
+        )
+        transition = by_hour[hours]
+        belief = periodic_prior.probabilities(hours, household)
     for lag in range(depth, -1, -1):
-        belief = belief @ transition
+        if transition.ndim == 2:
+            belief = belief @ transition
+        else:
+            belief = np.einsum("rs,rst->rt", belief, transition)
         loglik = np.zeros_like(belief)
         for channel, terms in likelihoods.items():
             counts = table.column(evidence_column(channel.name, lag))

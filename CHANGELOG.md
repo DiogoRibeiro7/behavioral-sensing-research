@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added a hierarchical periodic state prior, `sensor_modeling.datasets.periodic_prior`, so the generative model can take part in matched comparisons that declare time of day. It follows the roadmap's hierarchical time-structure hypothesis (3.1). The model and its assumptions are documented in `docs/PERIODIC_STATE_PRIOR.md`.
+  - **The model.** The prior probability of each state at each local hour is a softmax of state-specific Fourier log-probabilities: a population effect plus a household deviation. The deviation is the posterior mode under a Gaussian prior, so it is shrunk toward the population with a configurable, serialised precision. A household with no labelled time, or one never seen, gets exactly the population prior.
+  - **Fitting.** `fit_periodic_prior` fits the population from the given households only. `PeriodicStatePrior.adapt` fits a household's deviation. `hour_state_counts` counts labelled time with the information sets' own reading of the local hour; its `until` argument keeps later labels out of an adaptation. Fitting is deterministic.
+  - **In the filter.** The prior enters through the existing circadian term, with stickiness `π_h(s) / π(s)`. At every hour the chain's equilibrium is then exactly the prior, and its mean exit rate is unchanged. `StateOntology` gains `generator_at_hour` and `transition_at_hour`; `transition` behaves exactly as before.
+  - **In the matched evaluation.** `restricted_posteriors` accepts a periodic prior in sets with time of day. It starts from the prior at the declared hour and reads nothing finer than that hour. `GapProtocol(periodic_prior=...)` adds the model `generative_periodic` in `I1` and `I3`, with each fold's prior fitted on that fold's training households only.
+
+  The original generative model, abstention, the default experiment protocol and the published Phase 1 result are unchanged. No development-panel or held-out result is reported for the new model.
+
 ## [0.7.0] - 2026-09-26
 
 Completes the first Phase 1 measurement of the recoverable-information gap. It provides:

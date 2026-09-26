@@ -53,7 +53,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -100,6 +100,12 @@ from .matched_evaluation import (
     compare_information_sets,
     held_out_metrics,
     run_matched_evaluation,
+)
+from .periodic_prior import (
+    PeriodicPriorConfig,
+    PeriodicStatePrior,
+    fit_periodic_prior,
+    hour_state_counts,
 )
 from .restricted_filter import (
     channel_likelihoods,
@@ -165,6 +171,21 @@ GENERATIVE_CONFIGURATION: dict[str, object] = {
     "windows": "the set's current window, plus its lagged windows with recent history",
     "prediction": "most probable state of the posterior; no abstention",
     "fitted": "nothing: every parameter is the declared default",
+}
+
+#: The generative model with a periodic state prior, scored where the set
+#: declares time of day. Only its population prior is fitted.
+GENERATIVE_PERIODIC = "generative_periodic"
+
+#: How the generative model with a periodic prior is specified.
+GENERATIVE_PERIODIC_CONFIGURATION: dict[str, object] = {
+    **GENERATIVE_CONFIGURATION,
+    "model": "restricted generative filter with a periodic state prior",
+    "prior": "the periodic prior pi_h at the row's declared hour",
+    "transition": "default StateOntology with the prior as its circadian term, "
+    "at the row's declared hour, one step per window",
+    "fitted": "the population prior, per fold, on the fold's training "
+    "households' labels only; held-out households get the population prior",
 }
 
 #: How the production filter is run. Nothing is fitted.
@@ -287,6 +308,11 @@ class GapProtocol:
         The runner models: the reference, the diagnostic and the logistic
         model, in that order. Defaults to :func:`gap_models`, the declared
         settings. Their configurations are recorded with the result.
+    periodic_prior
+        If given, the generative model with a periodic state prior is also
+        scored, where the set declares time of day. Its population prior is
+        fitted per fold on the fold's training households only. ``None``, the
+        default, leaves the protocol and its digest as they were.
     name
         Name of the record.
     """
@@ -300,6 +326,7 @@ class GapProtocol:
     resamples: int = 10_000
     confidence: float = 0.95
     models: tuple[ModelSpec, ...] = field(default_factory=gap_models)
+    periodic_prior: PeriodicPriorConfig | None = None
     name: str = "phase1-recoverable-information-gap"
 
     def __post_init__(self) -> None:
@@ -350,10 +377,32 @@ class GapProtocol:
                 f"the runner models must be {REFERENCE!r}, {DIAGNOSTIC!r} and "
                 f"{LOGISTIC!r}, in that order"
             )
+        if self.periodic_prior is not None and not isinstance(
+            self.periodic_prior, PeriodicPriorConfig
+        ):
+            raise ValueError("periodic_prior must be a PeriodicPriorConfig or None")
         object.__setattr__(self, "models", models)
         object.__setattr__(self, "folds", folds)
         object.__setattr__(self, "information_sets", sets)
         object.__setattr__(self, "metrics", metrics)
+
+    @property
+    def candidates(self) -> tuple[str, ...]:
+        """Models compared within each set, in reporting order."""
+        if self.periodic_prior is None:
+            return CANDIDATES
+        return (*CANDIDATES, GENERATIVE_PERIODIC)
+
+    @property
+    def formulation_pairs(self) -> tuple[tuple[str, str], ...]:
+        """Pairs of models compared within each set."""
+        if self.periodic_prior is None:
+            return FORMULATION_PAIRS
+        return (
+            *FORMULATION_PAIRS,
+            (DIAGNOSTIC, GENERATIVE_PERIODIC),
+            (LOGISTIC, GENERATIVE_PERIODIC),
+        )
 
     @property
     def homes(self) -> tuple[str, ...]:
@@ -369,7 +418,27 @@ class GapProtocol:
         }
 
     def to_dict(self) -> dict[str, object]:
-        """Return the protocol as a stable JSON-serialisable declaration."""
+        """Return the protocol as a stable JSON-serialisable declaration.
+
+        The periodic prior appears only when it is enabled, so the declaration
+        and digest of a protocol without it are unchanged.
+        """
+        declaration = self._declaration()
+        if self.periodic_prior is not None:
+            models = cast(dict[str, object], declaration["models"])
+            models[GENERATIVE_PERIODIC] = {
+                **GENERATIVE_PERIODIC_CONFIGURATION,
+                "periodic_prior": self.periodic_prior.to_dict(),
+                "unsupported": {
+                    label: reason
+                    for label, info in zip(LABELS, self.information_sets)
+                    if (reason := unsupported_reason(info, periodic_prior=True))
+                    is not None
+                },
+            }
+        return declaration
+
+    def _declaration(self) -> dict[str, object]:
         return {
             "result_schema": RESULT_SCHEMA,
             "name": self.name,
@@ -496,6 +565,38 @@ def _oriented_gap(
     }
 
 
+def fold_priors(
+    recordings: Mapping[str, CasasRecording],
+    protocol: GapProtocol,
+    states: Sequence[BehaviouralState],
+) -> dict[str, PeriodicStatePrior]:
+    """Each fold's population prior, fitted on that fold's training households.
+
+    A fold's held-out households are never read, so their labels cannot reach
+    the prior used to score them. Returns an empty mapping when the protocol
+    has no periodic prior.
+    """
+    if protocol.periodic_prior is None:
+        return {}
+    step = protocol.information_sets[0].resolution.step
+    return {
+        fold.name: fit_periodic_prior(
+            {
+                home: hour_state_counts(
+                    recordings[home],
+                    _regular_moments(recordings[home], step),
+                    states=states,
+                    step=step,
+                )
+                for home in fold.train
+            },
+            states=states,
+            config=protocol.periodic_prior,
+        )
+        for fold in protocol.folds
+    }
+
+
 def run_recoverable_gap(
     recordings: Mapping[str, CasasRecording],
     protocol: GapProtocol,
@@ -567,8 +668,15 @@ def run_recoverable_gap(
     }
     fold_of = {home: fold.name for fold in protocol.folds for home in fold.test}
 
+    priors = fold_priors(recordings, protocol, space)
+
     generative: dict[str, dict[str, PredictionMetrics]] = {
         label: {} for label, info in sets.items() if unsupported_reason(info) is None
+    }
+    periodic: dict[str, dict[str, PredictionMetrics]] = {
+        label: {}
+        for label, info in sets.items()
+        if priors and unsupported_reason(info, periodic_prior=True) is None
     }
     production: dict[str, PredictionMetrics] = {}
     households: dict[str, dict[str, Any]] = {}
@@ -578,7 +686,7 @@ def run_recoverable_gap(
         terms, ignored = channel_likelihoods(recording.registry, resolution, ontology)
         built: _Household | None = None
         for label, info in sets.items():
-            if label not in generative:
+            if label not in generative and label not in periodic:
                 continue
             table = build_feature_table(recording, info, moments, household=home)
             built = _Household.build(home, "test", table, recording)
@@ -586,10 +694,18 @@ def run_recoverable_gap(
                 raise ValueError(
                     f"generative rows for {home!r} in {label} differ from the runner's"
                 )
-            posterior = restricted_posteriors(table, terms, ontology)
-            generative[label][home] = _score(
-                built.labels, posterior[built.labelled], space
-            )
+            if label in generative:
+                posterior = restricted_posteriors(table, terms, ontology)
+                generative[label][home] = _score(
+                    built.labels, posterior[built.labelled], space
+                )
+            if label in periodic:
+                posterior = restricted_posteriors(
+                    table, terms, ontology, periodic_prior=priors[fold_of[home]]
+                )
+                periodic[label][home] = _score(
+                    built.labels, posterior[built.labelled], space
+                )
         if built is None:  # pragma: no cover - I0 is always supported
             raise ValueError("the generative model supports none of the sets")
         beliefs, states = filter_posteriors(recording, moments, step=resolution.step)
@@ -605,12 +721,21 @@ def run_recoverable_gap(
             "generative_ignored_sensors": list(ignored),
         }
     scores[GENERATIVE] = {label: per_home for label, per_home in generative.items()}
+    if priors:
+        scores[GENERATIVE_PERIODIC] = {
+            label: per_home for label, per_home in periodic.items()
+        }
 
     def values(model: str, label: str, metric: Any) -> dict[str, float | None]:
         return household_values(scores[model][label], metric)
 
     def supported(model: str, label: str) -> bool:
         return label in scores[model]
+
+    def reason(model: str, label: str) -> str | None:
+        return unsupported_reason(
+            sets[label], periodic_prior=model == GENERATIVE_PERIODIC
+        )
 
     unsupported = [
         {
@@ -621,6 +746,16 @@ def run_recoverable_gap(
         for label in LABELS
         if not supported(GENERATIVE, label)
     ]
+    if priors:
+        unsupported += [
+            {
+                "model": GENERATIVE_PERIODIC,
+                "information_set": label,
+                "reason": reason(GENERATIVE_PERIODIC, label),
+            }
+            for label in LABELS
+            if not supported(GENERATIVE_PERIODIC, label)
+        ]
     unsupported += [
         {"model": FILTER, "information_set": label, "reason": FILTER_UNMATCHED}
         for label in LABELS
@@ -634,7 +769,7 @@ def run_recoverable_gap(
     )
 
     cells: list[dict[str, Any]] = []
-    for model in (*CANDIDATES, REFERENCE):
+    for model in (*protocol.candidates, REFERENCE):
         for label in LABELS:
             if not supported(model, label):
                 cells.append(
@@ -642,7 +777,7 @@ def run_recoverable_gap(
                         "model": model,
                         "information_set": label,
                         "status": "unsupported",
-                        "reason": unsupported_reason(sets[label]),
+                        "reason": reason(model, label),
                     }
                 )
                 continue
@@ -650,7 +785,7 @@ def run_recoverable_gap(
     cells.append(_cell(FILTER, "unbounded", production, space, protocol))
 
     information: list[dict[str, Any]] = []
-    for model in CANDIDATES:
+    for model in protocol.candidates:
         for small, large in NESTED_PAIRS:
             if not (supported(model, small) and supported(model, large)):
                 continue
@@ -662,7 +797,7 @@ def run_recoverable_gap(
                         metric,
                         protocol,
                     )
-                    if model == GENERATIVE
+                    if model in (GENERATIVE, GENERATIVE_PERIODIC)
                     else compare_information_sets(
                         runs[small],
                         runs[large],
@@ -685,7 +820,7 @@ def run_recoverable_gap(
 
     formulation: list[dict[str, Any]] = []
     interactions: list[dict[str, Any]] = []
-    for first, second in FORMULATION_PAIRS:
+    for first, second in protocol.formulation_pairs:
         for label in LABELS:
             if not (supported(first, label) and supported(second, label)):
                 continue
@@ -738,7 +873,7 @@ def run_recoverable_gap(
                 )
 
     against_filter: list[dict[str, Any]] = []
-    for model in CANDIDATES:
+    for model in protocol.candidates:
         for label in LABELS:
             if not supported(model, label):
                 continue
@@ -780,6 +915,13 @@ def run_recoverable_gap(
         "against_filter": against_filter,
         "unsupported": unsupported,
     }
+    if priors:
+        results["candidates"] = list(protocol.candidates)
+        results["formulation_pairs"] = [list(p) for p in protocol.formulation_pairs]
+        results["periodic_priors"] = {
+            fold: {**prior.to_dict(), "sha256": prior.sha256()}
+            for fold, prior in priors.items()
+        }
     record = ExperimentRecord(
         experiment=protocol.name,
         configuration={**protocol.to_dict(), "protocol_sha256": protocol.sha256()},
@@ -821,6 +963,20 @@ def run_recoverable_gap(
                 for spec in specs
             ),
             ModelRecord(GENERATIVE, GENERATIVE_CONFIGURATION, "restricted_posteriors"),
+            *(
+                [
+                    ModelRecord(
+                        GENERATIVE_PERIODIC,
+                        {
+                            **GENERATIVE_PERIODIC_CONFIGURATION,
+                            "periodic_prior": protocol.periodic_prior.to_dict(),
+                        },
+                        "restricted_posteriors(periodic_prior=...)",
+                    )
+                ]
+                if protocol.periodic_prior is not None
+                else []
+            ),
             ModelRecord(FILTER, FILTER_CONFIGURATION, "filter_posteriors"),
         ],
         household_metrics={
