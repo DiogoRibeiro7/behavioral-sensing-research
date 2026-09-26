@@ -30,6 +30,8 @@ from sensor_modeling.datasets import (
     EvidenceResolution,
     GradientBoostingBaseline,
     HouseholdSplit,
+    InformationComponent,
+    InformationSet,
     ModelSpec,
     build_feature_table,
     nested_information_sets,
@@ -362,6 +364,13 @@ class TestRestrictedFilter:
         assert unsupported_reason(I0) is None and unsupported_reason(I2) is None
         assert unsupported_reason(I1) == TIME_OF_DAY_UNSUPPORTED
         assert unsupported_reason(I3) == TIME_OF_DAY_UNSUPPORTED
+        summaries = InformationSet(
+            "current+history_summary",
+            I0.components | {InformationComponent.HISTORY_SUMMARY},
+        )
+        assert unsupported_reason(summaries) == (
+            "the generative model has no input for history_summary"
+        )
         table = build_feature_table(
             recording_of(registry_of(KITCHEN), [("K1", T0)]), I1, [T0], household="h"
         )
