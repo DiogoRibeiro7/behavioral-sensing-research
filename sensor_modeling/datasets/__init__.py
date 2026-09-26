@@ -66,6 +66,12 @@ from .matched_evaluation import (
     held_out_metrics,
     run_matched_evaluation,
 )
+from .periodic_prior import (
+    PeriodicPriorConfig,
+    PeriodicStatePrior,
+    fit_periodic_prior,
+    hour_state_counts,
+)
 from .rates import (
     RateReport,
     RateSample,
@@ -119,6 +125,10 @@ __all__ = [
     "RateReport",
     "RateSample",
     "fit_circadian_profile",
+    "PeriodicPriorConfig",
+    "PeriodicStatePrior",
+    "fit_periodic_prior",
+    "hour_state_counts",
     "fit_emission_defaults",
     "measure_event_rates",
     "pooled_rate_report",

@@ -132,7 +132,11 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
     confidence = round(100 * bootstrap["confidence"])
     title, section = "#" * level, "#" * (level + 1)
     ba = "balanced_accuracy"
-    models = (*CANDIDATES, REFERENCE)
+    candidates = tuple(results.get("candidates", CANDIDATES))
+    pairs = tuple(
+        (a, b) for a, b in results.get("formulation_pairs", FORMULATION_PAIRS)
+    )
+    models = (*candidates, REFERENCE)
     dirty = " (uncommitted changes)" if environment.get("git_dirty") == "true" else ""
 
     lines = [
@@ -164,7 +168,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
                         for label in LABELS
                     ),
                 ]
-                for model in CANDIDATES
+                for model in candidates
             ],
         ),
         "The production `filter` is matched to no set. It conditions on every "
@@ -220,7 +224,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
         "balanced accuracy, its interval, and how many households improved:",
         "",
         *_table(
-            ["Added", "Sets", *CANDIDATES],
+            ["Added", "Sets", *candidates],
             [
                 [
                     ADDED[(small, large)],
@@ -233,7 +237,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
                             **{"from": small, "to": large},
                         )
                         or "unsupported"
-                        for model in CANDIDATES
+                        for model in candidates
                     ),
                 ]
                 for small, large in NESTED_PAIRS
@@ -245,7 +249,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
         "the second, in balanced accuracy:",
         "",
         *_table(
-            ["Set", *(f"{a} {_MINUS} {b}" for a, b in FORMULATION_PAIRS)],
+            ["Set", *(f"{a} {_MINUS} {b}" for a, b in pairs)],
             [
                 [
                     label,
@@ -258,7 +262,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
                             information_set=label,
                         )
                         or "unsupported"
-                        for a, b in FORMULATION_PAIRS
+                        for a, b in pairs
                     ),
                 ]
                 for label in LABELS
@@ -271,7 +275,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
         "information gains and formulation gaps do not add up:",
         "",
         *_table(
-            ["Sets", *(f"{a} vs {b}" for a, b in FORMULATION_PAIRS)],
+            ["Sets", *(f"{a} vs {b}" for a, b in pairs)],
             [
                 [
                     f"{small} to {large}",
@@ -284,7 +288,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
                             **{"from": small, "to": large},
                         )
                         or "not estimable"
-                        for a, b in FORMULATION_PAIRS
+                        for a, b in pairs
                     ),
                 ]
                 for small, large in NESTED_PAIRS
@@ -311,16 +315,30 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
         ),
     ]
 
-    recall = [(model, "I2") for model in CANDIDATES] + [(FILTER, "unbounded")]
+    recall = [(model, "I2") for model in candidates if record.supported(model, "I2")]
+    needs_hour = [
+        (model, "I3")
+        for model in candidates
+        if not record.supported(model, "I2") and record.supported(model, "I3")
+    ]
+    recall += [*needs_hour, (FILTER, "unbounded")]
+    note = (
+        " A model that needs the hour is shown at `I3`, the richest set it can consume."
+        if needs_hour
+        else ""
+    )
     lines += [
         f"{section} Per-state recall",
         "",
         "Median over the households where the state occurs, at `I2` (the richest "
         "set every model can consume) and for the filter. The record holds every "
-        "cell:",
+        f"cell:{note}",
         "",
         *_table(
-            ["State", *(model for model, _ in recall)],
+            [
+                "State",
+                *(model if at != "I3" else f"{model} (I3)" for model, at in recall),
+            ],
             [
                 [
                     state,

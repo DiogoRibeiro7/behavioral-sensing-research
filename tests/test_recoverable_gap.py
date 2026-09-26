@@ -33,6 +33,7 @@ from sensor_modeling.datasets import (
     InformationComponent,
     InformationSet,
     ModelSpec,
+    PeriodicPriorConfig,
     build_feature_table,
     nested_information_sets,
     truth_series,
@@ -43,13 +44,16 @@ from sensor_modeling.datasets.recoverable_gap import (
     CIRCADIAN_UNSCORED,
     DEFAULT_METRICS,
     FILTER_UNMATCHED,
+    GENERATIVE_PERIODIC,
     GapProtocol,
     GapResult,
+    fold_priors,
     gap_models,
     load_frozen_splits,
     run_recoverable_gap,
 )
 from sensor_modeling.datasets.restricted_filter import (
+    PERIODIC_PRIOR_NEEDS_HOUR,
     TIME_OF_DAY_UNSUPPORTED,
     channel_likelihoods,
     filter_posteriors,
@@ -721,6 +725,149 @@ class TestReproducibility:
         partial = {name: homes[name] for name in ("sim1", "sim2", "sim3")}
         with pytest.raises(ValueError, match="sim4"):
             run_recoverable_gap(partial, protocol(), data_source="simulator")
+
+
+@pytest.fixture(scope="module")
+def periodic_result(homes: dict[str, CasasRecording]) -> GapResult:
+    with threadpool_limits(1):
+        return run_recoverable_gap(
+            homes,
+            protocol(periodic_prior=PeriodicPriorConfig()),
+            data_source="simulator",
+        )
+
+
+def relabelled(recording: CasasRecording) -> CasasRecording:
+    """The same recording with every label changed to asleep."""
+    return CasasRecording(
+        recording.registry,
+        recording.observations,
+        tuple(
+            ActivityInterval("Sleep", a.start, a.end, S.SLEEPING)
+            for a in recording.activities
+        ),
+    )
+
+
+class TestPeriodicPrior:
+    """The generative model with a periodic prior, in the sets that declare the hour."""
+
+    def test_the_default_protocol_is_unchanged(self) -> None:
+        default = GapProtocol(FOLDS)
+        periodic = GapProtocol(FOLDS, periodic_prior=PeriodicPriorConfig())
+        assert GENERATIVE_PERIODIC not in default.to_dict()["models"]  # type: ignore[operator]
+        assert default.candidates == ("diagnostic", "logistic", "generative")
+        assert GENERATIVE_PERIODIC in periodic.candidates
+        declared = periodic.to_dict()["models"][GENERATIVE_PERIODIC]  # type: ignore[index]
+        assert declared["unsupported"] == {
+            "I0": PERIODIC_PRIOR_NEEDS_HOUR,
+            "I2": PERIODIC_PRIOR_NEEDS_HOUR,
+        }
+        assert periodic.sha256() != default.sha256()
+        with pytest.raises(ValueError, match="PeriodicPriorConfig"):
+            GapProtocol(FOLDS, periodic_prior={"harmonics": 2})  # type: ignore[arg-type]
+
+    def test_each_fold_prior_sees_only_its_training_households(
+        self, homes: dict[str, CasasRecording]
+    ) -> None:
+        declared = protocol(periodic_prior=PeriodicPriorConfig())
+        states = tuple(StateOntology().states)
+        priors = fold_priors(homes, declared, states)
+        for fold in FOLDS:
+            assert priors[fold.name].fitted_on == tuple(sorted(fold.train))
+        changed = {
+            home: relabelled(recording) if home in FOLDS[0].test else recording
+            for home, recording in homes.items()
+        }
+        again = fold_priors(changed, declared, states)
+        assert again["a"].sha256() == priors["a"].sha256()
+        assert again["b"].sha256() != priors["b"].sha256()
+        assert fold_priors(homes, protocol(), states) == {}
+
+    def test_it_is_matched_only_where_the_hour_is_declared(
+        self, periodic_result: GapResult
+    ) -> None:
+        results = results_of(periodic_result)
+        cells = {(c["model"], c["information_set"]): c for c in results["cells"]}
+        for label in ("I1", "I3"):
+            assert cells[(GENERATIVE_PERIODIC, label)]["status"] == "matched"
+        for label in ("I0", "I2"):
+            cell = cells[(GENERATIVE_PERIODIC, label)]
+            assert cell["status"] == "unsupported"
+            assert cell["reason"] == PERIODIC_PRIOR_NEEDS_HOUR
+        metrics = periodic_result.record.household_metrics
+        assert {k for k in metrics if k.startswith(GENERATIVE_PERIODIC)} == {
+            "generative_periodic@I1",
+            "generative_periodic@I3",
+        }
+        assert cells[("generative", "I1")]["status"] == "unsupported"
+        assert results["candidates"][-1] == GENERATIVE_PERIODIC
+
+    def test_its_comparisons_stay_within_sets_that_declare_the_hour(
+        self, periodic_result: GapResult
+    ) -> None:
+        results = results_of(periodic_result)
+        for group in ("information_gains", "formulation_gaps", "interactions"):
+            touched = [
+                {e.get("information_set"), e.get("from"), e.get("to")} - {None}
+                for e in results[group]
+                if GENERATIVE_PERIODIC in (e["model"], e.get("reference"))
+            ]
+            assert touched, group
+            assert all(labels <= {"I1", "I3"} for labels in touched), group
+        pairs = {
+            (e["model"], e["reference"], e["information_set"])
+            for e in results["formulation_gaps"]
+            if e["metric"] == "balanced_accuracy"
+        }
+        assert ("diagnostic", GENERATIVE_PERIODIC, "I1") in pairs
+        assert ("logistic", GENERATIVE_PERIODIC, "I3") in pairs
+
+    def test_no_household_is_scored_with_a_prior_fitted_on_it(
+        self, periodic_result: GapResult
+    ) -> None:
+        results = results_of(periodic_result)
+        for home, entry in results["households"].items():
+            assert home not in results["periodic_priors"][entry["fold"]]["fitted_on"]
+
+    @pytest.mark.parametrize(("home", "fold"), [("sim1", "a"), ("sim2", "b")])
+    def test_its_cells_match_an_independent_recomputation(
+        self,
+        homes: dict[str, CasasRecording],
+        periodic_result: GapResult,
+        home: str,
+        fold: str,
+    ) -> None:
+        recording = homes[home]
+        declared = protocol(periodic_prior=PeriodicPriorConfig())
+        prior = fold_priors(homes, declared, tuple(StateOntology().states))[fold]
+        assert home not in prior.fitted_on
+        stored = results_of(periodic_result)["periodic_priors"][fold]
+        assert stored["sha256"] == prior.sha256()
+        moments = _regular_moments(recording, STEP)
+        truth = truth_series(recording.activities, moments)
+        labelled = [row for row, label in enumerate(truth) if label is not None]
+        table = build_feature_table(recording, I3, moments, household=home)
+        terms, _ = channel_likelihoods(recording.registry, I3.resolution)
+        beliefs = restricted_posteriors(table, terms, periodic_prior=prior)[labelled]
+        space = tuple(StateOntology().states)
+        expected = prediction_metrics(
+            [truth[row] for row in labelled],
+            [space[int(i)] for i in beliefs.argmax(axis=1)],
+            beliefs,
+            states=space,
+        ).to_dict()
+        recorded = periodic_result.record.household_metrics["generative_periodic@I3"][
+            home
+        ]
+        for metric in ("n", "balanced_accuracy", "log_loss", "brier"):
+            assert recorded[metric] == pytest.approx(expected[metric]), metric
+
+    def test_the_summary_shows_it(self, periodic_result: GapResult) -> None:
+        summary = render_summary(periodic_result.record.to_dict())
+        assert "| generative_periodic | unsupported |" in summary
+        assert "generative_periodic (I3)" in summary
+        assert "diagnostic − generative_periodic" in summary
 
 
 class TestPublishedResult:
