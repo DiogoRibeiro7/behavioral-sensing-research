@@ -27,7 +27,9 @@ What the runner enforces
 
 The generative filter is not a runner model. It is recursive and reads raw
 observations, so it cannot be restricted to a declared information set; see
-``docs/INFORMATION_SETS.md``.
+``docs/INFORMATION_SETS.md``. Its generative model can be restricted to some
+sets, and :mod:`~sensor_modeling.datasets.recoverable_gap` scores it on the
+same rows as the runner's models.
 """
 
 from __future__ import annotations
@@ -56,7 +58,13 @@ from ..evaluation.metrics import (
     _label_space,
     prediction_metrics,
 )
-from ..evaluation.provenance import METRIC_DEFINITIONS, ExperimentRecord
+from ..evaluation.provenance import (
+    METRIC_DEFINITIONS,
+    ExperimentRecord,
+    InputArtifact,
+    ModelRecord,
+    ReportedInterval,
+)
 from ..states.ontology import DEFAULT_STATES, BehaviouralState
 from .casas import CasasRecording, truth_series
 from .information_sets import FeatureTable, InformationSet, build_feature_table
@@ -64,7 +72,9 @@ from .information_sets import FeatureTable, InformationSet, build_feature_table
 #: Identifier of the ``results`` layout. Bump when a field changes meaning.
 #: Version 2 reports mean and median household differences, the share of
 #: households favouring each model, and a household with no pair partner.
-RESULT_SCHEMA = "matched-evaluation/2"
+#: Version 3 moves per-household metrics, models, split and information set
+#: into the experiment record's own fields (schema 1.1).
+RESULT_SCHEMA = "matched-evaluation/3"
 
 #: Metrics the runner can summarise and compare, and whether higher is better.
 COMPARABLE_METRICS: Mapping[str, bool] = {
@@ -617,6 +627,37 @@ def _compare(
     )
 
 
+def _intervals(comparisons: Sequence[PairedComparison]) -> list[ReportedInterval]:
+    """Every paired household interval, flattened for quoting."""
+    reported: list[ReportedInterval] = []
+    for comparison in comparisons:
+        difference = comparison.difference
+        if difference is None:
+            continue
+        for statistic, estimate in (
+            ("mean", difference.mean),
+            ("median", difference.median),
+        ):
+            if estimate.interval is None:
+                continue
+            reported.append(
+                ReportedInterval(
+                    label=(
+                        f"{comparison.model} vs {comparison.reference}: {statistic} "
+                        f"{comparison.metric} improvement"
+                    ),
+                    estimate=estimate.value,
+                    low=estimate.interval.low,
+                    high=estimate.interval.high,
+                    confidence=estimate.interval.confidence,
+                    method=estimate.interval.method,
+                    unit="household",
+                    n=difference.n,
+                )
+            )
+    return reported
+
+
 def _summary(
     metrics: Sequence[str], scores: Mapping[str, PredictionMetrics]
 ) -> dict[str, object]:
@@ -644,6 +685,7 @@ def run_matched_evaluation(
     resamples: int = 2000,
     confidence: float = 0.95,
     interval: str = "percentile",
+    inputs: Sequence[InputArtifact] = (),
 ) -> MatchedEvaluation:
     """Fit and score several models under one information set.
 
@@ -682,6 +724,9 @@ def run_matched_evaluation(
     interval
         ``"percentile"`` or ``"bca"``; see
         :func:`~sensor_modeling.evaluation.compare_households`.
+    inputs
+        Files the recordings were read from, with their digests, recorded as
+        input provenance.
 
     Raises
     ------
@@ -809,19 +854,8 @@ def run_matched_evaluation(
 
     configuration = {
         "result_schema": RESULT_SCHEMA,
-        "information_set": {
-            **information_set.to_dict(),
-            "sha256": information_set.sha256(),
-        },
-        "split": {**split.to_dict(), "sha256": split.sha256()},
-        "models": [spec.to_dict() for spec in models],
         "states": [state.value for state in space],
         "metrics": list(metrics),
-        "moments": (
-            "supplied by caller"
-            if moments is not None
-            else "one per step from each recording's first observation"
-        ),
         "row_order": "seeded random permutation; no household or time at predict",
         "row_independence_check": (
             "held-out rows predicted again as a random half in a new order"
@@ -841,10 +875,6 @@ def run_matched_evaluation(
         "unscored_households": sorted(set(split.test) - set(scored)),
         "models": {
             spec.name: {
-                "households": {
-                    name: scores.to_dict()
-                    for name, scores in household_metrics[spec.name].items()
-                },
                 "summary": _summary(metrics, household_metrics[spec.name]),
                 "confusion_summed": ConfusionMatrix.total(
                     [m.confusion for m in household_metrics[spec.name].values()]
@@ -865,6 +895,34 @@ def run_matched_evaluation(
             "Every model received the same feature rows built from one "
             "information set; comparisons are paired by held-out household.",
         ],
+        inputs=list(inputs),
+        split={**split.to_dict(), "sha256": split.sha256()},
+        information_set={
+            **information_set.to_dict(),
+            "sha256": information_set.sha256(),
+        },
+        preprocessing={
+            "moments": (
+                "supplied by caller"
+                if moments is not None
+                else "one per information-set step from each recording's first "
+                "observation to its last"
+            ),
+            "labels": "truth_series of each recording's annotations; "
+            "unlabelled moments are not scored",
+        },
+        models=[
+            ModelRecord(spec.name, spec.configuration, str(spec.to_dict()["build"]))
+            for spec in models
+        ],
+        household_metrics={
+            spec.name: {
+                name: scores.to_dict()
+                for name, scores in household_metrics[spec.name].items()
+            }
+            for spec in models
+        },
+        intervals=_intervals(comparisons),
     )
     path = (
         record.write(Path(output_dir) / f"{experiment}.json")

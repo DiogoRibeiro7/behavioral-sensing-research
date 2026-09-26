@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-26
+
+Completes the first Phase 1 measurement of the recoverable-information gap. It provides:
+
+- a versioned, validated schema for experiment records, which migrates earlier records;
+- a cyclic time-of-day encoding and interpretable recent-history summaries for matched experiments;
+- a declared gradient-boosted supervised diagnostic;
+- the generative filter's model restricted to the information sets it can consume, so it can be compared with supervised models on identical information;
+- an exploratory run on the 20 development homes under frozen folds. It separates what added information is worth to a fixed model from what a formulation is worth on fixed information, and it records every comparison it could not make.
+
+It does not change inference, abstention thresholds, transition dynamics, emissions, the behavioural ontology, or the frozen external-validation result.
+
+### Added
+- Added the Phase 1 recoverable-information-gap experiment, which separates what added information is worth to a fixed model from what a formulation is worth on fixed information. The protocol and design are in `docs/PHASE1_RECOVERABLE_GAP.md`.
+  - `sensor_modeling.datasets.recoverable_gap` runs the four nested sets under frozen folds, with every setting fixed and no household used for tuning. It reports household-level metrics, per-state recall and calibration summaries with bootstrap intervals, and paired information gains, formulation gaps, interactions and comparisons with the production filter. The result is one experiment record. `gap_summary.render_summary` generates a Markdown summary from the written record alone.
+  - `sensor_modeling.datasets.restricted_filter` restricts the generative filter's model to a declared set: its own stationary prior, transitions and emission models, fed only the set's windows. A test shows it equals the production `MultimodalBayesFilter` fed those windows. Sets with time of day are recorded as unsupported, because the current generative model has no time-of-day input. The production filter is scored as an unmatched reference.
+  - `GradientBoostingBaseline` is the supervised diagnostic: gradient-boosted trees with fixed settings, kept out of `baseline_suite`.
+  - `artifacts/phase1/household_splits.json` freezes the two Phase 1 folds, with each home's recording digest. `scripts/run_phase1_recoverable_gap.py` runs the experiment on the development panel.
+  - The first run is published in `artifacts/phase1/phase1-recoverable-information-gap.json` and summarised in the documentation. It is exploratory, on the 20 development homes.
+    - Given the same current and three previous windows, the diagnostic leads the generative model by +0.116 household balanced accuracy, in all 20 homes.
+    - The generative model gains only +0.021 from that history; the diagnostic gains +0.088.
+    - Information gains and formulation gaps interact, so the observed gap has no unique additive split.
+
+  Inference, abstention and the existing baselines are unchanged.
+- Added interpretable history summaries as an optional information component, `InformationComponent.HISTORY_SUMMARY`, for measuring how much longer history explains the gap between the filter and the diagnostic ceiling. Over each summary window, the component gives per-channel activation counts and room changes between active steps. Over the longest window, it gives each channel's quiet minutes and the rooms active in the most recent active step. The windows are `EvidenceResolution.summary_windows`, 60 and 180 minutes by default, chosen from measured bout durations and quiet spells on the development homes. Every summary is a function of whole-step per-channel counts, the evidence the filter receives, so none uses timing or order inside a step. Column names are stable, built by `summary_column` and read back by `parse_summary_column`. Missing, censored and silent history are distinguished, as documented in `docs/INFORMATION_SETS.md`. The four Phase 1 sets, their columns and their digests are unchanged, and no model or result is changed.
+- Added a cyclic time-of-day representation for matched-information experiments, in `sensor_modeling.datasets.time_features`:
+  - `local_hour` defines the local wall-clock hour once, for the feature builder, with the same reading as the circadian prior;
+  - `cyclic_hour_features` places each hour's midpoint on the 24-hour circle with 1 to 11 sine-cosine harmonics, so 23:00 and 00:00 are neighbours;
+  - `peak_hour` reads a fitted daily cycle's peak;
+  - `LogisticBaseline(hour_encoding="cyclic", harmonics=K)` uses the encoding. The default stays one-hot, and the baseline suite is unchanged.
+
+  It re-encodes the existing hour, so it adds no information and stays within the same information set. Daylight-saving behaviour is documented and tested. Day of week was evaluated on the development homes and not added: whole-day state shares barely differ between weekdays and weekends, and the one visible effect is a morning-only weekend lie-in, which an additive term cannot represent. The production filter and its priors are unchanged.
+- Experiment records now follow a versioned, validated schema, 1.1, documented in `docs/EXPERIMENT_ARTIFACTS.md`. `ExperimentRecord` gains typed fields for input provenance (`InputArtifact`, identified by SHA-256), household split, information set, preprocessing, models and their hyperparameters (`ModelRecord`), household-level metrics, quotable intervals (`ReportedInterval`) and simulation MCSE. `write()` validates before writing; `load_record()` and `ExperimentRecord.load()` validate on reading; `validate_record()` reports every problem at once through `ArtifactError`. Files are strict, deterministic JSON: sorted keys, LF endings, the time and environment fixed when the record is created, non-finite numbers written as `null`, and unknown objects refused. Schema 1.0 files are migrated on load with their results unchanged; a newer or foreign version is refused.
+
+### Changed
+- The matched evaluation runner fills the new record fields and accepts `inputs`. Per-household metrics, models, split and information set move out of `results` and `configuration` into the record's own fields, and every paired interval is listed in `intervals`. Its result layout is now `matched-evaluation/3`.
+
+### Fixed
+- The Phase 1 artifacts now verify on any platform. On a Windows checkout, git rewrote `artifacts/phase1/household_splits.json` with CRLF line endings. Its raw-byte digest then no longer matched the one recorded in the published record, and a test failed there, while it passed in Linux CI. As for the v0.3 artifacts, `.gitattributes` now keeps `artifacts/phase1/*.json` at LF, and `load_frozen_splits` hashes the file after normalising its line endings. The recorded digest and the published result are unchanged.
+- `CITATION.cff` is now valid Citation File Format 1.2.0. Since its first version it had carried three keys the schema forbids (`programming-languages`, `operating-systems`, `subjects`). GitHub therefore never showed a "Cite this repository" button, and tools reading the file, Zenodo among them, could not rely on it. The subject headings not already present are kept as keywords. A new test fails if a non-CFF top-level key returns.
+- `ZENODO.md` now matches the archive. The table of archived releases lists every version Zenodo holds, 0.1.0 to 0.6.0, including both 0.1.3 records. The account of the two concept DOIs is corrected: the current concept began with `v0.1.1` on 2026-07-13, not with `0.2.0` as this page and the 0.3.0 changelog entry stated, and the `0.2.0` record declares `isVersionOf 10.5281/zenodo.17070041`, not `isNewVersionOf 10.5281/zenodo.17070042`. The page also no longer claims that release results are simulator-only; real CASAS results have been documented since 0.3.0.
+
 ## [0.6.0] - 2026-09-25
 
 Adds the matched-information evaluation needed for Phases 1 and 2 of the roadmap, and records its first real-data result. It provides:

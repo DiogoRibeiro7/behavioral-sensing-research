@@ -11,9 +11,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 #: Concept DOI resolving to the latest archived version.
 #:
-#: Zenodo minted a new concept lineage when 0.2.0 was archived through the
+#: Zenodo started a new concept lineage when v0.1.1 was archived through the
 #: GitHub integration, so 0.1.0 remains under 10.5281/zenodo.17070041 while
-#: everything from 0.2.0 onwards lives here. See ZENODO.md.
+#: everything from 0.1.1 onwards lives here. See ZENODO.md.
 CONCEPT_DOI = "10.5281/zenodo.21337272"
 LEGACY_CONCEPT_DOI = "10.5281/zenodo.17070041"
 
@@ -106,7 +106,7 @@ def test_zenodo_metadata_has_required_repository_linkage():
 def test_the_superseded_concept_doi_is_not_a_citation_target():
     """0.1.0's concept DOI must not be offered as the project's DOI.
 
-    Zenodo minted a new concept lineage when 0.2.0 was archived, so the older
+    Zenodo started a new concept lineage when v0.1.1 was archived, so the older
     concept resolves to 0.1.0 alone. Presenting it as the "all versions" DOI
     would send anyone citing this work to an archive that predates the release
     they are using. It may still appear as historical context, but never as the
@@ -137,3 +137,43 @@ def test_every_archived_release_has_a_version_doi():
     assert rows, "no archived releases listed"
     for row in rows:
         assert "10.5281/zenodo." in row, row
+
+
+#: Every top-level key the Citation File Format 1.2.0 schema allows.
+#:
+#: The schema forbids any other key, and GitHub silently hides its "Cite this
+#: repository" button for a file that fails validation. Three extra keys kept
+#: this repository's CITATION.cff invalid from its first version until 0.6.0.
+CFF_1_2_0_KEYS = frozenset(
+    {
+        "abstract",
+        "authors",
+        "cff-version",
+        "commit",
+        "contact",
+        "date-released",
+        "doi",
+        "identifiers",
+        "keywords",
+        "license",
+        "license-url",
+        "message",
+        "preferred-citation",
+        "references",
+        "repository",
+        "repository-artifact",
+        "repository-code",
+        "title",
+        "type",
+        "url",
+        "version",
+    }
+)
+
+
+def test_citation_file_uses_only_cff_keys():
+    """A key outside the schema makes GitHub drop the citation entirely."""
+    citation = yaml.safe_load(_read("CITATION.cff"))
+
+    assert citation["cff-version"] == "1.2.0"
+    assert set(citation) <= CFF_1_2_0_KEYS, sorted(set(citation) - CFF_1_2_0_KEYS)

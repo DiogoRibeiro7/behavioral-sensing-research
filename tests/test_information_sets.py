@@ -518,3 +518,30 @@ class TestPipelineAlignment:
         assert sum(sum(c.observations for c in s.state.evidence) for s in steps) == len(
             source.observations
         )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "Evidence windows compare wall-clock times, as the online pipeline does, "
+        "so the two occurrences of a repeated fall-back hour are not ordered by "
+        "instant. CASAS timestamps are naive local times, all read as the first "
+        "occurrence, so current data cannot trigger it; unambiguous timestamps "
+        "can. See docs/INFORMATION_SETS.md."
+    ),
+)
+def test_a_repeated_fall_back_hour_is_ordered_by_instant() -> None:
+    zone = ZoneInfo("America/Los_Angeles")
+    start = datetime(2011, 11, 6, 7, 0, tzinfo=UTC).astimezone(zone)
+    later = datetime(2011, 11, 6, 9, 47, tzinfo=UTC).astimezone(zone)
+    source = CasasRecording(
+        registry=SensorRegistry.from_specs(SPECS),
+        observations=tuple(
+            Observation(at, "Kitchen", Modality.MOTION, ObservationKind.EVENT, 1.0)
+            for at in (start, later)
+        ),
+        activities=(),
+    )
+    moment = datetime(2011, 11, 6, 8, 50, tzinfo=UTC)  # 57 minutes before `later`
+    table = build(source, [moment], nested_information_sets()[0])
+    assert table.column("events_kitchen_motion_lag0")[0] == 0

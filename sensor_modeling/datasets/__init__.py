@@ -17,6 +17,7 @@ recording and under what terms.
 
 from .baseline_models import (
     Baseline,
+    GradientBoostingBaseline,
     LogisticBaseline,
     PersistenceBaseline,
     StateFrequencyBaseline,
@@ -72,10 +73,17 @@ from .rates import (
     measure_event_rates,
     pooled_rate_report,
 )
+from .time_features import (
+    cyclic_hour_columns,
+    cyclic_hour_features,
+    local_hour,
+    peak_hour,
+)
 
 __all__ = [
     "ActivityInterval",
     "Baseline",
+    "GradientBoostingBaseline",
     "LogisticBaseline",
     "PersistenceBaseline",
     "StateFrequencyBaseline",
@@ -123,4 +131,8 @@ __all__ = [
     "casas_sensor_specs",
     "read_casas",
     "truth_series",
+    "cyclic_hour_columns",
+    "cyclic_hour_features",
+    "local_hour",
+    "peak_hour",
 ]

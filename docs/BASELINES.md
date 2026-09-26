@@ -55,7 +55,7 @@ tuned, and no baseline reads the development rows.
 | --- | --- |
 | `state_frequency` | add-one smoothing |
 | `persistence` | inner `logistic` with the settings below |
-| `logistic` | `C = 1.0`, L-BFGS, `max_iter = 1000`, features standardised on training rows, hour one-hot encoded, add-one probability for states without training rows |
+| `logistic` | `C = 1.0`, L-BFGS, `max_iter = 1000`, features standardised on training rows, hour one-hot encoded, add-one probability for states without training rows. `hour_encoding="cyclic"` offers the [cyclic hour](INFORMATION_SETS.md#time-of-day) instead; the suite keeps one-hot |
 | `tree` | `max_depth = 6`, `min_samples_leaf = 20`, hour as an ordinal column, add-one smoothed leaves |
 
 `logistic`, `tree` and the inner model of `persistence` take the run's seed as
@@ -77,6 +77,33 @@ for each. Not every metric says the same thing for every model.
 | Balanced accuracy, per-state recall | a floor by construction: recall is 1 for the majority training state and 0 for every other | meaningful | meaningful | meaningful |
 | Log loss, Brier score | the no-information reference: what a model scores without using any row | meaningful; first-timestamp rows carry the training frequencies | meaningful | meaningful |
 | Calibration error | reflects only how the majority state's training frequency differs from its held-out accuracy; says nothing about discrimination | meaningful | meaningful | coarse: confidences take only as many values as there are leaves |
+
+## The supervised diagnostic
+
+`GradientBoostingBaseline` is the supervised diagnostic used by the
+[recoverable-information gap](PHASE1_RECOVERABLE_GAP.md). It is a measurement
+instrument, not a proposed model. It is kept out of `baseline_suite`, so the
+four pre-declared baselines and their recorded results are unchanged.
+
+[Real-data validation](real_data.md) measured a ceiling with a gradient-boosted
+classifier whose code was not retained. This class declares one, so the
+diagnostic can be re-run under matched information sets. It is not a
+reproduction of the lost classifier.
+
+| Setting | Value |
+| --- | --- |
+| estimator | scikit-learn `HistGradientBoostingClassifier`, log loss |
+| learning rate, rounds, leaves, minimum leaf size, L2 penalty | `0.1`, `100`, `31`, `20`, `0` |
+| early stopping | off |
+| hour of day | ordinal column |
+| missing evidence | zero plus indicator, as for every baseline |
+| states without training rows | the add-one probability `1 / (N + K)`, as for `logistic` |
+
+The settings are the library defaults, except that early stopping is off. With
+it on, the number of boosting rounds would be chosen on a random tenth of the
+training rows. Those rows are autocorrelated in time, so that tenth is not
+really held out, and the number of rounds would no longer be fixed in advance.
+The model's output does not depend on how many threads fit it.
 
 ## No probability is zero
 

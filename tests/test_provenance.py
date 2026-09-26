@@ -111,7 +111,7 @@ class TestWriteAndLoad:
     def test_an_artefact_without_provenance_is_refused(self, tmp_path: Path) -> None:
         bare = tmp_path / "bare.json"
         bare.write_text(json.dumps({"balanced_accuracy": 0.81}), encoding="utf-8")
-        with pytest.raises(ValueError, match="missing provenance fields"):
+        with pytest.raises(ValueError, match="no schema_version"):
             load_record(bare)
 
     def test_the_artefact_is_json_serialisable(self, tmp_path: Path) -> None:

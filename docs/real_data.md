@@ -350,7 +350,10 @@ more, so the two overlap.
 baselines, consistent with the figure above. It found recent history worth only
 +0.02 to +0.04. The +0.140 here came from a gradient-boosted diagnostic whose
 code was not retained, and has not been reproduced. See
-[Phase 1: matched baselines](PHASE1_MATCHED_BASELINES.md).
+[Phase 1: matched baselines](PHASE1_MATCHED_BASELINES.md). A declared
+gradient-boosted diagnostic, run on the same homes, finds history worth +0.075
+to +0.088. How much history is worth depends on the model that uses it; see
+[Phase 1: recoverable-information gap](PHASE1_RECOVERABLE_GAP.md).
 
 Time of day alone, with no sensor information whatsoever, reaches 0.262 against
 a 0.143 baseline. Daily rhythm is genuinely informative and the pipeline

@@ -65,6 +65,8 @@ nav:
       - Matched evaluation: MATCHED_EVALUATION.md
       - Baseline models: BASELINES.md
       - "Phase 1: matched baselines": PHASE1_MATCHED_BASELINES.md
+      - "Phase 1: recoverable-information gap": PHASE1_RECOVERABLE_GAP.md
+      - Experiment artifacts: EXPERIMENT_ARTIFACTS.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md
       - v0.3 freeze verification: V03_PROFILE_FREEZE_VERIFICATION.md

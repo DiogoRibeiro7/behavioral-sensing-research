@@ -9,19 +9,21 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pytest
+from threadpoolctl import threadpool_limits  # type: ignore[import-untyped]
 
 from sensor_modeling.datasets import (
     ActivityInterval,
     Baseline,
     CasasRecording,
     FeatureRows,
+    GradientBoostingBaseline,
     HouseholdSplit,
     LabelledRows,
     LogisticBaseline,
@@ -55,7 +57,20 @@ FACTORIES: dict[str, Callable[[], Baseline]] = {
     "persistence": PersistenceBaseline,
     "logistic": LogisticBaseline,
     "tree": lambda: TreeBaseline(min_samples_leaf=5),
+    "gradient_boosting": lambda: GradientBoostingBaseline(
+        max_iter=20, min_samples_leaf=5
+    ),
 }
+
+
+@pytest.fixture(autouse=True)
+def _one_thread() -> Iterator[None]:
+    """Boosting on a few hundred rows is dominated by thread start-up.
+
+    Its output does not depend on the thread count.
+    """
+    with threadpool_limits(1):
+        yield
 
 
 def synthetic(
@@ -273,7 +288,9 @@ class TestUnseenAndRareStates:
             assert (predictions.probabilities[:, STATES.index(state)] > 0).all()
             assert state not in predictions.labels
 
-    @pytest.mark.parametrize("name", ["state_frequency", "persistence", "logistic"])
+    @pytest.mark.parametrize(
+        "name", ["state_frequency", "persistence", "logistic", "gradient_boosting"]
+    )
     def test_states_without_training_rows_get_the_add_one_probability(
         self, name: str
     ) -> None:
@@ -317,10 +334,15 @@ class TestUnseenAndRareStates:
         probabilities = fitted(name, training).predict_proba(rows(values))
         np.testing.assert_allclose(probabilities.sum(axis=1), 1.0, atol=1e-12)
 
-    def test_logistic_regression_needs_two_training_states(self) -> None:
+    @pytest.mark.parametrize(
+        "model",
+        [LogisticBaseline(), GradientBoostingBaseline()],
+        ids=lambda model: type(model).__name__,
+    )
+    def test_fitted_classifiers_need_two_training_states(self, model: Baseline) -> None:
         values, _ = synthetic(10)
         with pytest.raises(ValueError, match="two states"):
-            LogisticBaseline().fit(labelled(values, [S.SLEEPING] * 10), None)
+            model.fit(labelled(values, [S.SLEEPING] * 10), None)
 
     @pytest.mark.parametrize("name", ["state_frequency", "tree"])
     def test_one_training_state_is_reported_but_not_with_certainty(
@@ -336,21 +358,61 @@ class TestUnseenAndRareStates:
         )
 
 
+class TestGradientBoosting:
+    def test_every_setting_is_declared(self) -> None:
+        assert GradientBoostingBaseline().configuration() == {
+            "model": "GradientBoostingBaseline",
+            "estimator": "HistGradientBoostingClassifier",
+            "loss": "log_loss",
+            "learning_rate": 0.1,
+            "max_iter": 100,
+            "max_leaf_nodes": 31,
+            "min_samples_leaf": 20,
+            "l2_regularization": 0.0,
+            "early_stopping": False,
+            "hour_of_day": "ordinal",
+            "missing": "zero plus indicator",
+            "states_without_training_rows": "add-one probability",
+        }
+
+    @pytest.mark.parametrize(
+        "settings",
+        [
+            {"learning_rate": 0.0},
+            {"learning_rate": float("nan")},
+            {"max_iter": 0},
+            {"max_leaf_nodes": 1},
+            {"min_samples_leaf": 0},
+            {"l2_regularization": -1.0},
+        ],
+    )
+    def test_invalid_settings_are_refused(self, settings: dict[str, Any]) -> None:
+        with pytest.raises(ValueError):
+            GradientBoostingBaseline(**settings)
+
+    def test_it_is_not_part_of_the_pre_declared_suite(self) -> None:
+        for information_set in nested_information_sets():
+            models = [
+                spec.configuration["model"] for spec in baseline_suite(information_set)
+            ]
+            assert "GradientBoostingBaseline" not in models
+
+
 class TestMissingFeatures:
     def test_missing_is_encoded_apart_from_zero(self) -> None:
         silent = rows(np.array([[0.0, 0.0, 3.0, 0.0, 0.0]]))
         absent = rows(np.array([[np.nan, 0.0, 3.0, 0.0, 0.0]]))
         assert not np.array_equal(
-            encode_rows(silent, one_hot_hour=True),
-            encode_rows(absent, one_hot_hour=True),
+            encode_rows(silent, hour="one-hot"),
+            encode_rows(absent, hour="one-hot"),
         )
 
     def test_hour_is_one_hot_for_the_linear_model_and_ordinal_for_the_tree(
         self,
     ) -> None:
         sample = rows(np.array([[1.0, 2.0, 23.0, 0.0, 0.0]]))
-        one_hot = encode_rows(sample, one_hot_hour=True)
-        ordinal = encode_rows(sample, one_hot_hour=False)
+        one_hot = encode_rows(sample, hour="one-hot")
+        ordinal = encode_rows(sample, hour="ordinal")
         assert one_hot.shape == (1, 4 * 2 + 24) and one_hot[0, 4 + 23] == 1.0
         assert ordinal.shape == (1, 4 * 2 + 1) and ordinal[0, 4] == 23.0
 

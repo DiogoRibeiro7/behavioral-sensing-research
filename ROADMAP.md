@@ -21,6 +21,8 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Current Stable Baseline
 
+`0.7.0` records the first complete Phase 1 recoverable-information-gap result. It adds a versioned experiment-record schema, a cyclic time-of-day encoding, interpretable history summaries, a declared supervised diagnostic, and the generative filter's model restricted to the information sets it can consume. Like `0.6.0`, it does not change inference, abstention, the ontology or the frozen external-validation result.
+
 `0.6.0` adds matched-information evaluation: information sets, the matched runner, four pre-declared baselines, household-level comparison, and the first exploratory Phase 1 run. Like `0.5.0`, it does not change inference, the ontology or the frozen external-validation result.
 
 `0.5.0` was released on 2026-09-16. It is a platform and support-policy release:
@@ -124,6 +126,22 @@ recorded in `docs/PHASE1_MATCHED_BASELINES.md`. For the pre-declared linear
 and tree baselines, time of day is worth +0.09 to +0.13 household balanced
 accuracy and recent history +0.02 to +0.04. The filter is not yet in the
 comparison, so the formulation gap remains to be measured.
+
+### Recoverable-information gap
+
+The first complete run is recorded in `docs/PHASE1_RECOVERABLE_GAP.md`. It is
+exploratory and uses the same homes and frozen folds. It compares the
+supervised diagnostic, logistic regression and the generative model, restricted
+to the sets it can consume exactly (`I0` and `I2`).
+
+- **Formulation.** Given the same current window and three previous windows,
+  the diagnostic leads the generative model by +0.116 household balanced
+  accuracy in all 20 homes. The generative model gains only +0.021 from that
+  history; the diagnostic gains +0.088.
+- **Time of day.** The current generative model has no time-of-day input, so
+  that comparison is recorded as unsupported.
+- **Not additive.** Information gains and formulation gaps interact, so the
+  observed gap has no unique additive split.
 
 ### Boundary
 
@@ -341,7 +359,7 @@ unless it blocks reproducibility or supported users.
 
 ## Release Policy
 
-`0.6.0` is the current stable release.
+`0.7.0` is the current stable release.
 
 Future versions are created only when the research programme produces a
 coherent user-facing software increment. Paper milestones do not automatically
