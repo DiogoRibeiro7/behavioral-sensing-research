@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `sensor_modeling.datasets.restricted_filter` restricts the generative filter's model to a declared set: its own stationary prior, transitions and emission models, fed only the set's windows. A test shows it equals the production `MultimodalBayesFilter` fed those windows. Sets with time of day are recorded as unsupported, because the current generative model has no time-of-day input. The production filter is scored as an unmatched reference.
   - `GradientBoostingBaseline` is the supervised diagnostic: gradient-boosted trees with fixed settings, kept out of `baseline_suite`.
   - `artifacts/phase1/household_splits.json` freezes the two Phase 1 folds, with each home's recording digest. `scripts/run_phase1_recoverable_gap.py` runs the experiment on the development panel.
+  - The first run is published in `artifacts/phase1/phase1-recoverable-information-gap.json` and summarised in the documentation. It is exploratory, on the 20 development homes.
+    - Given the same current and three previous windows, the diagnostic leads the generative model by +0.116 household balanced accuracy, in all 20 homes.
+    - The generative model gains only +0.021 from that history; the diagnostic gains +0.088.
+    - Information gains and formulation gaps interact, so the observed gap has no unique additive split.
 
   Inference, abstention and the existing baselines are unchanged.
 - Added a cyclic time-of-day representation for matched-information experiments, in `sensor_modeling.datasets.time_features`:

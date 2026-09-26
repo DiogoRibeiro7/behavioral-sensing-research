@@ -125,6 +125,22 @@ and tree baselines, time of day is worth +0.09 to +0.13 household balanced
 accuracy and recent history +0.02 to +0.04. The filter is not yet in the
 comparison, so the formulation gap remains to be measured.
 
+### Recoverable-information gap
+
+The first complete run is recorded in `docs/PHASE1_RECOVERABLE_GAP.md`. It is
+exploratory and uses the same homes and frozen folds. It compares the
+supervised diagnostic, logistic regression and the generative model, restricted
+to the sets it can consume exactly (`I0` and `I2`).
+
+- **Formulation.** Given the same current window and three previous windows,
+  the diagnostic leads the generative model by +0.116 household balanced
+  accuracy in all 20 homes. The generative model gains only +0.021 from that
+  history; the diagnostic gains +0.088.
+- **Time of day.** The current generative model has no time-of-day input, so
+  that comparison is recorded as unsupported.
+- **Not additive.** Information gains and formulation gaps interact, so the
+  observed gap has no unique additive split.
+
 ### Boundary
 
 The supervised diagnostic remains a measurement instrument, not a production

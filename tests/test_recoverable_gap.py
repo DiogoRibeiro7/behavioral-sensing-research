@@ -71,6 +71,8 @@ from sensor_modeling.states.ontology import StateOntology
 ROOT = Path(__file__).resolve().parents[1]
 SPLITS = ROOT / "artifacts" / "phase1" / "household_splits.json"
 PROFILE = ROOT / "artifacts" / "v03" / "v03_circadian_profile.json"
+PUBLISHED = ROOT / "artifacts" / "phase1" / "phase1-recoverable-information-gap.json"
+DOC = ROOT / "docs" / "PHASE1_RECOVERABLE_GAP.md"
 I0, I1, I2, I3 = nested_information_sets()
 STEP = I0.resolution.step
 UTC = timezone.utc
@@ -704,6 +706,30 @@ class TestReproducibility:
         partial = {name: homes[name] for name in ("sim1", "sim2", "sim3")}
         with pytest.raises(ValueError, match="sim4"):
             run_recoverable_gap(partial, protocol(), data_source="simulator")
+
+
+class TestPublishedResult:
+    """The published development-panel result, and the page that reports it."""
+
+    def test_it_ran_the_declared_protocol_on_a_clean_tree(self) -> None:
+        payload = load_record(PUBLISHED)
+        splits = load_frozen_splits(SPLITS)
+        assert payload["configuration"]["protocol_sha256"] == (
+            GapProtocol(splits.folds).sha256()
+        )
+        assert payload["environment"]["git_dirty"] == "false"
+        inputs = {item["name"]: item["sha256"] for item in payload["inputs"]}
+        assert inputs.pop(SPLITS.name) == splits.sha256
+        assert inputs == {
+            entry["filename"]: entry["sha256"] for entry in splits.homes.values()
+        }
+        assert sorted(payload["results"]["households"]) == sorted(splits.homes)
+
+    def test_the_page_carries_the_summary_generated_from_it(self) -> None:
+        text = DOC.read_text(encoding="utf-8")
+        block = text.split("<!-- generated-summary:start -->")[1]
+        block = block.split("<!-- generated-summary:end -->")[0]
+        assert block.strip() == render_summary(load_record(PUBLISHED), level=3).strip()
 
 
 def test_no_value_in_the_record_is_non_finite(result: GapResult) -> None:

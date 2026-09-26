@@ -148,6 +148,217 @@ The roadmap writes the decomposition as a sum:
 reports its terms as separate paired comparisons, with their interactions. It
 does not claim that they add up.
 
+## Results
+
+The summary below is generated from the published record,
+`artifacts/phase1/phase1-recoverable-information-gap.json`, by
+`render_summary`. A test checks that it still matches the record.
+
+<!-- generated-summary:start -->
+
+### Recoverable-information gap: summary
+
+Generated from the record `phase1-recoverable-information-gap`: protocol `e1082697cfbf`, commit `9431b9a2f0e3`. Status: exploratory: the development homes have been inspected in earlier work.
+
+- 20 households in 2 cross-fitted folds. Each is scored once, by models never fitted on it.
+- Intervals are 95% household bootstrap intervals from 10,000 resamples.
+- Differences are paired by household. A positive value favours the first model, or the larger set.
+- No setting was selected on any data.
+
+#### What each model receives
+
+| Model | I0 | I1 | I2 | I3 |
+| --- | ---: | ---: | ---: | ---: |
+| diagnostic | matched | matched | matched | matched |
+| logistic | matched | matched | matched | matched |
+| generative | matched | unsupported | matched | unsupported |
+
+The production `filter` is matched to no set. It conditions on every earlier window, so its information strictly contains `I0` and `I2`, and neither contains nor is contained in `I1` or `I3`.
+
+#### Balanced accuracy
+
+Median over households, then the mean with its 95% interval:
+
+| Model | I0 | I1 | I2 | I3 |
+| --- | ---: | ---: | ---: | ---: |
+| diagnostic | 0.418 (0.418 [0.397, 0.436]) | 0.519 (0.515 [0.477, 0.548]) | 0.505 (0.506 [0.477, 0.532]) | 0.596 (0.590 [0.550, 0.624]) |
+| logistic | 0.354 (0.344 [0.317, 0.370]) | 0.488 (0.477 [0.434, 0.516]) | 0.392 (0.383 [0.348, 0.414]) | 0.500 (0.498 [0.450, 0.539]) |
+| generative | 0.362 (0.370 [0.347, 0.391]) | unsupported | 0.383 (0.390 [0.367, 0.414]) | unsupported |
+| state_frequency | 0.167 (0.161 [0.156, 0.164]) | 0.167 (0.161 [0.156, 0.164]) | 0.167 (0.161 [0.156, 0.164]) | 0.167 (0.161 [0.156, 0.164]) |
+
+Production filter, unrestricted: 0.429 (0.426 [0.399, 0.451]).
+
+#### Probability quality
+
+Median over households. Lower is better:
+
+| Model | Set | log_loss | brier | calibration_error |
+| --- | ---: | ---: | ---: | ---: |
+| diagnostic | I0 | 1.450 | 0.648 | 0.113 |
+| diagnostic | I1 | 4.636 | 0.624 | 0.190 |
+| diagnostic | I2 | 1.370 | 0.565 | 0.116 |
+| diagnostic | I3 | 2.605 | 0.492 | 0.135 |
+| logistic | I0 | 1.242 | 0.665 | 0.109 |
+| logistic | I1 | 0.925 | 0.470 | 0.098 |
+| logistic | I2 | 1.176 | 0.631 | 0.107 |
+| logistic | I3 | 0.909 | 0.448 | 0.098 |
+| generative | I0 | 3.403 | 0.800 | 0.233 |
+| generative | I2 | 3.756 | 0.876 | 0.372 |
+| state_frequency | I0 | 1.510 | 0.750 | 0.095 |
+| state_frequency | I1 | 1.510 | 0.750 | 0.095 |
+| state_frequency | I2 | 1.510 | 0.750 | 0.095 |
+| state_frequency | I3 | 1.510 | 0.750 | 0.095 |
+| filter | unbounded | 3.620 | 0.812 | 0.314 |
+
+#### What added information is worth
+
+The model is held fixed. Each cell gives the mean paired difference in balanced accuracy, its interval, and how many households improved:
+
+| Added | Sets | diagnostic | logistic | generative |
+| --- | ---: | ---: | ---: | ---: |
+| time of day | I0 to I1 | +0.097 [+0.067, +0.123], 18/20 | +0.133 [+0.112, +0.152], 20/20 | unsupported |
+| history | I0 to I2 | +0.088 [+0.075, +0.101], 20/20 | +0.039 [+0.029, +0.047], 19/20 | +0.021 [+0.016, +0.026], 19/20 |
+| history | I1 to I3 | +0.075 [+0.064, +0.087], 20/20 | +0.021 [+0.013, +0.028], 18/20 | unsupported |
+| time of day | I2 to I3 | +0.084 [+0.057, +0.107], 18/20 | +0.115 [+0.097, +0.132], 20/20 | unsupported |
+| both | I0 to I3 | +0.172 [+0.141, +0.199], 19/20 | +0.154 [+0.129, +0.175], 19/20 | unsupported |
+
+#### What the formulation is worth
+
+The information is held fixed. Each cell gives the first model minus the second, in balanced accuracy:
+
+| Set | diagnostic − logistic | diagnostic − generative | logistic − generative |
+| --- | ---: | ---: | ---: |
+| I0 | +0.074 [+0.057, +0.091], 20/20 | +0.048 [+0.027, +0.071], 16/20 | −0.025 [−0.047, −0.004], 7/20 |
+| I1 | +0.038 [+0.016, +0.059], 13/20 | unsupported | unsupported |
+| I2 | +0.123 [+0.101, +0.147], 20/20 | +0.116 [+0.088, +0.144], 20/20 | −0.007 [−0.035, +0.019], 9/20 |
+| I3 | +0.092 [+0.074, +0.109], 20/20 | unsupported | unsupported |
+
+#### Interactions
+
+How much more the added information is worth to the first model than to the second, in balanced accuracy. A value away from zero means that information gains and formulation gaps do not add up:
+
+| Sets | diagnostic vs logistic | diagnostic vs generative | logistic vs generative |
+| --- | ---: | ---: | ---: |
+| I0 to I1 | −0.036 [−0.054, −0.019], 3/20 | not estimable | not estimable |
+| I0 to I2 | +0.050 [+0.039, +0.061], 20/20 | +0.067 [+0.054, +0.082], 20/20 | +0.018 [+0.008, +0.028], 17/20 |
+| I1 to I3 | +0.054 [+0.041, +0.068], 19/20 | not estimable | not estimable |
+| I2 to I3 | −0.031 [−0.052, −0.014], 3/20 | not estimable | not estimable |
+| I0 to I3 | +0.018 [+0.002, +0.031], 16/20 | not estimable | not estimable |
+
+#### Against the production filter
+
+These comparisons are not matched. Where the filter's information contains the set, a model that scores higher cannot owe it to seeing more:
+
+| Model | Set | Relation | Balanced accuracy difference |
+| --- | ---: | ---: | ---: |
+| diagnostic | I0 | the filter's information strictly contains the set | −0.008 [−0.031, +0.019], 10/20 |
+| diagnostic | I1 | neither set contains the other | +0.089 [+0.056, +0.120], 18/20 |
+| diagnostic | I2 | the filter's information strictly contains the set | +0.081 [+0.052, +0.111], 19/20 |
+| diagnostic | I3 | neither set contains the other | +0.164 [+0.132, +0.194], 19/20 |
+| logistic | I0 | the filter's information strictly contains the set | −0.081 [−0.103, −0.059], 1/20 |
+| logistic | I1 | neither set contains the other | +0.051 [+0.018, +0.083], 15/20 |
+| logistic | I2 | the filter's information strictly contains the set | −0.043 [−0.069, −0.016], 6/20 |
+| logistic | I3 | neither set contains the other | +0.072 [+0.035, +0.107], 18/20 |
+| generative | I0 | the filter's information strictly contains the set | −0.056 [−0.069, −0.043], 0/20 |
+| generative | I2 | the filter's information strictly contains the set | −0.035 [−0.044, −0.025], 1/20 |
+
+#### Per-state recall
+
+Median over the households where the state occurs, at `I2` (the richest set every model can consume) and for the filter. The record holds every cell:
+
+| State | diagnostic | logistic | generative | filter |
+| --- | ---: | ---: | ---: | ---: |
+| away | 0.764 | 0.114 | 0.116 | 0.379 |
+| home_active | 0.293 | 0.250 | 0.503 | 0.561 |
+| home_inactive | 0.481 | 0.251 | 0.136 | 0.189 |
+| sleeping | 0.388 | 0.966 | 0.832 | 0.755 |
+| bed_awake | 0.000 | 0.000 | 0.250 | 0.250 |
+| bathroom_activity | 0.767 | 0.369 | 0.262 | 0.249 |
+| kitchen_activity | 0.637 | 0.551 | 0.567 | 0.572 |
+
+#### Not compared
+
+- `generative` in I1, I3: the current generative model has no time-of-day input: its default ontology is time-homogeneous, and its optional circadian term rescales transition rates, so it acts only through unbounded recursion, not as a statement about the state at an hour; the one fitted profile (v0.3) was fitted on every development home and has no held-out score there.
+- `filter` in I0, I1, I2, I3: the production filter is recursive: its belief conditions on every earlier window and on health and attribution layers built from the whole history, so it belongs to no declared set; its information strictly contains I0 and I2 and neither contains nor is contained in I1 or I3.
+- `circadian filter` in any: the v0.3 circadian candidate's profile was fitted on every development home, so no household of this panel is held out from it.
+
+<!-- generated-summary:end -->
+
+### What this shows and does not show
+
+Balanced-accuracy figures are mean paired differences, with their intervals
+and the number of the 20 homes that improved.
+
+- **The run reproduces the first one.** `logistic` uses the same folds, seed
+  and settings as in the [first Phase 1 run](PHASE1_MATCHED_BASELINES.md). Its
+  scores are identical in every set.
+- **History is worth more to the diagnostic than to the linear model.**
+  - The diagnostic gains +0.088 [+0.075, +0.101] from `I0` to `I2`, and +0.075
+    once time of day is present.
+  - `logistic` gains +0.039 and +0.021.
+  - The interaction, +0.050 [+0.039, +0.061], favours the diagnostic in all 20
+    homes.
+
+  How much recent history is worth depends on the model that uses it. That
+  accounts for part of the distance between the first run's +0.02 to +0.04
+  and the +0.140 of the lost gradient-boosted diagnostic.
+- **The diagnostic in `I3` has a median of 0.596**, with a mean of 0.590
+  [0.550, 0.624]. The lost diagnostic reported 0.607 on an unrecorded split.
+  The two are not paired, so this is not a reproduction.
+- **On the current window alone, the generative formulation is competitive.**
+  In `I0`, the generative model's median is 0.362 against 0.354 for
+  `logistic`, which trails it by −0.025 [−0.047, −0.004]. The diagnostic leads
+  it by +0.048 [+0.027, +0.071], in 16 of 20 homes.
+- **The generative model gains little from recent history.**
+  - It gains +0.021 [+0.016, +0.026] from `I0` to `I2`, against +0.088 for the
+    diagnostic.
+  - Its gap to the diagnostic therefore grows from +0.048 in `I0` to +0.116
+    [+0.088, +0.144] in `I2`, in all 20 homes.
+  - Both models receive the same information there, so this is a formulation
+    gap. It is the largest matched one measured here.
+- **The production filter's extra history adds a little.** The filter's median
+  is 0.429. It beats its own model restricted to `I2` by 0.035 [0.025, 0.044],
+  in 19 of 20 homes. Its extra is unbounded history plus its health and
+  attribution layers.
+- **The diagnostic beats the filter while seeing strictly less.** In `I2` it
+  leads by +0.081 [+0.052, +0.111], in 19 of 20 homes. That difference cannot
+  come from information. It lies in formulation, which includes training on
+  labels. The observed gap, the diagnostic in `I3` against the filter, is
+  +0.164 [+0.132, +0.194]. It is not matched: `I3` has the hour, while the
+  filter has longer history.
+- **The generative model cannot take time of day.** The hour is worth +0.084 to
+  +0.133 to the discriminative models, and the current generative model has no
+  input for it. That part of the gap cannot be measured within the generative
+  formulation, and closing it needs a model change, which is Phase 3.
+- **Balanced accuracy and probability quality disagree.**
+  - The diagnostic's probabilities are poor once the hour is added. Its median
+    log loss is 4.64 in `I1` and 2.61 in `I3`, above the no-information 1.51,
+    with calibration error 0.19 and 0.14.
+  - The generative model and the filter are overconfident too: median log loss
+    3.4 to 3.8, calibration error 0.23 to 0.37.
+  - Only `logistic` improves on the reference's log loss in every set. The
+    diagnostic does so only without the hour, at 1.45 in `I0` and 1.37 in
+    `I2`.
+
+  A formulation gap in balanced accuracy is therefore not a gap in probability
+  quality.
+- **The errors differ in kind.**
+  - In `I2` the diagnostic's lead comes from `away` (median recall 0.76,
+    against 0.12 for the generative model and 0.38 for the filter),
+    `bathroom_activity` (0.77 against 0.26) and `home_inactive` (0.48 against
+    0.14).
+  - It does worse on `sleeping` (0.39 against 0.83) and `home_active` (0.29
+    against 0.50).
+- **The gaps do not add up.** Every estimable interaction is away from zero.
+  Time of day is worth less to the diagnostic than to `logistic` (−0.036 from
+  `I0`, −0.031 from `I2`). History is worth more (+0.050 from `I0`, +0.054 from
+  `I1`). No single split of the observed gap into an information part and a
+  formulation part is supported.
+
+Every figure above is scored by the most probable state, without abstention.
+The filter's 0.429 is therefore not comparable with the published 0.420, which
+counts abstentions as errors and comes from a different split.
+
 ## The artifact
 
 `run_recoverable_gap` writes one [experiment record](EXPERIMENT_ARTIFACTS.md),
