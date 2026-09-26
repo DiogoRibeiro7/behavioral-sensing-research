@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added the Phase 1 recoverable-information-gap experiment, which separates what added information is worth to a fixed model from what a formulation is worth on fixed information. The protocol and design are in `docs/PHASE1_RECOVERABLE_GAP.md`.
+  - `sensor_modeling.datasets.recoverable_gap` runs the four nested sets under frozen folds, with every setting fixed and no household used for tuning. It reports household-level metrics, per-state recall and calibration summaries with bootstrap intervals, and paired information gains, formulation gaps, interactions and comparisons with the production filter. The result is one experiment record. `gap_summary.render_summary` generates a Markdown summary from the written record alone.
+  - `sensor_modeling.datasets.restricted_filter` restricts the generative filter's model to a declared set: its own stationary prior, transitions and emission models, fed only the set's windows. A test shows it equals the production `MultimodalBayesFilter` fed those windows. Sets with time of day are recorded as unsupported, because the current generative model has no time-of-day input. The production filter is scored as an unmatched reference.
+  - `GradientBoostingBaseline` is the supervised diagnostic: gradient-boosted trees with fixed settings, kept out of `baseline_suite`.
+  - `artifacts/phase1/household_splits.json` freezes the two Phase 1 folds, with each home's recording digest. `scripts/run_phase1_recoverable_gap.py` runs the experiment on the development panel.
+
+  Inference, abstention and the existing baselines are unchanged.
 - Added a cyclic time-of-day representation for matched-information experiments, in `sensor_modeling.datasets.time_features`:
   - `local_hour` defines the local wall-clock hour once, for the feature builder, with the same reading as the circadian prior;
   - `cyclic_hour_features` places each hour's midpoint on the 24-hour circle with 1 to 11 sine-cosine harmonics, so 23:00 and 00:00 are neighbours;

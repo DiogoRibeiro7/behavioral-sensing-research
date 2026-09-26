@@ -15,6 +15,10 @@ None of them is proposed as a new model.
 - :class:`TreeBaseline` is one depth-limited decision tree on every permitted
   column; its probabilities are smoothed leaf frequencies.
 
+:class:`GradientBoostingBaseline` is the supervised diagnostic of Phase 1, a
+measurement instrument with fixed settings. It follows the same conventions
+but is not part of :func:`baseline_suite`.
+
 Shared conventions
 ------------------
 - Fitting uses the training rows only. No baseline reads the development rows.
@@ -42,6 +46,7 @@ import math
 from abc import ABC, abstractmethod
 
 import numpy as np
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -120,6 +125,25 @@ def _expand(classes: np.ndarray, scores: np.ndarray, size: int) -> np.ndarray:
     full = np.zeros((scores.shape[0], size))
     full[:, np.asarray(classes, dtype=int)] = scores
     return full
+
+
+def _unseen_states(
+    classes: np.ndarray, training: LabelledRows
+) -> tuple[np.ndarray, float]:
+    """States a classifier never saw, and the add-one probability each receives."""
+    unseen = np.ones(len(training.states), dtype=bool)
+    unseen[np.asarray(classes, dtype=int)] = False
+    return unseen, PSEUDO_COUNT / (len(training) + PSEUDO_COUNT * len(training.states))
+
+
+def _cover_unseen(
+    probabilities: np.ndarray, unseen: np.ndarray, mass: float
+) -> np.ndarray:
+    """Give every unseen state its add-one probability, rescaling the rest."""
+    if unseen.any():
+        probabilities *= 1.0 - mass * unseen.sum()
+        probabilities[:, unseen] = mass
+    return probabilities
 
 
 class Baseline(ABC):
@@ -273,19 +297,12 @@ class LogisticBaseline(Baseline):
             ),
         )
         self._model.fit(self._design(training), codes)
-        self._unseen = np.ones(len(training.states), dtype=bool)
-        self._unseen[np.asarray(self._model.classes_, dtype=int)] = False
-        self._unseen_mass = PSEUDO_COUNT / (
-            len(training) + PSEUDO_COUNT * len(training.states)
-        )
+        self._unseen, self._unseen_mass = _unseen_states(self._model.classes_, training)
 
     def _probabilities(self, rows: FeatureRows) -> np.ndarray:
         scores = self._model.predict_proba(self._design(rows))
         probabilities = _expand(self._model.classes_, scores, len(rows.states))
-        if self._unseen.any():
-            probabilities *= 1.0 - self._unseen_mass * self._unseen.sum()
-            probabilities[:, self._unseen] = self._unseen_mass
-        return probabilities
+        return _cover_unseen(probabilities, self._unseen, self._unseen_mass)
 
     def configuration(self) -> dict[str, object]:
         """Every setting except the seed."""
@@ -361,6 +378,102 @@ class TreeBaseline(Baseline):
             "hour_of_day": "ordinal",
             "missing": "zero plus indicator",
             "leaf_probabilities": "add-one",
+        }
+
+
+class GradientBoostingBaseline(Baseline):
+    """Gradient-boosted trees, the supervised diagnostic of Phase 1.
+
+    ``docs/real_data.md`` measured a ceiling with a gradient-boosted
+    classifier whose code was not retained. This class declares one with
+    fixed settings, so the diagnostic can be re-run under matched information
+    sets. It is a measurement instrument, not a proposed model, and not a
+    reproduction of the lost one.
+
+    The settings are scikit-learn's defaults for
+    :class:`~sklearn.ensemble.HistGradientBoostingClassifier`, except that
+    early stopping is off. With it on, the number of boosting rounds would be
+    chosen on a random tenth of the training rows. Those rows are
+    autocorrelated in time, so the choice would not be a held-out one, and the
+    number of rounds would no longer be fixed in advance.
+
+    Parameters
+    ----------
+    learning_rate, max_iter, max_leaf_nodes, min_samples_leaf, l2_regularization
+        Fixed boosting settings. They are declared, not searched.
+    seed
+        Random state passed to the estimator.
+
+    A state with no training rows gets the add-one probability, as in
+    :class:`LogisticBaseline`.
+    """
+
+    def __init__(
+        self,
+        *,
+        learning_rate: float = 0.1,
+        max_iter: int = 100,
+        max_leaf_nodes: int = 31,
+        min_samples_leaf: int = 20,
+        l2_regularization: float = 0.0,
+        seed: int = 0,
+    ) -> None:
+        super().__init__()
+        if not math.isfinite(learning_rate) or learning_rate <= 0.0:
+            raise ValueError("learning_rate must be positive and finite")
+        if max_iter < 1 or max_leaf_nodes < 2 or min_samples_leaf < 1:
+            raise ValueError(
+                "max_iter and min_samples_leaf must be at least 1, "
+                "max_leaf_nodes at least 2"
+            )
+        if not math.isfinite(l2_regularization) or l2_regularization < 0.0:
+            raise ValueError("l2_regularization must be non-negative and finite")
+        self.learning_rate = float(learning_rate)
+        self.max_iter = int(max_iter)
+        self.max_leaf_nodes = int(max_leaf_nodes)
+        self.min_samples_leaf = int(min_samples_leaf)
+        self.l2_regularization = float(l2_regularization)
+        self.seed = int(seed)
+
+    def _fit(self, training: LabelledRows) -> None:
+        codes = _label_codes(training)
+        if np.unique(codes).size < 2:
+            raise ValueError(
+                "gradient boosting needs at least two states in the training rows"
+            )
+        self._model = HistGradientBoostingClassifier(
+            loss="log_loss",
+            learning_rate=self.learning_rate,
+            max_iter=self.max_iter,
+            max_leaf_nodes=self.max_leaf_nodes,
+            min_samples_leaf=self.min_samples_leaf,
+            l2_regularization=self.l2_regularization,
+            early_stopping=False,
+            random_state=self.seed,
+        )
+        self._model.fit(encode_rows(training, hour="ordinal"), codes)
+        self._unseen, self._unseen_mass = _unseen_states(self._model.classes_, training)
+
+    def _probabilities(self, rows: FeatureRows) -> np.ndarray:
+        scores = self._model.predict_proba(encode_rows(rows, hour="ordinal"))
+        probabilities = _expand(self._model.classes_, scores, len(rows.states))
+        return _cover_unseen(probabilities, self._unseen, self._unseen_mass)
+
+    def configuration(self) -> dict[str, object]:
+        """Every setting except the seed."""
+        return {
+            "model": "GradientBoostingBaseline",
+            "estimator": "HistGradientBoostingClassifier",
+            "loss": "log_loss",
+            "learning_rate": self.learning_rate,
+            "max_iter": self.max_iter,
+            "max_leaf_nodes": self.max_leaf_nodes,
+            "min_samples_leaf": self.min_samples_leaf,
+            "l2_regularization": self.l2_regularization,
+            "early_stopping": False,
+            "hour_of_day": "ordinal",
+            "missing": "zero plus indicator",
+            "states_without_training_rows": "add-one probability",
         }
 
 

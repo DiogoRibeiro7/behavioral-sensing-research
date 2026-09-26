@@ -27,7 +27,9 @@ What the runner enforces
 
 The generative filter is not a runner model. It is recursive and reads raw
 observations, so it cannot be restricted to a declared information set; see
-``docs/INFORMATION_SETS.md``.
+``docs/INFORMATION_SETS.md``. Its generative model can be restricted to some
+sets, and :mod:`~sensor_modeling.datasets.recoverable_gap` scores it on the
+same rows as the runner's models.
 """
 
 from __future__ import annotations

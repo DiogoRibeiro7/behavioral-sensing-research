@@ -1,0 +1,151 @@
+{
+  "declared": "scripts/run_phase1_matched_baselines.py, committed in 1b4d705 before any household was scored",
+  "development_households": "none: no setting is selected on data",
+  "folds": [
+    {
+      "name": "phase1-fold-a",
+      "test": [
+        "hh101",
+        "hh103",
+        "hh106",
+        "hh110",
+        "hh114",
+        "hh119",
+        "hh122",
+        "hh124",
+        "hh126",
+        "hh129"
+      ],
+      "train": [
+        "hh102",
+        "hh105",
+        "hh108",
+        "hh111",
+        "hh118",
+        "hh120",
+        "hh123",
+        "hh125",
+        "hh127",
+        "hh130"
+      ]
+    },
+    {
+      "name": "phase1-fold-b",
+      "test": [
+        "hh102",
+        "hh105",
+        "hh108",
+        "hh111",
+        "hh118",
+        "hh120",
+        "hh123",
+        "hh125",
+        "hh127",
+        "hh130"
+      ],
+      "train": [
+        "hh101",
+        "hh103",
+        "hh106",
+        "hh110",
+        "hh114",
+        "hh119",
+        "hh122",
+        "hh124",
+        "hh126",
+        "hh129"
+      ]
+    }
+  ],
+  "homes": {
+    "hh101": {
+      "filename": "hh101.csv",
+      "sha256": "3f4d4a53ef4940670ef855c66cd9dee0a458700656afb112f2c80b703b65666d"
+    },
+    "hh102": {
+      "filename": "hh102.csv",
+      "sha256": "3720812ee71d89f230149cc0b6562f308eb8658e9198ff69d27be9a1d77b29d2"
+    },
+    "hh103": {
+      "filename": "hh103.csv",
+      "sha256": "bb589e6e350d971533a1e75eff4a960a590eb034d54b5e76855ee55e04d0e18b"
+    },
+    "hh105": {
+      "filename": "hh105.csv",
+      "sha256": "e50b80bab18551ae365c259b5b19210833cdbfecdf85fa6a2e760018e12e5f85"
+    },
+    "hh106": {
+      "filename": "hh106.csv",
+      "sha256": "d7bc4b7d43e24dc7d826c06c618a2206a2290302da6998dba9a5e7d23b5186a4"
+    },
+    "hh108": {
+      "filename": "hh108.csv",
+      "sha256": "02dc7a30cf16fd82605084bae34e8b1c2929fe306afef6dd75fc13c316151c6b"
+    },
+    "hh110": {
+      "filename": "hh110.csv",
+      "sha256": "c89fbf594549cd749d83e1b57c3d4b424d519211456c45d74c691e3bfe476c33"
+    },
+    "hh111": {
+      "filename": "hh111.csv",
+      "sha256": "10cdf20436acf834fea9d4b3bd40e6bd634050da7e1cff89ee4d79f817532b38"
+    },
+    "hh114": {
+      "filename": "hh114.csv",
+      "sha256": "51dace896e9e8ebb0dd62fafcadc7319c0b54ef60aacf8d62630fd45401d85d1"
+    },
+    "hh118": {
+      "filename": "hh118.csv",
+      "sha256": "5fa3f1e2b3c4dde5ce251f635abea710aadc382c6c554595eec8f2e80011ee36"
+    },
+    "hh119": {
+      "filename": "hh119.csv",
+      "sha256": "8bf08d3568c4eec3d236bd62ef5c0e9ad38ea03a2ddd79e32db7324db11f10f6"
+    },
+    "hh120": {
+      "filename": "hh120.csv",
+      "sha256": "3d2b52061cd1f6660fe1f2bb1ac84f7784756a756ee8d6b6fcb7c9bfbaad6b1a"
+    },
+    "hh122": {
+      "filename": "hh122.csv",
+      "sha256": "d4143027bc742e0c7dbdeb16d7095fafa5c69b8f5026aceb22954b8b50d17ac9"
+    },
+    "hh123": {
+      "filename": "hh123.csv",
+      "sha256": "05f149f788bd4d42fc4314a955f1dd6e55742aa366e3f2fa5fdf334ba2a4a5fb"
+    },
+    "hh124": {
+      "filename": "hh124.csv",
+      "sha256": "9c944a1460d194bde94a617ba8d4818ffa80cfb3adf67fb70fb2960fb1b6a5ce"
+    },
+    "hh125": {
+      "filename": "hh125.csv",
+      "sha256": "6723cce771fd0f41e088f23bc59f02a45b275303bcf1bbf5ceff569e4822d4b4"
+    },
+    "hh126": {
+      "filename": "hh126.csv",
+      "sha256": "c315fb1549522a6dfcd7d4b90540c8c780e27bf3dca0ea3b039825995e0e66d1"
+    },
+    "hh127": {
+      "filename": "hh127.csv",
+      "sha256": "d3d91e4d08600deabff70ae2fbb63e4aff763ff9c194d643a081920f7d36fe84"
+    },
+    "hh129": {
+      "filename": "hh129.csv",
+      "sha256": "a6065cbec7a1f9e2bc14cb9a63a2697f3010b9427cebc5338ad90d4925e5d37f"
+    },
+    "hh130": {
+      "filename": "hh130.csv",
+      "sha256": "34f48db608acea7a325721a4f81a71fc8fda3c6069f32ed4964a0c7023824103"
+    }
+  },
+  "name": "phase1-development-folds",
+  "panel": {
+    "archive": "zenodo:15708568 labeled_data.zip",
+    "description": "the 20 single-resident fitting homes of the frozen v0.3 development panel; the two two-resident homes are excluded, as in the frozen fit",
+    "source": "artifacts/v03/v03_circadian_profile.json (fitting_home_ids)"
+  },
+  "rule": "sorted home identifiers alternate between two folds; each fold is held out once, so every home is scored exactly once by models never fitted on it",
+  "schema": "household-splits/1",
+  "status": "frozen"
+}
