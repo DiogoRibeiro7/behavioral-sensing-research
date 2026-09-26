@@ -420,7 +420,7 @@ class TestScoring:
         result = run(moments=moments)
         households = result.record.results["households"]
         assert households["h4"]["moments"] == len(moments["h4"])
-        assert result.record.configuration["moments"] == "supplied by caller"
+        assert result.record.preprocessing["moments"] == "supplied by caller"
 
     def test_scores_do_not_depend_on_the_seed_for_row_wise_models(self) -> None:
         first, second = run(seed=1), run(seed=2)
@@ -541,13 +541,15 @@ class TestRecord:
         assert payload["data_source"] == "synthetic-test"
         assert payload["recorded_at"]
         assert {"git_commit", "sensor_modeling"} <= set(payload["environment"])
+        assert payload["schema_version"] == "1.1"
         configuration = payload["configuration"]
-        assert configuration["result_schema"] == "matched-evaluation/2"
+        assert configuration["result_schema"] == "matched-evaluation/3"
         assert configuration["bootstrap"]["unit"] == "household"
-        assert configuration["information_set"]["sha256"] == CURRENT.sha256()
-        assert configuration["information_set"]["columns"] == list(CURRENT.columns)
-        assert configuration["split"]["sha256"] == SPLIT.sha256()
-        assert [m["name"] for m in configuration["models"]] == ["prior", "rule"]
+        assert payload["information_set"]["sha256"] == CURRENT.sha256()
+        assert payload["information_set"]["columns"] == list(CURRENT.columns)
+        assert payload["split"]["sha256"] == SPLIT.sha256()
+        assert [m["name"] for m in payload["models"]] == ["prior", "rule"]
+        assert payload["preprocessing"]["moments"].startswith("one per")
         definitions = payload["metric_definitions"]
         assert {"balanced_accuracy", "confusion", "improvement", "brier"} <= set(
             definitions
@@ -555,10 +557,14 @@ class TestRecord:
         assert not any("simulator" in note for note in payload["notes"])
 
         rule = payload["results"]["models"]["rule"]
-        household = rule["households"]["h4"]
+        household = payload["household_metrics"]["rule"]["h4"]
         assert {"balanced_accuracy", "per_class_recall", "confusion", "brier"} <= set(
             household
         )
+        intervals = payload["intervals"]
+        assert intervals and {i["unit"] for i in intervals} == {"household"}
+        assert any(i["label"].startswith("rule vs prior: mean") for i in intervals)
+        assert all(i["n"] == len(SPLIT.test) for i in intervals)
         assert rule["confusion_summed"]["predicted"][-1] == "unknown"
         assert set(rule["summary"]["balanced_accuracy"]) >= {"median", "mean", "n"}
         assert payload["results"]["households"]["h1"]["role"] == "train"

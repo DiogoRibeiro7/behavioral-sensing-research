@@ -67,18 +67,26 @@ from .metrics import (
 from .provenance import (
     METRIC_DEFINITIONS,
     RESULTS_DIR,
+    SCHEMA_VERSION,
+    ArtifactError,
     ExperimentRecord,
+    InputArtifact,
+    ModelRecord,
+    ReportedInterval,
     environment,
     load_record,
+    validate_record,
 )
 from .resampling import Interval, monte_carlo_standard_error
 
 __all__ = [
     "METRIC_DEFINITIONS",
     "RESULTS_DIR",
+    "SCHEMA_VERSION",
     "AblationReport",
     "ArmOutcome",
     "ArmResult",
+    "ArtifactError",
     "AttributionStudy",
     "AblationRun",
     "BinaryMetrics",
@@ -90,9 +98,12 @@ __all__ = [
     "ExperimentRecord",
     "HouseholdComparison",
     "HouseholdSummary",
+    "InputArtifact",
     "Interval",
+    "ModelRecord",
     "PairedDifference",
     "PredictionMetrics",
+    "ReportedInterval",
     "Scenario",
     "ScenarioComparison",
     "SensorConfiguration",
@@ -123,4 +134,5 @@ __all__ = [
     "summarise",
     "summarise_households",
     "transition_timing",
+    "validate_record",
 ]
