@@ -28,9 +28,12 @@ It returns false for any two sets whose resolutions differ, because those sets
 differ in more than their declared components.
 
 Columns always appear in the same order: current evidence, then `hour_of_day`,
-then history from the most recent window backwards. A nested set's columns are
-therefore an ordered subsequence of the larger set's columns, with identical
-values.
+then history from the most recent window backwards, then history summaries. A
+nested set's columns are therefore an ordered subsequence of the larger set's
+columns, with identical values.
+
+History summaries are an optional fifth component, outside these four sets. See
+[History summaries](#history-summaries).
 
 ## What each component means
 
@@ -41,6 +44,7 @@ For a prediction at moment `t`:
 | Current evidence | activations per channel in `(t - step, t]` | the window the pipeline batches at `t`; an activation is a non-zero event observation, as the Poisson emission counts it |
 | Time of day | local wall-clock hour of `t`, 0–23 | the hour the optional circadian prior reads |
 | Recent history | activations per channel in each of the `history_steps` windows before the current one | the lagged steps given to the supervised diagnostic |
+| History summaries | counts, room changes, quiet time and last active room over longer lookbacks | a condensed form of the step history the filter carries forward |
 
 The hour is a raw integer. How a model encodes it is the model's choice, and
 no encoding adds information; see [Time of day](#time-of-day).
@@ -158,15 +162,153 @@ that happens only in the morning. Day of week would also be a new information
 component, not a new encoding. It is therefore not added. If it is pursued,
 pre-specify a weekend-by-time-of-day term as its own information component.
 
+## History summaries
+
+The supervised diagnostic behind the ceiling sees 20 minutes of history: the
+current step and three lagged steps. The filter conditions on its whole past.
+In the median development home, 52% of moments have no activation at all in
+those 20 minutes. There, every lagged count is zero, so 20 quiet minutes look
+the same as 3 quiet hours.
+
+History summaries give a model a longer past in a few interpretable columns.
+With them, a matched comparison can measure how much of the gap between the
+filter and the ceiling that longer history explains. They are not a sequence
+model: each column is a count, a duration or an indicator that can be read
+directly.
+
+### Features
+
+For a prediction at moment `t`, each summary window `W` is a lookback
+`(t − W, t]`. The horizon `H` is the longest window.
+
+| Feature | Column | Value |
+| --- | --- | --- |
+| Count | `history_count_{channel}_{W}m` | activations on the channel in `(t − W, t]` |
+| Room changes | `history_room_changes_{W}m` | how often the set of active rooms differs from one active step to the next in `(t − W, t]` |
+| Quiet minutes | `history_quiet_minutes_{channel}_{H}m` | minutes of whole silent steps since the channel last fired; `H` if it did not fire in `(t − H, t]` |
+| Last room | `history_last_room_{room}_{H}m` | 1 if the room was active in the most recent active step in `(t − H, t]`, otherwise 0 |
+
+- **Active step.** A step is active when at least one instrumented channel
+  fired in it.
+- **Active room.** A room is active in a step when any of its channels fired.
+  The front door counts as its room, the hall.
+- **Room changes.** Silent steps are skipped when looking for the next active
+  step.
+
+Two examples with 5-minute steps and `t = 12:00`:
+
+- **Quiet minutes.** Kitchen motion at 11:53 falls in the step
+  `(11:50, 11:55]`, so the kitchen has been silent for one whole step. Its
+  quiet minutes are 5.
+- **Last room.** If the kitchen and then the living room fire, both inside
+  `(11:50, 11:55]`, and nothing fires afterwards, both rooms are marked as last
+  room. The step does not say which came first.
+
+`summary_column` builds these names. `parse_summary_column` reads one back as
+`(feature, subject, minutes)`.
+
+### Matched to the filter's steps
+
+Every summary is a function of the per-channel counts in whole step windows,
+`(t − (j + 1) step, t − j step]`. These are the windows the filter batches. No
+summary uses a time or an order inside a step, which the filter never
+receives. That has three consequences:
+
+- Room changes are counted between steps, not between events. An event-level
+  count would need the order of activations within a step.
+- Quiet minutes are whole multiples of the step.
+- If two rooms are active in the most recent active step, both are marked.
+
+A set with summaries over a horizon `H` therefore carries no information beyond
+current evidence and `H / step − 1` lagged steps, and the filter conditions on
+all of that. The summaries condense that history; they add no new information.
+The tests check this by recomputing every summary from the lagged counts.
+
+### Why these windows
+
+There are two windows, both declared before any model was fitted on them and
+both whole numbers of steps:
+
+| Window | Reason |
+| --- | --- |
+| 60 minutes | spans the median `away` bout (53 minutes) and `home_inactive` bout (19.6 minutes), two of the three states where the filter falls furthest below the ceiling |
+| 180 minutes | spans the median `sleeping` bout (155 minutes) and is the horizon |
+
+In the median development home, 27.8% of moments have had no activation for
+at least an hour, and 6.8% for at least three hours. With a three-hour
+horizon, quiet minutes are therefore censored for few moments.
+
+- **Sources.** The bout medians come from the dwell table in
+  [Real-data validation](real_data.md). The shares were measured on the 20
+  development homes, at every step from each home's first observation to its
+  last, without labels.
+- **Only at the horizon.** Quiet minutes and last room are reported only at
+  the horizon. At a shorter window `W` they are exact functions of the horizon
+  columns; for example, quiet minutes at `W` equal `min(quiet minutes at H, W)`.
+  Repeating them would add columns without adding information.
+- **At every window.** Counts and room changes cannot be recovered from one
+  window to another, so each window has its own.
+
+At the default resolution the component adds 25 columns:
+
+| Feature | Columns |
+| --- | ---: |
+| counts: 6 channels × 2 windows | 12 |
+| room changes: 1 per window | 2 |
+| quiet minutes: 1 per channel | 6 |
+| last room: 1 per room | 5 |
+
+### Missing and sparse history
+
+| Situation | Value |
+| --- | --- |
+| Lookback inside the recording with no activations | counts `0`, room changes `0`, quiet minutes `H`, every last-room column `0` |
+| Lookback that reaches a step closing before the first observation | counts and room changes `NaN`. Quiet minutes and last room are known once something has fired inside the recording, and `NaN` until then |
+| Channel with no event sensor in this household | its counts and quiet minutes `NaN` |
+| Room with no instrumented channel | its last-room column `NaN`; room changes use the instrumented rooms |
+| Household with no instrumented channel | every summary `NaN` |
+| After the last observation | as inside the recording; nothing is missing |
+
+A step counts as observed on the same terms as a lagged window: it must close
+at or after the first observation. On the development homes, summaries are
+missing in at most 0.5% of any home's rows, all within three hours of its first
+observation.
+
+### Using them
+
+```python
+from sensor_modeling.datasets import (
+    InformationComponent,
+    InformationSet,
+    nested_information_sets,
+)
+
+diagnostic = nested_information_sets()[-1]  # current, time of day, 3 lagged steps
+extended = InformationSet(
+    "current+time_of_day+history+history_summary",
+    diagnostic.components | {InformationComponent.HISTORY_SUMMARY},
+    diagnostic.resolution,
+)
+```
+
+`diagnostic.is_nested_in(extended)` is true, so `compare_information_sets` can
+report what the summaries add for each model under the
+[matched evaluation runner](MATCHED_EVALUATION.md). That measurement is a
+separate, pre-declared run. This component makes no claim about its outcome.
+
+The summary windows enter a set's declaration and digest only when the set
+includes summaries. The digests of the four Phase 1 sets are unchanged.
+
 ## Resolution
 
-Every set in a comparison shares these three settings:
+Every set in a comparison shares these four settings:
 
 | Setting | Default | Source of the default |
 | --- | --- | --- |
 | `step` | 5 minutes | the step used for every figure in [Real-data validation](real_data.md) |
 | `channels` | `HH_EVIDENCE_CHANNELS` | every event channel the CASAS `hh` adapter can produce |
 | `history_steps` | 3 | the three lagged steps given to the supervised diagnostic |
+| `summary_windows` | 60 and 180 minutes | see [Why these windows](#why-these-windows) |
 
 When the filter is one of the models compared, `step` must equal its pipeline
 step.
@@ -208,6 +350,9 @@ reproduce the diagnostic's figures exactly.
 | Window that closes before the recording's first observation | `NaN` |
 | Window after the last observation | `0`: at `t` nobody can know the recording is about to end |
 | Sensor that is not event-kind, has no room, or sits on an undeclared channel | excluded; listed in `excluded_sensors` |
+
+History summaries follow the same rules; their cases are listed under
+[Missing and sparse history](#missing-and-sparse-history).
 
 The builder treats which sensors are installed as deployment metadata. The
 filter receives the same registry from its first step.
@@ -253,3 +398,7 @@ at this resolution. The circadian profile can switch time of day on or off,
 but history cannot be removed. A comparison must report this and must not
 place the filter in the `current` set. The only models that can be compared
 within all four sets are non-recursive ones.
+
+History summaries do not change this. They are functions of step counts over a
+bounded horizon, so a set that includes them still lies within what the filter
+conditions on.
