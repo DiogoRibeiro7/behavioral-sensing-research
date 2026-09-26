@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added interpretable history summaries as an optional information component, `InformationComponent.HISTORY_SUMMARY`, for measuring how much longer history explains the gap between the filter and the diagnostic ceiling. Over each summary window, the component gives per-channel activation counts and room changes between active steps. Over the longest window, it gives each channel's quiet minutes and the rooms active in the most recent active step. The windows are `EvidenceResolution.summary_windows`, 60 and 180 minutes by default, chosen from measured bout durations and quiet spells on the development homes. Every summary is a function of whole-step per-channel counts, the evidence the filter receives, so none uses timing or order inside a step. Column names are stable, built by `summary_column` and read back by `parse_summary_column`. Missing, censored and silent history are distinguished, as documented in `docs/INFORMATION_SETS.md`. The four Phase 1 sets, their columns and their digests are unchanged, and no model or result is changed.
 - Added a cyclic time-of-day representation for matched-information experiments, in `sensor_modeling.datasets.time_features`:
   - `local_hour` defines the local wall-clock hour once, for the feature builder, with the same reading as the circadian prior;
   - `cyclic_hour_features` places each hour's midpoint on the 24-hour circle with 1 to 11 sine-cosine harmonics, so 23:00 and 00:00 are neighbours;

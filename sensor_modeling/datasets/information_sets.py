@@ -27,6 +27,12 @@ For a prediction at moment ``t`` in one household:
   in :mod:`~sensor_modeling.datasets.time_features`.
 - **Recent history** is the same per-channel count in each of the
   ``history_steps`` preceding windows ``(t - (j + 1) step, t - j step]``.
+- **History summaries** condense those step windows over longer lookbacks into
+  a few interpretable columns: activation counts and room changes over each
+  summary window, and, over the longest window (the horizon), how long each
+  channel has been quiet and which rooms were active most recently. Each one is
+  a function of the per-channel counts in whole step windows, the evidence the
+  filter receives, so none of them reveals timing or ordering inside a step.
 
 Every window closes at or before ``t``, so nothing observed after the prediction
 moment can reach a feature. Nothing here reads the annotations, and each
@@ -39,7 +45,9 @@ Two situations produce no activations without being silence:
 - A declared channel with no event sensor in this household is
   **uninstrumented**. Its columns are NaN, because nothing was there to fire.
 - A history window that closes before the recording's first observation was
-  never observed. Its columns are NaN.
+  never observed. Its columns are NaN. A summary is NaN while its lookback
+  reaches such a window, unless an activation inside the recording already
+  settles its value.
 
 A zero from an instrumented channel inside the recording is evidence and is
 reported as zero. Windows after the last observation are zero too: at the
@@ -79,6 +87,9 @@ class InformationComponent(str, Enum):
 
     RECENT_HISTORY = "recent_history"
     """Per-channel activation counts in the preceding windows."""
+
+    HISTORY_SUMMARY = "history_summary"
+    """Interpretable summaries of the step windows over longer lookbacks."""
 
 
 @dataclass(frozen=True, order=True)
@@ -141,6 +152,58 @@ def parse_evidence_column(name: str) -> tuple[str, int] | None:
     return match.group("channel"), int(match.group("lag"))
 
 
+#: Activations on one channel over a summary window.
+SUMMARY_COUNT = "count"
+#: Changes of active room between consecutive active steps over a summary window.
+SUMMARY_ROOM_CHANGES = "room_changes"
+#: Minutes of whole quiet steps since one channel's last activation, within the horizon.
+SUMMARY_QUIET_MINUTES = "quiet_minutes"
+#: Whether one room was active in the most recent active step within the horizon.
+SUMMARY_LAST_ROOM = "last_room"
+
+#: Summary features, in the order their columns are laid out.
+SUMMARY_FEATURES = (
+    SUMMARY_COUNT,
+    SUMMARY_ROOM_CHANGES,
+    SUMMARY_QUIET_MINUTES,
+    SUMMARY_LAST_ROOM,
+)
+
+_SUMMARY_COLUMN = re.compile(
+    r"^history_(?P<feature>count|room_changes|quiet_minutes|last_room)"
+    r"(?:_(?P<subject>.+?))?_(?P<minutes>\d+)m$"
+)
+_MINUTE = timedelta(minutes=1)
+
+
+def summary_column(feature: str, window: timedelta, subject: str | None = None) -> str:
+    """Name of a history-summary column.
+
+    *subject* is a channel name for counts and quiet minutes, a room for the
+    last-room indicator, and ``None`` for room changes. The name ends in the
+    lookback in whole minutes, so ``history_count_kitchen_motion_60m`` counts
+    kitchen motion over the last hour.
+    """
+    if feature not in SUMMARY_FEATURES:
+        raise ValueError(f"summary feature must be one of {SUMMARY_FEATURES}")
+    if (subject is None) != (feature == SUMMARY_ROOM_CHANGES):
+        needs = "no subject" if feature == SUMMARY_ROOM_CHANGES else "a subject"
+        raise ValueError(f"summary feature {feature!r} takes {needs}")
+    stem = feature if subject is None else f"{feature}_{subject}"
+    return f"history_{stem}_{window // _MINUTE}m"
+
+
+def parse_summary_column(name: str) -> tuple[str, str | None, int] | None:
+    """Return ``(feature, subject, minutes)`` for a summary column, else ``None``."""
+    match = _SUMMARY_COLUMN.match(name)
+    if match is None:
+        return None
+    feature, subject = match.group("feature"), match.group("subject")
+    if (subject is None) != (feature == SUMMARY_ROOM_CHANGES):
+        return None
+    return feature, subject, int(match.group("minutes"))
+
+
 @dataclass(frozen=True)
 class EvidenceResolution:
     """How finely evidence is resolved, shared by every set in one comparison.
@@ -163,11 +226,22 @@ class EvidenceResolution:
     history_steps
         Number of preceding windows that ``RECENT_HISTORY`` adds. Three is what
         the documented supervised diagnostic used.
+    summary_windows
+        Lookbacks of ``HISTORY_SUMMARY``, in whole minutes, stored in
+        increasing order. The longest is the horizon. A set that includes the
+        summaries needs each window to be a whole number of steps. One hour
+        spans the median away and inactive bouts, the states where the filter
+        falls furthest below the diagnostic ceiling. Three hours spans the
+        median sleep bout. ``docs/INFORMATION_SETS.md`` gives the measurements.
     """
 
     step: timedelta = timedelta(minutes=5)
     channels: tuple[EvidenceChannel, ...] = HH_EVIDENCE_CHANNELS
     history_steps: int = 3
+    summary_windows: tuple[timedelta, ...] = (
+        timedelta(minutes=60),
+        timedelta(minutes=180),
+    )
 
     def __post_init__(self) -> None:
         """Validate the resolution and store channels in canonical order."""
@@ -187,7 +261,32 @@ class EvidenceResolution:
             or self.history_steps < 0
         ):
             raise ValueError("history_steps must be a non-negative integer")
+        windows = tuple(self.summary_windows)
+        if not windows:
+            raise ValueError("at least one summary window is required")
+        for window in windows:
+            if (
+                not isinstance(window, timedelta)
+                or window <= timedelta(0)
+                or window % _MINUTE
+            ):
+                raise ValueError(
+                    "summary windows must be positive whole numbers of minutes"
+                )
+        if len(set(windows)) != len(windows):
+            raise ValueError("summary windows must be unique")
         object.__setattr__(self, "channels", tuple(sorted(channels)))
+        object.__setattr__(self, "summary_windows", tuple(sorted(windows)))
+
+    @property
+    def rooms(self) -> tuple[str, ...]:
+        """Rooms of the declared channels, sorted and without repeats."""
+        return tuple(sorted({channel.room for channel in self.channels}))
+
+    @property
+    def horizon(self) -> timedelta:
+        """The longest summary window."""
+        return self.summary_windows[-1]
 
 
 @dataclass(frozen=True)
@@ -206,6 +305,20 @@ class _Column:
 
 
 @dataclass(frozen=True)
+class _Summary:
+    """One history-summary column: *feature* of *subject* over *window*."""
+
+    feature: str
+    window: timedelta
+    subject: str | None = None
+
+    @property
+    def name(self) -> str:
+        """Public column name."""
+        return summary_column(self.feature, self.window, self.subject)
+
+
+@dataclass(frozen=True)
 class InformationSet:
     """A declared, reproducible set of information a model may condition on.
 
@@ -219,9 +332,10 @@ class InformationSet:
         Step width, channel vocabulary and history depth.
 
     Columns are laid out as current evidence, then hour of day, then history
-    from the most recent window backwards, with channels in canonical order
-    inside each block. A set nested in another therefore has its columns as an
-    ordered subsequence of the larger set's, with identical values.
+    from the most recent window backwards, then history summaries, with
+    channels in canonical order inside each block. A set nested in another
+    therefore has its columns as an ordered subsequence of the larger set's,
+    with identical values.
     """
 
     name: str
@@ -245,19 +359,42 @@ class InformationSet:
                 f"information set {self.name!r} includes recent history but "
                 "the resolution declares no history steps"
             )
+        if InformationComponent.HISTORY_SUMMARY in components and any(
+            window % self.resolution.step for window in self.resolution.summary_windows
+        ):
+            raise ValueError(
+                f"information set {self.name!r} includes history summaries but "
+                "its summary windows are not whole numbers of steps"
+            )
         object.__setattr__(self, "components", components)
 
-    def _layout(self) -> tuple[_Column, ...]:
+    def _layout(self) -> tuple[_Column | _Summary, ...]:
         """Return the column sources in their canonical order."""
-        channels = self.resolution.channels
-        layout: list[_Column] = []
+        resolution = self.resolution
+        channels = resolution.channels
+        layout: list[_Column | _Summary] = []
         if InformationComponent.CURRENT_EVIDENCE in self.components:
             layout.extend(_Column(channel, 0) for channel in channels)
         if InformationComponent.TIME_OF_DAY in self.components:
             layout.append(_Column(None))
         if InformationComponent.RECENT_HISTORY in self.components:
-            for lag in range(1, self.resolution.history_steps + 1):
+            for lag in range(1, resolution.history_steps + 1):
                 layout.extend(_Column(channel, lag) for channel in channels)
+        if InformationComponent.HISTORY_SUMMARY in self.components:
+            for window in resolution.summary_windows:
+                layout.extend(
+                    _Summary(SUMMARY_COUNT, window, channel.name)
+                    for channel in channels
+                )
+                layout.append(_Summary(SUMMARY_ROOM_CHANGES, window))
+            horizon = resolution.horizon
+            layout.extend(
+                _Summary(SUMMARY_QUIET_MINUTES, horizon, channel.name)
+                for channel in channels
+            )
+            layout.extend(
+                _Summary(SUMMARY_LAST_ROOM, horizon, room) for room in resolution.rooms
+            )
         return tuple(layout)
 
     @property
@@ -272,9 +409,13 @@ class InformationSet:
         )
 
     def to_dict(self) -> dict[str, object]:
-        """Return a stable JSON-serialisable declaration."""
+        """Return a stable JSON-serialisable declaration.
+
+        The summary windows appear only in a set that includes the summaries,
+        so declarations, and digests, of sets without them are unchanged.
+        """
         resolution = self.resolution
-        return {
+        declaration: dict[str, object] = {
             "name": self.name,
             "components": sorted(component.value for component in self.components),
             "step_seconds": resolution.step.total_seconds(),
@@ -285,6 +426,11 @@ class InformationSet:
             "history_steps": resolution.history_steps,
             "columns": list(self.columns),
         }
+        if InformationComponent.HISTORY_SUMMARY in self.components:
+            declaration["summary_windows_seconds"] = [
+                window.total_seconds() for window in resolution.summary_windows
+            ]
+        return declaration
 
     def sha256(self) -> str:
         """Return the SHA-256 of the canonical serialised declaration."""
@@ -400,6 +546,102 @@ def _local_moments(moments: Sequence[datetime], zone: tzinfo) -> tuple[datetime,
     return tuple(moment.astimezone(zone) for moment in aware)
 
 
+_EPOCH = datetime(1970, 1, 1)
+_MICROSECOND = timedelta(microseconds=1)
+
+
+def _wall_clock(moment: datetime) -> int:
+    """Microseconds on the local clock, the order in which windows compare times."""
+    return (moment.replace(tzinfo=None) - _EPOCH) // _MICROSECOND
+
+
+def _history_summaries(
+    moments: Sequence[datetime],
+    start: datetime,
+    streams: Mapping[EvidenceChannel, Sequence[datetime]],
+    resolution: EvidenceResolution,
+) -> dict[_Summary, np.ndarray]:
+    """Every summary column of *resolution*, keyed by its source.
+
+    Everything is computed from ``seen[:, j]``, the number of activations up
+    to the end of lag window ``j``. So each value depends only on
+    per-channel counts in whole step windows ending at or before the moment.
+    """
+    step = resolution.step
+    windows = resolution.summary_windows
+    horizon = resolution.horizon
+    depth = horizon // step
+    minutes_per_step = step / _MINUTE
+    at = np.array([_wall_clock(moment) for moment in moments], dtype=np.int64)
+    width = step // _MICROSECOND
+    ends = at[:, None] - width * np.arange(depth + 1)[None, :]
+    first = _wall_clock(start)
+
+    def observed(steps: int) -> np.ndarray:
+        """Rows whose last *steps* windows all close at or after the start."""
+        closes: np.ndarray = at - width * (steps - 1) >= first
+        return closes
+
+    missing = np.full(len(at), math.nan)
+    rooms = resolution.rooms
+    bits = {room: 1 << position for position, room in enumerate(rooms)}
+    occupied = np.zeros((len(at), depth), dtype=np.int64)
+    summaries: dict[_Summary, np.ndarray] = {}
+    for channel in resolution.channels:
+        stamps = streams.get(channel)
+        count = {w: _Summary(SUMMARY_COUNT, w, channel.name) for w in windows}
+        quiet = _Summary(SUMMARY_QUIET_MINUTES, horizon, channel.name)
+        if stamps is None:
+            summaries.update({source: missing for source in count.values()})
+            summaries[quiet] = missing
+            continue
+        keys = np.array([_wall_clock(stamp) for stamp in stamps], dtype=np.int64)
+        seen = np.searchsorted(keys, ends, side="right")
+        for window, source in count.items():
+            steps = window // step
+            summaries[source] = np.where(
+                observed(steps), seen[:, 0] - seen[:, steps], math.nan
+            )
+        active = seen[:, :-1] > seen[:, 1:]
+        occupied |= np.where(active, bits[channel.room], 0)
+        summaries[quiet] = np.where(
+            active.any(axis=1),
+            active.argmax(axis=1) * minutes_per_step,
+            np.where(observed(depth), depth * minutes_per_step, math.nan),
+        )
+
+    busy = occupied != 0
+    anywhere = busy.any(axis=1)
+    latest = occupied[np.arange(len(at)), busy.argmax(axis=1)]
+    instrumented = {channel.room for channel in streams}
+    for room in rooms:
+        source = _Summary(SUMMARY_LAST_ROOM, horizon, room)
+        if room not in instrumented:
+            summaries[source] = missing
+            continue
+        summaries[source] = np.where(
+            anywhere,
+            (latest & bits[room]) != 0,
+            np.where(observed(depth), 0.0, math.nan),
+        )
+
+    # For each active lag, the nearest more recent active lag, or -1.
+    lags = np.arange(depth)
+    reached = np.maximum.accumulate(np.where(busy, lags, -1), axis=1)
+    newer = np.hstack([np.full((len(at), 1), -1), reached[:, :-1]])
+    before = np.take_along_axis(occupied, np.maximum(newer, 0), axis=1)
+    changes = np.cumsum(busy & (newer >= 0) & (before != occupied), axis=1)
+    for window in windows:
+        source = _Summary(SUMMARY_ROOM_CHANGES, window)
+        steps = window // step
+        summaries[source] = (
+            np.where(observed(steps), changes[:, steps - 1], math.nan)
+            if instrumented
+            else missing
+        )
+    return summaries
+
+
 def build_feature_table(
     recording: CasasRecording,
     information_set: InformationSet,
@@ -458,6 +700,8 @@ def build_feature_table(
     values = np.full((len(local), len(layout)), math.nan)
     for row, moment in enumerate(local):
         for col, source in enumerate(layout):
+            if isinstance(source, _Summary):
+                continue
             if source.channel is None:
                 values[row, col] = local_hour(moment, zone)
                 continue
@@ -468,6 +712,15 @@ def build_feature_table(
             values[row, col] = bisect_right(stamps, end) - bisect_right(
                 stamps, end - step
             )
+    summaries = [
+        (col, source)
+        for col, source in enumerate(layout)
+        if isinstance(source, _Summary)
+    ]
+    if summaries:
+        computed = _history_summaries(local, start, streams, resolution)
+        for col, source in summaries:
+            values[:, col] = computed[source]
 
     return FeatureTable(
         household=household,
