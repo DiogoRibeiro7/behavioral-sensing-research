@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Models.** The original generative model and the hierarchical model with time disabled are scored in `I0` and `I2`. The hierarchical model with the hour, the diagnostic and logistic regression are scored in `I1` and `I3`.
   - **Estimands and criteria.** The estimands are fixed, primary and secondary. Their verdicts compare effect sizes and household bootstrap intervals with declared minimal important differences; they are not significance tests. A secondary arm adapts each held-out home's prior on its first 7 days and scores it only afterwards.
   - **Output.** The run writes a versioned record, and `time_prior_summary.render_summary` generates the Markdown summary from it. `scripts/run_phase3_time_prior.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Result.** The run is published in `artifacts/phase3/phase3-hierarchical-time-prior.json`, made from the protocol commit on a clean tree. It is on the 20 development homes, so it is not a held-out claim.
+    - The hour is worth +0.131 [+0.120, +0.142] household balanced accuracy to the generative model, in all 20 homes: pre-specified success. Almost all of it comes from `away`, whose median recall rises from 0.006 to 0.824.
+    - At `I1` the model is within +0.006 [−0.022, +0.030] of the diagnostic, but its log loss stays above the no-information reference.
+    - Recent history still adds nothing to it.
+    - Household adaptation improves log loss and calibration, but its balanced-accuracy gain is below the declared minimal difference: pre-specified inconclusive.
 
 ## [0.7.0] - 2026-09-26
 
