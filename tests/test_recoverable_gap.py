@@ -192,10 +192,16 @@ class TestFrozenSplits:
     def test_the_file_digest_is_recorded(self) -> None:
         import hashlib
 
-        assert (
-            load_frozen_splits(SPLITS).sha256
-            == hashlib.sha256(SPLITS.read_bytes()).hexdigest()
-        )
+        content = SPLITS.read_bytes().replace(b"\r\n", b"\n")
+        assert load_frozen_splits(SPLITS).sha256 == hashlib.sha256(content).hexdigest()
+
+    def test_the_digest_does_not_depend_on_line_endings(self, tmp_path: Path) -> None:
+        """A Windows checkout may hold the file with CRLF endings."""
+        content = SPLITS.read_bytes().replace(b"\r\n", b"\n")
+        unix, windows = tmp_path / "unix.json", tmp_path / "windows.json"
+        unix.write_bytes(content)
+        windows.write_bytes(content.replace(b"\n", b"\r\n"))
+        assert load_frozen_splits(unix).sha256 == load_frozen_splits(windows).sha256
 
     def test_malformed_files_are_refused(self, tmp_path: Path) -> None:
         payload = json.loads(SPLITS.read_text(encoding="utf-8"))

@@ -2,3 +2,7 @@
 # content. Letting git rewrite their line endings on checkout would make those
 # digests verify or fail depending on the platform rather than on the content.
 artifacts/v03/*.json text eol=lf
+
+# The Phase 1 artifacts are read back and verified the same way: the frozen
+# household splits by their recorded digest, the published record by tests.
+artifacts/phase1/*.json text eol=lf

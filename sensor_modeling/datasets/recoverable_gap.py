@@ -228,7 +228,10 @@ class FrozenSplits:
     homes
         Each household's recording file name and SHA-256.
     sha256
-        SHA-256 of the file's bytes, recorded as input provenance.
+        SHA-256 of the file with its line endings normalised to LF, recorded
+        as input provenance. Git may rewrite line endings on checkout, and
+        the digest must identify the content wherever the repository was
+        cloned, not the platform.
     """
 
     folds: tuple[HouseholdSplit, ...]
@@ -258,7 +261,8 @@ def load_frozen_splits(path: Path) -> FrozenSplits:
     named = {home for fold in folds for home in fold.households}
     if named != set(homes):
         raise ValueError("the folds and the listed homes name different households")
-    return FrozenSplits(folds, homes, hashlib.sha256(raw).hexdigest())
+    content = raw.replace(b"\r\n", b"\n")
+    return FrozenSplits(folds, homes, hashlib.sha256(content).hexdigest())
 
 
 @dataclass(frozen=True)
