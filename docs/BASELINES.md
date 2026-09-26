@@ -55,7 +55,7 @@ tuned, and no baseline reads the development rows.
 | --- | --- |
 | `state_frequency` | add-one smoothing |
 | `persistence` | inner `logistic` with the settings below |
-| `logistic` | `C = 1.0`, L-BFGS, `max_iter = 1000`, features standardised on training rows, hour one-hot encoded, add-one probability for states without training rows |
+| `logistic` | `C = 1.0`, L-BFGS, `max_iter = 1000`, features standardised on training rows, hour one-hot encoded, add-one probability for states without training rows. `hour_encoding="cyclic"` offers the [cyclic hour](INFORMATION_SETS.md#time-of-day) instead; the suite keeps one-hot |
 | `tree` | `max_depth = 6`, `min_samples_leaf = 20`, hour as an ordinal column, add-one smoothed leaves |
 
 `logistic`, `tree` and the inner model of `persistence` take the run's seed as

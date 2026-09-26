@@ -72,6 +72,12 @@ from .rates import (
     measure_event_rates,
     pooled_rate_report,
 )
+from .time_features import (
+    cyclic_hour_columns,
+    cyclic_hour_features,
+    local_hour,
+    peak_hour,
+)
 
 __all__ = [
     "ActivityInterval",
@@ -123,4 +129,8 @@ __all__ = [
     "casas_sensor_specs",
     "read_casas",
     "truth_series",
+    "cyclic_hour_columns",
+    "cyclic_hour_features",
+    "local_hour",
+    "peak_hour",
 ]
