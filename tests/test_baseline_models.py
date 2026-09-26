@@ -341,16 +341,16 @@ class TestMissingFeatures:
         silent = rows(np.array([[0.0, 0.0, 3.0, 0.0, 0.0]]))
         absent = rows(np.array([[np.nan, 0.0, 3.0, 0.0, 0.0]]))
         assert not np.array_equal(
-            encode_rows(silent, one_hot_hour=True),
-            encode_rows(absent, one_hot_hour=True),
+            encode_rows(silent, hour="one-hot"),
+            encode_rows(absent, hour="one-hot"),
         )
 
     def test_hour_is_one_hot_for_the_linear_model_and_ordinal_for_the_tree(
         self,
     ) -> None:
         sample = rows(np.array([[1.0, 2.0, 23.0, 0.0, 0.0]]))
-        one_hot = encode_rows(sample, one_hot_hour=True)
-        ordinal = encode_rows(sample, one_hot_hour=False)
+        one_hot = encode_rows(sample, hour="one-hot")
+        ordinal = encode_rows(sample, hour="ordinal")
         assert one_hot.shape == (1, 4 * 2 + 24) and one_hot[0, 4 + 23] == 1.0
         assert ordinal.shape == (1, 4 * 2 + 1) and ordinal[0, 4] == 23.0
 

@@ -23,7 +23,8 @@ For a prediction at moment ``t`` in one household:
   value.
 - **Time of day** is the local wall-clock hour of ``t``, the quantity the
   optional circadian prior of :class:`~sensor_modeling.states.StateOntology`
-  conditions on.
+  conditions on. Its definition, daylight-saving behaviour and encodings are
+  in :mod:`~sensor_modeling.datasets.time_features`.
 - **Recent history** is the same per-channel count in each of the
   ``history_steps`` preceding windows ``(t - (j + 1) step, t - j step]``.
 
@@ -64,6 +65,7 @@ import numpy as np
 from ..observations import Modality, ObservationKind, SensorRegistry, require_aware
 from .casas import CasasRecording
 from .casas_hh import HH_LOCATIONS
+from .time_features import local_hour
 
 
 class InformationComponent(str, Enum):
@@ -457,7 +459,7 @@ def build_feature_table(
     for row, moment in enumerate(local):
         for col, source in enumerate(layout):
             if source.channel is None:
-                values[row, col] = moment.hour
+                values[row, col] = local_hour(moment, zone)
                 continue
             stamps = streams.get(source.channel)
             end = moment - step * source.lag

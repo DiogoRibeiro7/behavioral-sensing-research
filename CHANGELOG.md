@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added a cyclic time-of-day representation for matched-information experiments, in `sensor_modeling.datasets.time_features`:
+  - `local_hour` defines the local wall-clock hour once, for the feature builder, with the same reading as the circadian prior;
+  - `cyclic_hour_features` places each hour's midpoint on the 24-hour circle with 1 to 11 sine-cosine harmonics, so 23:00 and 00:00 are neighbours;
+  - `peak_hour` reads a fitted daily cycle's peak;
+  - `LogisticBaseline(hour_encoding="cyclic", harmonics=K)` uses the encoding. The default stays one-hot, and the baseline suite is unchanged.
+
+  It re-encodes the existing hour, so it adds no information and stays within the same information set. Daylight-saving behaviour is documented and tested. Day of week was evaluated on the development homes and not added: whole-day state shares barely differ between weekdays and weekends, and the one visible effect is a morning-only weekend lie-in, which an additive term cannot represent. The production filter and its priors are unchanged.
 - Experiment records now follow a versioned, validated schema, 1.1, documented in `docs/EXPERIMENT_ARTIFACTS.md`. `ExperimentRecord` gains typed fields for input provenance (`InputArtifact`, identified by SHA-256), household split, information set, preprocessing, models and their hyperparameters (`ModelRecord`), household-level metrics, quotable intervals (`ReportedInterval`) and simulation MCSE. `write()` validates before writing; `load_record()` and `ExperimentRecord.load()` validate on reading; `validate_record()` reports every problem at once through `ArtifactError`. Files are strict, deterministic JSON: sorted keys, LF endings, the time and environment fixed when the record is created, non-finite numbers written as `null`, and unknown objects refused. Schema 1.0 files are migrated on load with their results unchanged; a newer or foreign version is refused.
 
 ### Changed
