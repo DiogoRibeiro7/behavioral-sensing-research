@@ -206,8 +206,25 @@ A hierarchical periodic state prior is implemented; see
 `docs/PERIODIC_STATE_PRIOR.md`. It has a Fourier basis on the local hour, a
 population effect, and household deviations shrunk toward it. It enters the
 generative model through the existing circadian term. It lets the generative
-model take part in the matched `I1` and `I3` comparisons. Its evaluation is
-still to be run.
+model take part in the matched `I1` and `I3` comparisons.
+
+Its pre-specified development-panel evaluation is in
+`docs/PHASE3_TIME_PRIOR.md`. The measured conclusions, all on the development
+panel, which earlier work has inspected, and none a held-out claim:
+
+- **The hour.** It is worth +0.131 [+0.120, +0.142] household balanced
+  accuracy to the generative model, in all 20 homes: pre-specified success.
+  Against the original model the gain is +0.140.
+- **Where the gain comes from.** It is almost entirely `away`: median recall
+  rises from 0.006 to 0.824. Rare states do not meaningfully change.
+- **The diagnostic at `I1`.** The generative model with the hour is within
+  +0.006 [−0.022, +0.030] of the diagnostic, but its probabilities remain
+  poor: median log loss is 2.96, against 1.51 with no information.
+- **Recent history.** It adds nothing (+0.002). At `I3` the diagnostic still
+  leads by +0.079, so the history part of the gap is unchanged.
+- **Household adaptation.** On a 7-day window it improves log loss and
+  calibration. Its balanced-accuracy gain (+0.011) is below the declared
+  minimal difference: pre-specified inconclusive.
 
 ### 3.2 Explicit recent-history state
 
