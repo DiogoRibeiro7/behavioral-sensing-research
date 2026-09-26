@@ -202,6 +202,13 @@ and household-adaptable rather than hard-coding one global circadian schedule.
 Candidate approaches include hierarchical periodic priors and partial pooling
 across homes.
 
+A hierarchical periodic state prior is implemented; see
+`docs/PERIODIC_STATE_PRIOR.md`. It has a Fourier basis on the local hour, a
+population effect, and household deviations shrunk toward it. It enters the
+generative model through the existing circadian term. It lets the generative
+model take part in the matched `I1` and `I3` comparisons. Its evaluation is
+still to be run.
+
 ### 3.2 Explicit recent-history state
 
 Represent recent event history directly rather than relying on the current
