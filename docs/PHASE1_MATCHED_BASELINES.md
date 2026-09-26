@@ -101,7 +101,10 @@ score shows the same ordering without the instability.
 - **The filter is not in this comparison.** The generative filter is recursive
   and cannot be restricted to a declared information set, so the formulation
   part of the Phase 1 decomposition is still to be measured. Its published
-  development median of 0.420 is not matched to any row above.
+  development median of 0.420 is not matched to any row above. The
+  [recoverable-information gap](PHASE1_RECOVERABLE_GAP.md) run measures that
+  formulation part. It restricts the filter's generative model to the sets it
+  can consume.
 
 ## Reproducing it
 

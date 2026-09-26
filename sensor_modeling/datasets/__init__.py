@@ -17,6 +17,7 @@ recording and under what terms.
 
 from .baseline_models import (
     Baseline,
+    GradientBoostingBaseline,
     LogisticBaseline,
     PersistenceBaseline,
     StateFrequencyBaseline,
@@ -82,6 +83,7 @@ from .time_features import (
 __all__ = [
     "ActivityInterval",
     "Baseline",
+    "GradientBoostingBaseline",
     "LogisticBaseline",
     "PersistenceBaseline",
     "StateFrequencyBaseline",

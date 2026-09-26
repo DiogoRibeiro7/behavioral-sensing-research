@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added the Phase 1 recoverable-information-gap experiment, which separates what added information is worth to a fixed model from what a formulation is worth on fixed information. The protocol and design are in `docs/PHASE1_RECOVERABLE_GAP.md`.
+  - `sensor_modeling.datasets.recoverable_gap` runs the four nested sets under frozen folds, with every setting fixed and no household used for tuning. It reports household-level metrics, per-state recall and calibration summaries with bootstrap intervals, and paired information gains, formulation gaps, interactions and comparisons with the production filter. The result is one experiment record. `gap_summary.render_summary` generates a Markdown summary from the written record alone.
+  - `sensor_modeling.datasets.restricted_filter` restricts the generative filter's model to a declared set: its own stationary prior, transitions and emission models, fed only the set's windows. A test shows it equals the production `MultimodalBayesFilter` fed those windows. Sets with time of day are recorded as unsupported, because the current generative model has no time-of-day input. The production filter is scored as an unmatched reference.
+  - `GradientBoostingBaseline` is the supervised diagnostic: gradient-boosted trees with fixed settings, kept out of `baseline_suite`.
+  - `artifacts/phase1/household_splits.json` freezes the two Phase 1 folds, with each home's recording digest. `scripts/run_phase1_recoverable_gap.py` runs the experiment on the development panel.
+  - The first run is published in `artifacts/phase1/phase1-recoverable-information-gap.json` and summarised in the documentation. It is exploratory, on the 20 development homes.
+    - Given the same current and three previous windows, the diagnostic leads the generative model by +0.116 household balanced accuracy, in all 20 homes.
+    - The generative model gains only +0.021 from that history; the diagnostic gains +0.088.
+    - Information gains and formulation gaps interact, so the observed gap has no unique additive split.
+
+  Inference, abstention and the existing baselines are unchanged.
 - Added interpretable history summaries as an optional information component, `InformationComponent.HISTORY_SUMMARY`, for measuring how much longer history explains the gap between the filter and the diagnostic ceiling. Over each summary window, the component gives per-channel activation counts and room changes between active steps. Over the longest window, it gives each channel's quiet minutes and the rooms active in the most recent active step. The windows are `EvidenceResolution.summary_windows`, 60 and 180 minutes by default, chosen from measured bout durations and quiet spells on the development homes. Every summary is a function of whole-step per-channel counts, the evidence the filter receives, so none uses timing or order inside a step. Column names are stable, built by `summary_column` and read back by `parse_summary_column`. Missing, censored and silent history are distinguished, as documented in `docs/INFORMATION_SETS.md`. The four Phase 1 sets, their columns and their digests are unchanged, and no model or result is changed.
 - Added a cyclic time-of-day representation for matched-information experiments, in `sensor_modeling.datasets.time_features`:
   - `local_hour` defines the local wall-clock hour once, for the feature builder, with the same reading as the circadian prior;
