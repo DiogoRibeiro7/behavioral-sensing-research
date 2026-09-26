@@ -65,6 +65,11 @@ import numpy as np
 
 from ..fusion.defaults import default_emissions
 from ..fusion.emissions import EmissionModel, PoissonEventEmission
+from ..fusion.history import (
+    HistoryModel,
+    expected_log1p_poisson,
+    history_log_likelihood,
+)
 from ..observations import Observation, ObservationKind, SensorRegistry
 from ..online.pipeline import BehaviouralSensingPipeline, PipelineConfig, scoring_steps
 from ..states.ontology import BehaviouralState, StateOntology
@@ -106,19 +111,36 @@ PERIODIC_PRIOR_NEEDS_HOUR = (
 )
 
 
+#: Why the history state cannot be used in a set without enough lagged windows.
+HISTORY_NEEDS_LAGS = (
+    "the history state needs the k windows before the current one, which this "
+    "set does not declare"
+)
+
+
 def unsupported_reason(
-    information_set: InformationSet, *, periodic_prior: bool = False
+    information_set: InformationSet,
+    *,
+    periodic_prior: bool = False,
+    history_steps: int | None = None,
 ) -> str | None:
     """Why the generative model cannot consume *information_set*, or ``None``.
 
     With *periodic_prior*, the question is about the generative model with a
     :class:`~sensor_modeling.datasets.periodic_prior.PeriodicStatePrior`. It
     consumes the hour, so it is supported exactly where the set declares time
-    of day.
+    of day. With *history_steps*, it is about the model with a history state
+    over that many previous windows, which the set must declare as recent
+    history.
     """
     components = information_set.components
     if InformationComponent.CURRENT_EVIDENCE not in components:
         return "the generative model conditions on the current window by construction"
+    if history_steps is not None and (
+        InformationComponent.RECENT_HISTORY not in components
+        or information_set.resolution.history_steps < history_steps
+    ):
+        return HISTORY_NEEDS_LAGS
     has_hour = InformationComponent.TIME_OF_DAY in components
     if has_hour and not periodic_prior:
         return TIME_OF_DAY_UNSUPPORTED
@@ -148,15 +170,22 @@ class ChannelLikelihood:
     per_window
         Log-likelihood of a window with no activation, summed over the
         channel's sensors, one value per ontology state.
+    expected
+        The channel's expected activations in one step window, per state,
+        under the memoryless model: its sensors' rates times the step.
+    weight
+        The evidence weight its sensors share.
 
-    Both are defined up to a constant shared by every state, which a posterior
-    does not depend on.
+    ``per_activation`` and ``per_window`` are defined up to a constant shared
+    by every state, which a posterior does not depend on.
     """
 
     channel: EvidenceChannel
     sensors: tuple[str, ...]
     per_activation: np.ndarray
     per_window: np.ndarray
+    expected: np.ndarray
+    weight: float
 
 
 def _probe(
@@ -224,6 +253,8 @@ def channel_likelihoods(
         sensors = tuple(sorted(members[channel]))
         increments: list[np.ndarray] = []
         silence = np.zeros(ontology.size)
+        expected = np.zeros(ontology.size)
+        weights: set[float] = set()
         for sensor_id in sensors:
             emission = emissions.get(sensor_id)
             spec = registry.get(sensor_id)
@@ -244,13 +275,19 @@ def channel_likelihoods(
                 )
             increments.append(_centred(first))
             silence = silence + levels[0]
-        if any(not np.allclose(i, increments[0], atol=1e-9) for i in increments):
+            expected = (
+                expected + emission.rates_per_second(ontology) * step.total_seconds()
+            )
+            weights.add(emission.weight)
+        if len(weights) != 1 or any(
+            not np.allclose(i, increments[0], atol=1e-9) for i in increments
+        ):
             raise ValueError(
-                f"channel {channel.name!r} pools sensors with different rates, "
+                f"channel {channel.name!r} pools sensors with different rates or weights, "
                 "so its pooled count does not determine their likelihood"
             )
         terms[channel] = ChannelLikelihood(
-            channel, sensors, increments[0], _centred(silence)
+            channel, sensors, increments[0], _centred(silence), expected, weights.pop()
         )
     return terms, ignored
 
@@ -262,6 +299,7 @@ def restricted_posteriors(
     *,
     periodic_prior: PeriodicStatePrior | None = None,
     household: str | None = None,
+    history_model: HistoryModel | None = None,
 ) -> np.ndarray:
     """The generative model's posterior at each row, given only the row's windows.
 
@@ -283,6 +321,11 @@ def restricted_posteriors(
     household
         Whose deviation of *periodic_prior* to use. ``None``, or a household
         the prior has no deviation for, uses the population prior.
+    history_model
+        A history state for the current window. Its history is the row's
+        ``k`` lagged windows, so the set must declare them. An earlier
+        window's own history lies outside the set, so it is treated as
+        missing, and the history term applies to the current window only.
 
     Returns
     -------
@@ -295,13 +338,19 @@ def restricted_posteriors(
     """
     information_set = table.information_set
     reason = unsupported_reason(
-        information_set, periodic_prior=periodic_prior is not None
+        information_set,
+        periodic_prior=periodic_prior is not None,
+        history_steps=(
+            history_model.config.window_steps if history_model is not None else None
+        ),
     )
     if reason is not None:
         raise ValueError(f"information set {information_set.name!r}: {reason}")
     ontology = ontology or StateOntology()
     if ontology.circadian is not None:
         raise ValueError(TIME_OF_DAY_UNSUPPORTED)
+    if history_model is not None:
+        history_model.check(ontology)
     resolution = information_set.resolution
     instrumented = set(resolution.channels) - set(table.uninstrumented)
     if set(likelihoods) != instrumented:
@@ -341,10 +390,44 @@ def restricted_posteriors(
             loglik[seen] += (
                 np.outer(counts[seen], terms.per_activation) + terms.per_window
             )
+            if history_model is not None and lag == 0:
+                loglik += _history_terms(table, channel, terms, counts, history_model)
         loglik -= loglik.max(axis=1, keepdims=True)
         belief = belief * np.exp(loglik)
         belief /= belief.sum(axis=1, keepdims=True)
     return belief
+
+
+def _history_terms(
+    table: FeatureTable,
+    channel: EvidenceChannel,
+    terms: ChannelLikelihood,
+    now: np.ndarray,
+    model: HistoryModel,
+) -> np.ndarray:
+    """The history log-likelihood of the current window, per row and state.
+
+    Zero wherever the current window or any of its ``k`` history windows was
+    not observed.
+    """
+    window = model.config.window_steps
+    past = np.column_stack(
+        [
+            table.column(evidence_column(channel.name, lag))
+            for lag in range(1, window + 1)
+        ]
+    )
+    observed = ~np.isnan(now) & ~np.isnan(past).any(axis=1)
+    contribution = np.zeros((now.size, len(model.states)))
+    if not observed.any():
+        return contribution
+    betas = model.betas(channel.room)
+    reference = expected_log1p_poisson(window * terms.expected)
+    eta = np.outer(np.log1p(past[observed].sum(axis=1)), betas) - betas * reference
+    contribution[observed] = history_log_likelihood(
+        now[observed][:, None], terms.expected[None, :], eta, terms.weight
+    )
+    return contribution
 
 
 def filter_posteriors(
