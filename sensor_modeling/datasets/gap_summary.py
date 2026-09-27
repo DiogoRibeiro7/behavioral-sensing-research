@@ -53,6 +53,19 @@ def _difference(comparison: Mapping[str, Any]) -> str:
     )
 
 
+def inference_line(payload: Mapping[str, Any]) -> str:
+    """The inference regime a report's figures come from, as a bullet.
+
+    Every generated report carries it, so an online result and a smoothed one
+    are never read as the same kind of number. The parenthesis says whether the
+    writer declared the regime or it was attested when an older record was
+    migrated.
+    """
+    inference = payload["inference"]
+    how = str(inference["provenance"]).split(":", 1)[0]
+    return f"- Inference regime: {inference['label']} ({how})."
+
+
 def _table(header: Sequence[str], rows: Sequence[Sequence[str]]) -> list[str]:
     def row(cells: Sequence[str]) -> str:
         return "| " + " | ".join(cells) + " |"
@@ -147,6 +160,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
         f"`{str(environment.get('git_commit', 'unknown'))[:12]}`{dirty}. "
         f"Status: {results['status']}.",
         "",
+        inference_line(payload),
         f"- {len(results['households'])} households in "
         f"{len(configuration['folds'])} cross-fitted folds. Each is scored once, "
         "by models never fitted on it.",

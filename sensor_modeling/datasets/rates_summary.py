@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from statistics import mean
 from typing import Any
 
-from .gap_summary import _number, _table
+from .gap_summary import _number, _table, inference_line
 from .history_summary import _estimate, _homes, _level
 from .rates_experiment import CRITERIA, RESULT_SCHEMA
 
@@ -100,6 +100,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
         f"`{str(environment.get('git_commit', 'unknown'))[:12]}`{dirty}. "
         f"Status: {results['status']}.",
         "",
+        inference_line(payload),
         f"- {len(results['households'])} households in "
         f"{len(configuration['households']['folds'])} cross-fitted folds, each "
         "scored once by channel models fitted without it.",

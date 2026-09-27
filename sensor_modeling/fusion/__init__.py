@@ -32,9 +32,29 @@ from .history import (
     HistoryModel,
     PosteriorDecomposition,
 )
+from .regime import (
+    ONLINE,
+    EvidenceLeakageError,
+    InferenceMode,
+    InferenceRegime,
+    assert_respects_horizon,
+    check_evidence_access,
+    regime_beliefs,
+    require_online,
+    require_same_regime,
+)
 from .smoothing import smooth_beliefs, smooth_estimates
 
 __all__ = [
+    "ONLINE",
+    "EvidenceLeakageError",
+    "InferenceMode",
+    "InferenceRegime",
+    "assert_respects_horizon",
+    "check_evidence_access",
+    "regime_beliefs",
+    "require_online",
+    "require_same_regime",
     "smooth_beliefs",
     "smooth_estimates",
     "BernoulliEmission",

@@ -498,7 +498,8 @@ discriminative classifier can use lags because it is not recursive.
 
 So the third candidate is not reachable by giving the filter more past. Reached
 from the other side, through smoothing, it yields +0.014 -- again roughly a
-tenth of what the ablation attributed to it.
+tenth of what the ablation attributed to it. That is a smoothed gain, available
+five minutes late, not an online one.
 
 That repetition is itself the finding. Both principled mechanisms tried here,
 a circadian prior and a smoother, recover about a tenth of what a discriminative
@@ -512,14 +513,18 @@ Each addition was measured against the baseline on its own. Measured together on
 the same 11 held-out homes, with everything fitted on the training half, they do
 not combine.
 
-| Configuration | Balanced accuracy | Calibration error |
-| --- | --- | --- |
-| baseline | 0.449 | 0.312 |
-| fitted rates | 0.418 | **0.202** |
-| circadian prior | 0.460 | 0.296 |
-| smoothing, lag 1 | **0.463** | 0.327 |
-| rates + circadian | 0.434 | 0.299 |
-| **all three** | 0.435 | 0.327 |
+| Configuration | Inference regime | Balanced accuracy | Calibration error |
+| --- | --- | --- | --- |
+| baseline | online filter | 0.449 | 0.312 |
+| fitted rates | online filter | 0.418 | **0.202** |
+| circadian prior | online filter | 0.460 | 0.296 |
+| smoothing, lag 1 | fixed-lag smoother, lag 1 window (5 min) | **0.463** | 0.327 |
+| rates + circadian | online filter | 0.434 | 0.299 |
+| **all three** | fixed-lag smoother, lag 1 window (5 min) | 0.435 | 0.327 |
+
+The two smoothed rows read one window after each moment, so they are not online
+results. Their gains could not be had by a live system
+([inference regimes](INFERENCE_REGIMES.md)).
 
 **All three together is worse than any one of them alone.** It loses 0.028
 balanced accuracy against smoothing alone, and its calibration is worse than the

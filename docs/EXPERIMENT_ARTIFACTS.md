@@ -41,11 +41,12 @@ again = ExperimentRecord.load(path)  # the typed record
 
 | Field | Contents | Required |
 | --- | --- | --- |
-| `schema_version` | `MAJOR.MINOR`; currently `1.1` | yes |
+| `schema_version` | `MAJOR.MINOR`; currently `1.2` | yes |
 | `experiment` | experiment identifier | yes |
 | `recorded_at` | execution timestamp, ISO 8601 with time zone, fixed when the record is created | yes |
 | `environment` | `git_commit`, `git_dirty`, `sensor_modeling` (the package version), `python`, and library versions including NumPy, SciPy, pandas and scikit-learn | yes |
 | `data_source` | dataset identifier, such as `casas-hh` or `simulator` | yes |
+| `inference` | the inference regime every estimate comes from: `mode` (`online_filter` or `fixed_lag_smoother`), `lag_steps`, `step_seconds`, `label` and `provenance`; see below | 1.2 |
 | `inputs` | input files, each with `name`, `sha256`, `role` and `source` | 1.1 |
 | `split` | household split, with its SHA-256 | 1.1 |
 | `information_set` | information-set declaration, with its SHA-256 | 1.1 |
@@ -65,6 +66,21 @@ again = ExperimentRecord.load(path)  # the typed record
 
 Fields marked 1.1 appear in every record written at 1.1. A 1.0 file is given
 their empty defaults when it is loaded.
+
+### The inference regime
+
+`inference` says which [inference regime](INFERENCE_REGIMES.md) every estimate
+in the record comes from.
+
+- **Mode and lag.** The mode is the online filter or a fixed-lag smoother. A
+  smoother also records its lag in windows and the window width, so its
+  reporting delay is stated in time.
+- **Label.** The label is derived from the mode and lag. A record whose label
+  does not describe its regime is refused.
+- **Required.** `ExperimentRecord` takes `inference` as a required keyword, so
+  no experiment can leave it to a default.
+- **Provenance.** It says how the regime is known: declared by the writer, or
+  attested when an older record was migrated.
 
 An interval's `unit` says what was resampled: `household` for real homes, or
 `seed` for simulated trajectories. It is never timestamps; see
@@ -97,16 +113,26 @@ The version is `MAJOR.MINOR`.
 - **Newer files.** A reader refuses a newer minor, and any other major, rather
   than guessing at fields it does not know.
 
-| File version | This reader (1.1) |
+| File version | This reader (1.2) |
 | --- | --- |
-| `1.0` | migrated on load: new fields given defaults, non-finite numbers made `null`, `migrated_from: "1.0"` added, content otherwise unchanged |
-| `1.1` | read as written |
-| `1.2` or later | refused: written by a newer version of the package |
+| `1.0` | migrated on load: new fields given defaults, non-finite numbers made `null`, then as `1.1` with `migrated_from: "1.0"`, content otherwise unchanged |
+| `1.1` | migrated on load: `inference` added as the online filter, attested on migration, and `migrated_from: "1.1"`, content otherwise unchanged |
+| `1.2` | read as written |
+| `1.3` or later | refused: written by a newer version of the package |
 | `0.x`, `2.x` | refused: another major version |
 
 Files written at 1.0 before `data_source` existed are migrated to `simulator`
 if they carry the simulator note, which every such simulator record did, and
 to `unknown` otherwise.
+
+1.0 and 1.1 had no inference regime. Every writer of them in this repository ran
+online inference: the online pipeline, or matched information sets whose
+windows close at or before each prediction moment. The repository's history
+shows that no experiment code ever called the fixed-lag smoother. A migrated
+record therefore says `online_filter`. Its provenance states that this was
+attested on migration, not declared by the writer. The published Phase 1 and
+Phase 3 records are 1.1 files and are migrated this way when read. The files
+themselves are not changed.
 
 The writer always writes the current version. The migration was checked on
 real 1.0 files: the n=100 ablation and attribution studies, and all nine

@@ -28,6 +28,7 @@ from sensor_modeling.evaluation.provenance import (
     load_record,
     validate_record,
 )
+from sensor_modeling.fusion.regime import ONLINE
 
 DIGEST = "a" * 64
 
@@ -37,6 +38,7 @@ def full_record(**overrides: Any) -> ExperimentRecord:
     fields: dict[str, Any] = {
         "experiment": "unit",
         "configuration": {"step_minutes": 5, "metrics": ["balanced_accuracy"]},
+        "inference": ONLINE,
         "seeds": [0, 1],
         "results": {"summary": {"balanced_accuracy": {"median": 0.5}}},
         "data_source": "casas-hh",
@@ -135,7 +137,7 @@ class TestDeterminism:
         assert b"\r\n" not in raw and raw.endswith(b"}\n")
 
     def test_time_and_environment_are_fixed_when_the_record_is_made(self) -> None:
-        record = ExperimentRecord(experiment="x", configuration={})
+        record = ExperimentRecord(experiment="x", configuration={}, inference=ONLINE)
         assert record.to_dict()["recorded_at"] == record.to_dict()["recorded_at"]
         assert record.environment["git_commit"]
 
@@ -278,7 +280,7 @@ class TestValidation:
 
 class TestSchemaVersions:
     def test_the_writer_emits_the_current_version(self) -> None:
-        assert full_record().to_dict()["schema_version"] == SCHEMA_VERSION == "1.1"
+        assert full_record().to_dict()["schema_version"] == SCHEMA_VERSION == "1.2"
 
     def test_a_1_0_record_is_migrated_not_rewritten(self, tmp_path: Path) -> None:
         path = tmp_path / "legacy.json"
@@ -305,7 +307,7 @@ class TestSchemaVersions:
     @pytest.mark.parametrize(
         ("version", "message"),
         [
-            ("1.2", "newer than 1.1"),
+            ("1.3", "newer than 1.2"),
             ("2.0", "reads major version 1 only"),
             ("0.9", "reads major version 1 only"),
             ("one", "not MAJOR.MINOR"),
@@ -326,5 +328,5 @@ class TestSchemaVersions:
             load_record(write_json(tmp_path / "none.json", data))
 
     def test_only_current_payloads_can_be_rebuilt_directly(self) -> None:
-        with pytest.raises(ArtifactError, match="expected '1.1'"):
+        with pytest.raises(ArtifactError, match="expected '1.2'"):
             ExperimentRecord.from_dict(payload(schema_version="1.0"))

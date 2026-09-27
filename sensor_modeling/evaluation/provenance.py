@@ -40,6 +40,8 @@ from typing import Any
 
 import numpy as np
 
+from ..fusion.regime import ONLINE, InferenceRegime
+
 logger = logging.getLogger(__name__)
 
 #: Default location for generated artefacts. Excluded from version control.
@@ -52,10 +54,25 @@ RESULTS_DIR = Path("results")
 #: existing field means and would need an explicit migration. A reader refuses
 #: any version newer than its own rather than guessing at fields it does not
 #: know. See ``docs/EXPERIMENT_ARTIFACTS.md``.
-SCHEMA_VERSION = "1.1"
+SCHEMA_VERSION = "1.2"
 
 #: Versions :func:`load_record` accepts, oldest first.
-READABLE_VERSIONS = ("1.0", "1.1")
+READABLE_VERSIONS = ("1.0", "1.1", "1.2")
+
+#: How a record written at 1.2 or later knows its inference regime.
+DECLARED_INFERENCE = "declared by the experiment that wrote the record"
+
+#: How a 1.0 or 1.1 record is given its inference regime when migrated.
+#:
+#: Those schemas had no inference field. Every writer of them in this
+#: repository ran causal inference, and the fixed-lag smoother was never called
+#: by any experiment code, which the repository's history shows.
+MIGRATED_INFERENCE = (
+    "attested on migration from schema {version}: every writer of 1.0 and 1.1 "
+    "records in this repository ran online inference, the online pipeline or "
+    "matched information sets whose windows close at or before each prediction "
+    "moment, and none applied the fixed-lag smoother"
+)
 
 #: Note carried by every record whose observations came from the simulator.
 SIMULATOR_NOTE = (
@@ -398,10 +415,19 @@ class ExperimentRecord:
         was already written, as :meth:`load` does.
     migrated_from
         The schema version the record was read from, when it was migrated.
+    inference
+        The inference regime every estimate in the record comes from: the
+        online filter, or a fixed-lag smoother and its lag. Required, and
+        keyword-only, so no experiment can leave it to a default.
+    inference_provenance
+        How the regime is known: declared by the writer, or attested when an
+        older record was migrated.
     """
 
     experiment: str
     configuration: Mapping[str, Any]
+    inference: InferenceRegime = field(kw_only=True)
+    inference_provenance: str = field(default=DECLARED_INFERENCE, kw_only=True)
     seeds: Sequence[int] = field(default_factory=list)
     results: Mapping[str, Any] = field(default_factory=dict)
     sensor_subset: Sequence[str] | None = None
@@ -429,6 +455,10 @@ class ExperimentRecord:
             raise ValueError("an experiment record needs a name")
         if not str(self.data_source).strip():
             raise ValueError("an experiment record needs a data source")
+        if not isinstance(self.inference, InferenceRegime):
+            raise TypeError("inference must be an InferenceRegime")
+        if not str(self.inference_provenance).strip():
+            raise ValueError("an inference regime needs its provenance")
         notes = list(self.notes)
         if self.data_source == "simulator" and SIMULATOR_NOTE not in notes:
             notes.append(SIMULATOR_NOTE)
@@ -447,6 +477,10 @@ class ExperimentRecord:
             "recorded_at": self.recorded_at,
             "environment": dict(self.environment),
             "data_source": self.data_source,
+            "inference": {
+                **self.inference.to_dict(),
+                "provenance": self.inference_provenance,
+            },
             "inputs": [item.to_dict() for item in self.inputs],
             "split": dict(self.split) if self.split is not None else None,
             "information_set": (
@@ -509,6 +543,8 @@ class ExperimentRecord:
         return cls(
             experiment=payload["experiment"],
             configuration=payload["configuration"],
+            inference=InferenceRegime.from_dict(payload["inference"]),
+            inference_provenance=payload["inference"]["provenance"],
             seeds=payload["seeds"],
             results=payload["results"],
             sensor_subset=payload["sensor_subset"],
@@ -604,6 +640,11 @@ _ADDED_IN_1_1: Mapping[str, Any] = {
     "intervals": [],
     "mcse": {},
 }
+
+#: Fields added in 1.2. They have no default: a migration must supply them.
+_ADDED_IN_1_2: Mapping[str, type] = {"inference": dict}
+
+_INFERENCE_KEYS = {"mode", "lag_steps", "step_seconds", "label", "provenance"}
 
 _ENVIRONMENT_KEYS = ("git_commit", "git_dirty", "python", "sensor_modeling")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -729,6 +770,20 @@ def _check_sections(payload: Mapping[str, Any]) -> list[str]:
         _is_number(v) and v >= 0 for v in payload["mcse"].values()
     ):
         problems.append("mcse must map names to non-negative numbers")
+
+    inference = payload["inference"]
+    if set(inference) != _INFERENCE_KEYS:
+        problems.append(f"inference must have exactly {sorted(_INFERENCE_KEYS)}")
+    else:
+        try:
+            InferenceRegime.from_dict(inference)
+        except (ValueError, TypeError, KeyError) as exc:
+            problems.append(f"inference is not a valid regime: {exc}")
+        if (
+            not isinstance(inference["provenance"], str)
+            or not inference["provenance"].strip()
+        ):
+            problems.append("inference.provenance must be non-empty text")
     return problems
 
 
@@ -745,10 +800,12 @@ def validate_record(payload: Mapping[str, Any]) -> None:
     # Structural problems stop the field-level checks, which rely on every
     # field being present with the right type. Everything else is collected.
     structural: list[str] = []
-    missing = sorted((set(_REQUIRED) | set(_ADDED_IN_1_1)) - set(payload))
+    fields_ = set(_REQUIRED) | set(_ADDED_IN_1_1) | set(_ADDED_IN_1_2)
+    missing = sorted(fields_ - set(payload))
     structural += [f"missing required field {key!r}" for key in missing]
     expected_types: dict[str, type | tuple[type, ...]] = {
         **_REQUIRED,
+        **_ADDED_IN_1_2,
         "inputs": list,
         "models": list,
         "intervals": list,
@@ -768,7 +825,7 @@ def validate_record(payload: Mapping[str, Any]) -> None:
             f"schema_version is {payload.get('schema_version')!r}, expected "
             f"{SCHEMA_VERSION!r}; load older files with load_record"
         )
-    known = set(_REQUIRED) | set(_ADDED_IN_1_1) | {"migrated_from"}
+    known = fields_ | {"migrated_from"}
     problems += [f"unknown field {key!r}" for key in sorted(set(payload) - known)]
     problems += _non_finite(dict(payload), "$")
     if not structural:
@@ -783,7 +840,8 @@ def _migrate_1_0(payload: dict[str, Any]) -> dict[str, Any]:
     1.0 had no ``data_source`` before 0.6.0. A record without one is marked
     ``"simulator"`` when it carries the simulator note, which every 1.0
     simulator record did, and ``"unknown"`` otherwise. The 1.0 writer allowed
-    NaN and infinity, so non-finite numbers become ``None``.
+    NaN and infinity, so non-finite numbers become ``None``. The record then
+    continues through the 1.1 migration.
     """
     migrated = json_safe(payload)
     if "data_source" not in migrated:
@@ -792,10 +850,26 @@ def _migrate_1_0(payload: dict[str, Any]) -> dict[str, Any]:
         migrated["data_source"] = "simulator" if simulated else "unknown"
     for key, default in _ADDED_IN_1_1.items():
         migrated.setdefault(key, json.loads(json.dumps(default)))
+    return _migrate_1_1(migrated)
+
+
+def _migrate_1_1(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.1 record to the current version without changing its content.
+
+    1.1 had no inference regime. Every 1.0 and 1.1 writer in this repository
+    ran online inference, so the migrated record says so, with a provenance
+    that states it was attested on migration rather than declared by the
+    writer.
+    """
+    migrated = dict(payload)
+    version = str(migrated["schema_version"])
+    migrated["inference"] = {
+        **ONLINE.to_dict(),
+        "provenance": MIGRATED_INFERENCE.format(version=version),
+    }
     migrated["schema_version"] = SCHEMA_VERSION
-    migrated["migrated_from"] = "1.0"
-    result: dict[str, Any] = migrated
-    return result
+    migrated["migrated_from"] = version
+    return migrated
 
 
 def _parse_version(value: Any) -> tuple[int, int]:
@@ -854,6 +928,8 @@ def load_record(path: Path) -> dict[str, Any]:
             f"artefact at {path} contains {sorted(set(constants))}, which strict "
             "JSON cannot hold"
         )
+    elif version == "1.1":
+        payload = _migrate_1_1(payload)
     validate_record(payload)
     loaded: dict[str, Any] = payload
     return loaded
