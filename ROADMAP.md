@@ -377,13 +377,24 @@ A gain obtained with future evidence must never be reported as an online gain.
 The rule is enforced in code; see `docs/INFERENCE_REGIMES.md`.
 
 - **Every record states its regime.** Schema 1.2 records the regime of every
-  experiment: online filter, or fixed-lag smoother with its lag.
+  experiment: online filter, or fixed-lag smoother with its lag. Schema 1.3
+  adds whether it is causal, its reporting delay, and the prediction and
+  latest-evidence timestamps of the scored estimates. A record whose estimates
+  read past its regime is refused, so smoothed estimates cannot be recorded as
+  online.
 - **Every report states it.** Every generated report labels its regime.
-- **The matched evaluation is online.** It refuses smoothing regimes and
-  models, and results from different regimes are never pooled or compared.
+- **Reported online estimates are never revised.** Their beliefs are
+  read-only. Streaming tests show that an online estimate never changes as
+  later evidence arrives. A smoothed estimate changes only while its permitted
+  evidence arrives, and lag zero reproduces online filtering exactly.
+- **Regimes are never mixed silently.** The matched evaluation refuses
+  smoothing regimes and models. Results labelled with their regime can be
+  compared or pooled only within one regime. A smoother against the online
+  filter must be requested as a smoothing gain, and it is labelled with its
+  delay.
 - **Existing results.** Every published result is online, attested on
-  migration. The earlier smoothing measurements in `docs/real_data.md` are now
-  labelled as smoothed.
+  migration, and lists no prediction timestamps. The earlier smoothing
+  measurements in `docs/real_data.md` are labelled as smoothed.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
