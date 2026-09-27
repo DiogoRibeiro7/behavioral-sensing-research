@@ -305,6 +305,29 @@ inspected, and none a held-out claim:
 - **Implication.** A correlated-silence model would address the smaller of the
   two measured sources of overstated silence evidence.
 
+That result routes the work to fitting the channels' marginal observation
+models, keeping them independent: `docs/PHASE3_FITTED_RATES.md`. It uses a
+hurdle model per channel and state: a silence probability, and a
+zero-truncated Poisson rate for active windows, fitted on training households.
+The measured conclusions, on the development panel and none a held-out claim:
+
+- **Pre-specified success in both primaries.**
+  - With current windows, calibration error improves by 0.058, and balanced
+    accuracy is unchanged.
+  - In the filter's recursion over every window, calibration error improves
+    by 0.119 and balanced accuracy by 0.039.
+- **Probabilities.** With the Phase 3.1 time prior, median log loss is 1.448.
+  It is the first generative model below the no-information 1.510.
+- **The mechanism.**
+  - Silence-evidence inflation falls from 3.38 to 1.62, close to the
+    dependence-only 1.55.
+  - Overconfidence per quiet hour falls from 0.175 to 0.023.
+- **The cost.** `home_active` recall falls by 0.23. Active-window counts are
+  over-dispersed, which the zero-truncated Poisson does not model.
+- **Silence needs its own parameter.** A Poisson fitted to the mean count
+  improves balanced accuracy, but not calibration, and it makes silence
+  inflation four times worse.
+
 ### 3.4 Household adaptation
 
 Separate population-level parameters from household-specific effects. Evaluate
