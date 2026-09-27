@@ -283,6 +283,28 @@ streams.
 
 This is intended to address over-concentration without arbitrary posterior caps.
 
+Its pre-specified diagnostic is in `docs/PHASE3_CORRELATED_SILENCE.md`. It
+changes no inference. By its declared rule the hypothesis is **weakened**. The
+measured conclusions, all on the development panel, which earlier work has
+inspected, and none a held-out claim:
+
+- **Dependence is real and material.** In the quiet states, the pairwise log
+  odds ratio of silence is +4.43, and counts correlate at +0.30. Independence
+  overstates the spread of joint-silence evidence across states by 1.55
+  [1.38, 1.75], in 19 of 20 homes.
+- **The declared rates matter more.** The filter's own silence terms overstate
+  that spread by 3.38. On the log scale, dependence accounts for 0.435 of it
+  and the declared rates for 0.784.
+- **Overconfidence does not grow with the number of silent channels.** Within
+  the predicted state it falls by 0.059 per silent channel, in 16 of 20 homes.
+  The model is most overconfident in windows with activity.
+- **Overconfidence grows along quiet runs.** It rises by 0.175 per hour of
+  consecutive fully silent windows, in 18 of 20 homes. After one silent hour
+  the model reports `sleeping` in 19 of 20 away runs and all 18
+  `home_inactive` runs.
+- **Implication.** A correlated-silence model would address the smaller of the
+  two measured sources of overstated silence evidence.
+
 ### 3.4 Household adaptation
 
 Separate population-level parameters from household-specific effects. Evaluate
