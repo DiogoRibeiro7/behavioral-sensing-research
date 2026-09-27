@@ -60,6 +60,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from typing import Protocol
 
 import numpy as np
 
@@ -187,6 +188,26 @@ class ChannelLikelihood:
     expected: np.ndarray
     weight: float
 
+    def loglik(self, counts: np.ndarray) -> np.ndarray:
+        """``(rows, states)`` log-likelihood of each row's pooled count."""
+        values: np.ndarray = np.outer(counts, self.per_activation) + self.per_window
+        return values
+
+
+class ChannelModel(Protocol):
+    """Any per-channel observation model the restricted recursion can consume.
+
+    ``loglik`` returns the ``(rows, states)`` log-likelihood of each row's
+    pooled count on the channel, up to a constant shared by every state.
+    """
+
+    @property
+    def channel(self) -> EvidenceChannel:
+        """The evidence channel the model describes."""
+
+    def loglik(self, counts: np.ndarray) -> np.ndarray:
+        """Log-likelihood of each count, one row per count and one column per state."""
+
 
 def _probe(
     emission: EmissionModel,
@@ -294,7 +315,7 @@ def channel_likelihoods(
 
 def restricted_posteriors(
     table: FeatureTable,
-    likelihoods: Mapping[EvidenceChannel, ChannelLikelihood],
+    likelihoods: Mapping[EvidenceChannel, ChannelModel],
     ontology: StateOntology | None = None,
     *,
     periodic_prior: PeriodicStatePrior | None = None,
@@ -308,7 +329,8 @@ def restricted_posteriors(
     table
         One household's features under a supported information set.
     likelihoods
-        :func:`channel_likelihoods` for the same household.
+        :func:`channel_likelihoods` for the same household, or any other
+        :class:`ChannelModel` per instrumented channel, such as a fitted one.
     ontology
         The time-homogeneous base ontology. Defaults to the filter's default.
     periodic_prior
@@ -351,6 +373,11 @@ def restricted_posteriors(
         raise ValueError(TIME_OF_DAY_UNSUPPORTED)
     if history_model is not None:
         history_model.check(ontology)
+        if not all(isinstance(t, ChannelLikelihood) for t in likelihoods.values()):
+            raise ValueError(
+                "the history state conditions the declared Poisson rates, so it "
+                "needs channel_likelihoods terms"
+            )
     resolution = information_set.resolution
     instrumented = set(resolution.channels) - set(table.uninstrumented)
     if set(likelihoods) != instrumented:
@@ -387,10 +414,9 @@ def restricted_posteriors(
         for channel, terms in likelihoods.items():
             counts = table.column(evidence_column(channel.name, lag))
             seen = ~np.isnan(counts)
-            loglik[seen] += (
-                np.outer(counts[seen], terms.per_activation) + terms.per_window
-            )
+            loglik[seen] += terms.loglik(counts[seen])
             if history_model is not None and lag == 0:
+                assert isinstance(terms, ChannelLikelihood)  # checked above
                 loglik += _history_terms(table, channel, terms, counts, history_model)
         loglik -= loglik.max(axis=1, keepdims=True)
         belief = belief * np.exp(loglik)

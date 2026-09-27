@@ -51,6 +51,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Silences are strongly dependent given the state. Independence overstates the spread of joint-silence evidence by 1.55 [1.38, 1.75], in 19 of 20 homes: material.
     - The filter's declared silence terms overstate it by 3.38, and the declared rates account for more of that than dependence.
     - Overconfidence falls by 0.059 per additional silent channel, in 16 of 20 homes, so the pre-specified consequence is not observed. Overconfidence rises by 0.175 per hour along quiet runs, and after one silent hour the model reports `sleeping` in 37 of 38 away and `home_inactive` runs.
+- Added fitted observation models for the generative filter's evidence channels, `sensor_modeling.datasets.channel_models`, and their pre-specified experiment, `sensor_modeling.datasets.rates_experiment`. The frozen protocol, `artifacts/phase3/fitted_rates_protocol.json`, was committed before any household was scored. This is the route the Phase 3.3 diagnostic's 'weakened' result selects; the two-stage count-and-allocation model is not built. The likelihood and protocol are in `docs/PHASE3_FITTED_RATES.md`.
+  - **The hurdle model.** Each channel gets a silence probability and a zero-truncated Poisson rate for active windows, per state. When the silence probability equals the Poisson's, it reduces exactly to a Poisson. `HurdleChannel.decompose` splits a window's log-likelihood into its silence and activity parts.
+  - **The fitted Poisson.** The declared family with fitted means, kept to test whether silence needs its own parameter.
+  - **Fitting.** Per fold, per channel and state, from the training households' labelled windows only. Each parameter is shrunk toward the declared model with 12 pseudo-windows. There is no household adaptation.
+  - **The declared model is unchanged.** It stays available and is selected by family. `restricted_posteriors` now accepts any channel model with a `loglik` method; its results for the declared terms are identical.
+  - **Estimands.** Fitted against declared channels on identical information, in `I0` to `I3` and in the filter's recursion over every window. There are mechanism checks on silence-evidence inflation and quiet-run accumulation. Calibration error is the primary outcome, and balanced accuracy is a guard, with a declared trade-off verdict.
+  - **Result.** The run is published in `artifacts/phase3/phase3-fitted-rates.json`, made from the protocol commit on a clean tree. It is on the 20 development homes, so it is not a held-out claim.
+    - Fitted hurdle channels are a pre-specified success in both primaries. With current windows, calibration error improves by 0.058 [0.030, 0.087] and log loss by 1.645, and balanced accuracy is unchanged. In the recursion, calibration error improves by 0.119 [0.087, 0.153] and balanced accuracy by 0.039 [0.015, 0.062].
+    - With the time prior, median log loss is 1.448: the first generative model below the no-information 1.510.
+    - Silence-evidence inflation falls from 3.38 to 1.62, near the dependence-only 1.55. Overconfidence per quiet hour falls from 0.175 to 0.023.
+    - `home_active` recall falls by 0.23. A Poisson fitted to the mean count improves balanced accuracy but not calibration, and it makes silence inflation four times worse.
 
 ## [0.7.0] - 2026-09-26
 
