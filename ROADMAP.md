@@ -350,7 +350,24 @@ A partial-pooling framework is implemented; see `docs/PARTIAL_POOLING.md`.
 - **First application.** It is applied to the fitted hurdle channel
   parameters, whose silence differs widely between homes. The periodic state
   prior already has its own shrunk household deviation.
-- **Evaluation.** Its evaluation is still to be pre-specified and run.
+- **Evaluation.** Its pre-specified evaluation is in
+  `docs/PHASE3_PARTIAL_POOLING.md`. The measured conclusions follow, all on the
+  development panel, which earlier work has inspected, and none a held-out
+  claim.
+
+- **Pooling helps with current windows.** After a week of household data,
+  pooling toward the population improves log loss by 0.080 [0.039, 0.118], in
+  17 of 20 homes. Balanced accuracy and calibration are unchanged. This is a
+  pre-specified success.
+- **In the recursion it is inconclusive.** One home improves greatly, and
+  without it the mean change is −0.032. Four homes worsen by more than 0.4.
+- **Unconstrained per-home fitting overfits small homes.** After one day it is
+  worse than pooling by 0.175, and worse than the population alone by 0.161.
+  After a week it is close to pooling.
+- **The strength.** Selected on training homes only, it was the smallest in
+  the grid, 24 windows, in both folds. With it, pooling improves log loss by
+  0.132. The declared 288 pools more than a week of data needs. After a day,
+  it barely moves a home.
 
 ### 3.5 Smoothing versus online inference
 

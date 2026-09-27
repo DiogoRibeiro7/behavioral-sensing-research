@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Arms and settings.** A 7-day and a 1-day adaptation arm, with every model in an arm scored on the same windows after the cut-off. Each model is scored with current windows and in the filter's recursion.
   - **Estimands.** Pooled against population is the primary pooling question. Pooled against unconstrained after one day is the primary overfitting question. Log loss is the primary metric, and balanced accuracy and calibration error are guards. Results are also stratified by each home's amount of adaptation data.
   - **Output.** `pooling_summary.render_summary` generates the Markdown summary from the record. `scripts/run_phase3_pooling.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Result.** The run is published in `artifacts/phase3/phase3-partial-pooling.json`, made from the protocol commit on a clean tree. It is on the 20 development homes, so it is not a held-out claim. The population is identical to the Phase 3.3 follow-up's.
+    - Pooling a week of household data improves log loss with current windows by 0.080 [0.039, 0.118], in 17 of 20 homes, a pre-specified success. In the recursion it is inconclusive: one home carries the mean, and four worsen by more than 0.4.
+    - Unconstrained per-home fitting overfits small homes. After one day it is worse than pooling by 0.175 [0.055, 0.302], and worse than the population alone by 0.161.
+    - The strength selected on training homes was the grid's smallest, 24 windows, in both folds. With it, pooling improves log loss by 0.132. The declared 288 pools more than a week of data needs.
 
 ### Changed
 - `sensor_modeling.datasets.channel_models` gains `home_statistics`, `combine_statistics` and `pool_channels`, so that one household's statistics can be combined or pooled at several strengths without being counted again. `fit_channel_models` and `adapt_channels` now use them, and give identical results.
