@@ -205,6 +205,7 @@ A test checks that it still matches the record.
 
 Generated from the record `phase3-correlated-silence`: protocol `138e35aa977d`, commit `c9724dc6697a`. Status: pre-specified diagnostic; development panel, which earlier work has inspected.
 
+- Inference regime: online filter (attested on migration from schema 1.1).
 - 20 households, each counted once. Streams are the instrumented evidence channels in 5-minute windows.
 - Every value is computed within a household. Across households, the mean and median carry 95% household bootstrap intervals from 10,000 resamples. Zero is independence, or a calibrated model for slopes.
 - Quiet states: sleeping, away, home_inactive.

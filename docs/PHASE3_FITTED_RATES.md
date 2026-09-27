@@ -217,6 +217,7 @@ A test checks that it still matches the record.
 
 Generated from the record `phase3-fitted-rates`: protocol `4f5db165af7e`, commit `4b6a1aca94b2`. Status: pre-specified; development panel, which earlier work has inspected.
 
+- Inference regime: online filter (attested on migration from schema 1.1).
 - 20 households in 2 cross-fitted folds, each scored once by channel models fitted without it.
 - Every comparison is between two channel observation models on identical information: one set, or the recursion over every window (`R`).
 - Differences are paired by household, with the mean and the median and their 95% household bootstrap intervals from 10,000 resamples. A positive value favours the fitted model.

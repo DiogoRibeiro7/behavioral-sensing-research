@@ -142,6 +142,7 @@ A test checks that it still matches the record.
 
 Generated from the record `phase3-hierarchical-time-prior`: protocol `50c92f687181`, commit `5dd81777279e`. Status: pre-specified; development panel, which earlier work has inspected.
 
+- Inference regime: online filter (attested on migration from schema 1.1).
 - 20 households in 2 cross-fitted folds, each scored once by models never fitted on it.
 - Differences are means of paired household differences, with 95% household bootstrap intervals from 10,000 resamples. A positive value favours the first model.
 - Minimal important differences: balanced_accuracy 0.02, brier 0.01, calibration_error 0.02, log_loss 0.05, recall 0.05.

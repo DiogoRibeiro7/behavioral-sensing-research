@@ -86,9 +86,11 @@ def _record(
 ) -> object:
     """Wrap a result in the provenance needed to interpret it later."""
     from .evaluation.provenance import ExperimentRecord
+    from .fusion.regime import ONLINE
 
     return ExperimentRecord(
         experiment=experiment,
+        inference=ONLINE,
         configuration=configuration,
         seeds=seeds,
         results=results,

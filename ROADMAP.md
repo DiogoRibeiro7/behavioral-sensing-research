@@ -348,6 +348,17 @@ A partial-pooling framework is implemented; see `docs/PARTIAL_POOLING.md`.
 Keep fixed-lag smoothing and online filtering as separate operational regimes.
 A gain obtained with future evidence must never be reported as an online gain.
 
+The rule is enforced in code; see `docs/INFERENCE_REGIMES.md`.
+
+- **Every record states its regime.** Schema 1.2 records the regime of every
+  experiment: online filter, or fixed-lag smoother with its lag.
+- **Every report states it.** Every generated report labels its regime.
+- **The matched evaluation is online.** It refuses smoothing regimes and
+  models, and results from different regimes are never pooled or compared.
+- **Existing results.** Every published result is online, attested on
+  migration. The earlier smoothing measurements in `docs/real_data.md` are now
+  labelled as smoothed.
+
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
 Paper 1 rules out a simple scalar-score swap as the main solution.

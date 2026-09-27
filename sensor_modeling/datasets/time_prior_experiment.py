@@ -63,6 +63,7 @@ from ..evaluation.provenance import (
     ModelRecord,
     ReportedInterval,
 )
+from ..fusion.regime import ONLINE
 from ..states.ontology import BehaviouralState, StateOntology
 from .casas import CasasRecording
 from .information_sets import (
@@ -868,6 +869,7 @@ def run_time_prior_experiment(
     record = ExperimentRecord(
         experiment=protocol.name,
         configuration={**protocol.to_dict(), "protocol_sha256": protocol.sha256()},
+        inference=ONLINE,
         seeds=[protocol.seed],
         results=_finite(results),
         data_source=data_source,

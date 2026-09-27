@@ -163,6 +163,7 @@ The summary below is generated from the published record,
 
 Generated from the record `phase1-recoverable-information-gap`: protocol `e1082697cfbf`, commit `9431b9a2f0e3`. Status: exploratory: the development homes have been inspected in earlier work.
 
+- Inference regime: online filter (attested on migration from schema 1.1).
 - 20 households in 2 cross-fitted folds. Each is scored once, by models never fitted on it.
 - Intervals are 95% household bootstrap intervals from 10,000 resamples.
 - Differences are paired by household. A positive value favours the first model, or the larger set.

@@ -160,6 +160,7 @@ A test checks that it still matches the record.
 
 Generated from the record `phase3-explicit-history`: protocol `3e3f42fc5c32`, commit `36892ce1c782`. Status: pre-specified; development panel, which earlier work has inspected.
 
+- Inference regime: online filter (attested on migration from schema 1.1).
 - 20 households in 2 cross-fitted folds, each scored once by models never fitted on it.
 - Differences are paired by household, with the mean and the median and their 95% household bootstrap intervals from 10,000 resamples. A positive value favours the first model or the larger set.
 - Formulation estimands compare two models on one set. Information estimands compare one model family across nested sets.

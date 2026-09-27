@@ -63,6 +63,7 @@ nav:
       - Evaluation design: EVALUATION_DESIGN.md
       - Information-set contract: INFORMATION_SETS.md
       - Matched evaluation: MATCHED_EVALUATION.md
+      - Inference regimes: INFERENCE_REGIMES.md
       - Baseline models: BASELINES.md
       - "Phase 1: matched baselines": PHASE1_MATCHED_BASELINES.md
       - "Phase 1: recoverable-information gap": PHASE1_RECOVERABLE_GAP.md

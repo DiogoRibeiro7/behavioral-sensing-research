@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from statistics import median
 from typing import Any
 
-from .gap_summary import _number, _table
+from .gap_summary import _number, _table, inference_line
 from .silence_dependence import CRITERIA, RESULT_SCHEMA
 
 
@@ -89,6 +89,7 @@ def render_summary(payload: Mapping[str, Any], *, level: int = 1) -> str:
         f"`{str(environment.get('git_commit', 'unknown'))[:12]}`{dirty}. "
         f"Status: {results['status']}.",
         "",
+        inference_line(payload),
         f"- {len(households)} households, each counted once. Streams are the "
         f"instrumented evidence channels in {step_minutes}-minute windows.",
         "- Every value is computed within a household. Across households, the "
