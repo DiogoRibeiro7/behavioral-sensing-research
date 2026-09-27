@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-09-27
+
+Records the first Phase 3 inference-redesign results. Each experiment was pre-specified, with its protocol frozen before any household was scored, and run on the 20 development homes, so none is a held-out claim. It provides:
+
+- a hierarchical periodic state prior and its evaluation. The hour is worth +0.131 balanced accuracy to the generative model, a pre-specified success;
+- an explicit recent-history state and its evaluation. On identical information it lowers balanced accuracy by 0.042, a pre-specified failure;
+- a correlated-silence diagnostic. Silence is strongly dependent between channels, but the pre-specified consequence is not observed, so the hypothesis is weakened;
+- fitted hurdle observation models for the evidence channels and their evaluation. Calibration improves in both primaries without losing balanced accuracy, a pre-specified success;
+- a partial-pooling framework for household parameters, applied to the fitted channel parameters, with no evaluation yet;
+- explicit online-filter and fixed-lag-smoother inference regimes. Every experiment record carries its regime, and every generated report states it.
+
+It does not change the online pipeline's defaults, abstention thresholds, transition dynamics, the declared emissions, the behavioural ontology, or the frozen external-validation result.
+
 ### Added
 - Added an explicit, bounded recent-history state to the generative model, `sensor_modeling.fusion.history`, to test whether the model needs one rather than relying on the filtered posterior. The model, its assumptions and the diagnostics are documented in `docs/HISTORY_STATE.md`.
   - **The model.** Each channel's activations over the three previous windows, the Phase 1 history depth, condition its sensors' current Poisson rates by `exp(β (log(1 + h) − E_s[log(1 + H)]))`. The expectation is the memoryless model's own, so observed silence is informative and missing history is neutral. There is one coefficient per state and room relation, eleven for the default ontology. A window's counts still enter the likelihood once, so no evidence is counted twice. With every coefficient zero the filter is exactly the original one, which is unchanged and remains the comparator.
@@ -73,6 +86,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Experiment records, schema 1.2.** Every record carries `inference`: the mode, a smoother's lag and window, the label and its provenance. `ExperimentRecord` requires it as a keyword with no default, and a record whose label does not describe its regime is refused. 1.0 and 1.1 records migrate to the online filter, with provenance saying this was attested on migration: no experiment code ever called the smoother.
   - **Matched evaluation.** It is online by construction. It records and labels its regime, and refuses a smoothing regime or a model declaring one. Pooling folds and comparing information sets refuse runs from different regimes.
   - **Reports.** Every generated summary states its regime. The five published pages were regenerated from their unchanged records, adding only that line. The table in `docs/real_data.md` that set smoothed results beside online ones now labels each row's regime.
+
+### Changed
+- `ExperimentRecord` now requires an `inference` keyword, an `InferenceRegime`, and writes experiment-record schema 1.2. Code that builds records must declare the regime of its estimates. Records written at schema 1.0 and 1.1 are migrated when read, and their files are not changed.
+- `restricted_posteriors` accepts any per-channel model with a `loglik` method. With the declared terms its results are identical.
 
 ## [0.7.0] - 2026-09-26
 
