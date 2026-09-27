@@ -66,13 +66,13 @@ import json
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 import numpy as np
 from scipy.optimize import brentq
 
-from ..observations import SensorRegistry
+from ..observations import Modality, SensorRegistry
 from ..states.ontology import BehaviouralState, StateOntology
 from .casas import CasasRecording
 from .information_sets import (
@@ -84,6 +84,7 @@ from .information_sets import (
     evidence_column,
 )
 from .matched_evaluation import _Household, _regular_moments
+from .partial_pooling import PooledEstimate, PoolingConfig, pool
 from .restricted_filter import ChannelLikelihood, ChannelModel, channel_likelihoods
 
 HURDLE = "hurdle"
@@ -310,7 +311,10 @@ class FittedChannels:
     def parameters(
         self, channel: EvidenceChannel, declared: np.ndarray | None = None
     ) -> dict[str, np.ndarray]:
-        """``silence``, ``rate`` and ``mean`` per state for *channel*.
+        """``silence``, ``rate``, ``mean`` and ``active_mean`` per state for *channel*.
+
+        ``active_mean`` is the mean count of an active window that ``rate``
+        is solved from.
 
         *declared* is the held-out household's declared expected count, used as
         the prior where the training households have no window of a state on
@@ -342,7 +346,12 @@ class FittedChannels:
             ]
         )
         mean = (total + kappa * prior_mean) / (windows + kappa)
-        return {"silence": silence, "rate": rate, "mean": mean}
+        return {
+            "silence": silence,
+            "rate": rate,
+            "mean": mean,
+            "active_mean": active_mean,
+        }
 
     def models(
         self,
@@ -506,3 +515,256 @@ def filter_recursion(
         belief = weights / weights.sum()
         posterior[row] = belief
     return predicted, posterior
+
+
+# ----------------------------------------------------------------------------
+# Household adaptation, by partial pooling
+# ----------------------------------------------------------------------------
+def household_statistics(
+    recording: CasasRecording,
+    resolution: EvidenceResolution,
+    ontology: StateOntology,
+    *,
+    household: str,
+    until: datetime,
+) -> dict[EvidenceChannel, ChannelStatistics]:
+    """A household's channel statistics from its labelled windows up to *until*.
+
+    Only windows that close at or before *until* count, so a household adapted
+    this way can be scored on its later windows without reading them twice.
+    """
+    counts, rows, labels, moments = household_channel_counts(
+        recording, resolution, ontology, household=household
+    )
+    keep = np.array([moments[int(row)] <= until for row in rows], dtype=bool)
+    declared, _ = channel_likelihoods(recording.registry, resolution, ontology)
+    return {
+        channel: _statistics(
+            column[rows[keep]],
+            labels[keep],
+            len(ontology.states),
+            declared[channel].expected,
+        )
+        for channel, column in counts.items()
+    }
+
+
+def _channel_key(channel: EvidenceChannel) -> dict[str, str]:
+    return {"room": channel.room, "modality": channel.modality.value}
+
+
+@dataclass(frozen=True)
+class HouseholdChannels:
+    """One household's hurdle parameters, pooled toward a fitted population.
+
+    For each instrumented channel and state, the silence probability ``π`` is
+    pooled from the household's silent windows among its windows, and the mean
+    count of an active window from its total count among its active windows.
+    The activity rate ``μ`` is then solved from the pooled mean, as the
+    population's is.
+
+    Attributes
+    ----------
+    household
+        Whose parameters these are.
+    states
+        State order of every estimate.
+    config
+        The pooling strength.
+    population_sha256, population_fitted_on
+        Which fitted population the household was pooled toward, and which
+        households that population was fitted on.
+    until
+        ISO time of the last window the household's own statistics read, or
+        ``None`` if it contributed none: the population alone.
+    silence, activity
+        The pooled estimates per channel.
+    """
+
+    household: str
+    states: tuple[BehaviouralState, ...]
+    config: PoolingConfig
+    population_sha256: str
+    population_fitted_on: tuple[str, ...]
+    until: str | None
+    silence: Mapping[EvidenceChannel, PooledEstimate]
+    activity: Mapping[EvidenceChannel, PooledEstimate]
+
+    def __post_init__(self) -> None:
+        """Check the estimates cover the same channels and states."""
+        if set(self.silence) != set(self.activity):
+            raise ValueError("silence and activity must cover the same channels")
+        for channel in self.silence:
+            for estimate in (self.silence[channel], self.activity[channel]):
+                if estimate.population.size != len(self.states):
+                    raise ValueError("every estimate needs one value per state")
+                if estimate.strength != self.config.strength:
+                    raise ValueError("every estimate must use the declared strength")
+
+    def models(self) -> dict[EvidenceChannel, HurdleChannel]:
+        """The household's hurdle channel models, for the restricted recursion."""
+        return {
+            channel: HurdleChannel(
+                channel,
+                self.silence[channel].pooled,
+                np.array(
+                    [
+                        truncated_poisson_rate(float(m))
+                        for m in self.activity[channel].pooled
+                    ]
+                ),
+            )
+            for channel in sorted(self.silence)
+        }
+
+    def diagnostics(self) -> list[dict[str, Any]]:
+        """Raw, pooled and population estimates, and the effective shrinkage.
+
+        One row per channel, state and parameter. ``raw`` is the household's
+        unconstrained estimate, ``None`` without data; ``shrinkage`` is the
+        share of ``pooled`` that comes from ``population``.
+        """
+        rows: list[dict[str, Any]] = []
+        for channel in sorted(self.silence):
+            for parameter, estimate in (
+                ("silence", self.silence[channel]),
+                ("active_mean", self.activity[channel]),
+            ):
+                for i, state in enumerate(self.states):
+                    raw = float(estimate.raw[i])
+                    rows.append(
+                        {
+                            "channel": channel.name,
+                            "state": state.value,
+                            "parameter": parameter,
+                            "observations": int(estimate.count[i]),
+                            "raw": raw if math.isfinite(raw) else None,
+                            "pooled": float(estimate.pooled[i]),
+                            "population": float(estimate.population[i]),
+                            "shrinkage": float(estimate.shrinkage[i]),
+                        }
+                    )
+        return rows
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a serialisable form, with its provenance."""
+        return {
+            "model": "hurdle channel parameters pooled toward a fitted population",
+            "household": self.household,
+            "states": [state.value for state in self.states],
+            "pooling": self.config.to_dict(),
+            "population": {
+                "sha256": self.population_sha256,
+                "fitted_on": list(self.population_fitted_on),
+            },
+            "until": self.until,
+            "channels": [
+                {
+                    **_channel_key(channel),
+                    "silence": self.silence[channel].to_dict(),
+                    "active_mean": self.activity[channel].to_dict(),
+                }
+                for channel in sorted(self.silence)
+            ],
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> HouseholdChannels:
+        """Rebuild parameters written by :meth:`to_dict`."""
+        silence: dict[EvidenceChannel, PooledEstimate] = {}
+        activity: dict[EvidenceChannel, PooledEstimate] = {}
+        for entry in payload["channels"]:
+            channel = EvidenceChannel(entry["room"], Modality(entry["modality"]))
+            silence[channel] = PooledEstimate.from_dict(entry["silence"])
+            activity[channel] = PooledEstimate.from_dict(entry["active_mean"])
+        return cls(
+            household=str(payload["household"]),
+            states=tuple(BehaviouralState(s) for s in payload["states"]),
+            config=PoolingConfig.from_dict(payload["pooling"]),
+            population_sha256=str(payload["population"]["sha256"]),
+            population_fitted_on=tuple(payload["population"]["fitted_on"]),
+            until=payload["until"],
+            silence=silence,
+            activity=activity,
+        )
+
+    def sha256(self) -> str:
+        """SHA-256 of :meth:`to_dict`."""
+        return hashlib.sha256(
+            json.dumps(
+                self.to_dict(), sort_keys=True, separators=(",", ":"), allow_nan=False
+            ).encode("utf-8")
+        ).hexdigest()
+
+
+def adapt_channels(
+    population: FittedChannels,
+    recording: CasasRecording,
+    *,
+    household: str,
+    resolution: EvidenceResolution,
+    config: PoolingConfig,
+    until: datetime | None,
+    ontology: StateOntology | None = None,
+) -> HouseholdChannels:
+    """Pool *household*'s hurdle parameters toward *population*.
+
+    Parameters
+    ----------
+    population
+        Channel models fitted on other households. A household it was fitted
+        on is refused: its data would count twice, and a held-out score would
+        no longer be held out.
+    recording
+        The household's recording. Its registry sets its channels and, for a
+        state the population never saw, the declared prior.
+    until
+        The adaptation reads the household's labelled windows that close at
+        or before this moment, and nothing later. ``None`` reads none: an
+        unseen household gets the population alone.
+    """
+    if household in population.fitted_on:
+        raise ValueError(
+            f"household {household!r} was used to fit the population; adapting "
+            "it would count its data twice"
+        )
+    ontology = ontology or StateOntology()
+    states = tuple(ontology.states)
+    if states != population.states:
+        raise ValueError("the ontology's states differ from the population's")
+    declared, _ = channel_likelihoods(recording.registry, resolution, ontology)
+    own = (
+        household_statistics(
+            recording, resolution, ontology, household=household, until=until
+        )
+        if until is not None
+        else {}
+    )
+    zeros = np.zeros(len(states))
+    silence: dict[EvidenceChannel, PooledEstimate] = {}
+    activity: dict[EvidenceChannel, PooledEstimate] = {}
+    for channel, terms in declared.items():
+        fitted = population.parameters(channel, terms.expected)
+        stats = own.get(channel)
+        silence[channel] = pool(
+            fitted["silence"],
+            stats.silent if stats is not None else zeros,
+            stats.windows if stats is not None else zeros,
+            config,
+        )
+        activity[channel] = pool(
+            fitted["active_mean"],
+            stats.total if stats is not None else zeros,
+            stats.active if stats is not None else zeros,
+            config,
+        )
+    return HouseholdChannels(
+        household=household,
+        states=states,
+        config=config,
+        population_sha256=population.sha256(),
+        population_fitted_on=population.fitted_on,
+        until=until.isoformat() if until is not None else None,
+        silence=silence,
+        activity=activity,
+    )

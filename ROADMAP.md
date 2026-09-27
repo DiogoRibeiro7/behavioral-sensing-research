@@ -333,6 +333,16 @@ The measured conclusions, on the development panel and none a held-out claim:
 Separate population-level parameters from household-specific effects. Evaluate
 partial pooling before introducing unconstrained per-home fitting.
 
+A partial-pooling framework is implemented; see `docs/PARTIAL_POOLING.md`.
+
+- **The framework.** Each household gets the population parameter plus its own
+  deviation, shrunk toward zero with a declared strength. The strength's
+  limits are population-only and unconstrained per-home fitting.
+- **First application.** It is applied to the fitted hurdle channel
+  parameters, whose silence differs widely between homes. The periodic state
+  prior already has its own shrunk household deviation.
+- **Evaluation.** Its evaluation is still to be pre-specified and run.
+
 ### 3.5 Smoothing versus online inference
 
 Keep fixed-lag smoothing and online filtering as separate operational regimes.

@@ -62,6 +62,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - With the time prior, median log loss is 1.448: the first generative model below the no-information 1.510.
     - Silence-evidence inflation falls from 3.38 to 1.62, near the dependence-only 1.55. Overconfidence per quiet hour falls from 0.175 to 0.023.
     - `home_active` recall falls by 0.23. A Poisson fitted to the mean count improves balanced accuracy but not calibration, and it makes silence inflation four times worse.
+- Added a partial-pooling framework for household-specific parameters, `sensor_modeling.datasets.partial_pooling`, for roadmap item 3.4. The mathematics is in `docs/PARTIAL_POOLING.md`.
+  - **The estimator.** A household's estimate is the population parameter plus its own deviation shrunk toward zero: `θ_pop + w (θ_raw − θ_pop)`, with `w = n / (n + κ)`. It is the posterior mean under a Beta or Gamma prior centred on the population, with `κ` pseudo-observations. The limits of `κ` are population-only and unconstrained per-household fitting.
+  - **Its properties.** With no data it gives the population exactly. It is closed-form and deterministic. `PooledEstimate` reports the raw, pooled and population estimates and the effective shrinkage `κ / (n + κ)`, and round-trips through JSON.
+  - **First application.** The fitted hurdle channel parameters, the silence probability and the active-window mean, whose silence differs widely between homes. `adapt_channels` pools a household toward a fitted population from its own labelled windows up to a declared moment only, and refuses a household the population was fitted on. An unseen household gets the population exactly. `HouseholdChannels` records its provenance (population digest, training households, strength, cut-off) and reports diagnostics per channel, state and parameter.
+  - **Not changed.** No evaluation is reported, and no default or published result changes. The periodic state prior keeps its own household shrinkage. The default strength, 288 windows, is 24 labelled hours, as that prior declares.
 
 ## [0.7.0] - 2026-09-26
 
