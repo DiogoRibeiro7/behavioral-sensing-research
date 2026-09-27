@@ -13,7 +13,7 @@ from sensor_modeling.evaluation import (
     environment,
     load_record,
 )
-from sensor_modeling.fusion.regime import ONLINE
+from sensor_modeling.fusion.regime import ONLINE, NotEnumerated
 
 
 def record(**overrides: object) -> ExperimentRecord:
@@ -22,6 +22,7 @@ def record(**overrides: object) -> ExperimentRecord:
         "experiment": "example",
         "configuration": {"days": 10, "step_minutes": 15},
         "inference": ONLINE,
+        "evidence": NotEnumerated("a unit-test record"),
         "seeds": [1, 2, 3],
         "results": {"balanced_accuracy": 0.81},
     }

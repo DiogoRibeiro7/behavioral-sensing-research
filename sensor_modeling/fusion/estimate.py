@@ -180,7 +180,11 @@ class StateEstimate:
         total = belief.sum()
         if total <= 0.0:
             raise ValueError("belief must contain at least some probability mass")
-        object.__setattr__(self, "belief", belief / total)
+        # A reported estimate is never revised: later evidence produces a new
+        # estimate (a smoother returns new objects), never an edit of this one.
+        normalised = belief / total
+        normalised.setflags(write=False)
+        object.__setattr__(self, "belief", normalised)
 
         if self.information_gain is not None:
             value = float(self.information_gain)

@@ -37,6 +37,7 @@ from sensor_modeling.datasets.matched_evaluation import (
     LabelledRows,
     StatePredictions,
     held_out_metrics,
+    online_evidence,
     run_matched_evaluation,
 )
 from sensor_modeling.evaluation import ArtifactError, load_record
@@ -48,17 +49,22 @@ from sensor_modeling.evaluation.provenance import (
 from sensor_modeling.fusion import (
     ONLINE,
     EvidenceLeakageError,
+    EvidenceSummary,
     InferenceMode,
     InferenceRegime,
+    NotEnumerated,
     assert_respects_horizon,
     check_evidence_access,
     regime_beliefs,
+    regime_estimates,
     require_online,
     require_same_regime,
 )
 from sensor_modeling.simulation import HouseholdConfig, simulate
 
 ROOT = Path(__file__).resolve().parents[1]
+#: Fields a migration changes; everything else is carried over unchanged.
+MIGRATED = {"schema_version", "migrated_from", "inference"}
 STEP = timedelta(minutes=5)
 #: A sticky two-state chain, A and B.
 TRANSITION = np.array([[0.95, 0.05], [0.05, 0.95]])
@@ -227,11 +233,23 @@ class TestRegime:
 # ----------------------------------------------------------------------------
 # Records and reports
 # ----------------------------------------------------------------------------
+START = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+MOMENTS = [START + STEP * k for k in range(len(evidence()))]
+
+
+def reported_evidence(regime: InferenceRegime) -> EvidenceSummary:
+    """The evidence summary of *regime*'s estimates on the synthetic sequence."""
+    estimates = regime_estimates(MOMENTS, online(evidence()), TRANSITION, regime)
+    return EvidenceSummary.of_estimates(estimates)
+
+
 def record(**changes: Any) -> ExperimentRecord:
+    regime = changes.get("inference", ONLINE)
     settings: dict[str, Any] = {
         "experiment": "regimes",
         "configuration": {},
         "inference": ONLINE,
+        "evidence": reported_evidence(regime),
         "data_source": "synthetic-test",
     }
     settings.update(changes)
@@ -242,6 +260,10 @@ class TestRecords:
     def test_a_record_cannot_leave_the_regime_to_a_default(self) -> None:
         with pytest.raises(TypeError, match="inference"):
             ExperimentRecord(experiment="x", configuration={})  # type: ignore[call-arg]
+        with pytest.raises(TypeError, match="evidence"):
+            ExperimentRecord(  # type: ignore[call-arg]
+                experiment="x", configuration={}, inference=ONLINE
+            )
 
     def test_a_smoothed_record_carries_its_mode_and_lag(self, tmp_path: Path) -> None:
         regime = InferenceRegime.smoother(2, STEP)
@@ -252,9 +274,28 @@ class TestRecords:
             "lag_steps": 2,
             "step_seconds": 300.0,
             "label": "fixed-lag smoother, lag 2 windows (10 min)",
+            "causal": False,
+            "delay_seconds": 600.0,
             "provenance": DECLARED_INFERENCE,
+            "evidence": {
+                "enumerated": True,
+                "predictions": len(MOMENTS),
+                "first_prediction": MOMENTS[0].isoformat(),
+                "last_prediction": MOMENTS[-1].isoformat(),
+                "latest_evidence": MOMENTS[-1].isoformat(),
+                "max_lead_seconds": 600.0,
+            },
         }
-        assert ExperimentRecord.from_dict(payload).inference == regime
+        rebuilt = ExperimentRecord.from_dict(payload)
+        assert rebuilt.inference == regime
+        assert rebuilt.evidence == reported_evidence(regime)
+
+    def test_an_online_record_is_causal_with_no_delay(self) -> None:
+        inference = record().to_dict()["inference"]
+        assert inference["causal"] is True
+        assert inference["delay_seconds"] == 0.0
+        assert inference["evidence"]["max_lead_seconds"] == 0.0
+        assert inference["evidence"]["latest_evidence"] == MOMENTS[-1].isoformat()
 
     @pytest.mark.parametrize(
         ("change", "message"),
@@ -262,6 +303,9 @@ class TestRecords:
             ({"label": "online filter"}, "does not describe"),
             ({"mode": "online_filter"}, "lag is zero"),
             ({"provenance": ""}, "provenance"),
+            ({"causal": True}, "is not causal"),
+            ({"delay_seconds": 0.0}, "has a delay of 600"),
+            ({"evidence": NotEnumerated("not listed").to_dict()}, "must be recorded"),
         ],
     )
     def test_a_mislabelled_regime_is_refused(
@@ -271,6 +315,28 @@ class TestRecords:
         payload["inference"].update(change)
         with pytest.raises(ArtifactError, match=message):
             validate_record(payload)
+
+    def test_smoothed_estimates_cannot_be_recorded_as_online(self) -> None:
+        smoothed_evidence = reported_evidence(InferenceRegime.smoother(2, STEP))
+        with pytest.raises(EvidenceLeakageError, match="600 s past their moments"):
+            record(inference=ONLINE, evidence=smoothed_evidence)
+        payload = record().to_dict()
+        payload["inference"]["evidence"] = smoothed_evidence.to_dict()
+        with pytest.raises(ArtifactError, match="the online filter may read 0 s"):
+            validate_record(payload)
+
+    def test_a_smoother_must_list_the_future_information_it_used(self) -> None:
+        with pytest.raises(EvidenceLeakageError, match="must be recorded"):
+            record(
+                inference=InferenceRegime.smoother(1, STEP),
+                evidence=NotEnumerated("not listed"),
+            )
+        # A causal regime may say why it did not list them.
+        record(evidence=NotEnumerated("an aggregate study"))
+        record(
+            inference=InferenceRegime.smoother(0, STEP),
+            evidence=NotEnumerated("an aggregate study"),
+        )
 
     def test_an_older_record_is_attested_online_on_migration(
         self, tmp_path: Path
@@ -286,9 +352,56 @@ class TestRecords:
         assert migrated["inference"]["provenance"].startswith(
             "attested on migration from schema 1.1"
         )
+        assert migrated["inference"]["causal"] is True
+        assert migrated["inference"]["evidence"] == {
+            "enumerated": False,
+            "reason": "written at schema 1.1, before prediction and evidence "
+            "timestamps were recorded; its estimates read no evidence after their "
+            "prediction moments",
+        }
         assert inference_line(migrated) == (
             "- Inference regime: online filter (attested on migration from schema 1.1)."
         )
+
+    def test_a_published_1_2_record_is_migrated_to_the_current_schema(self) -> None:
+        path = ROOT / "artifacts" / "phase3" / "phase3-partial-pooling.json"
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        assert raw["schema_version"] == "1.2"
+        migrated = load_record(path)
+        assert migrated["migrated_from"] == "1.2"
+        assert migrated["inference"] == {
+            **raw["inference"],
+            "causal": True,
+            "delay_seconds": 0.0,
+            "evidence": {
+                "enumerated": False,
+                "reason": "written at schema 1.2, before prediction and evidence "
+                "timestamps were recorded; its estimates read no evidence after "
+                "their prediction moments",
+            },
+        }
+        assert {k: v for k, v in migrated.items() if k not in MIGRATED} == {
+            k: v for k, v in raw.items() if k not in MIGRATED
+        }
+        assert ExperimentRecord.from_dict(migrated).inference == ONLINE
+
+    def test_a_smoothed_1_2_record_is_refused_not_migrated(
+        self, tmp_path: Path
+    ) -> None:
+        payload = record().to_dict()
+        payload["schema_version"] = "1.2"
+        regime = InferenceRegime.smoother(1, STEP).to_dict()
+        payload["inference"] = {
+            "mode": regime["mode"],
+            "lag_steps": regime["lag_steps"],
+            "step_seconds": regime["step_seconds"],
+            "label": regime["label"],
+            "provenance": DECLARED_INFERENCE,
+        }
+        path = tmp_path / "smoothed-1.2.json"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        with pytest.raises(ArtifactError, match="a smoother must; re-run it"):
+            load_record(path)
 
     def test_reports_label_the_regime(self) -> None:
         assert inference_line(record().to_dict()) == (
@@ -399,6 +512,12 @@ class TestMatchedEvaluation:
         payload = run.record.to_dict()
         assert payload["inference"]["mode"] == "online_filter"
         assert payload["results"]["inference"] == "online filter"
+        # The scored moments are the held-out home's labelled moments, each
+        # read up to itself.
+        step = nested_information_sets()[0].resolution.step
+        assert run.evidence == online_evidence(homes, ("sim3",), step)
+        assert payload["inference"]["evidence"] == run.evidence.to_dict()
+        assert payload["inference"]["evidence"]["max_lead_seconds"] == 0.0
 
     def test_a_smoothing_evaluation_is_refused(
         self, homes: dict[str, CasasRecording]

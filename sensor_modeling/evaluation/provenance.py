@@ -40,7 +40,14 @@ from typing import Any
 
 import numpy as np
 
-from ..fusion.regime import ONLINE, InferenceRegime
+from ..fusion.regime import (
+    ONLINE,
+    EvidenceSummary,
+    InferenceRegime,
+    NotEnumerated,
+    check_evidence,
+    evidence_from_dict,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +61,19 @@ RESULTS_DIR = Path("results")
 #: existing field means and would need an explicit migration. A reader refuses
 #: any version newer than its own rather than guessing at fields it does not
 #: know. See ``docs/EXPERIMENT_ARTIFACTS.md``.
-SCHEMA_VERSION = "1.2"
+SCHEMA_VERSION = "1.3"
 
 #: Versions :func:`load_record` accepts, oldest first.
-READABLE_VERSIONS = ("1.0", "1.1", "1.2")
+READABLE_VERSIONS = ("1.0", "1.1", "1.2", "1.3")
 
 #: How a record written at 1.2 or later knows its inference regime.
 DECLARED_INFERENCE = "declared by the experiment that wrote the record"
+
+#: Why a record migrated from an earlier schema lists no prediction timestamps.
+UNLISTED_EVIDENCE = (
+    "written at schema {version}, before prediction and evidence timestamps were "
+    "recorded; its estimates read no evidence after their prediction moments"
+)
 
 #: How a 1.0 or 1.1 record is given its inference regime when migrated.
 #:
@@ -422,12 +435,19 @@ class ExperimentRecord:
     inference_provenance
         How the regime is known: declared by the writer, or attested when an
         older record was migrated.
+    evidence
+        The prediction and latest-evidence timestamps behind the record's
+        estimates, as an :class:`~sensor_modeling.fusion.EvidenceSummary`. A
+        causal result that cannot list them may give a
+        :class:`~sensor_modeling.fusion.NotEnumerated` reason instead; a
+        smoothed result may not. Required and keyword-only.
     """
 
     experiment: str
     configuration: Mapping[str, Any]
     inference: InferenceRegime = field(kw_only=True)
     inference_provenance: str = field(default=DECLARED_INFERENCE, kw_only=True)
+    evidence: EvidenceSummary | NotEnumerated = field(kw_only=True)
     seeds: Sequence[int] = field(default_factory=list)
     results: Mapping[str, Any] = field(default_factory=dict)
     sensor_subset: Sequence[str] | None = None
@@ -459,6 +479,9 @@ class ExperimentRecord:
             raise TypeError("inference must be an InferenceRegime")
         if not str(self.inference_provenance).strip():
             raise ValueError("an inference regime needs its provenance")
+        if not isinstance(self.evidence, (EvidenceSummary, NotEnumerated)):
+            raise TypeError("evidence must be an EvidenceSummary or NotEnumerated")
+        check_evidence(self.evidence, self.inference)
         notes = list(self.notes)
         if self.data_source == "simulator" and SIMULATOR_NOTE not in notes:
             notes.append(SIMULATOR_NOTE)
@@ -480,6 +503,7 @@ class ExperimentRecord:
             "inference": {
                 **self.inference.to_dict(),
                 "provenance": self.inference_provenance,
+                "evidence": self.evidence.to_dict(),
             },
             "inputs": [item.to_dict() for item in self.inputs],
             "split": dict(self.split) if self.split is not None else None,
@@ -545,6 +569,7 @@ class ExperimentRecord:
             configuration=payload["configuration"],
             inference=InferenceRegime.from_dict(payload["inference"]),
             inference_provenance=payload["inference"]["provenance"],
+            evidence=evidence_from_dict(payload["inference"]["evidence"]),
             seeds=payload["seeds"],
             results=payload["results"],
             sensor_subset=payload["sensor_subset"],
@@ -644,7 +669,16 @@ _ADDED_IN_1_1: Mapping[str, Any] = {
 #: Fields added in 1.2. They have no default: a migration must supply them.
 _ADDED_IN_1_2: Mapping[str, type] = {"inference": dict}
 
-_INFERENCE_KEYS = {"mode", "lag_steps", "step_seconds", "label", "provenance"}
+_INFERENCE_KEYS = {
+    "mode",
+    "lag_steps",
+    "step_seconds",
+    "label",
+    "causal",
+    "delay_seconds",
+    "provenance",
+    "evidence",
+}
 
 _ENVIRONMENT_KEYS = ("git_commit", "git_dirty", "python", "sensor_modeling")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -776,9 +810,17 @@ def _check_sections(payload: Mapping[str, Any]) -> list[str]:
         problems.append(f"inference must have exactly {sorted(_INFERENCE_KEYS)}")
     else:
         try:
-            InferenceRegime.from_dict(inference)
+            regime = InferenceRegime.from_dict(inference)
         except (ValueError, TypeError, KeyError) as exc:
             problems.append(f"inference is not a valid regime: {exc}")
+        else:
+            if not isinstance(inference["evidence"], dict):
+                problems.append("inference.evidence must be an object")
+            else:
+                try:
+                    check_evidence(evidence_from_dict(inference["evidence"]), regime)
+                except (ValueError, TypeError, KeyError) as exc:
+                    problems.append(f"inference.evidence is not valid: {exc}")
         if (
             not isinstance(inference["provenance"], str)
             or not inference["provenance"].strip()
@@ -866,9 +908,40 @@ def _migrate_1_1(payload: dict[str, Any]) -> dict[str, Any]:
     migrated["inference"] = {
         **ONLINE.to_dict(),
         "provenance": MIGRATED_INFERENCE.format(version=version),
+        "evidence": NotEnumerated(UNLISTED_EVIDENCE.format(version=version)).to_dict(),
     }
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["migrated_from"] = version
+    return migrated
+
+
+def _migrate_1_2(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.2 record to the current version without changing its content.
+
+    1.2 recorded the regime but not its causality, its delay or its
+    prediction and evidence timestamps. Causality and delay follow from the
+    regime. A causal record's timestamps are marked as not listed, with the
+    reason. A smoothed one is refused: a smoother must list the future
+    information it used, and 1.2 did not record it. None was published.
+    """
+    migrated = dict(payload)
+    try:
+        inference = dict(migrated["inference"])
+        regime = InferenceRegime.from_dict(inference)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ArtifactError(f"the 1.2 inference is not a valid regime: {exc}") from exc
+    if not regime.is_causal:
+        raise ArtifactError(
+            f"a 1.2 record of the {regime.label} does not list its prediction and "
+            "evidence timestamps, which a smoother must; re-run it"
+        )
+    migrated["inference"] = {
+        **inference,
+        **regime.to_dict(),
+        "evidence": NotEnumerated(UNLISTED_EVIDENCE.format(version="1.2")).to_dict(),
+    }
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["migrated_from"] = "1.2"
     return migrated
 
 
@@ -930,6 +1003,8 @@ def load_record(path: Path) -> dict[str, Any]:
         )
     elif version == "1.1":
         payload = _migrate_1_1(payload)
+    elif version == "1.2":
+        payload = _migrate_1_2(payload)
     validate_record(payload)
     loaded: dict[str, Any] = payload
     return loaded

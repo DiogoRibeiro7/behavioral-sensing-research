@@ -57,7 +57,7 @@ from sensor_modeling.evaluation import (
     household_values,
     summarise_households,
 )
-from sensor_modeling.fusion.regime import ONLINE
+from sensor_modeling.fusion.regime import ONLINE, EvidenceSummary
 
 PROFILE_PATH = Path("artifacts/v03/v03_circadian_profile.json")
 TIMEZONE = "America/Los_Angeles"
@@ -225,6 +225,12 @@ def main() -> None:
     record = ExperimentRecord(
         experiment="phase1-matched-baselines",
         inference=ONLINE,
+        evidence=EvidenceSummary.combine(
+            run.evidence
+            for folded in runs.values()
+            for run in folded
+            if run.evidence is not None
+        ),
         configuration={
             "homes": homes,
             "folds": [split.to_dict() for split in splits],
