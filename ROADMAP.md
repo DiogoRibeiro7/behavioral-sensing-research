@@ -21,6 +21,15 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Current Stable Baseline
 
+`0.8.0` records the first Phase 3 inference-redesign results. Each is pre-specified and on the development panel:
+
+- a hierarchical time-of-day prior, a success;
+- an explicit history state, a failure;
+- a correlated-silence diagnostic, which weakens the hypothesis;
+- fitted silence and activity rates, a success.
+
+It adds a partial-pooling framework for household parameters, and explicit inference regimes recorded in every experiment record. It does not change the online pipeline's defaults, abstention, the ontology or the frozen external-validation result.
+
 `0.7.0` records the first complete Phase 1 recoverable-information-gap result. It adds a versioned experiment-record schema, a cyclic time-of-day encoding, interpretable history summaries, a declared supervised diagnostic, and the generative filter's model restricted to the information sets it can consume. Like `0.6.0`, it does not change inference, abstention, the ontology or the frozen external-validation result.
 
 `0.6.0` adds matched-information evaluation: information sets, the matched runner, four pre-declared baselines, household-level comparison, and the first exploratory Phase 1 run. Like `0.5.0`, it does not change inference, the ontology or the frozen external-validation result.
@@ -484,7 +493,7 @@ unless it blocks reproducibility or supported users.
 
 ## Release Policy
 
-`0.7.0` is the current stable release.
+`0.8.0` is the current stable release.
 
 Future versions are created only when the research programme produces a
 coherent user-facing software increment. Paper milestones do not automatically
