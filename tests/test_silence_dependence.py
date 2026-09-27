@@ -486,6 +486,18 @@ def simulated(seed: int) -> CasasRecording:
     )
 
 
+def numbers(value: Any) -> Iterator[float]:
+    """Every non-integer number in a JSON-like value."""
+    if isinstance(value, dict):
+        for item in value.values():
+            yield from numbers(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from numbers(item)
+    elif isinstance(value, float):
+        yield value
+
+
 def small_protocol(**changes: Any) -> SilenceProtocol:
     settings: dict[str, Any] = {
         "households": ("sim1", "sim2", "sim3", "sim4"),
@@ -589,6 +601,18 @@ class TestRecord:
             text = path.read_text(encoding="utf-8")
             assert f"data sha256 {data_sha256(data[name])}" in text
             assert path.read_bytes() == second[name].read_bytes()
+
+    def test_figure_data_is_copied_verbatim_from_the_record(
+        self, result: SilenceResult
+    ) -> None:
+        # A digest over computed values, such as a logarithm, could differ in
+        # the last bit between platforms, so every plotted number must be a
+        # number in the record.
+        assert result.path is not None
+        written = load_record(result.path)
+        recorded = set(numbers(written["results"]))
+        for name, data in figure_data(written).items():
+            assert set(numbers(data)) <= recorded, name
 
 
 # ----------------------------------------------------------------------------

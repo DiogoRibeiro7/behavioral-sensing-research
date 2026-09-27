@@ -5,6 +5,12 @@ and :func:`draw_figures` draws it. Each SVG carries the SHA-256 of the data it
 plots in its metadata, so a committed figure can be checked against the
 published record without comparing rendered pixels, which differ between
 Matplotlib versions.
+
+The data are copied from the record verbatim, and every transformation, such as
+a logarithm or a difference, is applied only when drawing. Floating-point
+library functions such as ``log`` may differ in the last bit between
+platforms, and a digest over their results would then depend on where it was
+computed.
 """
 
 from __future__ import annotations
@@ -33,7 +39,7 @@ FIGURES = ("joint-silence", "inflation", "overconfidence", "quiet-runs")
 
 
 def figure_data(payload: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
-    """What each figure plots, read from the record."""
+    """What each figure plots, copied verbatim from the record."""
     results = payload["results"]
     if results.get("result_schema") != RESULT_SCHEMA:
         raise ValueError(f"not a {RESULT_SCHEMA} record")
@@ -42,8 +48,8 @@ def figure_data(payload: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
         {
             "household": home,
             "state": state,
-            "independent": math.log(stats["independent_joint_silence"]),
-            "observed": math.log(stats["joint_silence"]),
+            "independent": stats["independent_joint_silence"],
+            "observed": stats["joint_silence"],
         }
         for home, entry in households.items()
         for state in results["states"]
@@ -57,23 +63,15 @@ def figure_data(payload: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
             e["values"]["log_inflation_declared"] for e in households.values()
         ],
     }
-    overconfidence: dict[str, Any] = {"households": {}}
+    overconfidence: dict[str, Any] = {}
     for home, entry in households.items():
         by_count = entry["concentration"]["by_silent_channels"]
         counts = sorted(by_count, key=int)
-        overconfidence["households"][home] = {
+        overconfidence[home] = {
             "silent_channels": [int(k) for k in counts],
-            "gap": [
-                by_count[k]["confidence"] - by_count[k]["accuracy"] for k in counts
-            ],
+            "confidence": [by_count[k]["confidence"] for k in counts],
+            "accuracy": [by_count[k]["accuracy"] for k in counts],
         }
-    pooled: dict[int, list[float]] = {}
-    for series in overconfidence["households"].values():
-        for k, gap in zip(series["silent_channels"], series["gap"], strict=True):
-            pooled.setdefault(k, []).append(gap)
-    overconfidence["mean"] = {
-        str(k): sum(v) / len(v) for k, v in sorted(pooled.items())
-    }
     quiet_runs = {
         state: {
             home: {
@@ -150,7 +148,14 @@ def draw_figures(payload: Mapping[str, Any], out_dir: Path) -> dict[str, Path]:
 
 def _joint_silence(plt: Any, data: Mapping[str, Any]) -> Any:
     figure, axes = plt.subplots(figsize=(5.5, 4.5))
-    points = data["points"]
+    points = [
+        {
+            "state": p["state"],
+            "independent": math.log(p["independent"]),
+            "observed": math.log(p["observed"]),
+        }
+        for p in data["points"]
+    ]
     for state, colour in _COLOURS.items():
         chosen = [p for p in points if p["state"] == state]
         if chosen:
@@ -210,18 +215,27 @@ def _overconfidence(plt: Any, data: Mapping[str, Any]) -> Any:
     from matplotlib.ticker import MaxNLocator
 
     figure, axes = plt.subplots(figsize=(5.5, 4.0))
-    for series in data["households"].values():
+    pooled: dict[int, list[float]] = {}
+    for series in data.values():
+        gaps = [
+            confidence - accuracy
+            for confidence, accuracy in zip(
+                series["confidence"], series["accuracy"], strict=True
+            )
+        ]
+        for count, gap in zip(series["silent_channels"], gaps, strict=True):
+            pooled.setdefault(count, []).append(gap)
         axes.plot(
             series["silent_channels"],
-            series["gap"],
+            gaps,
             color="#56B4E9",
             linewidth=0.6,
             alpha=0.7,
         )
-    mean = data["mean"]
+    counts = sorted(pooled)
     axes.plot(
-        [int(k) for k in mean],
-        list(mean.values()),
+        counts,
+        [sum(pooled[k]) / len(pooled[k]) for k in counts],
         color="#0072B2",
         linewidth=2.0,
         marker="o",
