@@ -453,31 +453,68 @@ def fit_channel_models(
     if not isinstance(resolution.step, timedelta):
         raise ValueError("the resolution needs a step")
     ontology = ontology or StateOntology()
-    states = tuple(ontology.states)
-    pooled: dict[EvidenceChannel, list[ChannelStatistics]] = {}
-    for home in sorted(recordings):
-        recording = recordings[home]
-        counts, rows, labels, _ = household_channel_counts(
-            recording, resolution, ontology, household=home
-        )
-        declared, _ = channel_likelihoods(recording.registry, resolution, ontology)
-        for channel, column in counts.items():
-            pooled.setdefault(channel, []).append(
-                _statistics(
-                    column[rows], labels, len(states), declared[channel].expected
-                )
+    return combine_statistics(
+        {
+            home: home_statistics(
+                recordings[home], resolution, ontology, household=home
             )
+            for home in sorted(recordings)
+        },
+        states=tuple(ontology.states),
+        pseudo_windows=pseudo_windows,
+    )
+
+
+def home_statistics(
+    recording: CasasRecording,
+    resolution: EvidenceResolution,
+    ontology: StateOntology,
+    *,
+    household: str,
+) -> dict[EvidenceChannel, ChannelStatistics]:
+    """One household's channel statistics over all its labelled windows."""
+    counts, rows, labels, _ = household_channel_counts(
+        recording, resolution, ontology, household=household
+    )
+    declared, _ = channel_likelihoods(recording.registry, resolution, ontology)
+    return {
+        channel: _statistics(
+            column[rows], labels, len(ontology.states), declared[channel].expected
+        )
+        for channel, column in counts.items()
+    }
+
+
+def combine_statistics(
+    parts: Mapping[str, Mapping[EvidenceChannel, ChannelStatistics]],
+    *,
+    states: tuple[BehaviouralState, ...],
+    pseudo_windows: float,
+) -> FittedChannels:
+    """The population fitted on the households in *parts*, from their statistics.
+
+    Households are combined in sorted order, as :func:`fit_channel_models`
+    combines them, so both give the same parameters to the last bit.
+    """
+    if not parts:
+        raise ValueError("at least one training household is required")
+    if not math.isfinite(pseudo_windows) or pseudo_windows <= 0.0:
+        raise ValueError("pseudo_windows must be positive")
+    pooled: dict[EvidenceChannel, list[ChannelStatistics]] = {}
+    for home in sorted(parts):
+        for channel, stats in parts[home].items():
+            pooled.setdefault(channel, []).append(stats)
     statistics = {
         channel: ChannelStatistics(
             *(
-                np.sum([getattr(s, name) for s in parts], axis=0)
+                np.sum([getattr(s, name) for s in pieces], axis=0)
                 for name in ("windows", "silent", "total", "squares", "declared")
             )
         )
-        for channel, parts in pooled.items()
+        for channel, pieces in pooled.items()
     }
     return FittedChannels(
-        tuple(sorted(recordings)), states, float(pseudo_windows), statistics
+        tuple(sorted(parts)), states, float(pseudo_windows), statistics
     )
 
 
@@ -723,16 +760,7 @@ def adapt_channels(
         or before this moment, and nothing later. ``None`` reads none: an
         unseen household gets the population alone.
     """
-    if household in population.fitted_on:
-        raise ValueError(
-            f"household {household!r} was used to fit the population; adapting "
-            "it would count its data twice"
-        )
     ontology = ontology or StateOntology()
-    states = tuple(ontology.states)
-    if states != population.states:
-        raise ValueError("the ontology's states differ from the population's")
-    declared, _ = channel_likelihoods(recording.registry, resolution, ontology)
     own = (
         household_statistics(
             recording, resolution, ontology, household=household, until=until
@@ -740,6 +768,52 @@ def adapt_channels(
         if until is not None
         else {}
     )
+    return pool_channels(
+        population,
+        recording.registry,
+        own,
+        household=household,
+        resolution=resolution,
+        config=config,
+        until=until,
+        ontology=ontology,
+    )
+
+
+def pool_channels(
+    population: FittedChannels,
+    registry: SensorRegistry,
+    own: Mapping[EvidenceChannel, ChannelStatistics],
+    *,
+    household: str,
+    resolution: EvidenceResolution,
+    config: PoolingConfig,
+    until: datetime | None,
+    ontology: StateOntology | None = None,
+) -> HouseholdChannels:
+    """Pool a household's own statistics toward *population*.
+
+    :func:`adapt_channels` computes *own* from the recording; this takes it
+    precomputed, so one household's statistics can be pooled at several
+    strengths without being counted again. *own* must hold only the
+    household's labelled windows that close at or before *until*, as
+    :func:`household_statistics` returns them, and be empty when *until* is
+    ``None``.
+    """
+    if household in population.fitted_on:
+        raise ValueError(
+            f"household {household!r} was used to fit the population; adapting "
+            "it would count its data twice"
+        )
+    if until is None and own:
+        raise ValueError(
+            "statistics without a cut-off cannot be attributed to a window"
+        )
+    ontology = ontology or StateOntology()
+    states = tuple(ontology.states)
+    if states != population.states:
+        raise ValueError("the ontology's states differ from the population's")
+    declared, _ = channel_likelihoods(registry, resolution, ontology)
     zeros = np.zeros(len(states))
     silence: dict[EvidenceChannel, PooledEstimate] = {}
     activity: dict[EvidenceChannel, PooledEstimate] = {}

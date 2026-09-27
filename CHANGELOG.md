@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added the pre-specified Phase 3.4 evaluation of partial pooling, `sensor_modeling.datasets.pooling_experiment`, with its frozen protocol, `artifacts/phase3/pooling_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_PARTIAL_POOLING.md`.
+  - **Models.** The hurdle channel parameters come from one of: the population, fitted per fold on training homes; each held-out home pooled toward it with the declared strength, 288 windows; the same with a strength selected by leave-one-household-out on training homes only; or unconstrained per-home estimates. The declared rates give context.
+  - **Arms and settings.** A 7-day and a 1-day adaptation arm, with every model in an arm scored on the same windows after the cut-off. Each model is scored with current windows and in the filter's recursion.
+  - **Estimands.** Pooled against population is the primary pooling question. Pooled against unconstrained after one day is the primary overfitting question. Log loss is the primary metric, and balanced accuracy and calibration error are guards. Results are also stratified by each home's amount of adaptation data.
+  - **Output.** `pooling_summary.render_summary` generates the Markdown summary from the record. `scripts/run_phase3_pooling.py` refuses to run unless the code's protocol equals the frozen file.
+
+### Changed
+- `sensor_modeling.datasets.channel_models` gains `home_statistics`, `combine_statistics` and `pool_channels`, so that one household's statistics can be combined or pooled at several strengths without being counted again. `fit_channel_models` and `adapt_channels` now use them, and give identical results.
+
 ## [0.8.0] - 2026-09-27
 
 Records the first Phase 3 inference-redesign results. Each experiment was pre-specified, with its protocol frozen before any household was scored, and run on the 20 development homes, so none is a held-out claim. It provides:
