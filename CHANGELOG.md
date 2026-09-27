@@ -47,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Rules.** Households are the unit of replication, with household bootstrap intervals. Joint-silence statistics are computed only where they are estimable. The conclusion rule is declared in advance.
   - **Checks.** On synthetic households, the tests show that the diagnostic reads conditionally independent streams as independent and strongly correlated silence as dependent. The decomposed recursion equals `MultimodalBayesFilter`.
   - **Output.** `scripts/run_phase3_silence.py` writes the record, a summary generated from it, and figures drawn from it. `scripts/plot_phase3_silence.py` redraws the figures from any record, and each SVG carries the SHA-256 of the data it plots.
+  - **Result.** The run is published in `artifacts/phase3/phase3-correlated-silence.json`, made from the protocol commit on a clean tree, with its figures in `docs/figures/`. It is on the 20 development homes, so it is not a held-out claim. By the declared rule the hypothesis is weakened.
+    - Silences are strongly dependent given the state. Independence overstates the spread of joint-silence evidence by 1.55 [1.38, 1.75], in 19 of 20 homes: material.
+    - The filter's declared silence terms overstate it by 3.38, and the declared rates account for more of that than dependence.
+    - Overconfidence falls by 0.059 per additional silent channel, in 16 of 20 homes, so the pre-specified consequence is not observed. Overconfidence rises by 0.175 per hour along quiet runs, and after one silent hour the model reports `sleeping` in 37 of 38 away and `home_inactive` runs.
 
 ## [0.7.0] - 2026-09-26
 

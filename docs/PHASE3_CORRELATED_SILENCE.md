@@ -195,8 +195,257 @@ They also check that:
 
 ## Results
 
-The results will be published here from the record
-`artifacts/phase3/phase3-correlated-silence.json`.
+The summary below is generated from the published record,
+`artifacts/phase3/phase3-correlated-silence.json`, by `render_summary`.
+A test checks that it still matches the record.
+
+<!-- generated-summary:start -->
+
+### Correlated silence: summary
+
+Generated from the record `phase3-correlated-silence`: protocol `138e35aa977d`, commit `c9724dc6697a`. Status: pre-specified diagnostic; development panel, which earlier work has inspected.
+
+- 20 households, each counted once. Streams are the instrumented evidence channels in 5-minute windows.
+- Every value is computed within a household. Across households, the mean and median carry 95% household bootstrap intervals from 10,000 resamples. Zero is independence, or a calibrated model for slopes.
+- Quiet states: sleeping, away, home_inactive.
+- Minimal effects: correlation 0.1, log_ratio 0.223, slope 0.02. A log ratio of log 1.25 is a ratio of 1.25.
+
+#### Pre-specified conclusion
+
+| Question | Verdict |
+| --- | ---: |
+| Does independence materially inflate silence evidence? (D1) | positive |
+| Does overconfidence grow with the number of silent channels? (C1) | negative |
+| The correlated-silence hypothesis | weakened |
+
+Supported: D1 and C1 are both positive: independence materially inflates silence evidence, and overconfidence grows with the number of silent channels. Weakened: D1 or C1 is negligible or negative.
+
+Verdicts: positive: mean >= delta and lower bound > 0; negative: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else.
+
+#### Estimands
+
+Log ratios are also shown as ratios, where 1 is independence:
+
+| Key | Role | Quantity | Mean | Median | As a ratio | Households above / below zero | Verdict |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| D1 | primary | log_inflation | +0.435 [+0.319, +0.559] | +0.368 [+0.263, +0.587] | 1.55 [1.38, 1.75] | 19 / 1 of 20 | positive |
+| D2 | primary | log_joint_silence_quiet | +0.144 [+0.107, +0.190] | +0.114 [+0.100, +0.143] | 1.15 [1.11, 1.21] | 20 / 0 of 20 | negligible |
+| C1 | primary | gap_slope | −0.059 [−0.083, −0.034] | −0.061 [−0.098, −0.049] |  | 4 / 16 of 20 | negative |
+| S1 | secondary | log_inflation_declared | +1.219 [+0.958, +1.513] | +1.102 [+0.820, +1.311] | 3.38 [2.61, 4.54] | 20 / 0 of 20 | positive |
+| S2 | secondary | log_marginal_factor | +0.784 [+0.557, +1.031] | +0.755 [+0.515, +1.073] | 2.19 [1.75, 2.80] | 19 / 1 of 20 | positive |
+| S3 | secondary | log_odds_silence_quiet | +4.429 [+3.795, +5.099] | +4.458 [+3.551, +4.814] | 83.81 [44.46, 163.88] | 19 / 0 of 19 | positive |
+| S4 | secondary | count_correlation_quiet | +0.301 [+0.273, +0.332] | +0.292 [+0.261, +0.317] |  | 20 / 0 of 20 | positive |
+| S5 | secondary | log_dispersion_quiet | +0.762 [+0.689, +0.837] | +0.777 [+0.731, +0.814] | 2.14 [1.99, 2.31] | 20 / 0 of 20 | positive |
+| S6 | secondary | confidence_slope | −0.030 [−0.034, −0.025] | −0.028 [−0.035, −0.024] |  | 0 / 20 of 20 | negative |
+| S7 | secondary | accuracy_slope | +0.030 [+0.005, +0.053] | +0.030 [+0.021, +0.069] |  | 15 / 5 of 20 | positive |
+| S8 | secondary | accumulation_slope | +0.175 [+0.118, +0.231] | +0.172 [+0.074, +0.280] |  | 18 / 2 of 20 | positive |
+
+#### Joint silence by state
+
+Mean log ratio of the observed probability that every channel is silent to each independence baseline, with the households where it is estimable. The difference is in probability:
+
+| State | Households | Against observed marginals | Against Poisson streams | Against the declared rates | Difference |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| away | 20 | +0.153 [+0.102, +0.228], uncertain | +1.549 [+1.050, +2.271] | +0.311 [+0.266, +0.343] | +0.116 [+0.088, +0.150] |
+| home_active | 20 | +0.649 [+0.450, +0.881], positive | +15.613 [+12.887, +18.349] | +3.520 [+3.069, +3.927] | +0.129 [+0.094, +0.168] |
+| home_inactive | 20 | +0.244 [+0.171, +0.328], positive | +5.332 [+4.266, +6.442] | +0.403 [+0.208, +0.586] | +0.095 [+0.071, +0.122] |
+| sleeping | 20 | +0.035 [+0.028, +0.043], negligible | +0.852 [+0.638, +1.104] | −0.006 [−0.044, +0.026] | +0.029 [+0.024, +0.037] |
+| bed_awake | 1 | +0.092, uncertain | +0.098 | +1.149 | +0.079 |
+| bathroom_activity | 3 | +1.282 [+0.546, +1.760], positive | +12.124 [+9.123, +15.047] | +0.723 [−2.164, +2.396] | +0.172 [+0.045, +0.282] |
+| kitchen_activity | 4 | +1.118 [+0.629, +1.413], positive | +20.892 [+9.724, +33.566] | +1.374 [+0.816, +1.932] | +0.088 [+0.053, +0.135] |
+
+#### Pairwise dependence by state
+
+Mean across households of each household's median over channel pairs (log odds ratio of silence, log pair silence ratio), mean pairwise count correlation, and log dispersion of the number of silent channels:
+
+| State | Log odds ratio of silence | Log pair silence ratio | Count correlation | Log dispersion |
+| --- | ---: | ---: | ---: | ---: |
+| away | +6.623 [+5.928, +7.303] (n = 13) | +0.026 [+0.017, +0.040] (n = 20) | +0.407 [+0.371, +0.447] (n = 20) | +1.159 [+1.075, +1.232] (n = 20) |
+| home_active | +1.833 [+1.619, +2.052] (n = 20) | +0.108 [+0.063, +0.171] (n = 20) | +0.170 [+0.134, +0.209] (n = 20) | +0.751 [+0.668, +0.838] (n = 20) |
+| home_inactive | +3.268 [+2.636, +4.070] (n = 19) | +0.037 [+0.022, +0.061] (n = 20) | +0.214 [+0.185, +0.244] (n = 20) | +0.646 [+0.548, +0.745] (n = 20) |
+| sleeping | +4.632 [+3.710, +5.665] (n = 13) | +0.004 [+0.002, +0.008] (n = 20) | +0.283 [+0.238, +0.327] (n = 20) | +0.483 [+0.399, +0.575] (n = 20) |
+| bed_awake | n/a (n = 0) | +0.009 (n = 1) | +0.224 (n = 1) | +0.533 (n = 1) |
+| bathroom_activity | +2.891 [+2.244, +3.520] (n = 18) | +0.180 [+0.141, +0.223] (n = 19) | +0.051 [+0.019, +0.083] (n = 19) | +0.746 [+0.662, +0.834] (n = 19) |
+| kitchen_activity | +2.671 [+1.958, +3.320] (n = 17) | +0.146 [+0.087, +0.220] (n = 18) | +0.047 [+0.010, +0.089] (n = 18) | +0.655 [+0.560, +0.744] (n = 18) |
+
+#### Channel pairs in the quiet states
+
+Mean across households, each household averaged over its quiet states where the statistic is estimable:
+
+| Pair | Log odds ratio of silence | Households above / below zero | Log pair silence ratio | Households above / below zero |
+| --- | ---: | ---: | ---: | ---: |
+| bathroom_motion and bedroom_motion | +5.205 [+4.458, +6.035] | 14 / 0 of 14 | +0.030 [+0.021, +0.041] | 19 / 0 of 19 |
+| bathroom_motion and hall_door | +5.906 [+4.119, +7.571] | 6 / 0 of 6 | +0.014 [+0.009, +0.019] | 19 / 0 of 19 |
+| bathroom_motion and hall_motion | n/a | 0 | +0.003 | 1 / 0 of 1 |
+| bathroom_motion and kitchen_motion | +3.840 [+2.356, +5.625] | 9 / 0 of 9 | +0.014 [+0.007, +0.025] | 19 / 0 of 19 |
+| bathroom_motion and living_motion | +3.869 [+2.946, +4.927] | 15 / 0 of 15 | +0.022 [+0.014, +0.033] | 19 / 0 of 19 |
+| bedroom_motion and hall_door | +4.611 [+3.373, +5.855] | 14 / 0 of 14 | +0.023 [+0.015, +0.033] | 20 / 0 of 20 |
+| bedroom_motion and hall_motion | +1.491 | 1 / 0 of 1 | +0.012 [+0.002, +0.022] | 2 / 0 of 2 |
+| bedroom_motion and kitchen_motion | +2.591 [+1.784, +3.406] | 14 / 1 of 15 | +0.023 [+0.011, +0.037] | 20 / 0 of 20 |
+| bedroom_motion and living_motion | +3.217 [+2.219, +4.273] | 18 / 1 of 19 | +0.033 [+0.015, +0.054] | 16 / 4 of 20 |
+| hall_door and hall_motion | +1.119 | 1 / 0 of 1 | +0.011 [+0.008, +0.014] | 2 / 0 of 2 |
+| hall_door and kitchen_motion | +4.119 [+2.677, +5.724] | 11 / 0 of 11 | +0.016 [+0.011, +0.021] | 20 / 0 of 20 |
+| hall_door and living_motion | +5.230 [+4.457, +6.028] | 19 / 0 of 19 | +0.031 [+0.024, +0.038] | 20 / 0 of 20 |
+| hall_motion and kitchen_motion | +3.495 | 1 / 0 of 1 | +0.021 [+0.003, +0.039] | 2 / 0 of 2 |
+| hall_motion and living_motion | +4.099 | 1 / 0 of 1 | +0.039 [+0.008, +0.069] | 2 / 0 of 2 |
+| kitchen_motion and living_motion | +4.715 [+4.040, +5.391] | 17 / 0 of 17 | +0.040 [+0.029, +0.053] | 20 / 0 of 20 |
+
+#### Households
+
+Each household's values. D1 and S1 are shown as inflation factors, D2 as a ratio; C1 and S8 are slopes of overconfidence:
+
+| Household | Channels | D1 inflation | S1 declared inflation | D2 joint silence | C1 per silent channel | S8 per quiet hour |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| hh101 | 5 | 0.93 | 1.59 | 1.11 | +0.009 | +0.194 |
+| hh102 | 5 | 1.12 | 2.48 | 1.05 | −0.101 | +0.099 |
+| hh103 | 5 | 1.87 | 19.79 | 1.11 | −0.067 | +0.292 |
+| hh105 | 5 | 1.45 | 4.33 | 1.11 | −0.082 | +0.151 |
+| hh106 | 5 | 1.44 | 2.97 | 1.16 | −0.132 | +0.235 |
+| hh108 | 5 | 1.70 | 2.78 | 1.19 | −0.055 | +0.274 |
+| hh110 | 5 | 1.15 | 3.28 | 1.09 | −0.118 | +0.358 |
+| hh111 | 5 | 1.23 | 2.18 | 1.08 | −0.100 | +0.350 |
+| hh114 | 5 | 1.82 | 6.87 | 1.12 | −0.053 | +0.038 |
+| hh118 | 5 | 1.31 | 3.06 | 1.14 | −0.096 | +0.083 |
+| hh119 | 5 | 1.43 | 1.67 | 1.14 | −0.053 | +0.101 |
+| hh120 | 5 | 1.22 | 3.39 | 1.07 | −0.116 | +0.263 |
+| hh122 | 5 | 1.29 | 4.05 | 1.12 | −0.047 | +0.287 |
+| hh123 | 5 | 1.91 | 3.39 | 1.15 | −0.005 | +0.066 |
+| hh124 | 6 | 2.92 | 8.82 | 1.04 | +0.040 | +0.031 |
+| hh125 | 5 | 1.61 | 1.99 | 1.10 | −0.143 | −0.047 |
+| hh126 | 5 | 2.41 | 7.90 | 1.55 | −0.051 | −0.013 |
+| hh127 | 5 | 1.41 | 2.28 | 1.23 | +0.052 | +0.046 |
+| hh129 | 5 | 1.77 | 1.67 | 1.42 | −0.095 | +0.329 |
+| hh130 | 5 | 2.13 | 2.26 | 1.24 | +0.026 | +0.365 |
+
+Across households, the Spearman correlation of D1 and C1 is +0.392 [−0.103, +0.815], n = 20.
+
+#### Representative quiet periods
+
+One pre-specified quiet run per household and quiet state. Medians across households of the confidence predicted by the transition before the first window, and of the posterior confidence after windows 1, 6 and the last recorded:
+
+| State | Households | Predicted, window 1 | After window 1 | After window 6 | After the last | Silent channels |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| sleeping | 20 | 0.787 | 0.729 | 0.975 | 0.986 | 5 |
+| away | 20 | 0.790 | 0.472 | 0.710 | 0.658 | 5 |
+| home_inactive | 18 | 0.780 | 0.477 | 0.700 | 0.684 | 5 |
+
+<!-- generated-summary:end -->
+
+### Figures
+
+`scripts/plot_phase3_silence.py` drew these from the published record. Each
+carries the SHA-256 of the data it plots, and a test checks it against the
+record.
+
+![Observed against independent joint silence, per household and state](figures/phase3-silence-joint-silence.svg)
+
+*Joint silence on every channel, per household and state where it is
+estimable. Points above the line are silent together more often than
+independence implies.*
+
+![Silence-evidence inflation factor per household](figures/phase3-silence-inflation.svg)
+
+*The inflation factor per household, from dependence alone (D1) and with the
+filter's declared terms (S1). The solid line is independence; the dashed line
+is the minimal effect, 1.25.*
+
+![Overconfidence by the number of silent channels](figures/phase3-silence-overconfidence.svg)
+
+*Mean confidence minus accuracy at each number of silent channels, per
+household, not adjusted for the predicted state. Only `hh124` has six
+channels, so the point at six is one household.*
+
+![Confidence along the representative quiet periods](figures/phase3-silence-quiet-runs.svg)
+
+*Posterior confidence along each representative quiet run. Window 0 is the
+confidence predicted by the transition before the first silent window.*
+
+### What this shows and does not show
+
+Figures are means across the 20 homes, with 95% household intervals, and the
+number of homes on each side of zero.
+
+- **By the pre-specified rule, the hypothesis is weakened.** D1 is positive,
+  but C1 is negative.
+- **Silences are strongly dependent, given the state.** In the quiet states:
+  - the median pairwise log odds ratio of silence is +4.43 [+3.80, +5.10],
+    above zero in all 19 homes where it is estimable (S3);
+  - counts correlate at +0.30 [+0.27, +0.33], in all 20 homes (S4);
+  - the number of silent channels varies 2.14 [1.99, 2.31] times as much as
+    independence allows, in all 20 homes (S5).
+- **That dependence materially inflates silence evidence (D1).** Independence
+  overstates the spread of joint-silence log-evidence across states by a
+  factor of 1.55 [1.38, 1.75], in 19 of 20 homes.
+- **The excess joint silence in the quiet states is small (D2).**
+  - Every channel is silent together 1.15 [1.11, 1.21] times as often as
+    independence implies: a negligible verdict.
+  - The ratio cannot be large there. Each channel is silent in almost every
+    quiet window (the median home is fully silent in 88% of its sleeping
+    windows and 94% of its away windows), so the product of the channels'
+    silence is already close to the joint silence.
+  - The excess is larger where joint silence is rarer: 1.91 in
+    `home_active`, and above 3 in the bathroom and kitchen states of the few
+    homes where it is estimable.
+- **The declared rates overstate silence evidence more than dependence does.**
+  - The filter's own silence terms overstate the spread by 3.38
+    [2.61, 4.54], in all 20 homes (S1).
+  - On the log scale that is exactly D1 plus S2. Dependence accounts for
+    0.435 of the mean 1.219, and the declared rates for 0.784, a factor of
+    2.19 [1.75, 2.80] (S2).
+- **Overconfidence does not grow with the number of silent channels (C1).**
+  - Within the predicted state it falls by 0.059 [0.034, 0.083] per
+    additional silent channel, in 16 of 20 homes.
+  - Confidence falls by 0.030 per silent channel, in all 20 homes (S6).
+    Accuracy rises by 0.030 (S7).
+  - Unadjusted, windows with every channel active have mean confidence 1.00
+    and accuracy 0.33. Windows with five silent channels, which is all of
+    them in 19 of the 20 homes, have 0.83 and 0.51. The model is most
+    overconfident where channels are active, not silent.
+- **Overconfidence grows along quiet runs (S8).**
+  - It rises by 0.175 [0.118, 0.231] per hour of consecutive fully silent
+    windows, in 18 of 20 homes.
+  - In the representative sleeping runs, the median confidence is 0.73 after
+    the first silent window, 0.975 after six (30 minutes) and 0.986 after
+    twelve.
+- **Silence drives every quiet state towards `sleeping`.**
+  - After twelve fully silent windows, the model reports `sleeping` in all 20
+    sleeping runs, 19 of 20 away runs and all 18 `home_inactive` runs.
+  - The median confidence at that point is 0.658 in the away runs and 0.684
+    in the `home_inactive` runs, still rising.
+  - This follows from the construction. In a fully silent window, every home
+    with the same channels gets the same update, from the declared terms and
+    the transition. The home only sets the belief the run starts from, which
+    is why several trajectories in the last figure coincide.
+- **One household stands out.** `hh124` is the only one with six channels. In
+  its 16,586 fully silent windows the model's mean confidence is 0.97 and its
+  accuracy 0.03.
+- **Dependence and overconfidence are not clearly linked across homes.** The
+  Spearman correlation of D1 and C1 is +0.39 [−0.10, +0.82].
+
+The reading, then:
+
+- The independence assumption is materially wrong for silence.
+- But the pre-specified consequence, overconfidence growing with the number of
+  jointly silent channels, is not what the data show.
+- Quiet-period saturation appears as accumulation over consecutive silent
+  windows, with the posterior drifting to `sleeping`.
+- The filter's silence terms are overstated more by their declared rates than
+  by dependence.
+
+**Not shown:**
+
+- This is the development panel, which earlier work has inspected, so it is
+  not a held-out or external claim.
+- The diagnostic runs the filter's generative model on the six channels at
+  full reliability. The production pipeline's health and attribution layers
+  are not included.
+- Dependence is conditional on the annotated state. The annotations are
+  coarse, and the diagnostic does not separate the causes of dependence, such
+  as time of day or which room the resident is in.
+- C1 and S8 are associations within the predicted state. No change to the
+  evidence, such as tempering silence, is tested, because that would change
+  inference.
+- Windows are autocorrelated, so there are no within-household intervals.
 
 ## Reproducing it
 

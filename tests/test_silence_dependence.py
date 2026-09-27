@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections.abc import Iterator
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
@@ -588,3 +589,40 @@ class TestRecord:
             text = path.read_text(encoding="utf-8")
             assert f"data sha256 {data_sha256(data[name])}" in text
             assert path.read_bytes() == second[name].read_bytes()
+
+
+# ----------------------------------------------------------------------------
+# The published result
+# ----------------------------------------------------------------------------
+class TestPublishedResult:
+    """The published development-panel result, and the page that reports it."""
+
+    def test_it_ran_the_frozen_protocol_on_a_clean_tree(self) -> None:
+        payload = load_record(PUBLISHED)
+        splits = load_frozen_splits(SPLITS)
+        declared = declared_protocol(splits)
+        assert payload["configuration"]["protocol_sha256"] == declared.sha256()
+        assert payload["environment"]["git_dirty"] == "false"
+        inputs = {item["name"]: item["sha256"] for item in payload["inputs"]}
+        assert inputs.pop(PROTOCOL.name) == check_frozen_protocol(declared, PROTOCOL)
+        assert inputs.pop(SPLITS.name) == splits.sha256
+        assert inputs == {
+            entry["filename"]: entry["sha256"] for entry in splits.homes.values()
+        }
+        assert sorted(payload["results"]["households"]) == sorted(splits.homes)
+
+    def test_the_page_carries_the_summary_generated_from_it(self) -> None:
+        text = DOC.read_text(encoding="utf-8")
+        block = text.split("<!-- generated-summary:start -->")[1]
+        block = block.split("<!-- generated-summary:end -->")[0]
+        assert block.strip() == render_summary(load_record(PUBLISHED), level=3).strip()
+
+    def test_the_committed_figures_plot_the_published_record(self) -> None:
+        data = figure_data(load_record(PUBLISHED))
+        for name in FIGURES:
+            svg = (FIGURE_DIR / f"phase3-silence-{name}.svg").read_text(
+                encoding="utf-8"
+            )
+            digest = re.search(r"data sha256 ([0-9a-f]{64})", svg)
+            assert digest is not None
+            assert digest.group(1) == data_sha256(data[name])
