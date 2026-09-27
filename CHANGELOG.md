@@ -40,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Recent history is worth −0.021 to the model with the history state, against +0.021 to the original model re-measured in the same run.
     - The loss is mostly `home_active` recall, down 0.164. Log loss improves by 0.726, but Brier score and calibration error do not.
     - The history gain is 0.013 to 0.021 smaller when the hour is known, in every model family.
+- Added the pre-specified Phase 3.3 correlated-silence diagnostic, `sensor_modeling.datasets.silence_dependence`, with its frozen protocol, `artifacts/phase3/silence_protocol.json`, committed before any household was examined. It tests whether independent room-level Poisson silence likelihoods cause posterior over-concentration. It is diagnostic only: no inference, emission model or default changes. The design is described in `docs/PHASE3_CORRELATED_SILENCE.md`.
+  - **Dependence.** Within each household and state, it compares joint silence on every channel with three independence baselines: observed marginals, Poisson streams and the declared rates. It also reports pairwise log odds ratios of silence, count correlations and the dispersion of the number of silent channels.
+  - **Silence-evidence inflation.** Only the variation of joint silence across states can move a posterior. The inflation factor measures how much independence overstates that variation, from dependence alone and with the filter's declared terms.
+  - **Concentration.** It measures the slope of overconfidence on the number of silent channels and along quiet runs, within the predicted state, where a calibrated model's slope is zero. Representative quiet periods are decomposed channel by channel.
+  - **Rules.** Households are the unit of replication, with household bootstrap intervals. Joint-silence statistics are computed only where they are estimable. The conclusion rule is declared in advance.
+  - **Checks.** On synthetic households, the tests show that the diagnostic reads conditionally independent streams as independent and strongly correlated silence as dependent. The decomposed recursion equals `MultimodalBayesFilter`.
+  - **Output.** `scripts/run_phase3_silence.py` writes the record, a summary generated from it, and figures drawn from it. `scripts/plot_phase3_silence.py` redraws the figures from any record, and each SVG carries the SHA-256 of the data it plots.
 
 ## [0.7.0] - 2026-09-26
 
