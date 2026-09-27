@@ -42,6 +42,7 @@ from .evaluate import (
     uncertainty_diagnostics,
     uncertainty_panel_summary,
 )
+from .history_fit import fit_history_model
 from .information_sets import (
     HH_EVIDENCE_CHANNELS,
     EvidenceChannel,
@@ -65,6 +66,12 @@ from .matched_evaluation import (
     compare_information_sets,
     held_out_metrics,
     run_matched_evaluation,
+)
+from .periodic_prior import (
+    PeriodicPriorConfig,
+    PeriodicStatePrior,
+    fit_periodic_prior,
+    hour_state_counts,
 )
 from .rates import (
     RateReport,
@@ -119,6 +126,11 @@ __all__ = [
     "RateReport",
     "RateSample",
     "fit_circadian_profile",
+    "fit_history_model",
+    "PeriodicPriorConfig",
+    "PeriodicStatePrior",
+    "fit_periodic_prior",
+    "hour_state_counts",
     "fit_emission_defaults",
     "measure_event_rates",
     "pooled_rate_report",

@@ -15,6 +15,7 @@ hard to produce by accident.
 | Row order carries no history | Rows are presented in seeded random order. |
 | Each prediction uses only its own row | Held-out rows are predicted a second time as a random half in a new order. A model whose prediction for any row changes is refused. |
 | Statistics are household-level | Each held-out household is scored on its own. Models are compared by paired differences across households, never by pooling observations. |
+| The evaluation is online | Every feature closes at or before its prediction moment. The runner refuses a fixed-lag smoothing regime, and a model that declares one through an `inference_regime` attribute. The record and its results state the regime, `online filter`. Pooling folds or comparing sets refuses runs from different regimes. See [inference regimes](INFERENCE_REGIMES.md). |
 
 ## Plugging in a model
 

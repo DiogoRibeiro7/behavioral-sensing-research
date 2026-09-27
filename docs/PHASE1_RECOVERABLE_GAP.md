@@ -114,7 +114,10 @@ k     0 in I0; 3, the set's history depth, in I2
   circadian term rescales transition rates by hour. That acts only through
   unbounded recursion and says nothing about how probable a state is at a
   given hour. Placing it in `I1` would either ignore the hour or need a term
-  the model does not have.
+  the model does not have. The [periodic state prior](PERIODIC_STATE_PRIOR.md)
+  now supplies that term. With `GapProtocol(periodic_prior=...)`, the model
+  `generative_periodic` is scored in `I1` and `I3`. The result below predates
+  it and does not include it.
 - **The production filter in any set.** It conditions on every earlier window
   and on health and attribution layers built from the whole history. Its
   information strictly contains `I0` and `I2`. It neither contains nor is
@@ -160,6 +163,7 @@ The summary below is generated from the published record,
 
 Generated from the record `phase1-recoverable-information-gap`: protocol `e1082697cfbf`, commit `9431b9a2f0e3`. Status: exploratory: the development homes have been inspected in earlier work.
 
+- Inference regime: online filter (attested on migration from schema 1.1).
 - 20 households in 2 cross-fitted folds. Each is scored once, by models never fitted on it.
 - Intervals are 95% household bootstrap intervals from 10,000 resamples.
 - Differences are paired by household. A positive value favours the first model, or the larger set.

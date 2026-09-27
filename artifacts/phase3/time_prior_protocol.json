@@ -1,0 +1,523 @@
+{
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "statistic": "mean paired difference, with the median also recorded",
+    "unit": "household"
+  },
+  "calibration": "expected calibration error over 10 confidence bins",
+  "cells": {
+    "diagnostic": [
+      "I1",
+      "I3"
+    ],
+    "generative": [
+      "I0",
+      "I2"
+    ],
+    "generative_periodic": [
+      "I1",
+      "I3"
+    ],
+    "generative_untimed": [
+      "I0",
+      "I2"
+    ],
+    "logistic": [
+      "I1",
+      "I3"
+    ],
+    "state_frequency": [
+      "I1",
+      "I3"
+    ]
+  },
+  "criteria": {
+    "failure": "P1 balanced accuracy is negligible or favours the reference",
+    "hierarchy": "household adaptation helps if A-I1 balanced accuracy favours the adapted prior and A-I1 log loss does not favour the population prior",
+    "inconclusive": "neither success nor failure",
+    "practical": "P2 is judged by the same rule, as the improvement over the original model",
+    "success": "P1 balanced accuracy favours the model, and P1 log loss and P1 calibration error do not favour the reference",
+    "verdicts": "favours model: mean >= delta and lower bound > 0; favours reference: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else"
+  },
+  "estimands": [
+    {
+      "key": "P1",
+      "model": "generative_periodic@I1",
+      "question": "what the hour is worth to the hierarchical model",
+      "reference": "generative_untimed@I0",
+      "role": "primary"
+    },
+    {
+      "key": "P2",
+      "model": "generative_periodic@I1",
+      "question": "the hierarchical model with the hour against the original model without it",
+      "reference": "generative@I0",
+      "role": "primary"
+    },
+    {
+      "key": "P3",
+      "model": "diagnostic@I1",
+      "question": "formulation gap at I1: the diagnostic against the hierarchical model",
+      "reference": "generative_periodic@I1",
+      "role": "primary"
+    },
+    {
+      "key": "P4",
+      "model": "logistic@I1",
+      "question": "formulation gap at I1: logistic regression against the hierarchical model",
+      "reference": "generative_periodic@I1",
+      "role": "primary"
+    },
+    {
+      "key": "S1",
+      "model": "generative_untimed@I0",
+      "question": "the fitted prior against the declared one, both without the hour",
+      "reference": "generative@I0",
+      "role": "secondary"
+    },
+    {
+      "key": "S2",
+      "model": "generative_periodic@I3",
+      "question": "what the hour is worth to the hierarchical model with recent history",
+      "reference": "generative_untimed@I2",
+      "role": "secondary"
+    },
+    {
+      "key": "S3",
+      "model": "generative_periodic@I3",
+      "question": "the hierarchical model with the hour and history against the original model with history",
+      "reference": "generative@I2",
+      "role": "secondary"
+    },
+    {
+      "key": "S4",
+      "model": "diagnostic@I3",
+      "question": "formulation gap at I3: the diagnostic against the hierarchical model",
+      "reference": "generative_periodic@I3",
+      "role": "secondary"
+    },
+    {
+      "key": "S5",
+      "model": "logistic@I3",
+      "question": "formulation gap at I3: logistic regression against the hierarchical model",
+      "reference": "generative_periodic@I3",
+      "role": "secondary"
+    },
+    {
+      "key": "S6",
+      "model": "generative_periodic@I3",
+      "question": "what recent history is worth to the hierarchical model",
+      "reference": "generative_periodic@I1",
+      "role": "secondary"
+    }
+  ],
+  "households": {
+    "development_households": "none: no setting is selected on data",
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21"
+  },
+  "information_sets": {
+    "I0": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0"
+      ],
+      "components": [
+        "current_evidence"
+      ],
+      "history_steps": 3,
+      "name": "current",
+      "sha256": "c4ef81951d5c35bca43ed458926c4a14dbb48c1af3e7496721f2a139c0649bdb",
+      "step_seconds": 300.0
+    },
+    "I1": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0",
+        "hour_of_day"
+      ],
+      "components": [
+        "current_evidence",
+        "time_of_day"
+      ],
+      "history_steps": 3,
+      "name": "current+time_of_day",
+      "sha256": "cb70da40bb03ea3a2b7ac30b6087a988e99df599cfc222291a638ac31d67ea76",
+      "step_seconds": 300.0
+    },
+    "I2": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0",
+        "events_bathroom_motion_lag1",
+        "events_bedroom_motion_lag1",
+        "events_hall_door_lag1",
+        "events_hall_motion_lag1",
+        "events_kitchen_motion_lag1",
+        "events_living_motion_lag1",
+        "events_bathroom_motion_lag2",
+        "events_bedroom_motion_lag2",
+        "events_hall_door_lag2",
+        "events_hall_motion_lag2",
+        "events_kitchen_motion_lag2",
+        "events_living_motion_lag2",
+        "events_bathroom_motion_lag3",
+        "events_bedroom_motion_lag3",
+        "events_hall_door_lag3",
+        "events_hall_motion_lag3",
+        "events_kitchen_motion_lag3",
+        "events_living_motion_lag3"
+      ],
+      "components": [
+        "current_evidence",
+        "recent_history"
+      ],
+      "history_steps": 3,
+      "name": "current+history",
+      "sha256": "eeaff036f46399dc343344718f430a98c145f7d511d249c2c51959b650c3970e",
+      "step_seconds": 300.0
+    },
+    "I3": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0",
+        "hour_of_day",
+        "events_bathroom_motion_lag1",
+        "events_bedroom_motion_lag1",
+        "events_hall_door_lag1",
+        "events_hall_motion_lag1",
+        "events_kitchen_motion_lag1",
+        "events_living_motion_lag1",
+        "events_bathroom_motion_lag2",
+        "events_bedroom_motion_lag2",
+        "events_hall_door_lag2",
+        "events_hall_motion_lag2",
+        "events_kitchen_motion_lag2",
+        "events_living_motion_lag2",
+        "events_bathroom_motion_lag3",
+        "events_bedroom_motion_lag3",
+        "events_hall_door_lag3",
+        "events_hall_motion_lag3",
+        "events_kitchen_motion_lag3",
+        "events_living_motion_lag3"
+      ],
+      "components": [
+        "current_evidence",
+        "recent_history",
+        "time_of_day"
+      ],
+      "history_steps": 3,
+      "name": "current+time_of_day+history",
+      "sha256": "02e25a6acc1f5a31076bd3374e520f7afe53b0afb49f2ea28223de3ee3ed931d",
+      "step_seconds": 300.0
+    }
+  },
+  "metrics": [
+    "balanced_accuracy",
+    "log_loss",
+    "brier",
+    "calibration_error"
+  ],
+  "minimal_differences": {
+    "balanced_accuracy": 0.02,
+    "brier": 0.01,
+    "calibration_error": 0.02,
+    "log_loss": 0.05,
+    "recall": 0.05
+  },
+  "models": {
+    "diagnostic": {
+      "early_stopping": false,
+      "estimator": "HistGradientBoostingClassifier",
+      "hour_of_day": "ordinal",
+      "l2_regularization": 0.0,
+      "learning_rate": 0.1,
+      "loss": "log_loss",
+      "max_iter": 100,
+      "max_leaf_nodes": 31,
+      "min_samples_leaf": 20,
+      "missing": "zero plus indicator",
+      "model": "GradientBoostingBaseline",
+      "random_state": "run seed",
+      "states_without_training_rows": "add-one probability"
+    },
+    "generative": {
+      "attribution": 1.0,
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "nothing: every parameter is the declared default",
+      "model": "restricted generative filter",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "generative_periodic": {
+      "attribution": 1.0,
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "the population prior, per fold, on the fold's training households' labels only; held-out households get the population prior",
+      "model": "restricted generative filter with a periodic state prior",
+      "periodic_prior": {
+        "basis": "1, sin(k theta), cos(k theta); theta = 2 pi (hour + 1/2) / 24",
+        "harmonics": 2,
+        "household_precision": 24.0,
+        "population_precision": 1.0,
+        "unit": "labelled hours"
+      },
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "the periodic prior pi_h at the row's declared hour",
+      "reliability": 1.0,
+      "transition": "default StateOntology with the prior as its circadian term, at the row's declared hour, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "generative_untimed": {
+      "attribution": 1.0,
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "the population prior, per fold, on the fold's training households' labels only",
+      "model": "restricted generative filter with a time-disabled periodic prior",
+      "periodic_prior": {
+        "basis": "1, sin(k theta), cos(k theta); theta = 2 pi (hour + 1/2) / 24",
+        "harmonics": 2,
+        "household_precision": 24.0,
+        "population_precision": 1.0,
+        "unit": "labelled hours"
+      },
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "the periodic prior fitted on counts pooled over hours, so every periodic coefficient is zero; its constant pi_bar is the starting belief",
+      "reliability": 1.0,
+      "transition": "default StateOntology with dwell times scaled by pi_bar(s) / pi(s), the time-homogeneous form of the same prior",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "logistic": {
+      "C": 1.0,
+      "hour_of_day": "one-hot",
+      "max_iter": 1000,
+      "missing": "zero plus indicator",
+      "model": "LogisticBaseline",
+      "penalty": "l2",
+      "random_state": "run seed",
+      "solver": "lbfgs",
+      "standardised": true,
+      "states_without_training_rows": "add-one probability"
+    },
+    "state_frequency": {
+      "model": "StateFrequencyBaseline",
+      "smoothing": "add-one"
+    }
+  },
+  "name": "phase3-hierarchical-time-prior",
+  "per_state_recall": {
+    "estimands": [
+      "P1",
+      "P2"
+    ],
+    "rare_rule": "share of labelled time below 0.05 in either fold's training households"
+  },
+  "pooling": {
+    "adaptation_arm": {
+      "comparison": "adapted prior against the population prior, same model and moments, in I1 and I3",
+      "declared_precision": 24.0,
+      "precisions": [
+        24.0,
+        2.4,
+        240.0
+      ],
+      "scored": "only that household's labelled moments after the window",
+      "window": "from each held-out household's first observation; its labels fit the household deviation",
+      "window_days": 7.0
+    },
+    "household_precision": 24.0,
+    "population_arm": "held-out households get the population prior",
+    "selection": "declared before scoring, not selected on any data"
+  },
+  "protocol_sha256": "50c92f687181c66f4206ed7a234da6932ef4942123af4095efc53039ebdf9305",
+  "schema": "time-prior-protocol/1",
+  "seeds": {
+    "bootstrap": 0,
+    "models": 0,
+    "row_order": 0
+  },
+  "tuning": "none: every setting is declared here, before scoring"
+}

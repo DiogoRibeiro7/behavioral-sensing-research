@@ -65,6 +65,12 @@ from ..evaluation.provenance import (
     ModelRecord,
     ReportedInterval,
 )
+from ..fusion.regime import (
+    ONLINE,
+    InferenceRegime,
+    require_online,
+    require_same_regime,
+)
 from ..states.ontology import DEFAULT_STATES, BehaviouralState
 from .casas import CasasRecording, truth_series
 from .information_sets import FeatureTable, InformationSet, build_feature_table
@@ -313,6 +319,11 @@ class StateModel(Protocol):
 
     ``predict`` must be a deterministic function of each row alone. The runner
     checks this and refuses a model that violates it.
+
+    A model may declare an ``inference_regime`` attribute, an
+    :class:`~sensor_modeling.fusion.InferenceRegime`; one without it is online.
+    Every feature row closes at or before its prediction moment, so the runner
+    is an online evaluation, and it refuses a model that declares a smoother.
     """
 
     def fit(self, training: LabelledRows, development: LabelledRows | None) -> None:
@@ -419,6 +430,9 @@ class MatchedEvaluation:
         SHA-256 of each scored held-out household's prediction moments.
     path
         Where the record was written, if an output directory was given.
+    regime
+        The inference regime every prediction comes from: the online filter,
+        since every feature closes at or before its prediction moment.
     """
 
     record: ExperimentRecord
@@ -430,6 +444,7 @@ class MatchedEvaluation:
     states: tuple[BehaviouralState, ...]
     moments: Mapping[str, str]
     path: Path | None = None
+    regime: InferenceRegime = ONLINE
 
 
 @dataclass(frozen=True)
@@ -686,6 +701,7 @@ def run_matched_evaluation(
     confidence: float = 0.95,
     interval: str = "percentile",
     inputs: Sequence[InputArtifact] = (),
+    regime: InferenceRegime = ONLINE,
 ) -> MatchedEvaluation:
     """Fit and score several models under one information set.
 
@@ -727,6 +743,11 @@ def run_matched_evaluation(
     inputs
         Files the recordings were read from, with their digests, recorded as
         input provenance.
+    regime
+        The inference regime of the evaluation, recorded with its results.
+        Only the online filter is accepted: every window of an information set
+        closes at or before its prediction moment, and a fixed-lag smoother
+        reads later ones, so it must be evaluated and reported separately.
 
     Raises
     ------
@@ -734,6 +755,11 @@ def run_matched_evaluation(
         If the specification is inconsistent, a model's output is malformed or
         depends on rows other than its own, or nothing held out is labelled.
     """
+    require_online(
+        regime,
+        "a matched evaluation, whose features close at or before each "
+        "prediction moment,",
+    )
     space = _label_space(states)
     if interval not in INTERVAL_METHODS:
         raise ValueError(f"interval must be one of {INTERVAL_METHODS}")
@@ -810,6 +836,13 @@ def run_matched_evaluation(
         model = spec.build(seed)
         if not isinstance(model, StateModel):
             raise TypeError(f"model {spec.name!r} must provide fit and predict")
+        declared = getattr(model, "inference_regime", ONLINE)
+        if not isinstance(declared, InferenceRegime):
+            raise TypeError(
+                f"model {spec.name!r} declares an inference_regime that is not "
+                "an InferenceRegime"
+            )
+        require_online(declared, f"model {spec.name!r} in a matched evaluation")
         model.fit(training, development)
         predicted = _predict(model, spec.name, held_out, check)
         labels = [predicted.labels[i] for i in restore]
@@ -869,6 +902,7 @@ def run_matched_evaluation(
         },
     }
     results = {
+        "inference": regime.label,
         "households": {
             name: household.summary() for name, household in households.items()
         },
@@ -887,6 +921,7 @@ def run_matched_evaluation(
     record = ExperimentRecord(
         experiment=experiment,
         configuration=configuration,
+        inference=regime,
         seeds=[seed],
         results=_finite(results),
         data_source=data_source,
@@ -939,6 +974,7 @@ def run_matched_evaluation(
         states=space,
         moments={name: households[name].moments_sha256 for name in scored},
         path=path,
+        regime=regime,
     )
 
 
@@ -971,6 +1007,7 @@ def held_out_metrics(
     was never fitted on it.
     """
     folds = _runs(runs)
+    require_same_regime((fold.regime for fold in folds), "pooling folds")
     first = folds[0]
     specification = _spec_of(first, model)
     pooled: dict[str, PredictionMetrics] = {}
@@ -1010,7 +1047,8 @@ def compare_information_sets(
     - they use the same label space and model specification.
 
     Differences are oriented so that a positive value means the model did
-    better with the larger set.
+    better with the larger set. Runs from different inference regimes are
+    refused: a smoothed gain is never an online one.
 
     Parameters
     ----------
@@ -1027,6 +1065,9 @@ def compare_information_sets(
     if metric not in COMPARABLE_METRICS:
         raise ValueError(f"metric must be one of {sorted(COMPARABLE_METRICS)}")
     small, large = _runs(smaller), _runs(larger)
+    require_same_regime(
+        (run.regime for run in (*small, *large)), "comparing information sets"
+    )
     if len(small) != len(large):
         raise ValueError("both sides need one run per fold")
     reference, candidate = small[0].information_set, large[0].information_set
@@ -1042,8 +1083,7 @@ def compare_information_sets(
             raise ValueError("paired folds must use the same label space")
         if low.moments != high.moments:
             raise ValueError(
-                "paired folds must score identical moments in every held-out "
-                "household"
+                "paired folds must score identical moments in every held-out household"
             )
         if _spec_of(low, model) != _spec_of(high, model):
             raise ValueError(f"model {model!r} is specified differently across sets")

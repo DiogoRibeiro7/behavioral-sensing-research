@@ -1,0 +1,558 @@
+{
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "statistics": "mean and median paired differences",
+    "unit": "household"
+  },
+  "calibration": "expected calibration error over 10 confidence bins",
+  "cells": {
+    "filter_declared": [
+      "R"
+    ],
+    "filter_fitted_poisson": [
+      "R"
+    ],
+    "filter_hurdle": [
+      "R"
+    ],
+    "generative": [
+      "I0",
+      "I2"
+    ],
+    "generative_fitted_poisson": [
+      "I0"
+    ],
+    "generative_hurdle": [
+      "I0",
+      "I2"
+    ],
+    "generative_periodic": [
+      "I1",
+      "I3"
+    ],
+    "generative_periodic_hurdle": [
+      "I1",
+      "I3"
+    ]
+  },
+  "criteria": {
+    "failure": "calibration error is negligible or favours the declared rates",
+    "inconclusive": "anything else",
+    "mechanisms": "M1 and M2 get verdicts on the log-ratio and slope scales of Phase 3.3: positive, negative, negligible or uncertain",
+    "primary": "F0 and FR are each judged by the rule; the other estimands are read by it",
+    "success": "calibration error favours the fitted model, and neither log loss nor balanced accuracy favours the declared rates",
+    "trade-off": "calibration error favours the fitted model and balanced accuracy favours the declared rates",
+    "verdicts": "favours model: mean >= delta and lower bound > 0; favours reference: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else",
+    "why_calibration": "the diagnostic found the declared rates overstating evidence, which shows as overconfidence; balanced accuracy is a guard, not the target"
+  },
+  "descriptive": {
+    "dispersion": "the variance of an active window's count against its mean, per fold, channel and state, from the training households",
+    "drift": "in each held-out household's Phase 3.3 representative quiet runs, the state each recursion reports after the recorded windows, and its confidence"
+  },
+  "estimands": [
+    {
+      "key": "F0",
+      "kind": "formulation",
+      "model": "generative_hurdle@I0",
+      "question": "fitted hurdle channels against the declared rates, current windows",
+      "reference": "generative@I0",
+      "role": "primary"
+    },
+    {
+      "key": "FR",
+      "kind": "formulation",
+      "model": "filter_hurdle@R",
+      "question": "fitted hurdle channels against the declared rates, the filter's recursion over every window",
+      "reference": "filter_declared@R",
+      "role": "primary"
+    },
+    {
+      "key": "F1",
+      "kind": "formulation",
+      "model": "generative_periodic_hurdle@I1",
+      "question": "the same, with the Phase 3.1 time prior",
+      "reference": "generative_periodic@I1",
+      "role": "secondary"
+    },
+    {
+      "key": "F2",
+      "kind": "formulation",
+      "model": "generative_hurdle@I2",
+      "question": "the same, with three lagged windows",
+      "reference": "generative@I2",
+      "role": "secondary"
+    },
+    {
+      "key": "F3",
+      "kind": "formulation",
+      "model": "generative_periodic_hurdle@I3",
+      "question": "the same, with the time prior and three lagged windows",
+      "reference": "generative_periodic@I3",
+      "role": "secondary"
+    },
+    {
+      "key": "P0",
+      "kind": "formulation",
+      "model": "generative_fitted_poisson@I0",
+      "question": "fitted Poisson channels against the declared rates, current windows",
+      "reference": "generative@I0",
+      "role": "secondary"
+    },
+    {
+      "key": "PR",
+      "kind": "formulation",
+      "model": "filter_fitted_poisson@R",
+      "question": "fitted Poisson channels against the declared rates, the recursion",
+      "reference": "filter_declared@R",
+      "role": "secondary"
+    }
+  ],
+  "fitting": {
+    "hurdle": "pi = (Z + k pi0) / (W + k); m = (S + k m0) / (P + k); mu solves mu / (1 - exp(-mu)) = m",
+    "periodic_prior": "fitted per fold on the training households, the population prior for every held-out household",
+    "poisson": "lambda = (S + k lambda0) / (W + k)",
+    "prior": "lambda0 the declared expected count, pi0 = exp(-lambda0), m0 = lambda0 / (1 - exp(-lambda0)), each averaged over the training windows; a channel with no training window in a state takes the held-out household's declared value",
+    "pseudo_windows": 12.0,
+    "unit": "one parameter set per fold, per channel and state, pooled over the fold's training households' labelled windows"
+  },
+  "households": {
+    "development_households": "none: no setting is selected on data",
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21"
+  },
+  "inclusion": {
+    "generative_fitted_poisson": "secondary: the declared family with fitted values, to test whether silence needs its own parameter",
+    "generative_hurdle": "primary: the diagnostic found silence far more frequent than a Poisson with the observed mean allows, so silence needs its own parameter",
+    "generative_periodic_hurdle": "secondary: Phase 3.1 met its success rule, so the time prior is the current best generative model"
+  },
+  "information_sets": {
+    "I0": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0"
+      ],
+      "components": [
+        "current_evidence"
+      ],
+      "history_steps": 3,
+      "name": "current",
+      "sha256": "c4ef81951d5c35bca43ed458926c4a14dbb48c1af3e7496721f2a139c0649bdb",
+      "step_seconds": 300.0
+    },
+    "I1": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0",
+        "hour_of_day"
+      ],
+      "components": [
+        "current_evidence",
+        "time_of_day"
+      ],
+      "history_steps": 3,
+      "name": "current+time_of_day",
+      "sha256": "cb70da40bb03ea3a2b7ac30b6087a988e99df599cfc222291a638ac31d67ea76",
+      "step_seconds": 300.0
+    },
+    "I2": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0",
+        "events_bathroom_motion_lag1",
+        "events_bedroom_motion_lag1",
+        "events_hall_door_lag1",
+        "events_hall_motion_lag1",
+        "events_kitchen_motion_lag1",
+        "events_living_motion_lag1",
+        "events_bathroom_motion_lag2",
+        "events_bedroom_motion_lag2",
+        "events_hall_door_lag2",
+        "events_hall_motion_lag2",
+        "events_kitchen_motion_lag2",
+        "events_living_motion_lag2",
+        "events_bathroom_motion_lag3",
+        "events_bedroom_motion_lag3",
+        "events_hall_door_lag3",
+        "events_hall_motion_lag3",
+        "events_kitchen_motion_lag3",
+        "events_living_motion_lag3"
+      ],
+      "components": [
+        "current_evidence",
+        "recent_history"
+      ],
+      "history_steps": 3,
+      "name": "current+history",
+      "sha256": "eeaff036f46399dc343344718f430a98c145f7d511d249c2c51959b650c3970e",
+      "step_seconds": 300.0
+    },
+    "I3": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0",
+        "hour_of_day",
+        "events_bathroom_motion_lag1",
+        "events_bedroom_motion_lag1",
+        "events_hall_door_lag1",
+        "events_hall_motion_lag1",
+        "events_kitchen_motion_lag1",
+        "events_living_motion_lag1",
+        "events_bathroom_motion_lag2",
+        "events_bedroom_motion_lag2",
+        "events_hall_door_lag2",
+        "events_hall_motion_lag2",
+        "events_kitchen_motion_lag2",
+        "events_living_motion_lag2",
+        "events_bathroom_motion_lag3",
+        "events_bedroom_motion_lag3",
+        "events_hall_door_lag3",
+        "events_hall_motion_lag3",
+        "events_kitchen_motion_lag3",
+        "events_living_motion_lag3"
+      ],
+      "components": [
+        "current_evidence",
+        "recent_history",
+        "time_of_day"
+      ],
+      "history_steps": 3,
+      "name": "current+time_of_day+history",
+      "sha256": "02e25a6acc1f5a31076bd3374e520f7afe53b0afb49f2ea28223de3ee3ed931d",
+      "step_seconds": 300.0
+    },
+    "R": "the filter's recursion fed every window of the recording from the stationary distribution; both sides of a comparison receive the same windows"
+  },
+  "mechanisms": [
+    {
+      "key": "M1",
+      "quantity": "inflation_reduction_hurdle",
+      "question": "how much the fitted hurdle channels reduce the overstatement of silence evidence: log inflation, declared minus hurdle",
+      "role": "mechanism",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "M1P",
+      "quantity": "inflation_reduction_poisson",
+      "question": "the same for the fitted Poisson channels",
+      "role": "mechanism",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "M2",
+      "quantity": "accumulation_reduction_hurdle",
+      "question": "how much the fitted hurdle channels slow the growth of overconfidence along quiet runs: slope per hour, declared minus hurdle",
+      "role": "mechanism",
+      "scale": "slope"
+    },
+    {
+      "key": "M2P",
+      "quantity": "accumulation_reduction_poisson",
+      "question": "the same for the fitted Poisson channels",
+      "role": "mechanism",
+      "scale": "slope"
+    }
+  ],
+  "metrics": [
+    "balanced_accuracy",
+    "log_loss",
+    "brier",
+    "calibration_error"
+  ],
+  "minimal_differences": {
+    "balanced_accuracy": 0.02,
+    "brier": 0.01,
+    "calibration_error": 0.02,
+    "log_loss": 0.05,
+    "recall": 0.05
+  },
+  "minimal_effects": {
+    "correlation": 0.1,
+    "log_ratio": 0.22314355131420976,
+    "slope": 0.02
+  },
+  "models": {
+    "filter_declared": "declared Poisson channels, the recursion",
+    "filter_fitted_poisson": "fitted Poisson channels, the recursion",
+    "filter_hurdle": "fitted hurdle channels, the recursion",
+    "generative": {
+      "attribution": 1.0,
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "nothing: every parameter is the declared default",
+      "model": "restricted generative filter",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "generative_fitted_poisson": {
+      "attribution": 1.0,
+      "emissions": "per channel and state: a Poisson with the fitted mean count",
+      "fitted": "the mean count per fold, per channel and state, on the fold's training households' labelled windows only, shrunk toward the declared model by the declared pseudo-windows",
+      "model": "restricted generative filter with fitted Poisson channels",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "generative_hurdle": {
+      "attribution": 1.0,
+      "emissions": "per channel and state: P(silent) = pi, and a zero-truncated Poisson with rate mu for an active window's count",
+      "fitted": "pi and mu per fold, per channel and state, on the fold's training households' labelled windows only, shrunk toward the declared model by the declared pseudo-windows",
+      "model": "restricted generative filter with fitted hurdle channels",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "generative_periodic": {
+      "attribution": 1.0,
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "the population prior, per fold, on the fold's training households' labels only; held-out households get the population prior",
+      "model": "restricted generative filter with a periodic state prior",
+      "periodic_prior": {
+        "basis": "1, sin(k theta), cos(k theta); theta = 2 pi (hour + 1/2) / 24",
+        "harmonics": 2,
+        "household_precision": 24.0,
+        "population_precision": 1.0,
+        "unit": "labelled hours"
+      },
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "the periodic prior pi_h at the row's declared hour",
+      "reliability": 1.0,
+      "transition": "default StateOntology with the prior as its circadian term, at the row's declared hour, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "generative_periodic_hurdle": {
+      "attribution": 1.0,
+      "emissions": "per channel and state: P(silent) = pi, and a zero-truncated Poisson with rate mu for an active window's count",
+      "fitted": "pi and mu per fold, per channel and state, on the fold's training households' labelled windows only, shrunk toward the declared model by the declared pseudo-windows",
+      "model": "restricted generative filter with fitted hurdle channels",
+      "periodic_prior": {
+        "basis": "1, sin(k theta), cos(k theta); theta = 2 pi (hour + 1/2) / 24",
+        "harmonics": 2,
+        "household_precision": 24.0,
+        "population_precision": 1.0,
+        "unit": "labelled hours"
+      },
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "the periodic prior pi_h at the row's declared hour",
+      "reliability": 1.0,
+      "transition": "default StateOntology with the prior as its circadian term, at the row's declared hour, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    }
+  },
+  "name": "phase3-fitted-rates",
+  "per_state_recall": {
+    "estimands": [
+      "F0",
+      "FR"
+    ],
+    "rare_rule": "share of labelled time below 0.05 in either fold's training households"
+  },
+  "protocol_sha256": "4f5db165af7eb9178b6154b3f01db806094955571cec1b07a92623f1e8cfc8d6",
+  "routing": "Phase 3.3 concluded 'weakened' under its frozen rule, which selects this route: fit the channels' marginal observation models on training households, keeping them conditionally independent. The two-stage count-and-allocation model is the route for 'supported' and is not built.",
+  "schema": "fitted-rates-protocol/1",
+  "seeds": {
+    "bootstrap": 0
+  },
+  "silence_settings": {
+    "accumulation_steps": 36,
+    "case_min_steps": 12,
+    "case_steps": 12,
+    "inflation": "Phase 3.3's log inflation with each family's joint silence log-likelihood: declared sum of per-window terms, hurdle sum of log pi, Poisson sum of -lambda",
+    "min_expected": 5.0,
+    "min_windows": 50,
+    "quiet_states": [
+      "sleeping",
+      "away",
+      "home_inactive"
+    ],
+    "smoothing": 0.5
+  },
+  "tuning": "none: every setting is declared here, before scoring"
+}

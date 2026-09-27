@@ -1,0 +1,245 @@
+{
+  "accumulation_steps": 36,
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "statistics": "mean and median of the household values, against zero, the value under independence",
+    "unit": "household"
+  },
+  "cases": {
+    "channel_order": "each silent channel is added in the declared channel order to show the cumulative confidence",
+    "rule": "for each household and quiet state, the maximal runs of consecutive windows that are fully silent and labelled with that state, at least 12 windows long; the case is the run of median length (the lower median, the earliest among equal lengths); its first 12 windows are recorded"
+  },
+  "criteria": {
+    "correlation": "0.1, the conventional smallest correlation of note",
+    "inconclusive": "neither supported nor weakened",
+    "log_ratio": "log 1.25: at an inflation of 1.25, a posterior of 0.95 reached on silence alone would be 0.91 with the evidence corrected, which leaves the 0.95 to 1.00 confidence band of the uncertainty study",
+    "roadmap": "ROADMAP.md is updated only if the conclusion is supported or weakened",
+    "slope": "0.02 per silent channel or per hour, the calibration-error minimal difference of Phases 3.1 and 3.2",
+    "supported": "D1 and C1 are both positive: independence materially inflates silence evidence, and overconfidence grows with the number of silent channels",
+    "verdicts": "positive: mean >= delta and lower bound > 0; negative: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else",
+    "weakened": "D1 or C1 is negligible or negative",
+    "why_inflation": "a constant excess of joint silence in every state shifts every state's evidence equally and cannot move a posterior; only its variation across states can, which is what D1 measures"
+  },
+  "definitions": {
+    "accumulation_slope": "the same for the gap on the position in a run of consecutive fully silent windows, in hours, over labelled fully silent windows at positions up to the declared limit",
+    "accuracy_slope": "the same for correctness",
+    "association": "Spearman correlation across households of log_inflation and gap_slope, with a household bootstrap interval",
+    "confidence_slope": "the same for confidence",
+    "count_correlation": "Pearson correlation of the two channels' counts; undefined where either count is constant",
+    "count_covariance": "covariance of the two channels' counts, divided by the number of windows",
+    "gap": "confidence (largest posterior probability) minus 1 if its state is the annotated state, else 0",
+    "gap_slope": "least-squares slope of the gap on the number of silent channels, after removing each predicted state's mean from both, over every labelled window; zero in expectation for a calibrated model",
+    "joint_silence": "the same, for windows in which every instrumented channel is silent",
+    "log_dispersion": "variance of the number of silent channels over the sum of p(1 - p) over channels, p unsmoothed; undefined where either is zero",
+    "log_inflation": "log of SD_s[sum_c log p_c(s)] / SD_s[log p_joint(s)] over the household's eligible states whose joint silence is estimable, population SDs",
+    "log_inflation_declared": "the same with sum_c of the filter's declared silence log-likelihood in place of sum_c log p_c(s)",
+    "log_marginal_factor": "log_inflation_declared minus log_inflation",
+    "log_odds_silence": "log((n00 + 0.5)(n11 + 0.5) / ((n01 + 0.5)(n10 + 0.5))) over the pair's silent (0) and active (1) windows",
+    "pair_silence": "the same, for windows in which both channels of a pair are silent",
+    "quiet": "the mean over the household's eligible quiet states",
+    "silence_probability": "(silent windows + a) / (windows + 2a), a = the declared smoothing",
+    "silent": "a channel is silent in a window when it records no activation"
+  },
+  "estimands": [
+    {
+      "key": "D1",
+      "quantity": "log_inflation",
+      "question": "how much independence overstates the spread of joint-silence log-evidence across states, with the channels' observed silence probabilities: dependence alone",
+      "role": "primary",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "D2",
+      "quantity": "log_joint_silence_quiet",
+      "question": "how much more often every channel is silent than independence implies, in the quiet states",
+      "role": "primary",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "C1",
+      "quantity": "gap_slope",
+      "question": "how much overconfidence grows per additional silent channel, within a state",
+      "role": "primary",
+      "scale": "slope"
+    },
+    {
+      "key": "S1",
+      "quantity": "log_inflation_declared",
+      "question": "how much the filter's declared silence terms overstate the spread of joint-silence log-evidence across states",
+      "role": "secondary",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "S2",
+      "quantity": "log_marginal_factor",
+      "question": "how much of S1 comes from the declared rates rather than dependence: S1 minus D1",
+      "role": "secondary",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "S3",
+      "quantity": "log_odds_silence_quiet",
+      "question": "the median pairwise log odds ratio of silence, in the quiet states",
+      "role": "secondary",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "S4",
+      "quantity": "count_correlation_quiet",
+      "question": "the mean pairwise correlation of counts, in the quiet states",
+      "role": "secondary",
+      "scale": "correlation"
+    },
+    {
+      "key": "S5",
+      "quantity": "log_dispersion_quiet",
+      "question": "the variance of the number of silent channels against independence, in the quiet states",
+      "role": "secondary",
+      "scale": "log_ratio"
+    },
+    {
+      "key": "S6",
+      "quantity": "confidence_slope",
+      "question": "how much confidence grows per additional silent channel, within a state",
+      "role": "secondary",
+      "scale": "slope"
+    },
+    {
+      "key": "S7",
+      "quantity": "accuracy_slope",
+      "question": "how much accuracy grows per additional silent channel, within a state",
+      "role": "secondary",
+      "scale": "slope"
+    },
+    {
+      "key": "S8",
+      "quantity": "accumulation_slope",
+      "question": "how much overconfidence grows per hour of consecutive fully silent windows, within a state",
+      "role": "secondary",
+      "scale": "slope"
+    }
+  ],
+  "households": {
+    "households": [
+      "hh101",
+      "hh102",
+      "hh103",
+      "hh105",
+      "hh106",
+      "hh108",
+      "hh110",
+      "hh111",
+      "hh114",
+      "hh118",
+      "hh119",
+      "hh120",
+      "hh122",
+      "hh123",
+      "hh124",
+      "hh125",
+      "hh126",
+      "hh127",
+      "hh129",
+      "hh130"
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+    "use": "every development household once; nothing is fitted, so the folds are not used"
+  },
+  "inference": "unchanged: the diagnostic reads the filter's own emission terms and transition, and changes neither",
+  "min_expected": {
+    "rule": "a joint-silence statistic is computed only where at least this many windows would be jointly silent if the channels fell silent independently; a log odds ratio needs every cell of its table to reach it; the classical expected-count rule for contingency tables",
+    "value": 5.0
+  },
+  "minimal_effects": {
+    "correlation": 0.1,
+    "log_ratio": 0.22314355131420976,
+    "slope": 0.02
+  },
+  "model": {
+    "attribution": 1.0,
+    "emissions": "default_emissions of the household registry, pooled per channel",
+    "fitted": "nothing: every parameter is the declared default",
+    "model": "the generative filter's model fed every window of the recording",
+    "prediction": "most probable state of the posterior; no abstention",
+    "prior": "stationary distribution of the default ontology, one step before each recording's first window",
+    "reliability": 1.0,
+    "transition": "default StateOntology, time-homogeneous, one step per window",
+    "windows": "every step window from each recording's first observation to its last, in order, each channel's pooled count"
+  },
+  "name": "phase3-correlated-silence",
+  "per_pair": "log odds ratio of silence and log pair silence ratio per channel pair, each the mean over the household's eligible quiet states where it is estimable",
+  "per_state": {
+    "count_correlation": "mean over channel pairs of the correlation of counts",
+    "joint_silence_difference": "observed joint silence minus the product of the channels' observed silence probabilities",
+    "log_dispersion": "log of the variance of the number of silent channels over its variance under independence",
+    "log_joint_silence": "log of observed joint silence over the product of the channels' observed silence probabilities",
+    "log_joint_silence_declared": "log of observed joint silence over the filter's declared rates",
+    "log_joint_silence_poisson": "log of observed joint silence over independent Poisson streams with each channel's observed mean count",
+    "log_odds_silence": "median over channel pairs of the log odds ratio of silence",
+    "log_pair_silence": "median over channel pairs of the log ratio of joint to independent silence"
+  },
+  "protocol_sha256": "138e35aa977da2800c75e4a3ab5f5d37483d6d26dcc8b489b7b29aae15155eb3",
+  "schema": "silence-protocol/1",
+  "seeds": {
+    "bootstrap": 0
+  },
+  "smoothing": 0.5,
+  "states": {
+    "eligibility": "a state enters a household's statistics with at least 50 labelled windows there",
+    "quiet": [
+      "sleeping",
+      "away",
+      "home_inactive"
+    ]
+  },
+  "streams": {
+    "definition": "each instrumented evidence channel's activations in each step window; uninstrumented channels are left out",
+    "information_set": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0"
+      ],
+      "components": [
+        "current_evidence"
+      ],
+      "history_steps": 3,
+      "name": "current",
+      "sha256": "c4ef81951d5c35bca43ed458926c4a14dbb48c1af3e7496721f2a139c0649bdb",
+      "step_seconds": 300.0
+    }
+  },
+  "tuning": "none: every setting is declared here, before any household is examined"
+}

@@ -25,9 +25,36 @@ from .filter import (
     MultimodalBayesFilter,
     NonMonotonicUpdateError,
 )
+from .history import (
+    ChannelHistory,
+    HistoryAwareBayesFilter,
+    HistoryConfig,
+    HistoryModel,
+    PosteriorDecomposition,
+)
+from .regime import (
+    ONLINE,
+    EvidenceLeakageError,
+    InferenceMode,
+    InferenceRegime,
+    assert_respects_horizon,
+    check_evidence_access,
+    regime_beliefs,
+    require_online,
+    require_same_regime,
+)
 from .smoothing import smooth_beliefs, smooth_estimates
 
 __all__ = [
+    "ONLINE",
+    "EvidenceLeakageError",
+    "InferenceMode",
+    "InferenceRegime",
+    "assert_respects_horizon",
+    "check_evidence_access",
+    "regime_beliefs",
+    "require_online",
+    "require_same_regime",
     "smooth_beliefs",
     "smooth_estimates",
     "BernoulliEmission",
@@ -38,6 +65,11 @@ __all__ = [
     "Explanation",
     "FusionConfig",
     "GaussianEmission",
+    "ChannelHistory",
+    "HistoryAwareBayesFilter",
+    "HistoryConfig",
+    "HistoryModel",
+    "PosteriorDecomposition",
     "MultimodalBayesFilter",
     "NonMonotonicUpdateError",
     "PoissonEventEmission",

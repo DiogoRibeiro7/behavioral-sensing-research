@@ -21,6 +21,15 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Current Stable Baseline
 
+`0.8.0` records the first Phase 3 inference-redesign results. Each is pre-specified and on the development panel:
+
+- a hierarchical time-of-day prior, a success;
+- an explicit history state, a failure;
+- a correlated-silence diagnostic, which weakens the hypothesis;
+- fitted silence and activity rates, a success.
+
+It adds a partial-pooling framework for household parameters, and explicit inference regimes recorded in every experiment record. It does not change the online pipeline's defaults, abstention, the ontology or the frozen external-validation result.
+
 `0.7.0` records the first complete Phase 1 recoverable-information-gap result. It adds a versioned experiment-record schema, a cyclic time-of-day encoding, interpretable history summaries, a declared supervised diagnostic, and the generative filter's model restricted to the information sets it can consume. Like `0.6.0`, it does not change inference, abstention, the ontology or the frozen external-validation result.
 
 `0.6.0` adds matched-information evaluation: information sets, the matched runner, four pre-declared baselines, household-level comparison, and the first exploratory Phase 1 run. Like `0.5.0`, it does not change inference, the ontology or the frozen external-validation result.
@@ -202,11 +211,70 @@ and household-adaptable rather than hard-coding one global circadian schedule.
 Candidate approaches include hierarchical periodic priors and partial pooling
 across homes.
 
+A hierarchical periodic state prior is implemented; see
+`docs/PERIODIC_STATE_PRIOR.md`. It has a Fourier basis on the local hour, a
+population effect, and household deviations shrunk toward it. It enters the
+generative model through the existing circadian term. It lets the generative
+model take part in the matched `I1` and `I3` comparisons.
+
+Its pre-specified development-panel evaluation is in
+`docs/PHASE3_TIME_PRIOR.md`. The measured conclusions, all on the development
+panel, which earlier work has inspected, and none a held-out claim:
+
+- **The hour.** It is worth +0.131 [+0.120, +0.142] household balanced
+  accuracy to the generative model, in all 20 homes: pre-specified success.
+  Against the original model the gain is +0.140.
+- **Where the gain comes from.** It is almost entirely `away`: median recall
+  rises from 0.006 to 0.824. Rare states do not meaningfully change.
+- **The diagnostic at `I1`.** The generative model with the hour is within
+  +0.006 [−0.022, +0.030] of the diagnostic, but its probabilities remain
+  poor: median log loss is 2.96, against 1.51 with no information.
+- **Recent history.** It adds nothing (+0.002). At `I3` the diagnostic still
+  leads by +0.079, so the history part of the gap is unchanged.
+- **Household adaptation.** On a 7-day window it improves log loss and
+  calibration. Its balanced-accuracy gain (+0.011) is below the declared
+  minimal difference: pre-specified inconclusive.
+
 ### 3.2 Explicit recent-history state
 
 Represent recent event history directly rather than relying on the current
 filter state to absorb all temporal structure. The representation must remain
 interpretable enough to audit which historical evidence changed a posterior.
+
+An explicit history state is implemented; see `docs/HISTORY_STATE.md`.
+
+- **The model.** Each channel's activations over the three previous windows
+  condition its current Poisson rate, relative to what the memoryless model
+  expects in each state. There are eleven coefficients, fitted on training
+  labels.
+- **Diagnostics.** Each prediction splits exactly into prior and transitions,
+  the current window, and recent history.
+- **Matched sets.** It can be scored in `I2` and `I3`.
+
+Its pre-specified development-panel evaluation is in
+`docs/PHASE3_HISTORY_STATE.md`. The measured conclusions, all on the
+development panel, which earlier work has inspected, and none a held-out
+claim:
+
+- **On identical information.** The history state lowers balanced accuracy by
+  0.042 [0.026, 0.060] in `I2`, and by 0.044 [0.028, 0.060] in `I3` with the
+  hour. At most 3 of 20 homes improve. Both are pre-specified failures.
+- **Recent history.** It is worth −0.021 to the model with the history state,
+  against +0.021 to the original model re-measured in the same run. The
+  history state recovers less from recent history, not more.
+- **Where the loss is.** It is mostly `home_active`, whose recall falls by
+  0.164. More of its moments are reported as `away`.
+- **Probabilities.** Log loss improves by 0.726, but Brier score and
+  calibration error do not, and log loss stays about twice the no-information
+  value.
+- **The formulation gap.** The diagnostic now leads by +0.158 at `I2` and
+  +0.123 at `I3`.
+- **Time and history.** The history gain is 0.013 to 0.021 smaller when the
+  hour is known, in every model family.
+- **What is not known.** The fitted coefficients are positive in nearly every
+  state, so recent activity raises the expected rate everywhere. Whether they
+  also absorb errors in the declared rates is not separated by this
+  experiment.
 
 ### 3.3 Correlated silence model
 
@@ -224,15 +292,81 @@ streams.
 
 This is intended to address over-concentration without arbitrary posterior caps.
 
+Its pre-specified diagnostic is in `docs/PHASE3_CORRELATED_SILENCE.md`. It
+changes no inference. By its declared rule the hypothesis is **weakened**. The
+measured conclusions, all on the development panel, which earlier work has
+inspected, and none a held-out claim:
+
+- **Dependence is real and material.** In the quiet states, the pairwise log
+  odds ratio of silence is +4.43, and counts correlate at +0.30. Independence
+  overstates the spread of joint-silence evidence across states by 1.55
+  [1.38, 1.75], in 19 of 20 homes.
+- **The declared rates matter more.** The filter's own silence terms overstate
+  that spread by 3.38. On the log scale, dependence accounts for 0.435 of it
+  and the declared rates for 0.784.
+- **Overconfidence does not grow with the number of silent channels.** Within
+  the predicted state it falls by 0.059 per silent channel, in 16 of 20 homes.
+  The model is most overconfident in windows with activity.
+- **Overconfidence grows along quiet runs.** It rises by 0.175 per hour of
+  consecutive fully silent windows, in 18 of 20 homes. After one silent hour
+  the model reports `sleeping` in 19 of 20 away runs and all 18
+  `home_inactive` runs.
+- **Implication.** A correlated-silence model would address the smaller of the
+  two measured sources of overstated silence evidence.
+
+That result routes the work to fitting the channels' marginal observation
+models, keeping them independent: `docs/PHASE3_FITTED_RATES.md`. It uses a
+hurdle model per channel and state: a silence probability, and a
+zero-truncated Poisson rate for active windows, fitted on training households.
+The measured conclusions, on the development panel and none a held-out claim:
+
+- **Pre-specified success in both primaries.**
+  - With current windows, calibration error improves by 0.058, and balanced
+    accuracy is unchanged.
+  - In the filter's recursion over every window, calibration error improves
+    by 0.119 and balanced accuracy by 0.039.
+- **Probabilities.** With the Phase 3.1 time prior, median log loss is 1.448.
+  It is the first generative model below the no-information 1.510.
+- **The mechanism.**
+  - Silence-evidence inflation falls from 3.38 to 1.62, close to the
+    dependence-only 1.55.
+  - Overconfidence per quiet hour falls from 0.175 to 0.023.
+- **The cost.** `home_active` recall falls by 0.23. Active-window counts are
+  over-dispersed, which the zero-truncated Poisson does not model.
+- **Silence needs its own parameter.** A Poisson fitted to the mean count
+  improves balanced accuracy, but not calibration, and it makes silence
+  inflation four times worse.
+
 ### 3.4 Household adaptation
 
 Separate population-level parameters from household-specific effects. Evaluate
 partial pooling before introducing unconstrained per-home fitting.
 
+A partial-pooling framework is implemented; see `docs/PARTIAL_POOLING.md`.
+
+- **The framework.** Each household gets the population parameter plus its own
+  deviation, shrunk toward zero with a declared strength. The strength's
+  limits are population-only and unconstrained per-home fitting.
+- **First application.** It is applied to the fitted hurdle channel
+  parameters, whose silence differs widely between homes. The periodic state
+  prior already has its own shrunk household deviation.
+- **Evaluation.** Its evaluation is still to be pre-specified and run.
+
 ### 3.5 Smoothing versus online inference
 
 Keep fixed-lag smoothing and online filtering as separate operational regimes.
 A gain obtained with future evidence must never be reported as an online gain.
+
+The rule is enforced in code; see `docs/INFERENCE_REGIMES.md`.
+
+- **Every record states its regime.** Schema 1.2 records the regime of every
+  experiment: online filter, or fixed-lag smoother with its lag.
+- **Every report states it.** Every generated report labels its regime.
+- **The matched evaluation is online.** It refuses smoothing regimes and
+  models, and results from different regimes are never pooled or compared.
+- **Existing results.** Every published result is online, attested on
+  migration. The earlier smoothing measurements in `docs/real_data.md` are now
+  labelled as smoothed.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
@@ -359,7 +493,7 @@ unless it blocks reproducibility or supported users.
 
 ## Release Policy
 
-`0.7.0` is the current stable release.
+`0.8.0` is the current stable release.
 
 Future versions are created only when the research programme produces a
 coherent user-facing software increment. Paper milestones do not automatically
