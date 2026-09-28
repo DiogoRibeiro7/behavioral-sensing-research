@@ -67,6 +67,7 @@ from ..evaluation.provenance import (
 )
 from ..fusion.regime import (
     ONLINE,
+    EvidenceSummary,
     InferenceRegime,
     require_online,
     require_same_regime,
@@ -433,6 +434,9 @@ class MatchedEvaluation:
     regime
         The inference regime every prediction comes from: the online filter,
         since every feature closes at or before its prediction moment.
+    evidence
+        The prediction and latest-evidence timestamps of the scored
+        predictions, as recorded.
     """
 
     record: ExperimentRecord
@@ -445,6 +449,7 @@ class MatchedEvaluation:
     moments: Mapping[str, str]
     path: Path | None = None
     regime: InferenceRegime = ONLINE
+    evidence: EvidenceSummary | None = None
 
 
 @dataclass(frozen=True)
@@ -492,6 +497,33 @@ def _digest(payload: object) -> str:
         payload, sort_keys=True, separators=(",", ":"), allow_nan=False
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def online_evidence(
+    recordings: Mapping[str, CasasRecording],
+    homes: Sequence[str],
+    step: timedelta,
+    *,
+    after: Mapping[str, datetime] | None = None,
+) -> EvidenceSummary:
+    """The evidence summary of online estimates at the scored moments of *homes*.
+
+    Every experiment in this package scores each household's labelled regular
+    moments, or, with *after*, those after the household's cut-off. An online
+    estimate reads evidence up to its own moment, so each prediction's latest
+    evidence is its moment.
+    """
+    moments: list[datetime] = []
+    for home in sorted(homes):
+        grid = _regular_moments(recordings[home], step)
+        start = after.get(home) if after is not None else None
+        truth = truth_series(recordings[home].activities, grid)
+        moments += [
+            moment
+            for moment, label in zip(grid, truth, strict=True)
+            if label is not None and (start is None or moment > start)
+        ]
+    return EvidenceSummary.online(moments)
 
 
 def _regular_moments(recording: CasasRecording, step: timedelta) -> list[datetime]:
@@ -918,10 +950,16 @@ def run_matched_evaluation(
         },
         "comparisons": [comparison.to_dict() for comparison in comparisons],
     }
+    evidence = EvidenceSummary.online(
+        households[name].table.moments[int(row)]
+        for name in scored
+        for row in households[name].labelled
+    )
     record = ExperimentRecord(
         experiment=experiment,
         configuration=configuration,
         inference=regime,
+        evidence=evidence,
         seeds=[seed],
         results=_finite(results),
         data_source=data_source,
@@ -975,6 +1013,7 @@ def run_matched_evaluation(
         moments={name: households[name].moments_sha256 for name in scored},
         path=path,
         regime=regime,
+        evidence=evidence,
     )
 
 

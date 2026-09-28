@@ -78,6 +78,7 @@ from .matched_evaluation import (
     _finite,
     _Household,
     _regular_moments,
+    online_evidence,
 )
 from .periodic_prior import (
     PeriodicPriorConfig,
@@ -906,6 +907,9 @@ def run_fitted_rates(
         experiment=protocol.name,
         configuration={**protocol.to_dict(), "protocol_sha256": protocol.sha256()},
         inference=ONLINE,
+        evidence=online_evidence(
+            recordings, protocol.homes, protocol.information_sets[0].resolution.step
+        ),
         seeds=[protocol.seed],
         results=_finite(results),
         data_source=data_source,

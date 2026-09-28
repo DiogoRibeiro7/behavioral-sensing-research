@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterator
 from dataclasses import replace
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -320,6 +321,29 @@ class TestExperiment:
         assert payload["results"]["result_schema"] == "pooling-results/1"
         assert payload["configuration"]["protocol_sha256"] == small_protocol().sha256()
         assert payload["inference"]["mode"] == "online_filter"
+
+    def test_the_record_lists_the_scored_windows(self, result: PoolingResult) -> None:
+        # The arms' scored windows are nested, so each household contributes
+        # those of its largest eligible arm, and each reads up to itself.
+        households = results_of(result)["households"].values()
+        scored = sum(
+            max(
+                (a["scored_windows"] for a in e["arms"].values() if a["eligible"]),
+                default=0,
+            )
+            for e in households
+        )
+        evidence = load_record(result.path)["inference"]["evidence"]
+        assert evidence["enumerated"] is True
+        assert evidence["predictions"] == scored
+        assert evidence["max_lead_seconds"] == 0.0
+        cutoffs = [
+            datetime.fromisoformat(a["cutoff"])
+            for e in households
+            for a in e["arms"].values()
+            if a["eligible"]
+        ]
+        assert datetime.fromisoformat(evidence["first_prediction"]) > min(cutoffs)
 
     def test_models_in_an_arm_are_scored_on_the_same_windows(
         self, result: PoolingResult

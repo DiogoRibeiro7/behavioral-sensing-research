@@ -122,6 +122,21 @@ class InferenceRegime:
         return self.step * self.lag_steps
 
     @property
+    def is_causal(self) -> bool:
+        """Whether estimates read no evidence after their moment.
+
+        The online filter is causal. A smoother is causal only with lag zero,
+        where it reports exactly the filtered estimate. Any positive lag uses
+        future information.
+        """
+        return self.lag_steps == 0
+
+    @property
+    def delay(self) -> timedelta:
+        """The effective delay: how long after its moment an estimate can be reported."""
+        return self.lag
+
+    @property
     def label(self) -> str:
         """A human-readable name that no report may leave out."""
         if self.is_online:
@@ -140,7 +155,7 @@ class InferenceRegime:
         return min(row + self.lag_steps, rows - 1)
 
     def to_dict(self) -> dict[str, Any]:
-        """Return a serialisable form, with its label."""
+        """Return a serialisable form, with its label, causality and delay."""
         return {
             "mode": self.mode.value,
             "lag_steps": self.lag_steps,
@@ -148,11 +163,17 @@ class InferenceRegime:
                 self.step.total_seconds() if self.step is not None else None
             ),
             "label": self.label,
+            "causal": self.is_causal,
+            "delay_seconds": self.delay.total_seconds(),
         }
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> InferenceRegime:
-        """Rebuild a regime written by :meth:`to_dict`, refusing a wrong label."""
+        """Rebuild a regime written by :meth:`to_dict`.
+
+        A label, causality or delay that does not describe the regime is
+        refused. Causality and delay are derived, and may be absent.
+        """
         seconds = payload["step_seconds"]
         regime = cls(
             InferenceMode(payload["mode"]),
@@ -163,6 +184,19 @@ class InferenceRegime:
             raise EvidenceLeakageError(
                 f"the label {payload['label']!r} does not describe the regime "
                 f"{regime.label!r}"
+            )
+        if "causal" in payload and payload["causal"] is not regime.is_causal:
+            raise EvidenceLeakageError(
+                f"the {regime.label} is {'' if regime.is_causal else 'not '}causal, "
+                f"but the payload says causal={payload['causal']!r}"
+            )
+        if (
+            "delay_seconds" in payload
+            and payload["delay_seconds"] != regime.delay.total_seconds()
+        ):
+            raise EvidenceLeakageError(
+                f"the {regime.label} has a delay of {regime.delay.total_seconds():g} "
+                f"s, not {payload['delay_seconds']!r}"
             )
         return regime
 
@@ -249,6 +283,260 @@ def regime_beliefs(
         online: np.ndarray = array.copy()
         return online
     return smooth_beliefs(array, transition, lag=regime.lag_steps)
+
+
+@dataclass(frozen=True)
+class ReportedEstimate:
+    """One estimate as a regime reports it: for when, on what, and when it exists.
+
+    Attributes
+    ----------
+    prediction_at
+        The moment the estimate is about.
+    evidence_until
+        The latest evidence it read. Online, the moment itself. A smoother reads
+        up to its lag after the moment, or to the end of the recording.
+    available_at
+        When it can first be reported. Online, the moment itself. A smoother
+        must wait for its last evidence, so this is ``evidence_until``.
+    belief
+        The posterior, read-only: a reported estimate is never revised.
+    regime
+        The regime that produced it.
+    """
+
+    prediction_at: datetime
+    evidence_until: datetime
+    available_at: datetime
+    belief: np.ndarray
+    regime: InferenceRegime
+
+    def __post_init__(self) -> None:
+        """Refuse an estimate that reads beyond its regime, and freeze its belief."""
+        if self.evidence_until < self.prediction_at:
+            raise ValueError("an estimate reads at least the evidence of its moment")
+        check_evidence_access(self.regime, self.prediction_at, self.evidence_until)
+        expected = self.prediction_at if self.regime.is_online else self.evidence_until
+        if self.available_at != expected:
+            raise EvidenceLeakageError(
+                f"an estimate of the {self.regime.label} is available at "
+                f"{expected.isoformat()}, not {self.available_at.isoformat()}"
+            )
+        belief = np.array(self.belief, dtype=float)
+        belief.setflags(write=False)
+        object.__setattr__(self, "belief", belief)
+
+    @property
+    def lead(self) -> timedelta:
+        """How far past its moment the estimate read: the future information used."""
+        return self.evidence_until - self.prediction_at
+
+    @property
+    def uses_future_evidence(self) -> bool:
+        """Whether it read any evidence after its moment."""
+        return self.lead > timedelta(0)
+
+
+def regime_estimates(
+    moments: Sequence[datetime],
+    filtered: np.ndarray,
+    transition: np.ndarray,
+    regime: InferenceRegime,
+) -> tuple[ReportedEstimate, ...]:
+    """The estimates *regime* reports, each with its evidence and availability.
+
+    Parameters
+    ----------
+    moments
+        The windows' moments, strictly increasing. A smoother's windows must be
+        spaced by its step, so its lag in windows is its lag in time.
+    filtered, transition
+        As for :func:`regime_beliefs`.
+    regime
+        The regime to report under.
+    """
+    stamps = list(moments)
+    beliefs = regime_beliefs(filtered, transition, regime)
+    if len(stamps) != beliefs.shape[0]:
+        raise ValueError("one moment is needed per window")
+    if any(later <= earlier for earlier, later in zip(stamps, stamps[1:])):
+        raise ValueError("moments must be strictly increasing")
+    if not regime.is_online and any(
+        later - earlier != regime.step for earlier, later in zip(stamps, stamps[1:])
+    ):
+        raise ValueError("a smoother's windows must be spaced by its step")
+    count = len(stamps)
+    reported = []
+    for row, moment in enumerate(stamps):
+        until = stamps[regime.horizon_row(row, count)]
+        reported.append(
+            ReportedEstimate(
+                prediction_at=moment,
+                evidence_until=until,
+                available_at=moment if regime.is_online else until,
+                belief=beliefs[row],
+                regime=regime,
+            )
+        )
+    return tuple(reported)
+
+
+@dataclass(frozen=True)
+class EvidenceSummary:
+    """The prediction and evidence timestamps behind a set of reported estimates.
+
+    Attributes
+    ----------
+    predictions
+        How many estimates.
+    first_prediction, last_prediction
+        The earliest and latest moments they are about.
+    latest_evidence
+        The latest evidence any of them read.
+    max_lead
+        The largest lead of an estimate's evidence over its moment: the most
+        future information any of them used.
+    """
+
+    predictions: int
+    first_prediction: datetime
+    last_prediction: datetime
+    latest_evidence: datetime
+    max_lead: timedelta
+
+    def __post_init__(self) -> None:
+        """Check the summary is internally consistent."""
+        if self.predictions < 1:
+            raise ValueError("an evidence summary needs at least one prediction")
+        if not self.first_prediction <= self.last_prediction <= self.latest_evidence:
+            raise ValueError(
+                "first prediction, last prediction and latest evidence are out of order"
+            )
+        if self.max_lead < timedelta(0):
+            raise ValueError("a lead cannot be negative")
+        if self.latest_evidence - self.last_prediction > self.max_lead:
+            raise ValueError("the latest evidence lies beyond the largest lead")
+
+    @classmethod
+    def of(cls, pairs: Iterable[tuple[datetime, datetime]]) -> EvidenceSummary:
+        """Summarise ``(prediction_at, evidence_until)`` pairs."""
+        items = list(pairs)
+        if not items:
+            raise ValueError("an evidence summary needs at least one prediction")
+        if any(until < at for at, until in items):
+            raise ValueError("an estimate reads at least the evidence of its moment")
+        return cls(
+            predictions=len(items),
+            first_prediction=min(at for at, _ in items),
+            last_prediction=max(at for at, _ in items),
+            latest_evidence=max(until for _, until in items),
+            max_lead=max(until - at for at, until in items),
+        )
+
+    @classmethod
+    def online(cls, moments: Iterable[datetime]) -> EvidenceSummary:
+        """Online estimates: each reads evidence up to its own moment."""
+        return cls.of((moment, moment) for moment in moments)
+
+    @classmethod
+    def of_estimates(cls, estimates: Iterable[ReportedEstimate]) -> EvidenceSummary:
+        """Summarise reported estimates."""
+        return cls.of((e.prediction_at, e.evidence_until) for e in estimates)
+
+    @classmethod
+    def combine(cls, summaries: Iterable[EvidenceSummary]) -> EvidenceSummary:
+        """One summary for several sets of estimates."""
+        parts = list(summaries)
+        if not parts:
+            raise ValueError("nothing to combine")
+        return cls(
+            predictions=sum(p.predictions for p in parts),
+            first_prediction=min(p.first_prediction for p in parts),
+            last_prediction=max(p.last_prediction for p in parts),
+            latest_evidence=max(p.latest_evidence for p in parts),
+            max_lead=max(p.max_lead for p in parts),
+        )
+
+    def check(self, regime: InferenceRegime) -> None:
+        """Refuse a summary whose estimates read beyond *regime*'s horizon."""
+        if self.max_lead > regime.delay:
+            raise EvidenceLeakageError(
+                f"estimates read up to {self.max_lead.total_seconds():g} s past their "
+                f"moments, but the {regime.label} may read "
+                f"{regime.delay.total_seconds():g} s"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a serialisable form."""
+        return {
+            "enumerated": True,
+            "predictions": self.predictions,
+            "first_prediction": self.first_prediction.isoformat(),
+            "last_prediction": self.last_prediction.isoformat(),
+            "latest_evidence": self.latest_evidence.isoformat(),
+            "max_lead_seconds": self.max_lead.total_seconds(),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> EvidenceSummary:
+        """Rebuild a summary written by :meth:`to_dict`."""
+        return cls(
+            predictions=int(payload["predictions"]),
+            first_prediction=datetime.fromisoformat(payload["first_prediction"]),
+            last_prediction=datetime.fromisoformat(payload["last_prediction"]),
+            latest_evidence=datetime.fromisoformat(payload["latest_evidence"]),
+            max_lead=timedelta(seconds=float(payload["max_lead_seconds"])),
+        )
+
+
+@dataclass(frozen=True)
+class NotEnumerated:
+    """Why a result's predictions and evidence timestamps were not listed.
+
+    Only a causal result may say this: a smoother must always record the
+    future information it used.
+    """
+
+    reason: str
+
+    def __post_init__(self) -> None:
+        """Require a reason."""
+        if not str(self.reason).strip():
+            raise ValueError("say why the predictions were not enumerated")
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a serialisable form."""
+        return {"enumerated": False, "reason": self.reason}
+
+
+def evidence_from_dict(payload: Mapping[str, Any]) -> EvidenceSummary | NotEnumerated:
+    """Rebuild an evidence record written by either ``to_dict``."""
+    if payload.get("enumerated") is True:
+        return EvidenceSummary.from_dict(payload)
+    if payload.get("enumerated") is False and set(payload) == {"enumerated", "reason"}:
+        return NotEnumerated(str(payload["reason"]))
+    raise ValueError("evidence must be an enumerated summary or a reason")
+
+
+def check_evidence(
+    evidence: EvidenceSummary | NotEnumerated, regime: InferenceRegime
+) -> None:
+    """Refuse evidence a regime could not have produced, or left unlisted.
+
+    Raises
+    ------
+    EvidenceLeakageError
+        If the estimates read beyond the regime's horizon, or if a non-causal
+        result does not list the future information it used.
+    """
+    if isinstance(evidence, NotEnumerated):
+        if not regime.is_causal:
+            raise EvidenceLeakageError(
+                f"a {regime.label} uses future information, so its predictions and "
+                "evidence timestamps must be recorded"
+            )
+        return
+    evidence.check(regime)
 
 
 def assert_respects_horizon(

@@ -18,8 +18,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Unconstrained per-home fitting overfits small homes. After one day it is worse than pooling by 0.175 [0.055, 0.302], and worse than the population alone by 0.161.
     - The strength selected on training homes was the grid's smallest, 24 windows, in both folds. With it, pooling improves log loss by 0.132. The declared 288 pools more than a week of data needs.
 
+- Added the inference-regime contract of ROADMAP 3.5, so that a smoothing gain cannot be reported as an online one. It is described in `docs/INFERENCE_REGIMES.md`. No inference algorithm changes.
+  - **Regimes.** `InferenceRegime` gains `is_causal` and `delay`, the effective reporting delay.
+  - **Estimates.** `ReportedEstimate` records an estimate's prediction timestamp, the latest evidence it read, and when it can first be reported. It refuses evidence beyond its regime and an availability the regime cannot have. `regime_estimates` builds them from filtered beliefs.
+  - **Records.** `EvidenceSummary` summarises the scored estimates' timestamps and their largest lead of evidence over prediction. `NotEnumerated` gives the reason a causal result does not list them; a smoother may not use it.
+  - **Evaluation.** `sensor_modeling.evaluation.RegimeResult` keeps one value per household with its regime and evidence.
+    - `compare_results` refuses unlabelled results, and results of different regimes unless a smoothing gain is requested. A smoothing gain is then labelled with its delay.
+    - `RegimeComparison.online_gain` refuses anything but two online results.
+    - `pool_results` refuses to mix regimes or count a household twice.
+  - **Tests.** The strict leakage tests stream a synthetic sequence whose later evidence changes an earlier posterior, and a simulated day through the online pipeline.
+
 ### Changed
 - `sensor_modeling.datasets.channel_models` gains `home_statistics`, `combine_statistics` and `pool_channels`, so that one household's statistics can be combined or pooled at several strengths without being counted again. `fit_channel_models` and `adapt_channels` now use them, and give identical results.
+- The experiment-record schema is 1.3. The `inference` block adds `causal`, `delay_seconds` and `evidence`, and `ExperimentRecord` requires `evidence`.
+  - A record is refused if its causality or delay disagrees with its regime, or if its estimates read past it.
+  - Every experiment in `sensor_modeling.datasets` lists its scored moments. The CLI's simulation studies give a reason instead.
+  - 1.1 and 1.2 records are migrated on load, with their evidence marked not listed and the reason given. A smoothed 1.2 record is refused, and none was published.
+  - The published records and their generated summaries are unchanged.
+- A `StateEstimate`'s belief is read-only, so a reported estimate cannot be revised in place. `smooth_estimates` already returned new estimates.
+- `compare_households` refuses a `RegimeResult` and points to `compare_results`.
 
 ## [0.8.0] - 2026-09-27
 

@@ -104,6 +104,12 @@ with bootstrap intervals and the share of households favouring each model. See
 [Evaluation design](EVALUATION_DESIGN.md#households-not-timestamps-are-the-unit)
 for why the household, not the timestamp, is the unit.
 
+When the two sides may come from different inference regimes, wrap each in a
+`RegimeResult` and use `compare_results`. It refuses to compare an online
+filter with a fixed-lag smoother unless the difference is requested as a
+smoothing gain, and then labels it with the smoother's delay. See
+[Inference regimes](INFERENCE_REGIMES.md#what-fails-loudly).
+
 ## Sensor ablation
 
 The research question is whether useful behavioural inference survives with

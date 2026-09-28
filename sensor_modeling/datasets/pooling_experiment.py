@@ -89,6 +89,7 @@ from .matched_evaluation import (
     _finite,
     _Household,
     _regular_moments,
+    online_evidence,
 )
 from .partial_pooling import PoolingConfig
 from .recoverable_gap import (
@@ -993,10 +994,24 @@ def run_pooling(
             for fold, fit in fits.items()
         },
     }
+    # The arms' scored windows are nested, so a household's predictions are
+    # the windows after its earliest eligible cut-off.
+    first = {
+        home: min(
+            datetime.fromisoformat(entry["cutoff"])
+            for entry in households[home]["arms"].values()
+            if entry["eligible"]
+        )
+        for home in households
+        if any(entry["eligible"] for entry in households[home]["arms"].values())
+    }
     record = ExperimentRecord(
         experiment=protocol.name,
         configuration={**protocol.to_dict(), "protocol_sha256": protocol.sha256()},
         inference=ONLINE,
+        evidence=online_evidence(
+            recordings, sorted(first), protocol.resolution.step, after=first
+        ),
         seeds=[protocol.seed],
         results=_finite(results),
         data_source=data_source,

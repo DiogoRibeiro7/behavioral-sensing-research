@@ -80,6 +80,7 @@ from .matched_evaluation import (
     _Household,
     _regular_moments,
     held_out_metrics,
+    online_evidence,
     run_matched_evaluation,
 )
 from .periodic_prior import (
@@ -870,6 +871,7 @@ def run_time_prior_experiment(
         experiment=protocol.name,
         configuration={**protocol.to_dict(), "protocol_sha256": protocol.sha256()},
         inference=ONLINE,
+        evidence=online_evidence(recordings, protocol.homes, step),
         seeds=[protocol.seed],
         results=_finite(results),
         data_source=data_source,

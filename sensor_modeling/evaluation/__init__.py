@@ -77,6 +77,12 @@ from .provenance import (
     load_record,
     validate_record,
 )
+from .regime_results import (
+    RegimeComparison,
+    RegimeResult,
+    compare_results,
+    pool_results,
+)
 from .resampling import Interval, monte_carlo_standard_error
 
 __all__ = [
@@ -103,6 +109,8 @@ __all__ = [
     "ModelRecord",
     "PairedDifference",
     "PredictionMetrics",
+    "RegimeComparison",
+    "RegimeResult",
     "ReportedInterval",
     "Scenario",
     "ScenarioComparison",
@@ -112,6 +120,7 @@ __all__ = [
     "binary_metrics",
     "compare_scenario",
     "compare_households",
+    "compare_results",
     "confusion_matrix",
     "detection_metrics",
     "environment",
@@ -122,6 +131,7 @@ __all__ = [
     "monte_carlo_standard_error",
     "named_subsets",
     "paired_difference",
+    "pool_results",
     "prediction_metrics",
     "recall_of",
     "run_ablation",

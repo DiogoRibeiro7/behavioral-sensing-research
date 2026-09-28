@@ -93,7 +93,12 @@ from .information_sets import (
     build_feature_table,
     evidence_column,
 )
-from .matched_evaluation import _finite, _Household, _regular_moments
+from .matched_evaluation import (
+    _finite,
+    _Household,
+    _regular_moments,
+    online_evidence,
+)
 from .recoverable_gap import GENERATIVE_CONFIGURATION, FrozenSplits
 from .restricted_filter import ChannelLikelihood, channel_likelihoods
 from .time_prior_experiment import verdict
@@ -1251,6 +1256,9 @@ def run_silence_diagnostic(
         experiment=protocol.name,
         configuration={**protocol.to_dict(), "protocol_sha256": protocol.sha256()},
         inference=ONLINE,
+        evidence=online_evidence(
+            recordings, protocol.households, protocol.resolution.step
+        ),
         seeds=[protocol.seed],
         results=_finite(results),
         data_source=data_source,

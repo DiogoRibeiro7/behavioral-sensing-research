@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -28,9 +29,15 @@ from sensor_modeling.evaluation.provenance import (
     load_record,
     validate_record,
 )
-from sensor_modeling.fusion.regime import ONLINE
+from sensor_modeling.fusion.regime import ONLINE, EvidenceSummary
 
 DIGEST = "a" * 64
+EVIDENCE = EvidenceSummary.online(
+    [
+        datetime(2026, 9, 1, 8, tzinfo=timezone.utc),
+        datetime(2026, 9, 1, 9, tzinfo=timezone.utc),
+    ]
+)
 
 
 def full_record(**overrides: Any) -> ExperimentRecord:
@@ -39,6 +46,7 @@ def full_record(**overrides: Any) -> ExperimentRecord:
         "experiment": "unit",
         "configuration": {"step_minutes": 5, "metrics": ["balanced_accuracy"]},
         "inference": ONLINE,
+        "evidence": EVIDENCE,
         "seeds": [0, 1],
         "results": {"summary": {"balanced_accuracy": {"median": 0.5}}},
         "data_source": "casas-hh",
@@ -137,7 +145,9 @@ class TestDeterminism:
         assert b"\r\n" not in raw and raw.endswith(b"}\n")
 
     def test_time_and_environment_are_fixed_when_the_record_is_made(self) -> None:
-        record = ExperimentRecord(experiment="x", configuration={}, inference=ONLINE)
+        record = ExperimentRecord(
+            experiment="x", configuration={}, inference=ONLINE, evidence=EVIDENCE
+        )
         assert record.to_dict()["recorded_at"] == record.to_dict()["recorded_at"]
         assert record.environment["git_commit"]
 
@@ -280,7 +290,7 @@ class TestValidation:
 
 class TestSchemaVersions:
     def test_the_writer_emits_the_current_version(self) -> None:
-        assert full_record().to_dict()["schema_version"] == SCHEMA_VERSION == "1.2"
+        assert full_record().to_dict()["schema_version"] == SCHEMA_VERSION == "1.3"
 
     def test_a_1_0_record_is_migrated_not_rewritten(self, tmp_path: Path) -> None:
         path = tmp_path / "legacy.json"
@@ -307,7 +317,7 @@ class TestSchemaVersions:
     @pytest.mark.parametrize(
         ("version", "message"),
         [
-            ("1.3", "newer than 1.2"),
+            ("1.4", "newer than 1.3"),
             ("2.0", "reads major version 1 only"),
             ("0.9", "reads major version 1 only"),
             ("one", "not MAJOR.MINOR"),
@@ -328,5 +338,5 @@ class TestSchemaVersions:
             load_record(write_json(tmp_path / "none.json", data))
 
     def test_only_current_payloads_can_be_rebuilt_directly(self) -> None:
-        with pytest.raises(ArtifactError, match="expected '1.2'"):
+        with pytest.raises(ArtifactError, match="expected '1.3'"):
             ExperimentRecord.from_dict(payload(schema_version="1.0"))
