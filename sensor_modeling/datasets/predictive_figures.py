@@ -179,6 +179,9 @@ def _ratio_axis(axes: Any) -> None:
     axes.set_yscale("log")
     low, high = axes.get_ylim()
     ticks = [t for t in _RATIO_TICKS if low <= t <= high]
+    if high / low > 16.0:
+        # Over a wide range, the minimal-ratio ticks crowd the one at 1.
+        ticks = [t for t in ticks if t not in (0.8, 1.25)]
     axes.set_yticks(ticks)
     axes.set_yticklabels([f"{t:g}" for t in ticks])
     axes.minorticks_off()

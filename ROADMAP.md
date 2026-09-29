@@ -337,6 +337,30 @@ The measured conclusions, on the development panel and none a held-out claim:
   improves balanced accuracy, but not calibration, and it makes silence
   inflation four times worse.
 
+Where the fitted hurdle model is misspecified was located by pre-specified
+posterior predictive checks; see `docs/PHASE3_PREDICTIVE_CHECKS.md`. They are
+diagnostic only, on the development panel. Each household's cells are checked
+against their own hurdle fit, which tests the family, and against the
+population fit.
+
+- **The active count is systematically under-dispersed.** In the common states,
+  the observed active variance is 4.3 to 7.4 times the zero-truncated Poisson's,
+  in every household. The excess grows with the square of the mean: the
+  household slope of log variance on log mean is 1.94, where the model gives
+  1.15.
+- **Silence comes in long runs.** Windows in quiet runs of an hour or more are
+  1.3 to 5.2 times as common as independence given the state allows, in
+  `away`, `home_active` and `home_inactive`. `home_active` has both the largest
+  dispersion and the largest excess of quiet runs.
+- **Next model family.** The declared routing names within-state temporal
+  dependence: activity sub-states or a Markov-modulated emission within each
+  state.
+  - It would produce the long runs, which no marginal count distribution can.
+  - A latent intensity that varies over time would also produce the
+    over-dispersion.
+  - A zero-truncated negative binomial alone would address the dispersion but
+    not the runs.
+
 ### 3.4 Household adaptation
 
 Separate population-level parameters from household-specific effects. Evaluate
