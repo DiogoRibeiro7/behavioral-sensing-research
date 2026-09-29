@@ -491,3 +491,75 @@ class TestExperiment:
         payload["results"] = {"result_schema": "fitted-rates-results/1"}
         with pytest.raises(ValueError, match="dispersion-results"):
             render_summary(payload)
+
+
+# ----------------------------------------------------------------------------
+# The published result
+# ----------------------------------------------------------------------------
+PUBLISHED = ROOT / "artifacts" / "phase3" / "phase3-hurdle-negative-binomial.json"
+FITTED_RATES = ROOT / "artifacts" / "phase3" / "phase3-fitted-rates.json"
+DOC = ROOT / "docs" / "PHASE3_NEGATIVE_BINOMIAL.md"
+
+#: This experiment's cells that are the Phase 3.3 follow-up's cells.
+REPRODUCED = {
+    "declared@I0": "generative@I0",
+    "hurdle@I0": "generative_hurdle@I0",
+    "declared@R": "filter_declared@R",
+    "hurdle@R": "filter_hurdle@R",
+}
+
+
+class TestPublishedResult:
+    """The published development-panel result, and the page that reports it."""
+
+    def test_it_ran_the_frozen_protocol_on_a_clean_tree(self) -> None:
+        payload = load_record(PUBLISHED)
+        splits = load_frozen_splits(SPLITS)
+        declared = declared_protocol(splits)
+        assert payload["configuration"]["protocol_sha256"] == declared.sha256()
+        assert payload["environment"]["git_dirty"] == "false"
+        assert payload["inference"]["mode"] == "online_filter"
+        inputs = {item["name"]: item["sha256"] for item in payload["inputs"]}
+        assert inputs.pop(PROTOCOL.name) == check_frozen_protocol(declared, PROTOCOL)
+        assert inputs.pop(SPLITS.name) == splits.sha256
+        assert inputs == {
+            entry["filename"]: entry["sha256"] for entry in splits.homes.values()
+        }
+        assert sorted(payload["results"]["households"]) == sorted(splits.homes)
+
+    def test_it_reproduces_the_phase_3_3_follow_up(self) -> None:
+        published = load_record(PUBLISHED)
+        earlier = load_record(FITTED_RATES)
+        for fold, entry in published["results"]["fitted"].items():
+            assert (
+                entry["population"]["sha256"]
+                == earlier["results"]["fitted"][fold]["channels"]["sha256"]
+            )
+        for cell, earlier_cell in REPRODUCED.items():
+            assert (
+                published["household_metrics"][cell]
+                == earlier["household_metrics"][earlier_cell]
+            )
+
+    def test_its_questions_follow_the_declared_rules(self) -> None:
+        results = load_record(PUBLISHED)["results"]
+        by_key = {e["key"]: e for e in results["estimands"]}
+        for setting, (primary, against) in (("I0", ("N0", "D0")), ("R", ("NR", "DR"))):
+            verdicts_ = by_key[primary]["verdicts"]
+            recall = by_key[primary]["per_state_recall"]["home_active"]["verdict"]
+            calibration = calibration_answer(
+                verdicts_["calibration_error"],
+                by_key[against]["verdicts"]["calibration_error"],
+            )
+            assert results["questions"][setting]["decision"] == decision(
+                verdicts_, recall, calibration
+            )
+        assert results["conclusion"] == overall_decision(
+            {s: q["decision"] for s, q in results["questions"].items()}
+        )
+
+    def test_the_page_carries_the_summary_generated_from_it(self) -> None:
+        text = DOC.read_text(encoding="utf-8")
+        block = text.split("<!-- generated-summary:start -->")[1]
+        block = block.split("<!-- generated-summary:end -->")[0]
+        assert block.strip() == render_summary(load_record(PUBLISHED), level=3).strip()
