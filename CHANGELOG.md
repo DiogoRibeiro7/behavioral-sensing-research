@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added the pre-specified Phase 3.5 evaluation of fixed-lag smoothing, `sensor_modeling.datasets.smoothing_experiment`, with its frozen protocol, `artifacts/phase3/smoothing_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_SMOOTHING.md`.
+  - **Formulation.** The Phase 3.3 follow-up's fitted-hurdle recursion, the recursion over every window with a pre-specified success.
+  - **Regimes.** The online filter, and fixed-lag smoothers with lags of 1, 6 and 12 windows (5, 30 and 60 minutes), each with a declared operational use. Every regime is scored on the same labelled windows, and every smoothed estimate reads its full lag.
+  - **Measures.** Balanced accuracy, per-state recall, log loss, Brier score and calibration error. Also the share of states changed, corrected and made wrong relative to the online filter, accuracy near transitions, and each regime's decision delay after a transition, including its reporting delay.
+  - **Estimands.** Each smoother against the online filter, as a labelled smoothing gain, judged by a rule fixed in advance: gain, trade-off, probability gain, no gain or inconclusive.
+  - **Output.** `smoothing_summary.render_summary` generates the Markdown summary from the record. `scripts/run_phase3_smoothing.py` refuses to run unless the code's protocol equals the frozen file.
+  - **The record.** It is the first to compare regimes. Its `inference` field states the longest lag, which bounds every estimate in it, and its results label every cell and comparison with its own regime.
 - Added the pre-specified Phase 3.4 evaluation of partial pooling, `sensor_modeling.datasets.pooling_experiment`, with its frozen protocol, `artifacts/phase3/pooling_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_PARTIAL_POOLING.md`.
   - **Models.** The hurdle channel parameters come from one of: the population, fitted per fold on training homes; each held-out home pooled toward it with the declared strength, 288 windows; the same with a strength selected by leave-one-household-out on training homes only; or unconstrained per-home estimates. The declared rates give context.
   - **Arms and settings.** A 7-day and a 1-day adaptation arm, with every model in an arm scored on the same windows after the cut-off. Each model is scored with current windows and in the filter's recursion.
