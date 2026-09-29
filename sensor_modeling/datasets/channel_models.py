@@ -30,6 +30,19 @@ each have their own parameter, which is what the diagnostic's zero excess
 needs. When ``π = e^{−μ}`` the hurdle model is exactly a Poisson with rate
 ``μ``.
 
+The hurdle negative binomial
+----------------------------
+The same hurdle, with a zero-truncated negative binomial for the active count::
+
+    P(n = k ≥ 1 | s) = (1 − π) · NB(k; μ, α) / (1 − NB(0; μ, α))
+
+``NB(k; μ, α)`` has mean ``μ`` and variance ``μ + α μ²``. The posterior
+predictive checks found the zero-truncated Poisson's active count
+systematically under-dispersed, with a variance growing with the square of
+the mean: the negative binomial's relationship. ``α = 0`` is the Poisson, so the
+family contains the hurdle model as its limit. See
+``docs/HURDLE_NEGATIVE_BINOMIAL.md``.
+
 The fitted Poisson
 ------------------
 ``P(n = k | s) = λ^k e^{−λ} / k!`` with ``λ = λ_c(s)``, the channel's mean count
@@ -55,6 +68,13 @@ fitted model is the declared one. A channel no training household has is
 therefore given the held-out household's own declared values, which use its
 sensor registry but none of its labels.
 
+The negative binomial keeps the hurdle's ``π̂`` and active mean ``m̂``. Its
+dispersion ``α̂`` maximises the profile likelihood of the training households'
+active-count table plus ``κ`` pseudo-windows shaped as the zero-truncated
+Poisson with mean ``m̂``, which shrinks it toward the Poisson limit, ``α = 0``,
+with the weight of ``κ`` windows. ``μ̂`` then solves the zero-truncated negative
+binomial's mean for ``m̂``.
+
 Uninstrumented channels are absent, not silent: they have no model and no
 column. Nothing here clips a probability.
 """
@@ -70,7 +90,8 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import numpy as np
-from scipy.optimize import brentq
+from scipy.optimize import brentq, minimize_scalar
+from scipy.special import betaln, gammaln
 
 from ..observations import Modality, SensorRegistry
 from ..states.ontology import BehaviouralState, StateOntology
@@ -88,9 +109,10 @@ from .partial_pooling import PooledEstimate, PoolingConfig, pool
 from .restricted_filter import ChannelLikelihood, ChannelModel, channel_likelihoods
 
 HURDLE = "hurdle"
+HURDLE_NB = "hurdle_nb"
 POISSON = "poisson"
 DECLARED = "declared"
-FAMILIES = (DECLARED, HURDLE, POISSON)
+FAMILIES = (DECLARED, HURDLE, HURDLE_NB, POISSON)
 
 #: Smallest positive rate of the truncated Poisson: the limit of a channel whose
 #: active windows all hold exactly one activation.
@@ -230,17 +252,430 @@ def poisson_channel(
 
 
 # ----------------------------------------------------------------------------
+# The over-dispersed active count: a zero-truncated negative binomial
+# ----------------------------------------------------------------------------
+#: Largest dispersion the fit may return: an active count whose variance
+#: exceeds its mean by a hundred times the square of the mean. As ``α`` grows
+#: with the mean held fixed, the zero-truncated negative binomial tends to the
+#: logarithmic series, and a count table with many ones and a long tail can
+#: have its likelihood rise toward that limit without a maximum. The bound
+#: stops it there, where the likelihood is flat; a fit at the bound is flagged.
+MAX_DISPERSION = 100.0
+
+#: Smallest positive dispersion the fit searches. Below it the variance exceeds
+#: a Poisson's by less than a ten-thousandth of the squared mean, and the fit
+#: compares with the Poisson limit, dispersion zero, directly.
+MIN_DISPERSION = 1e-4
+
+#: Log-likelihood per unit of weight a positive dispersion must gain over the
+#: Poisson limit to be preferred. Near ``α = 0`` the likelihood is flat to second
+#: order, and a smaller gain is below the formula's rounding.
+MIN_GAIN = 1e-6
+
+#: Tail mass below which a tabulated count distribution is cut off.
+_TAIL = 1e-12
+
+
+def _log1mexp(values: np.ndarray) -> np.ndarray:
+    """``log(1 − e^x)`` for ``x < 0``, accurate near 0 and far below it."""
+    values = np.asarray(values, dtype=float)
+    near = values > -math.log(2.0)
+    out = np.empty_like(values)
+    out[near] = np.log(-np.expm1(values[near]))
+    out[~near] = np.log1p(-np.exp(values[~near]))
+    return out
+
+
+def nb_log_zero(rate: np.ndarray | float, dispersion: np.ndarray | float) -> np.ndarray:
+    """``log P(X = 0)`` of the negative binomial with mean *rate* and *dispersion*.
+
+    It is ``−log(1 + αμ) / α``, and ``−μ`` at ``α = 0``, the Poisson.
+    """
+    mu = np.asarray(rate, dtype=float)
+    alpha = np.asarray(dispersion, dtype=float)
+    poisson_limit = alpha <= 0.0
+    safe = np.where(poisson_limit, 1.0, alpha)
+    values: np.ndarray = np.where(poisson_limit, -mu, -np.log1p(safe * mu) / safe)
+    return values
+
+
+def ztnb_log_pmf(
+    counts: np.ndarray | float,
+    rate: np.ndarray | float,
+    dispersion: np.ndarray | float,
+) -> np.ndarray:
+    """``log P(X = k | X ≥ 1)`` of the zero-truncated negative binomial, for ``k ≥ 1``.
+
+    *counts* broadcast against *rate* and *dispersion*. With ``r = 1/α``::
+
+        log P(k) = log Γ(k + r) − log Γ(r) − log k! + r log(r / (r + μ))
+                   + k log(μ / (r + μ)) − log(1 − P(0))
+
+    ``log Γ(k + r) − log Γ(r) − log k!`` is evaluated as ``−log k − log B(k, r)``,
+    which stays accurate as ``r`` grows. At ``α = 0`` it is the zero-truncated
+    Poisson.
+    """
+    k = np.asarray(counts, dtype=float)
+    mu = np.asarray(rate, dtype=float)
+    alpha = np.asarray(dispersion, dtype=float)
+    k, mu, alpha = np.broadcast_arrays(k, mu, alpha)
+    poisson_limit = alpha <= 0.0
+    safe = np.where(poisson_limit, 1.0, alpha)
+    size = 1.0 / safe
+    log_zero = nb_log_zero(mu, alpha)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        negative_binomial = (
+            -np.log(k)
+            - betaln(k, size)
+            + k * (np.log(safe * mu) - np.log1p(safe * mu))
+            + log_zero
+        )
+        poisson = k * np.log(mu) - mu - gammaln(k + 1.0)
+    values: np.ndarray = np.where(poisson_limit, poisson, negative_binomial) - (
+        _log1mexp(log_zero)
+    )
+    return values
+
+
+def ztnb_moments(
+    rate: np.ndarray | float, dispersion: np.ndarray | float
+) -> tuple[np.ndarray, np.ndarray]:
+    """Mean and variance of the zero-truncated negative binomial.
+
+    The untruncated count has mean ``μ`` and second moment
+    ``μ + (1 + α) μ²``; truncation divides both by ``1 − P(0)``.
+    """
+    mu = np.asarray(rate, dtype=float)
+    alpha = np.asarray(dispersion, dtype=float)
+    active = -np.expm1(nb_log_zero(mu, alpha))
+    mean = mu / active
+    second = (mu + (1.0 + alpha) * mu * mu) / active
+    return mean, second - mean * mean
+
+
+def ztnb_rate(mean: float, dispersion: float) -> float:
+    """The mean ``μ`` whose zero-truncated negative binomial has mean *mean*.
+
+    It solves ``μ / (1 − P(0)) = mean``, which has one root for any mean above 1,
+    since the truncated mean rises from 1 as ``μ`` does. A mean of 1, every
+    active window holding one activation, is the limit ``μ → 0``, returned as
+    ``MIN_TRUNCATED_RATE``. At dispersion zero it is
+    :func:`truncated_poisson_rate`.
+    """
+    if not math.isfinite(dispersion) or dispersion < 0.0:
+        raise ValueError("dispersion must be finite and non-negative")
+    if dispersion == 0.0:
+        return truncated_poisson_rate(mean)
+    if not math.isfinite(mean) or mean < 1.0:
+        raise ValueError("a zero-truncated mean must be at least 1")
+    if mean <= 1.0 + 1e-9:
+        return MIN_TRUNCATED_RATE
+
+    def excess(rate: float) -> float:
+        return rate + mean * math.expm1(-math.log1p(dispersion * rate) / dispersion)
+
+    return float(brentq(excess, MIN_TRUNCATED_RATE, mean, xtol=1e-14, rtol=1e-12))
+
+
+@dataclass(frozen=True)
+class HurdleNBChannel:
+    """A channel's hurdle model with a negative-binomial active count.
+
+    For state ``s``, ``π = π_c(s)``, ``μ = μ_c(s)`` and ``α = α_c(s)``::
+
+        P(n = 0     | s) = π
+        P(n = k ≥ 1 | s) = (1 − π) · NB(k; μ, α) / (1 − NB(0; μ, α))
+
+    ``NB(k; μ, α)`` is the negative binomial with mean ``μ`` and variance
+    ``μ + α μ²``. ``α = 0`` is the Poisson, so the model is then exactly the
+    :class:`HurdleChannel` with the same ``π`` and ``μ``.
+
+    Attributes
+    ----------
+    channel
+        The evidence channel.
+    silence
+        ``π``, the probability of a silent window, per state.
+    rate
+        ``μ``, the mean of the untruncated negative binomial, per state.
+    dispersion
+        ``α ≥ 0``, per state: how much faster than its mean the active count's
+        variance grows.
+    """
+
+    channel: EvidenceChannel
+    silence: np.ndarray
+    rate: np.ndarray
+    dispersion: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Validate the parameters and freeze copies of them."""
+        silence = np.array(self.silence, dtype=float)
+        rate = np.array(self.rate, dtype=float)
+        dispersion = np.array(self.dispersion, dtype=float)
+        if not (silence.shape == rate.shape == dispersion.shape) or silence.ndim != 1:
+            raise ValueError("silence, rate and dispersion need one value per state")
+        if not np.all((silence > 0.0) & (silence < 1.0)):
+            raise ValueError("silence probabilities must lie strictly in (0, 1)")
+        if not np.all(np.isfinite(rate) & (rate > 0.0)):
+            raise ValueError("rates must be positive and finite")
+        if not np.all(np.isfinite(dispersion) & (dispersion >= 0.0)):
+            raise ValueError("dispersions must be finite and non-negative")
+        for values in (silence, rate, dispersion):
+            values.setflags(write=False)
+        object.__setattr__(self, "silence", silence)
+        object.__setattr__(self, "rate", rate)
+        object.__setattr__(self, "dispersion", dispersion)
+
+    @property
+    def zero_term(self) -> np.ndarray:
+        """``log π``: the log-likelihood of a silent window, per state."""
+        values: np.ndarray = np.log(self.silence)
+        return values
+
+    def active_moments(self) -> tuple[np.ndarray, np.ndarray]:
+        """Mean and variance of an active window's count, per state."""
+        return ztnb_moments(self.rate, self.dispersion)
+
+    def log_pmf(self, counts: np.ndarray) -> np.ndarray:
+        """``(rows, states)`` log-probability of each count, normalised over counts."""
+        counts = _checked_counts(counts)
+        active = np.log1p(-self.silence)[None, :] + ztnb_log_pmf(
+            np.maximum(counts, 1.0)[:, None],
+            self.rate[None, :],
+            self.dispersion[None, :],
+        )
+        values: np.ndarray = np.where(
+            (counts == 0)[:, None], self.zero_term[None, :], active
+        )
+        return values
+
+    def loglik(self, counts: np.ndarray) -> np.ndarray:
+        """``(rows, states)`` log-likelihood of each pooled count, up to ``log n!``.
+
+        The ``log n!`` shared by every state is dropped, as :class:`HurdleChannel`
+        drops it, so the two families' terms are directly comparable.
+        """
+        counts = _checked_counts(counts)
+        values: np.ndarray = self.log_pmf(counts) + gammaln(counts + 1.0)[:, None]
+        return values
+
+    def decompose(self, count: float) -> dict[str, np.ndarray]:
+        """One window's log-likelihood split into silence and activity parts."""
+        counts = _checked_counts(np.array([count]))
+        if counts[0] == 0:
+            return {"silence": self.zero_term, "activity": np.zeros_like(self.rate)}
+        return {
+            "silence": np.log1p(-self.silence),
+            "activity": ztnb_log_pmf(counts[0], self.rate, self.dispersion)
+            + gammaln(counts[0] + 1.0),
+        }
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a serialisable form."""
+        return {
+            "family": HURDLE_NB,
+            **_channel_key(self.channel),
+            "silence": self.silence.tolist(),
+            "rate": self.rate.tolist(),
+            "dispersion": self.dispersion.tolist(),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> HurdleNBChannel:
+        """Rebuild a model written by :meth:`to_dict`."""
+        if payload.get("family") != HURDLE_NB:
+            raise ValueError(f"not a {HURDLE_NB} channel model")
+        return cls(
+            EvidenceChannel(payload["room"], Modality(payload["modality"])),
+            np.array(payload["silence"], dtype=float),
+            np.array(payload["rate"], dtype=float),
+            np.array(payload["dispersion"], dtype=float),
+        )
+
+
+@dataclass(frozen=True)
+class ActiveCounts:
+    """How often each active count occurred, per state, on one channel.
+
+    The negative binomial's dispersion is not determined by a count's sum and
+    sum of squares, so its fit needs the whole distribution of active counts.
+
+    Attributes
+    ----------
+    values
+        The distinct counts of at least one, increasing.
+    frequencies
+        ``(states, values)``: how many active windows of each state held each
+        count.
+    """
+
+    values: np.ndarray
+    frequencies: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Validate and freeze copies."""
+        values = np.array(self.values, dtype=float)
+        frequencies = np.array(self.frequencies, dtype=float)
+        if values.ndim != 1 or frequencies.ndim != 2:
+            raise ValueError("values are one-dimensional, frequencies two")
+        if frequencies.shape[1] != values.size:
+            raise ValueError("one frequency column per value")
+        if values.size and (
+            values.min() < 1.0
+            or np.any(np.diff(values) <= 0.0)
+            or not np.array_equal(values, np.round(values))
+        ):
+            raise ValueError("values must be increasing whole counts of at least 1")
+        if not np.all(np.isfinite(frequencies)) or (frequencies < 0.0).any():
+            raise ValueError("frequencies must be finite and non-negative")
+        values.setflags(write=False)
+        frequencies.setflags(write=False)
+        object.__setattr__(self, "values", values)
+        object.__setattr__(self, "frequencies", frequencies)
+
+    @classmethod
+    def from_counts(
+        cls, counts: np.ndarray, labels: np.ndarray, states: int
+    ) -> ActiveCounts:
+        """Tabulate the active windows among *counts*, by their state *labels*."""
+        counts = _checked_counts(counts)
+        active = counts > 0
+        values, index = np.unique(counts[active], return_inverse=True)
+        frequencies = np.zeros((states, values.size))
+        np.add.at(frequencies, (np.asarray(labels)[active], index), 1.0)
+        return cls(values, frequencies)
+
+    @classmethod
+    def combine(cls, parts: Sequence[ActiveCounts]) -> ActiveCounts:
+        """One table holding every part's active windows."""
+        if not parts:
+            raise ValueError("nothing to combine")
+        values = np.unique(np.concatenate([p.values for p in parts]))
+        states = {p.frequencies.shape[0] for p in parts}
+        if len(states) != 1:
+            raise ValueError("every part needs the same states")
+        frequencies = np.zeros((states.pop(), values.size))
+        for part in parts:
+            frequencies[:, np.searchsorted(values, part.values)] += part.frequencies
+        return cls(values, frequencies)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a serialisable form."""
+        return {
+            "values": [int(v) for v in self.values],
+            "frequencies": self.frequencies.tolist(),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> ActiveCounts:
+        """Rebuild a table written by :meth:`to_dict`."""
+        return cls(
+            np.array(payload["values"], dtype=float),
+            np.array(payload["frequencies"], dtype=float),
+        )
+
+
+def _tail_count(rate: float) -> int:
+    """A count beyond which the zero-truncated Poisson with *rate* holds under ``_TAIL``."""
+    from scipy.stats import poisson
+
+    return max(1, int(poisson.isf(_TAIL, rate)) + 1)
+
+
+def _ztp_table(rate: float, top: int) -> np.ndarray:
+    """The zero-truncated Poisson's probabilities of the counts 1 to *top*."""
+    from scipy.stats import poisson
+
+    k = np.arange(1, top + 1)
+    probabilities: np.ndarray = poisson.pmf(k, rate) / -math.expm1(-rate)
+    return probabilities
+
+
+def fit_dispersion(
+    values: np.ndarray,
+    weights: np.ndarray,
+    active_mean: float,
+    *,
+    max_dispersion: float = MAX_DISPERSION,
+) -> float:
+    """The dispersion ``α`` that maximises the profile likelihood of an active-count table.
+
+    For each ``α``, ``μ`` is the one whose truncated mean is *active_mean*, which
+    is the maximum-likelihood ``μ`` for that ``α`` when *active_mean* is the
+    table's own mean: with ``α`` fixed, the truncated negative binomial is an
+    exponential family in ``k``. The log-likelihood ``Σ w_k log P(k)`` is then
+    maximised over ``α`` in ``{0} ∪ [MIN_DISPERSION, max_dispersion]``: a grid in
+    ``log α``, refined by bounded Brent search around the best point. A positive
+    ``α`` is preferred to the Poisson limit only if it gains more than
+    ``MIN_GAIN`` per unit of weight, so a table no more dispersed than a Poisson
+    returns exactly 0.
+
+    Parameters
+    ----------
+    values, weights
+        Distinct active counts and how much each weighs, such as its
+        frequency.
+    active_mean
+        The mean the fitted distribution must keep.
+    """
+    values = np.asarray(values, dtype=float)
+    weights = np.asarray(weights, dtype=float)
+    if values.shape != weights.shape or values.ndim != 1:
+        raise ValueError("values and weights must be matching one-dimensional arrays")
+    if not math.isfinite(max_dispersion) or max_dispersion <= MIN_DISPERSION:
+        raise ValueError("max_dispersion must exceed MIN_DISPERSION")
+    if weights.sum() <= 0.0 or active_mean <= 1.0 + 1e-9:
+        return 0.0
+
+    def loss(log_alpha: float | None) -> float:
+        alpha = 0.0 if log_alpha is None else math.exp(log_alpha)
+        rate = ztnb_rate(active_mean, alpha)
+        return -float(np.dot(weights, ztnb_log_pmf(values, rate, alpha)))
+
+    best = loss(None)
+    grid = np.linspace(math.log(MIN_DISPERSION), math.log(max_dispersion), 41)
+    losses = [loss(float(u)) for u in grid]
+    at = int(np.argmin(losses))
+    low = grid[max(at - 1, 0)]
+    high = grid[min(at + 1, grid.size - 1)]
+    refined = minimize_scalar(
+        loss,
+        bounds=(float(low), float(high)),
+        method="bounded",
+        options={"xatol": 1e-6},
+    )
+    candidates = [
+        (float(grid[at]), losses[at]),
+        (float(refined.x), float(refined.fun)),
+    ]
+    log_alpha, value = min(candidates, key=lambda c: c[1])
+    if best - value <= MIN_GAIN * float(weights.sum()):
+        return 0.0
+    if log_alpha >= math.log(max_dispersion) - 1e-9:
+        return max_dispersion  # exactly, so a fit at the bound is flagged
+    return min(max(math.exp(log_alpha), MIN_DISPERSION), max_dispersion)
+
+
+# ----------------------------------------------------------------------------
 # Fitting
 # ----------------------------------------------------------------------------
 @dataclass(frozen=True)
 class ChannelStatistics:
-    """Sufficient statistics of one channel's labelled windows, per state."""
+    """Sufficient statistics of one channel's labelled windows, per state.
+
+    ``active_counts`` tabulates the active windows, which the negative
+    binomial's dispersion needs. It is optional, so statistics built from sums
+    alone still fit the hurdle and Poisson families, and it is never part of a
+    fit's serialised form, so adding it changes no published digest.
+    """
 
     windows: np.ndarray
     silent: np.ndarray
     total: np.ndarray
     squares: np.ndarray
     declared: np.ndarray
+    active_counts: ActiveCounts | None = None
 
     @property
     def active(self) -> np.ndarray:
@@ -256,7 +691,14 @@ def _statistics(
     silent = np.bincount(labels, weights=(counts == 0).astype(float), minlength=states)
     total = np.bincount(labels, weights=counts, minlength=states)
     squares = np.bincount(labels, weights=counts * counts, minlength=states)
-    return ChannelStatistics(windows, silent, total, squares, declared * windows)
+    return ChannelStatistics(
+        windows,
+        silent,
+        total,
+        squares,
+        declared * windows,
+        ActiveCounts.from_counts(counts, labels, states),
+    )
 
 
 def household_channel_counts(
@@ -353,6 +795,100 @@ class FittedChannels:
             "active_mean": active_mean,
         }
 
+    def dispersion(
+        self,
+        channel: EvidenceChannel,
+        declared: np.ndarray | None = None,
+        *,
+        max_dispersion: float = MAX_DISPERSION,
+    ) -> np.ndarray:
+        """The negative binomial's dispersion ``α`` per state for *channel*.
+
+        Each state's ``α`` maximises the profile likelihood of the training
+        households' active-count table plus ``κ`` pseudo-windows distributed as
+        the zero-truncated Poisson with the same active mean, keeping the
+        hurdle's active mean (:func:`fit_dispersion`). The pseudo-windows carry
+        no information about the mean, only the Poisson's shape, so they
+        penalise ``α`` toward 0 with the weight of ``κ`` windows: with little
+        data the fit is the hurdle model, and with none it is the declared one.
+
+        *declared* is as for :meth:`parameters`. A state whose parameters are
+        undefined without it gets NaN.
+
+        Raises
+        ------
+        ValueError
+            If the statistics carry no active-count table.
+        """
+        fitted = self.parameters(channel, declared)
+        stats = self.statistics.get(channel)
+        if stats is not None and stats.active_counts is None:
+            raise ValueError(
+                "the negative binomial's dispersion needs active-count tables; "
+                "build the statistics with home_statistics or combine_statistics"
+            )
+        size = len(self.states)
+        out = np.full(size, np.nan)
+        for i in range(size):
+            mean = float(fitted["active_mean"][i])
+            if not math.isfinite(mean):
+                continue
+            shape_rate = truncated_poisson_rate(mean)
+            top = _tail_count(shape_rate)
+            observed_values = (
+                stats.active_counts.values
+                if stats is not None and stats.active_counts is not None
+                else np.zeros(0)
+            )
+            observed_weights = (
+                stats.active_counts.frequencies[i]
+                if stats is not None and stats.active_counts is not None
+                else np.zeros(0)
+            )
+            values = np.union1d(observed_values, np.arange(1.0, top + 1.0))
+            weights = np.zeros(values.size)
+            weights[np.searchsorted(values, observed_values)] += observed_weights
+            weights[: int(top)] += self.pseudo_windows * _ztp_table(
+                shape_rate, int(top)
+            )
+            out[i] = fit_dispersion(
+                values, weights, mean, max_dispersion=max_dispersion
+            )
+        return out
+
+    def dispersion_to_dict(self) -> dict[str, Any]:
+        """The negative binomial's fitted parameters, serialisable.
+
+        Per channel and state: the active windows the dispersion was fitted on,
+        ``α``, whether it reached ``MAX_DISPERSION``, the size ``1/α`` (``None``
+        at the Poisson limit), ``μ`` and the active mean. Kept apart from
+        :meth:`to_dict`, whose digest identifies published fits.
+        """
+        channels: dict[str, Any] = {}
+        for channel in sorted(self.statistics):
+            stats = self.statistics[channel]
+            fitted = self.parameters(channel)
+            alpha = self.dispersion(channel)
+            channels[channel.name] = {}
+            for i, state in enumerate(self.states):
+                a, m = float(alpha[i]), float(fitted["active_mean"][i])
+                defined = math.isfinite(a) and math.isfinite(m)
+                channels[channel.name][state.value] = {
+                    "active_windows": int(stats.active[i]),
+                    "dispersion": a if defined else None,
+                    "at_bound": (a >= MAX_DISPERSION) if defined else None,
+                    "size": (1.0 / a if a > 0.0 else None) if defined else None,
+                    "rate": ztnb_rate(m, a) if defined else None,
+                    "active_mean": m if defined else None,
+                }
+        return {
+            "model": "hurdle with a zero-truncated negative binomial active count",
+            "fitted_on": list(self.fitted_on),
+            "pseudo_windows": self.pseudo_windows,
+            "max_dispersion": MAX_DISPERSION,
+            "channels": channels,
+        }
+
     def models(
         self,
         registry: SensorRegistry,
@@ -370,6 +906,19 @@ class FittedChannels:
             fitted = self.parameters(channel, terms.expected)
             if family == HURDLE:
                 out[channel] = HurdleChannel(channel, fitted["silence"], fitted["rate"])
+            elif family == HURDLE_NB:
+                alpha = self.dispersion(channel, terms.expected)
+                out[channel] = HurdleNBChannel(
+                    channel,
+                    fitted["silence"],
+                    np.array(
+                        [
+                            ztnb_rate(float(m), float(a))
+                            for m, a in zip(fitted["active_mean"], alpha, strict=True)
+                        ]
+                    ),
+                    alpha,
+                )
             elif family == POISSON:
                 out[channel] = poisson_channel(channel, fitted["mean"], terms.sensors)
             else:
@@ -509,7 +1058,12 @@ def combine_statistics(
             *(
                 np.sum([getattr(s, name) for s in pieces], axis=0)
                 for name in ("windows", "silent", "total", "squares", "declared")
-            )
+            ),
+            active_counts=(
+                ActiveCounts.combine([s.active_counts for s in pieces])  # type: ignore[misc]
+                if all(s.active_counts is not None for s in pieces)
+                else None
+            ),
         )
         for channel, pieces in pooled.items()
     }
@@ -638,21 +1192,41 @@ class HouseholdChannels:
                 if estimate.strength != self.config.strength:
                     raise ValueError("every estimate must use the declared strength")
 
-    def models(self) -> dict[EvidenceChannel, HurdleChannel]:
-        """The household's hurdle channel models, for the restricted recursion."""
-        return {
-            channel: HurdleChannel(
+    def models(
+        self, dispersion: Mapping[EvidenceChannel, np.ndarray] | None = None
+    ) -> dict[EvidenceChannel, ChannelModel]:
+        """The household's channel models, for the restricted recursion.
+
+        Without *dispersion*, the hurdle models. With the population's
+        dispersion per channel, from :meth:`FittedChannels.dispersion`, the
+        hurdle negative binomial: its silence and active mean are the pooled
+        ones, and its dispersion is the population's. A household's own
+        dispersion is not pooled, because a few active windows cannot estimate
+        it stably.
+        """
+        out: dict[EvidenceChannel, ChannelModel] = {}
+        for channel in sorted(self.silence):
+            means = self.activity[channel].pooled
+            if dispersion is None:
+                out[channel] = HurdleChannel(
+                    channel,
+                    self.silence[channel].pooled,
+                    np.array([truncated_poisson_rate(float(m)) for m in means]),
+                )
+                continue
+            alpha = np.asarray(dispersion[channel], dtype=float)
+            out[channel] = HurdleNBChannel(
                 channel,
                 self.silence[channel].pooled,
                 np.array(
                     [
-                        truncated_poisson_rate(float(m))
-                        for m in self.activity[channel].pooled
+                        ztnb_rate(float(m), float(a))
+                        for m, a in zip(means, alpha, strict=True)
                     ]
                 ),
+                alpha,
             )
-            for channel in sorted(self.silence)
-        }
+        return out
 
     def diagnostics(self) -> list[dict[str, Any]]:
         """Raw, pooled and population estimates, and the effective shrinkage.

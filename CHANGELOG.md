@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added a hurdle model with a zero-truncated negative-binomial active count, the `hurdle_nb` family in `sensor_modeling.datasets.channel_models`, described in `docs/HURDLE_NEGATIVE_BINOMIAL.md`. The posterior predictive checks found the zero-truncated Poisson active count systematically under-dispersed, with a variance growing with the square of the mean. No comparison with the hurdle-Poisson model is run here.
+  - **Model.** `HurdleNBChannel` keeps the hurdle's silence probability and replaces the active count with a negative binomial of mean `mu` and dispersion `alpha`, truncated at zero. `alpha = 0` is exactly the hurdle-Poisson model, which remains available and unchanged.
+  - **Fitting.** On training households only. Silence and the active mean are the hurdle's shrunk estimates. The dispersion maximises the profile likelihood of the active-count table plus 12 Poisson-shaped pseudo-windows at the same mean, which shrink it toward the Poisson. It is bounded at 100, where the family approaches the logarithmic series, and a fit at the bound is flagged.
+  - **Pooling.** `HouseholdChannels.models(dispersion=...)` builds a household's models from its pooled silence and active mean and the population's dispersion.
+  - **Numerics.** The coefficients use `log B(k, r)`, the truncation term a stable `log(1 - exp(x))`, and the Poisson limit its own branch; counts of a million stay finite.
 - Added pre-specified posterior predictive checks of the fitted hurdle channel model, `sensor_modeling.datasets.predictive_checks`, with its frozen protocol, `artifacts/phase3/predictive_protocol.json`, committed before any household was examined. The design is described in `docs/PHASE3_PREDICTIVE_CHECKS.md`. It is diagnostic only: no model is changed and no inference is run.
   - **Cells.** Each household's labelled windows of one state on one channel, with at least 50 windows, are checked against two references: the hurdle fitted to the cell alone, which tests the family, and the fold's population hurdle, which inference uses.
   - **Statistics.** Silence, mean, variance, the active mean and dispersion, the 90th and 99th percentiles, the tail above the 99th, windows in long quiet runs, and windows in bursts. Each is compared with 200 replicates of the cell's own windows, refitted for the cell's own fit.
@@ -52,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests.** The strict leakage tests stream a synthetic sequence whose later evidence changes an earlier posterior, and a simulated day through the online pipeline.
 
 ### Changed
+- `ChannelStatistics` gains an optional `active_counts` table of active-window counts, built by `home_statistics` and merged by `combine_statistics`. It is excluded from `FittedChannels.to_dict`, so every fit's SHA-256, including the published populations', is unchanged.
 - `sensor_modeling.datasets.channel_models` gains `home_statistics`, `combine_statistics` and `pool_channels`, so that one household's statistics can be combined or pooled at several strengths without being counted again. `fit_channel_models` and `adapt_channels` now use them, and give identical results.
 - The experiment-record schema is 1.3. The `inference` block adds `causal`, `delay_seconds` and `evidence`, and `ExperimentRecord` requires `evidence`.
   - A record is refused if its causality or delay disagrees with its regime, or if its estimates read past it.
