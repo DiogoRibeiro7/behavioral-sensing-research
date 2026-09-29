@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added pre-specified posterior predictive checks of the fitted hurdle channel model, `sensor_modeling.datasets.predictive_checks`, with its frozen protocol, `artifacts/phase3/predictive_protocol.json`, committed before any household was examined. The design is described in `docs/PHASE3_PREDICTIVE_CHECKS.md`. It is diagnostic only: no model is changed and no inference is run.
+  - **Cells.** Each household's labelled windows of one state on one channel, with at least 50 windows, are checked against two references: the hurdle fitted to the cell alone, which tests the family, and the fold's population hurdle, which inference uses.
+  - **Statistics.** Silence, mean, variance, the active mean and dispersion, the 90th and 99th percentiles, the tail above the 99th, windows in long quiet runs, and windows in bursts. Each is compared with 200 replicates of the cell's own windows, refitted for the cell's own fit.
+  - **Households.** Households are the unit. Every summary by state, channel, room and channel type is a household bootstrap of household means, and every household's values stay in the record.
+  - **Rules.** Declared in advance, they judge whether the zero-truncated Poisson active count is under-dispersed and whether quiet runs or bursts are in excess, and route the result to a next model family, if any.
+  - **Output.** `predictive_summary.render_summary` and `predictive_figures.draw_figures` generate the Markdown summary and the figures from the record. `scripts/run_phase3_predictive_checks.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Tests.** Synthetic tests check that the checks accept a correctly specified Poisson model and detect a negative-binomial-like process and clustering in time.
+  - **Result.** The run is published in `artifacts/phase3/phase3-hurdle-predictive-checks.json`, made from the protocol commit on a clean tree, with its figures in `docs/figures/phase3-predictive-*.svg`. It is on the 20 development homes. Its population fit is the Phase 3.3 follow-up's, by digest.
+    - The zero-truncated Poisson active count is systematically under-dispersed: the observed active variance is 4.3 to 7.4 times the predicted in the common states, in every household, and 472 of 493 cells are flagged. The excess grows with the square of the mean.
+    - Long quiet runs are in systematic excess, 1.3 to 5.2 times in `away`, `home_active` and `home_inactive`. Bursts are in excess only in `sleeping` and `home_inactive`.
+    - The declared routing names within-state temporal dependence, activity sub-states or a Markov-modulated emission, as the next model family, and the roadmap records it.
 - Added the pre-specified Phase 3.5 evaluation of fixed-lag smoothing, `sensor_modeling.datasets.smoothing_experiment`, with its frozen protocol, `artifacts/phase3/smoothing_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_SMOOTHING.md`.
   - **Formulation.** The Phase 3.3 follow-up's fitted-hurdle recursion, the recursion over every window with a pre-specified success.
   - **Regimes.** The online filter, and fixed-lag smoothers with lags of 1, 6 and 12 windows (5, 30 and 60 minutes), each with a declared operational use. Every regime is scored on the same labelled windows, and every smoothed estimate reads its full lag.
