@@ -75,6 +75,13 @@ their empty defaults when it is loaded.
 `inference` says which [inference regime](INFERENCE_REGIMES.md) every estimate
 in the record comes from.
 
+A record that compares regimes, such as the
+[Phase 3.5 smoothing evaluation](PHASE3_SMOOTHING.md), states the one with the
+longest lag instead. That regime bounds every estimate in the record: none
+reads further ahead. Its results then label every cell and comparison with its
+own regime and evidence summary. Every comparison between regimes is a
+labelled smoothing gain.
+
 - **Mode and lag.** The mode is the online filter or a fixed-lag smoother. A
   smoother also records its lag in windows and the window width, so its
   reporting delay is stated in time.

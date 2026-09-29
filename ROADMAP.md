@@ -396,6 +396,43 @@ The rule is enforced in code; see `docs/INFERENCE_REGIMES.md`.
   migration, and lists no prediction timestamps. The earlier smoothing
   measurements in `docs/real_data.md` are labelled as smoothed.
 
+How much smoothing recovers was measured in a pre-specified evaluation; see
+`docs/PHASE3_SMOOTHING.md`.
+
+- **The setup.** It uses the fitted-hurdle recursion, the current best, and
+  lags of 5, 30 and 60 minutes.
+- **Status.** The conclusions are on the development panel, and none is a
+  held-out claim.
+- **Every figure is a smoothing gain.** Each is available only after the
+  smoother's delay, and none is an online improvement.
+
+- **Five minutes of lag is a gain.** Balanced accuracy rises by 0.031 [0.021,
+  0.043], in all 20 homes. No probability metric favours the online filter.
+  Log loss worsens by 0.044, short of its minimal difference, an uncertain
+  verdict.
+- **Thirty and sixty minutes are trade-offs.**
+  - Balanced accuracy rises by 0.043 and 0.049.
+  - Log loss worsens by 0.101 and 0.119.
+  - The Brier score improves, and calibration error is negligible.
+- **Returns diminish.** Five minutes gives 63% of the sixty-minute gain in
+  balanced accuracy.
+- **Most changes are not corrections.** At five minutes the smoother changes
+  8.3% of reported states. It corrects 6.9% of the filter's errors and makes
+  3.9% of its correct windows wrong, so only 37% of its changes are
+  corrections.
+- **By state.**
+  - `away` recall gains 0.060 and 0.083 at thirty and sixty minutes.
+  - `home_active` recall is unchanged at every lag.
+  - `sleeping` recall is unchanged at five and thirty minutes, and uncertain at
+    sixty.
+  - The largest gains are in rare states, such as `bathroom_activity`, +0.089.
+- **Transitions.**
+  - Accuracy near true transitions rises by 0.022 to 0.051.
+  - No smoother reports a new state sooner than the online filter. The earlier
+    boundary it places recovers at most 12.5 minutes of its wait.
+  - Smoothing is therefore no help to alerting or to any decision made when a
+    state changes.
+
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
 Paper 1 rules out a simple scalar-score swap as the main solution.

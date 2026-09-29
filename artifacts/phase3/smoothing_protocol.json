@@ -1,0 +1,233 @@
+{
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "statistics": "mean and median paired differences",
+    "unit": "household"
+  },
+  "calibration": "expected calibration error over 10 confidence bins",
+  "criteria": {
+    "gain": "balanced accuracy favours the smoother, and neither log loss nor calibration error favours the online filter",
+    "inconclusive": "anything else",
+    "no gain": "balanced accuracy is negligible or favours the online filter, and log loss is negligible or favours the online filter",
+    "not_online": "every difference is a smoothing gain: the smoother reads up to its lag after each window and reports that long after it, so no difference is an improvement of the online filter",
+    "primary": "each smoother against the online filter on the same windows; every estimand is primary and read by the same rule",
+    "probability gain": "balanced accuracy does not favour the smoother, log loss does, and neither balanced accuracy nor calibration error favours the online filter",
+    "trade-off": "balanced accuracy favours the smoother, and log loss or calibration error favours the online filter",
+    "verdicts": "favours model: mean >= delta and lower bound > 0; favours reference: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else"
+  },
+  "estimands": [
+    {
+      "key": "G1",
+      "kind": "smoothing gain",
+      "model": "lag_1",
+      "question": "how much does the fixed-lag smoother with lag 1 recover over the online filter",
+      "reference": "online",
+      "role": "primary"
+    },
+    {
+      "key": "G6",
+      "kind": "smoothing gain",
+      "model": "lag_6",
+      "question": "how much does the fixed-lag smoother with lag 6 recover over the online filter",
+      "reference": "online",
+      "role": "primary"
+    },
+    {
+      "key": "G12",
+      "kind": "smoothing gain",
+      "model": "lag_12",
+      "question": "how much does the fixed-lag smoother with lag 12 recover over the online filter",
+      "reference": "online",
+      "role": "primary"
+    }
+  ],
+  "formulation": {
+    "attribution": 1.0,
+    "channels": "hurdle, fitted per fold on the training households as in the Phase 3.3 follow-up",
+    "emissions": "default_emissions of the household registry, pooled per channel",
+    "fitted": "the population hurdle parameters, per fold, on the fold's training households' labelled windows only",
+    "model": "the Phase 3.3 follow-up's filter_hurdle recursion",
+    "prediction": "most probable state of the posterior; no abstention",
+    "prior": "stationary distribution of the default ontology, one step before the first window of the recording",
+    "pseudo_windows": 12.0,
+    "reliability": 1.0,
+    "transition": "default StateOntology, time-homogeneous, one step per window",
+    "why": "it is the recursion over every window with a pre-specified success on develop (Phase 3.3 follow-up, FR); partial pooling in the recursion was inconclusive (Phase 3.4, P2), and the Phase 3.1 time prior was evaluated only on declared information sets, never as a recursion",
+    "windows": "every window of the recording, each channel's current count"
+  },
+  "households": {
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+    "use": "each household is held out once; its fold's training households fit the channel models"
+  },
+  "inference": "the online filter reads no window after the scored one; each smoother reads up to its lag after it and reports that long after it; the record states the longest lag, which bounds every estimate in it, and labels every cell and comparison with its own regime",
+  "lags": {
+    "smoother": "smooth_beliefs through regime_beliefs: each window's filtered belief revised with the filtered beliefs of up to lag later windows and the transition, starting every correction from the filtered belief at its horizon",
+    "step_minutes": 5.0,
+    "why": "a small set declared before scoring and never searched: short, medium and long delays with an operational use each; lags beyond an hour serve only offline analysis and are not scored",
+    "windows": [
+      1,
+      6,
+      12
+    ]
+  },
+  "metrics": [
+    "balanced_accuracy",
+    "log_loss",
+    "brier",
+    "calibration_error"
+  ],
+  "minimal_differences": {
+    "balanced_accuracy": 0.02,
+    "boundary_accuracy": 0.02,
+    "brier": 0.01,
+    "calibration_error": 0.02,
+    "decision_delay_minutes": 5.0,
+    "detection_rate": 0.05,
+    "log_loss": 0.05,
+    "recall": 0.05
+  },
+  "name": "phase3-fixed-lag-smoothing",
+  "operational": {
+    "broken": "Share of a household's scored windows where the online filter's most probable state is right that the smoother gets wrong.",
+    "by_state": "the same shares within the scored windows whose labelled state is each focus state",
+    "changed": "Share of a household's scored windows whose most probable state under the smoother differs from the online filter's.",
+    "corrected": "Share of a household's scored windows where the online filter's most probable state is wrong that the smoother gets right.",
+    "corrections_among_changes": "Share of a household's changed windows where the smoother is right and the online filter wrong.",
+    "reporting_delay": "the regime's lag times the step",
+    "summary": "one value per household; the mean and the median across households with household bootstrap intervals; no verdict"
+  },
+  "per_state_recall": {
+    "focus_states": [
+      "away",
+      "home_active",
+      "sleeping"
+    ],
+    "rare_rule": "share of labelled time below 0.05 in either fold's training households",
+    "states": "every state, for every estimand"
+  },
+  "protocol_sha256": "f68d2733fb8f984c4617fdbbee2ed9fe1d534892bfcbfd704e6e6f1b180a6f1f",
+  "regimes": {
+    "lag_1": {
+      "causal": false,
+      "delay_seconds": 300.0,
+      "label": "fixed-lag smoother, lag 1 window (5 min)",
+      "lag_steps": 1,
+      "mode": "fixed_lag_smoother",
+      "role": "short: one window, for a display that may run one window behind",
+      "step_seconds": 300.0
+    },
+    "lag_12": {
+      "causal": false,
+      "delay_seconds": 3600.0,
+      "label": "fixed-lag smoother, lag 12 windows (60 min)",
+      "lag_steps": 12,
+      "mode": "fixed_lag_smoother",
+      "role": "long: one hour, for retrospective hourly or daily reporting; the longest delay treated as plausible for a decision made the same day",
+      "step_seconds": 300.0
+    },
+    "lag_6": {
+      "causal": false,
+      "delay_seconds": 1800.0,
+      "label": "fixed-lag smoother, lag 6 windows (30 min)",
+      "lag_steps": 6,
+      "mode": "fixed_lag_smoother",
+      "role": "medium: half an hour, for a non-urgent check within the hour, such as whether the resident has got up",
+      "step_seconds": 300.0
+    },
+    "online": {
+      "causal": true,
+      "delay_seconds": 0.0,
+      "label": "online filter",
+      "lag_steps": 0,
+      "mode": "online_filter",
+      "role": "reference: what a live system reports at each window",
+      "step_seconds": null
+    }
+  },
+  "reproduction": "the online filter is also scored on every labelled window, as filter_hurdle@R, to reproduce the Phase 3.3 follow-up",
+  "schema": "smoothing-protocol/1",
+  "scored_windows": "each held-out household's labelled windows except the last 12 of its recording, identical for every regime, so every smoothed estimate reads its full lag",
+  "seeds": {
+    "bootstrap": 0
+  },
+  "transitions": {
+    "boundary_accuracy": "Share of a household's scored windows within boundary_windows of a transition, before or after it, whose most probable state is right.",
+    "boundary_windows": 6,
+    "comparisons": "boundary accuracy, and each group's detection rate and decision delay, as paired household differences against the online filter, read with the verdicts",
+    "decision_delay_minutes": "The median over a household's detected transitions of the time from the transition to the moment the regime can first report the new state: the windows until its most probable state first equals the new state, plus its lag, times the step. Lower is better.",
+    "detection_rate": "Share of a household's transitions after which the regime reports the new state at some window of the new episode.",
+    "group_rule": "all transitions, and the transitions into each focus state",
+    "groups": [
+      "all",
+      "away",
+      "home_active",
+      "sleeping"
+    ],
+    "interior_accuracy": "The same, for the scored windows further from every transition.",
+    "transition": "A scored window whose labelled state differs from the labelled state of the window before it. Its episode runs while the following windows keep that labelled state, up to the last scored window; an unlabelled window ends it."
+  },
+  "tuning": "none: the lags, the boundary and the focus states are declared; nothing is fitted on held-out households"
+}

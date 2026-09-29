@@ -126,6 +126,13 @@ Every experiment in `sensor_modeling.datasets` now lists its scored moments.
 Each is a held-out household's labelled regular moment, after the household's
 cut-off where an experiment has one.
 
+A record that compares regimes states the one with the longest lag, which
+bounds every estimate in it. Its results label every cell and comparison with
+its own regime and evidence summary. The
+[Phase 3.5 smoothing evaluation](PHASE3_SMOOTHING.md) is the first such record.
+Each of its comparisons is made with `compare_results(..., smoothing_gain=True)`,
+so each is a labelled smoothing gain.
+
 ## What fails loudly
 
 - **In the regime module.**
