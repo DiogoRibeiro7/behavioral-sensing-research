@@ -513,3 +513,59 @@ class TestExperiment:
         payload["results"] = {"result_schema": "pooling-results/1"}
         with pytest.raises(ValueError, match="smoothing-results"):
             render_summary(payload)
+
+
+# ----------------------------------------------------------------------------
+# The published result
+# ----------------------------------------------------------------------------
+PUBLISHED = ROOT / "artifacts" / "phase3" / "phase3-fixed-lag-smoothing.json"
+FITTED_RATES = ROOT / "artifacts" / "phase3" / "phase3-fitted-rates.json"
+DOC = ROOT / "docs" / "PHASE3_SMOOTHING.md"
+
+
+class TestPublishedResult:
+    """The published development-panel result, and the page that reports it."""
+
+    def test_it_ran_the_frozen_protocol_on_a_clean_tree(self) -> None:
+        payload = load_record(PUBLISHED)
+        splits = load_frozen_splits(SPLITS)
+        declared = declared_protocol(splits)
+        assert payload["configuration"]["protocol_sha256"] == declared.sha256()
+        assert payload["environment"]["git_dirty"] == "false"
+        assert payload["inference"]["label"] == (
+            "fixed-lag smoother, lag 12 windows (60 min)"
+        )
+        inputs = {item["name"]: item["sha256"] for item in payload["inputs"]}
+        assert inputs.pop(PROTOCOL.name) == check_frozen_protocol(declared, PROTOCOL)
+        assert inputs.pop(SPLITS.name) == splits.sha256
+        assert inputs == {
+            entry["filename"]: entry["sha256"] for entry in splits.homes.values()
+        }
+        assert sorted(payload["results"]["households"]) == sorted(splits.homes)
+
+    def test_the_population_is_the_phase_3_3_follow_up_fit(self) -> None:
+        earlier = load_record(FITTED_RATES)["results"]["fitted"]
+        for fold, entry in load_record(PUBLISHED)["results"]["fitted"].items():
+            assert entry["population"]["sha256"] == earlier[fold]["channels"]["sha256"]
+
+    def test_the_online_filter_reproduces_the_phase_3_3_follow_up(self) -> None:
+        published = load_record(PUBLISHED)["household_metrics"][REPRODUCED]
+        earlier = load_record(FITTED_RATES)["household_metrics"][REPRODUCED]
+        assert published == earlier
+
+    def test_every_published_difference_is_a_labelled_smoothing_gain(self) -> None:
+        results = load_record(PUBLISHED)["results"]
+        for entry in results["estimands"]:
+            assert entry["kind"] == "smoothing gain"
+            assert entry["reference_inference"]["mode"] == "online_filter"
+            assert entry["model_inference"]["causal"] is False
+            assert entry["conclusion"] == smoothing_conclusion(entry["verdicts"])
+        for key, regime in results["regimes"].items():
+            assert regime["evidence"]["max_lead_seconds"] == regime["delay_seconds"]
+            assert regime["causal"] is (key == ONLINE_KEY)
+
+    def test_the_page_carries_the_summary_generated_from_it(self) -> None:
+        text = DOC.read_text(encoding="utf-8")
+        block = text.split("<!-- generated-summary:start -->")[1]
+        block = block.split("<!-- generated-summary:end -->")[0]
+        assert block.strip() == render_summary(load_record(PUBLISHED), level=3).strip()
