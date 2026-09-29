@@ -74,6 +74,7 @@ nav:
       - "Phase 3.3: correlated silence": PHASE3_CORRELATED_SILENCE.md
       - "Phase 3.3 follow-up: fitted rates": PHASE3_FITTED_RATES.md
       - "Phase 3.3 follow-up: predictive checks": PHASE3_PREDICTIVE_CHECKS.md
+      - Hurdle negative binomial: HURDLE_NEGATIVE_BINOMIAL.md
       - Partial pooling: PARTIAL_POOLING.md
       - "Phase 3.4: partial pooling": PHASE3_PARTIAL_POOLING.md
       - "Phase 3.5: fixed-lag smoothing": PHASE3_SMOOTHING.md
