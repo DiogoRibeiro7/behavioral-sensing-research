@@ -97,11 +97,23 @@ from .regime_results import (
     pool_results,
 )
 from .resampling import Interval, monte_carlo_standard_error
+from .selective import (
+    HIGHER_IS_RISKIER,
+    HIGHER_IS_SAFER,
+    SelectiveData,
+    SelectiveReport,
+    Signal,
+    SignalEvaluation,
+    evaluate_signal,
+    evaluate_signals,
+)
 
 __all__ = [
     "METRIC_DEFINITIONS",
     "RESULTS_DIR",
     "SCHEMA_VERSION",
+    "HIGHER_IS_RISKIER",
+    "HIGHER_IS_SAFER",
     "AblationReport",
     "ArmOutcome",
     "ArmResult",
@@ -133,6 +145,10 @@ __all__ = [
     "RegimeResult",
     "ReportedInterval",
     "Scenario",
+    "SelectiveData",
+    "SelectiveReport",
+    "Signal",
+    "SignalEvaluation",
     "ScenarioComparison",
     "SensorConfiguration",
     "StateMetrics",
@@ -148,6 +164,8 @@ __all__ = [
     "household_values",
     "jensen_shannon",
     "evaluate_configuration",
+    "evaluate_signal",
+    "evaluate_signals",
     "group_window",
     "leave_one_out",
     "load_record",

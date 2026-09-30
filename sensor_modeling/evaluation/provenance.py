@@ -50,6 +50,7 @@ from ..fusion.regime import (
 )
 from .disagreement import DisagreementReport, validate_disagreement
 from .mismatch import MismatchReport, validate_mismatch
+from .selective import SelectiveReport, validate_selective
 
 logger = logging.getLogger(__name__)
 
@@ -63,10 +64,10 @@ RESULTS_DIR = Path("results")
 #: existing field means and would need an explicit migration. A reader refuses
 #: any version newer than its own rather than guessing at fields it does not
 #: know. See ``docs/EXPERIMENT_ARTIFACTS.md``.
-SCHEMA_VERSION = "1.5"
+SCHEMA_VERSION = "1.6"
 
 #: Versions :func:`load_record` accepts, oldest first.
-READABLE_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "1.5")
+READABLE_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6")
 
 #: How a record written at 1.2 or later knows its inference regime.
 DECLARED_INFERENCE = "declared by the experiment that wrote the record"
@@ -434,6 +435,11 @@ class ExperimentRecord:
         observation model, as a
         :class:`~sensor_modeling.evaluation.MismatchReport`, or ``None``. Added
         in 1.5.
+    selective_prediction
+        How well candidate risk signals order predictions for rejection, over a
+        grid of coverage levels, as a
+        :class:`~sensor_modeling.evaluation.SelectiveReport`, or ``None``. Added
+        in 1.6.
     recorded_at, environment, resolved_defaults
         Captured at creation. Pass them only when rebuilding a record that
         was already written, as :meth:`load` does.
@@ -477,6 +483,7 @@ class ExperimentRecord:
     mcse: Mapping[str, float] = field(default_factory=dict)
     structural_disagreement: DisagreementReport | None = None
     observation_mismatch: MismatchReport | None = None
+    selective_prediction: SelectiveReport | None = None
     recorded_at: str = field(default_factory=_now)
     environment: Mapping[str, str] = field(default_factory=environment)
     resolved_defaults: Mapping[str, Any] = field(default_factory=resolved_defaults)
@@ -503,6 +510,10 @@ class ExperimentRecord:
             self.observation_mismatch, MismatchReport
         ):
             raise TypeError("observation_mismatch must be a MismatchReport")
+        if self.selective_prediction is not None and not isinstance(
+            self.selective_prediction, SelectiveReport
+        ):
+            raise TypeError("selective_prediction must be a SelectiveReport")
         notes = list(self.notes)
         if self.data_source == "simulator" and SIMULATOR_NOTE not in notes:
             notes.append(SIMULATOR_NOTE)
@@ -559,6 +570,11 @@ class ExperimentRecord:
             "observation_mismatch": (
                 self.observation_mismatch.to_dict()
                 if self.observation_mismatch is not None
+                else None
+            ),
+            "selective_prediction": (
+                self.selective_prediction.to_dict()
+                if self.selective_prediction is not None
                 else None
             ),
             "notes": list(self.notes),
@@ -623,6 +639,11 @@ class ExperimentRecord:
             observation_mismatch=(
                 MismatchReport.from_dict(payload["observation_mismatch"])
                 if payload["observation_mismatch"] is not None
+                else None
+            ),
+            selective_prediction=(
+                SelectiveReport.from_dict(payload["selective_prediction"])
+                if payload["selective_prediction"] is not None
                 else None
             ),
             recorded_at=payload["recorded_at"],
@@ -716,8 +737,15 @@ _ADDED_IN_1_4: Mapping[str, Any] = {"structural_disagreement": None}
 #: Fields added in 1.5, with the default an older record is given.
 _ADDED_IN_1_5: Mapping[str, Any] = {"observation_mismatch": None}
 
+#: Fields added in 1.6, with the default an older record is given.
+_ADDED_IN_1_6: Mapping[str, Any] = {"selective_prediction": None}
+
 #: Every optional section added since 1.3, with its default.
-_ADDED_SINCE_1_3: Mapping[str, Any] = {**_ADDED_IN_1_4, **_ADDED_IN_1_5}
+_ADDED_SINCE_1_3: Mapping[str, Any] = {
+    **_ADDED_IN_1_4,
+    **_ADDED_IN_1_5,
+    **_ADDED_IN_1_6,
+}
 
 _INFERENCE_KEYS = {
     "mode",
@@ -880,6 +908,8 @@ def _check_sections(payload: Mapping[str, Any]) -> list[str]:
         problems += validate_disagreement(payload["structural_disagreement"])
     if payload["observation_mismatch"] is not None:
         problems += validate_mismatch(payload["observation_mismatch"])
+    if payload["selective_prediction"] is not None:
+        problems += validate_selective(payload["selective_prediction"])
     return problems
 
 
@@ -911,6 +941,7 @@ def validate_record(payload: Mapping[str, Any]) -> None:
         "preprocessing": dict,
         "structural_disagreement": (dict, type(None)),
         "observation_mismatch": (dict, type(None)),
+        "selective_prediction": (dict, type(None)),
     }
     structural += [
         f"{key} has the wrong type"
@@ -1009,8 +1040,8 @@ def _migrate_1_2(payload: dict[str, Any]) -> dict[str, Any]:
 def _migrate_1_3(payload: dict[str, Any]) -> dict[str, Any]:
     """Bring a 1.3 record to the current version without changing its content.
 
-    1.4 and 1.5 only add ``structural_disagreement`` and
-    ``observation_mismatch``, which a 1.3 record did not have.
+    1.4 to 1.6 only add ``structural_disagreement``, ``observation_mismatch``
+    and ``selective_prediction``, which a 1.3 record did not have.
     """
     migrated = dict(payload)
     for key, default in _ADDED_SINCE_1_3.items():
@@ -1023,13 +1054,27 @@ def _migrate_1_3(payload: dict[str, Any]) -> dict[str, Any]:
 def _migrate_1_4(payload: dict[str, Any]) -> dict[str, Any]:
     """Bring a 1.4 record to the current version without changing its content.
 
-    1.5 only adds ``observation_mismatch``, which a 1.4 record did not have.
+    1.5 and 1.6 only add ``observation_mismatch`` and ``selective_prediction``,
+    which a 1.4 record did not have.
     """
     migrated = dict(payload)
-    for key, default in _ADDED_IN_1_5.items():
+    for key, default in {**_ADDED_IN_1_5, **_ADDED_IN_1_6}.items():
         migrated.setdefault(key, default)
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["migrated_from"] = "1.4"
+    return migrated
+
+
+def _migrate_1_5(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.5 record to the current version without changing its content.
+
+    1.6 only adds ``selective_prediction``, which a 1.5 record did not have.
+    """
+    migrated = dict(payload)
+    for key, default in _ADDED_IN_1_6.items():
+        migrated.setdefault(key, default)
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["migrated_from"] = "1.5"
     return migrated
 
 
@@ -1097,6 +1142,8 @@ def load_record(path: Path) -> dict[str, Any]:
         payload = _migrate_1_3(payload)
     elif version == "1.4":
         payload = _migrate_1_4(payload)
+    elif version == "1.5":
+        payload = _migrate_1_5(payload)
     validate_record(payload)
     loaded: dict[str, Any] = payload
     return loaded

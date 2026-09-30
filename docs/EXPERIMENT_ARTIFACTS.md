@@ -44,7 +44,7 @@ again = ExperimentRecord.load(path)  # the typed record
 
 | Field | Contents | Required |
 | --- | --- | --- |
-| `schema_version` | `MAJOR.MINOR`; currently `1.5` | yes |
+| `schema_version` | `MAJOR.MINOR`; currently `1.6` | yes |
 | `experiment` | experiment identifier | yes |
 | `recorded_at` | execution timestamp, ISO 8601 with time zone, fixed when the record is created | yes |
 | `environment` | `git_commit`, `git_dirty`, `sensor_modeling` (the package version), `python`, and library versions including NumPy, SciPy, pandas and scikit-learn | yes |
@@ -66,6 +66,7 @@ again = ExperimentRecord.load(path)  # the typed record
 | `mcse` | Monte Carlo standard errors of simulation summaries, by name | 1.1 |
 | `structural_disagreement` | how much the experiment's model specifications disagree, window by window: the specifications with their assumptions and published support, the reference, and each household's summary and trace file; `null` if the experiment has none. See [structural disagreement](STRUCTURAL_DISAGREEMENT.md) | 1.4 |
 | `observation_mismatch` | how surprising each window's evidence is under every state of the observation model: the model's family and training households, the tail levels reported, and each household's summary and trace file; `null` if the experiment has none. See [observation mismatch](OBSERVATION_MISMATCH.md) | 1.5 |
+| `selective_prediction` | how well candidate risk signals order predictions for rejection over a grid of coverage levels: each signal's direction, pooled curve with household-bootstrap intervals, curve summaries and household curves, with the random and oracle references; `null` if the experiment has none. See [selective prediction](SELECTIVE_PREDICTION.md) | 1.6 |
 | `notes` | anything a reader needs in order not to over-read the result | yes |
 | `migrated_from` | the version the record was read from, when it was migrated | only after migration |
 
@@ -141,15 +142,16 @@ The version is `MAJOR.MINOR`.
 - **Newer files.** A reader refuses a newer minor, and any other major, rather
   than guessing at fields it does not know.
 
-| File version | This reader (1.5) |
+| File version | This reader (1.6) |
 | --- | --- |
 | `1.0` | migrated on load: new fields given defaults, non-finite numbers made `null`, then as `1.1` with `migrated_from: "1.0"`, content otherwise unchanged |
 | `1.1` | migrated on load: `inference` added as the online filter, attested on migration, with its causality, its delay and its evidence marked not listed, and `migrated_from: "1.1"`, content otherwise unchanged |
 | `1.2` | migrated on load: causality and delay derived from the regime, evidence marked not listed, and `migrated_from: "1.2"`, content otherwise unchanged. A smoothed 1.2 record is refused |
-| `1.3` | migrated on load: `structural_disagreement` and `observation_mismatch` added as `null`, and `migrated_from: "1.3"`, content otherwise unchanged |
-| `1.4` | migrated on load: `observation_mismatch` added as `null`, and `migrated_from: "1.4"`, content otherwise unchanged |
-| `1.5` | read as written |
-| `1.6` or later | refused: written by a newer version of the package |
+| `1.3` | migrated on load: `structural_disagreement`, `observation_mismatch` and `selective_prediction` added as `null`, and `migrated_from: "1.3"`, content otherwise unchanged |
+| `1.4` | migrated on load: `observation_mismatch` and `selective_prediction` added as `null`, and `migrated_from: "1.4"`, content otherwise unchanged |
+| `1.5` | migrated on load: `selective_prediction` added as `null`, and `migrated_from: "1.5"`, content otherwise unchanged |
+| `1.6` | read as written |
+| `1.7` or later | refused: written by a newer version of the package |
 | `0.x`, `2.x` | refused: another major version |
 
 Files written at 1.0 before `data_source` existed are migrated to `simulator`

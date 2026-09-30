@@ -323,7 +323,7 @@ class TestRecord:
     def test_a_record_carries_and_rebuilds_the_report(self, tmp_path: Path) -> None:
         path = record().write(tmp_path / "r.json")
         payload = load_record(path)
-        assert payload["schema_version"] == "1.5"
+        assert payload["schema_version"] == "1.6"
         section = payload["structural_disagreement"]
         assert section["reference"] == "x"
         assert set(section["households"]["h"]["summary"]["pairs"]) == {

@@ -70,6 +70,7 @@ MIGRATED = {
     "inference",
     "structural_disagreement",
     "observation_mismatch",
+    "selective_prediction",
 }
 STEP = timedelta(minutes=5)
 #: A sticky two-state chain, A and B.
