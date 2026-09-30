@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added the pre-specified Phase 4 comparison of richer uncertainty diagnostics, `sensor_modeling.datasets.uncertainty_experiment`, with its frozen protocol, `artifacts/phase4/uncertainty_protocol.json`, committed before any household was scored.
+  - **Signals.** Posterior confidence, entropy, model-structure disagreement over a population-only ensemble, evidence-channel disagreement, and predictive mismatch. Each ranks the same predictions: the Phase 3.3 follow-up's hurdle recursion on the 20 development homes, cross-fitted on the frozen folds.
+  - **Evaluation.** Selective-prediction curves of error, balanced accuracy, calibration and per-state retained coverage, pooled and per household. Each signal is compared with confidence by paired household differences with household bootstrap intervals.
+  - **Rule.** Declared in advance: a structural diagnostic is materially better when its error AURC beats confidence's by at least 0.01, with the interval above 0, and no difficult minority state is retained less than under confidence. No threshold is selected.
+  - **Output.** `uncertainty_summary.render_page` and `uncertainty_figures.draw_figures` generate the documentation page and its figures entirely from the record. `scripts/run_phase4_uncertainty.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Result.** The run is published in `artifacts/phase4/phase4-uncertainty-diagnostics.json`, made from the protocol commit on a clean tree. The page, `docs/PHASE4_UNCERTAINTY_DIAGNOSTICS.md`, and its figures are generated from it. It is on the 20 development homes, so it is not a held-out claim. Its predictions reproduce the Phase 3.3 follow-up's hurdle recursion to 3e-15.
+    - Model-structure disagreement is materially better than confidence by the declared rule. Household error AURC is 0.059 [0.031, 0.087] lower, and the guard holds.
+    - Its gain is at low coverage: at 50% to 90% coverage its error and balanced-accuracy differences are uncertain or negligible.
+    - It retains less of kitchen and bathroom activity than confidence does at 50% and 70%, and the guard did not cover these states. The frozen rule admitted only `bed_awake`, with 68 windows.
+    - Confidence barely orders the predictions (pooled gain 0.04), and entropy is indistinguishable from it.
+    - Evidence-channel disagreement and predictive mismatch are worse than confidence, and reject activity states and `bed_awake` heavily.
 - Added a selective-prediction evaluation framework for ROADMAP Phase 4, `sensor_modeling.evaluation.selective`, described in `docs/SELECTIVE_PREDICTION.md`. It evaluates any candidate risk signal without selecting a threshold or an abstention rule.
   - **Signals.** A `Signal` states its direction, `higher_is_riskier` or `higher_is_safer`, which is never assumed. A missing value is refused unless a policy ranks it for rejection or retention.
   - **Curves.** Over a grid of coverage levels, pooled over the panel and per household:

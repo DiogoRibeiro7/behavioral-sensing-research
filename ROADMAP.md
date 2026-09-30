@@ -539,6 +539,57 @@ direction stated, and selects no threshold.
 - **Uncertainty.** Households, never timestamps, are resampled.
 - **The record.** Experiment records carry it from schema 1.6.
 
+### Measured: the first comparison of the diagnostics
+
+The first pre-specified comparison is published; see
+`docs/PHASE4_UNCERTAINTY_DIAGNOSTICS.md` and
+`artifacts/phase4/phase4-uncertainty-diagnostics.json`.
+
+- **Scope.** The protocol was frozen in `ad459f1`. The data are the 20
+  development homes, 232,975 scored windows, so this is not a held-out claim.
+- **Predictions.** Every signal ranks the same cross-fitted hurdle-recursion
+  predictions, whose full-coverage error is 0.487.
+- **The answer.** Yes, by the declared rule, for model-structure disagreement
+  alone, with the limits below.
+
+Results:
+
+- **Confidence barely orders the predictions.** Its pooled gain over random
+  rejection is 0.04 [−0.22, 0.31].
+  - **Its most confident windows.** The most confident 10% of windows have an
+    error of 0.66, above the full-coverage 0.49.
+  - **Calibration.** The calibration error of its retained predictions grows
+    from 0.30 to 0.39 as coverage falls to 50%.
+  - **Entropy.** It is indistinguishable: household AURC difference +0.002,
+    negligible.
+- **Structural disagreement is materially better by the declared rule.**
+  - **AURC.** Household error AURC is 0.059 [0.031, 0.087] lower than
+    confidence's, lower in 16 of 20 homes.
+  - **Balanced accuracy.** Over the grid it is 0.032 [0.013, 0.051] higher.
+  - **Pooled gain.** 0.45 [0.37, 0.53].
+  - **Calibration.** Its retained predictions are better calibrated at every
+    inspection level, by 0.13 at 50% coverage.
+- **Its gain is at low coverage.** At 50%, 70% and 90% coverage, its paired
+  error and balanced-accuracy differences are uncertain or negligible.
+- **The minority-state guard was weak.** The frozen rule admitted only
+  `bed_awake`: 68 windows in 5 homes.
+  - **Activity states.** Structural disagreement retains less than confidence
+    of `kitchen_activity` and `bathroom_activity` at 50% and 70% coverage. At
+    50% it keeps 0.85 and 0.87 of their proportional share, where confidence
+    keeps 1.46 and 1.16.
+  - **`away`.** It keeps 0.73 of the proportional share at 50%.
+- **Evidence-channel disagreement and predictive mismatch are worse than
+  confidence.**
+  - **AURC.** Household AURC is 0.149 [0.110, 0.183] and 0.040 [0.020, 0.060]
+    higher.
+  - **Activity states.** Both reject them heavily: predictive mismatch keeps
+    0.08 of `kitchen_activity`'s share at 50%. Both fail the guard on
+    `bed_awake`.
+  - **Pooled selection.** Pooled, predictive mismatch's gain is 0.13
+    [0.01, 0.21], but a single threshold rejects every window of hh127 at 50%
+    and 70% coverage.
+- **No threshold was selected**, and no abstention rule.
+
 ### Required evaluation
 
 Selective prediction must be presented as a risk--coverage curve, not a single

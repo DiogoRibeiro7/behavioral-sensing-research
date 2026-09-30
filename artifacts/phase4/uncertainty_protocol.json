@@ -1,0 +1,373 @@
+{
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "seed": 0,
+    "statistics": "mean and median paired differences",
+    "unit": "household"
+  },
+  "comparator": "confidence",
+  "compared": [
+    "entropy",
+    "structural_disagreement",
+    "evidence_disagreement",
+    "predictive_mismatch"
+  ],
+  "decision": {
+    "better but rejects difficult minority states": "the AURC verdict favours the signal and the guard fails",
+    "key_question": "yes when any structural signal is materially better; no otherwise",
+    "materially better": "the AURC verdict favours the signal and the guard holds",
+    "negligible difference": "the AURC verdict is negligible",
+    "uncertain": "otherwise",
+    "worse": "the AURC verdict favours confidence"
+  },
+  "difficult_minority_states": {
+    "minority_share": 0.1,
+    "rule": "a state is a difficult minority state when its share of the scored windows is below 0.1 and the reference's recall on it at full coverage is below the reference's balanced accuracy, both pooled over the scored windows; fixed from the reference's predictions, before any signal is compared"
+  },
+  "ensemble": {
+    "reason": "the default ensemble without its pooled specification, which adapts to the household's own labelled windows; a deployed signal has no labels, and a cut-off would change the scored windows of every signal",
+    "specifications": [
+      {
+        "assumptions": [
+          {
+            "axis": "observation",
+            "description": "fitted hurdle-Poisson channels: a silence probability and a zero-truncated Poisson active count per channel and state",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "hurdle"
+          },
+          {
+            "axis": "parameters",
+            "description": "every held-out household gets its fold's population parameters",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "population"
+          },
+          {
+            "axis": "parameter_sample",
+            "description": "the population fitted on every training household of the fold",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "all"
+          }
+        ],
+        "name": "hurdle/population/all"
+      },
+      {
+        "assumptions": [
+          {
+            "axis": "observation",
+            "description": "fitted hurdle negative-binomial channels: the same silence, and a zero-truncated negative-binomial active count",
+            "support": [
+              {
+                "estimand": "NR",
+                "finding": "adopt",
+                "record": "artifacts/phase3/phase3-hurdle-negative-binomial.json"
+              }
+            ],
+            "variant": "hurdle_nb"
+          },
+          {
+            "axis": "parameters",
+            "description": "every held-out household gets its fold's population parameters",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "population"
+          },
+          {
+            "axis": "parameter_sample",
+            "description": "the population fitted on every training household of the fold",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "all"
+          }
+        ],
+        "name": "hurdle_nb/population/all"
+      },
+      {
+        "assumptions": [
+          {
+            "axis": "observation",
+            "description": "fitted hurdle-Poisson channels: a silence probability and a zero-truncated Poisson active count per channel and state",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "hurdle"
+          },
+          {
+            "axis": "parameters",
+            "description": "every held-out household gets its fold's population parameters",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "population"
+          },
+          {
+            "axis": "parameter_sample",
+            "description": "the same population fitted on the first half of the fold's training households, in sorted order, alternating: its estimation uncertainty over training households",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "half_a"
+          }
+        ],
+        "name": "hurdle/population/half_a"
+      },
+      {
+        "assumptions": [
+          {
+            "axis": "observation",
+            "description": "fitted hurdle-Poisson channels: a silence probability and a zero-truncated Poisson active count per channel and state",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "hurdle"
+          },
+          {
+            "axis": "parameters",
+            "description": "every held-out household gets its fold's population parameters",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "population"
+          },
+          {
+            "axis": "parameter_sample",
+            "description": "the same on the other half",
+            "support": [
+              {
+                "estimand": "FR",
+                "finding": "success",
+                "record": "artifacts/phase3/phase3-fitted-rates.json"
+              }
+            ],
+            "variant": "half_b"
+          }
+        ],
+        "name": "hurdle/population/half_b"
+      }
+    ]
+  },
+  "estimands": {
+    "at_inspection": "at each inspection coverage, each household's selective balanced accuracy (signal minus confidence), error and calibration error (confidence minus signal)",
+    "aurc": "primary: each household's error AURC over the grid, confidence minus signal; positive favours the signal",
+    "balanced_accuracy_area": "each household's selective balanced accuracy averaged over the grid by the trapezoid rule, signal minus confidence",
+    "pairing": "households with a value under both signals; every household counts once",
+    "state_coverage": "at each inspection coverage, each household's retained share of each state it has, signal minus confidence: negative when the signal rejects the state more"
+  },
+  "evaluation": {
+    "calibration_bins": 10,
+    "coverages": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95,
+      1.0
+    ],
+    "curve_bootstrap": {
+      "confidence": 0.95,
+      "resamples": 2000,
+      "seed": 0,
+      "unit": "household"
+    },
+    "framework": "sensor_modeling.evaluation.selective",
+    "inspection": [
+      0.5,
+      0.7,
+      0.9
+    ],
+    "loss": "0-1: the selective risk is the error rate",
+    "selection": "pooled over the panel for the pooled curves; within each household for the household curves; ties at the boundary retained in part"
+  },
+  "evidence_groups": {
+    "evidence_floor": 0.05,
+    "groups": "motion: motion channels; contact: door channels; context: the prediction before the window",
+    "reliability": "1 for every channel: CASAS records no sensor health"
+  },
+  "households": {
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+    "use": "each household is held out once; its fold's training households fit every channel model; the development panel, not a held-out claim"
+  },
+  "inference": "online filter: every prediction and signal reads no window after the scored one",
+  "minimal_differences": {
+    "aurc": 0.01,
+    "balanced_accuracy": 0.02,
+    "balanced_accuracy_area": 0.02,
+    "calibration_error": 0.02,
+    "error": 0.02,
+    "state_coverage": 0.05
+  },
+  "name": "phase4-uncertainty-diagnostics",
+  "predictions": {
+    "description": "the Phase 3.3 follow-up's recursion: fitted hurdle-Poisson channels with the fold's population parameters, fed every window of the recording from the stationary distribution; the predicted state is the posterior's most probable, and every signal ranks these same predictions",
+    "model": "hurdle/population/all",
+    "pseudo_windows": 12.0,
+    "scored": "every labelled window of every held-out household"
+  },
+  "protocol_sha256": "78a378f47c8adb9b1d2233383cd211b433881e167dab19b94750054182985c91",
+  "question": "does any structural diagnostic produce a materially better selective-risk curve than confidence, without disproportionately rejecting difficult minority states",
+  "rejection_bias": {
+    "absolute": "the retained share over the coverage, pooled, is reported for every signal and state: 1 is proportional rejection",
+    "guard": "a signal disproportionately rejects difficult minority states when, for any such state at any inspection coverage, the paired comparison of its retained share favours confidence: it retains less of the state than confidence does, by at least the minimal difference, with the interval below 0",
+    "inspected": "every state's retained share at every inspection coverage, pooled and paired by household against confidence"
+  },
+  "schema": "uncertainty-protocol/1",
+  "signals": {
+    "confidence": {
+      "definition": "the reference recursion's posterior probability of its predicted state",
+      "direction": "higher_is_safer",
+      "missing": "refuse"
+    },
+    "entropy": {
+      "definition": "the reference posterior's Shannon entropy divided by log of the number of states, in [0, 1]",
+      "direction": "higher_is_riskier",
+      "missing": "refuse"
+    },
+    "evidence_disagreement": {
+      "definition": "the normalised discordance of the identifiable evidence groups of the reference recursion's window: motion (the motion channels), contact (the door channel) and context (the prediction before the window), each group's posterior its channels' fitted likelihoods normalised with no prior; undefined, and rejected first, when fewer than two groups are identifiable",
+      "direction": "higher_is_riskier",
+      "missing": "reject_first"
+    },
+    "predictive_mismatch": {
+      "definition": "the least standardised surprise over the states: min over s of (-log p(x | s) minus its mean under s) over its standard deviation under s, with the reference's normalised hurdle count laws",
+      "direction": "higher_is_riskier",
+      "missing": "refuse"
+    },
+    "structural_disagreement": {
+      "definition": "the normalised discordance of the ensemble's posteriors: their generalised Jensen-Shannon divergence in bits over log2 of the number of specifications, in [0, 1]",
+      "direction": "higher_is_riskier",
+      "missing": "refuse"
+    }
+  },
+  "structural_signals": [
+    "structural_disagreement",
+    "evidence_disagreement",
+    "predictive_mismatch"
+  ],
+  "thresholds": "none selected: no coverage level or signal value is chosen for deployment",
+  "tuning": "none: every setting is declared here, before scoring",
+  "verdicts": "favours signal: mean at least the minimal difference and interval above 0; favours confidence: mean at most minus it and interval below 0; negligible: interval within plus or minus it; uncertain otherwise"
+}
