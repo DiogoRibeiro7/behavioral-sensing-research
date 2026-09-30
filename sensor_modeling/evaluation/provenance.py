@@ -49,6 +49,7 @@ from ..fusion.regime import (
     evidence_from_dict,
 )
 from .disagreement import DisagreementReport, validate_disagreement
+from .mismatch import MismatchReport, validate_mismatch
 
 logger = logging.getLogger(__name__)
 
@@ -62,10 +63,10 @@ RESULTS_DIR = Path("results")
 #: existing field means and would need an explicit migration. A reader refuses
 #: any version newer than its own rather than guessing at fields it does not
 #: know. See ``docs/EXPERIMENT_ARTIFACTS.md``.
-SCHEMA_VERSION = "1.4"
+SCHEMA_VERSION = "1.5"
 
 #: Versions :func:`load_record` accepts, oldest first.
-READABLE_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4")
+READABLE_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "1.5")
 
 #: How a record written at 1.2 or later knows its inference regime.
 DECLARED_INFERENCE = "declared by the experiment that wrote the record"
@@ -428,6 +429,11 @@ class ExperimentRecord:
         How much the experiment's model specifications disagree, window by
         window, as a :class:`~sensor_modeling.evaluation.DisagreementReport`, or
         ``None``. Added in 1.4.
+    observation_mismatch
+        How surprising each window's evidence is under every state of the
+        observation model, as a
+        :class:`~sensor_modeling.evaluation.MismatchReport`, or ``None``. Added
+        in 1.5.
     recorded_at, environment, resolved_defaults
         Captured at creation. Pass them only when rebuilding a record that
         was already written, as :meth:`load` does.
@@ -470,6 +476,7 @@ class ExperimentRecord:
     intervals: Sequence[ReportedInterval] = field(default_factory=list)
     mcse: Mapping[str, float] = field(default_factory=dict)
     structural_disagreement: DisagreementReport | None = None
+    observation_mismatch: MismatchReport | None = None
     recorded_at: str = field(default_factory=_now)
     environment: Mapping[str, str] = field(default_factory=environment)
     resolved_defaults: Mapping[str, Any] = field(default_factory=resolved_defaults)
@@ -492,6 +499,10 @@ class ExperimentRecord:
             self.structural_disagreement, DisagreementReport
         ):
             raise TypeError("structural_disagreement must be a DisagreementReport")
+        if self.observation_mismatch is not None and not isinstance(
+            self.observation_mismatch, MismatchReport
+        ):
+            raise TypeError("observation_mismatch must be a MismatchReport")
         notes = list(self.notes)
         if self.data_source == "simulator" and SIMULATOR_NOTE not in notes:
             notes.append(SIMULATOR_NOTE)
@@ -543,6 +554,11 @@ class ExperimentRecord:
             "structural_disagreement": (
                 self.structural_disagreement.to_dict()
                 if self.structural_disagreement is not None
+                else None
+            ),
+            "observation_mismatch": (
+                self.observation_mismatch.to_dict()
+                if self.observation_mismatch is not None
                 else None
             ),
             "notes": list(self.notes),
@@ -602,6 +618,11 @@ class ExperimentRecord:
             structural_disagreement=(
                 DisagreementReport.from_dict(payload["structural_disagreement"])
                 if payload["structural_disagreement"] is not None
+                else None
+            ),
+            observation_mismatch=(
+                MismatchReport.from_dict(payload["observation_mismatch"])
+                if payload["observation_mismatch"] is not None
                 else None
             ),
             recorded_at=payload["recorded_at"],
@@ -691,6 +712,12 @@ _ADDED_IN_1_2: Mapping[str, type] = {"inference": dict}
 
 #: Fields added in 1.4, with the default an older record is given.
 _ADDED_IN_1_4: Mapping[str, Any] = {"structural_disagreement": None}
+
+#: Fields added in 1.5, with the default an older record is given.
+_ADDED_IN_1_5: Mapping[str, Any] = {"observation_mismatch": None}
+
+#: Every optional section added since 1.3, with its default.
+_ADDED_SINCE_1_3: Mapping[str, Any] = {**_ADDED_IN_1_4, **_ADDED_IN_1_5}
 
 _INFERENCE_KEYS = {
     "mode",
@@ -851,6 +878,8 @@ def _check_sections(payload: Mapping[str, Any]) -> list[str]:
             problems.append("inference.provenance must be non-empty text")
     if payload["structural_disagreement"] is not None:
         problems += validate_disagreement(payload["structural_disagreement"])
+    if payload["observation_mismatch"] is not None:
+        problems += validate_mismatch(payload["observation_mismatch"])
     return problems
 
 
@@ -868,7 +897,7 @@ def validate_record(payload: Mapping[str, Any]) -> None:
     # field being present with the right type. Everything else is collected.
     structural: list[str] = []
     fields_ = set(_REQUIRED) | set(_ADDED_IN_1_1) | set(_ADDED_IN_1_2)
-    fields_ |= set(_ADDED_IN_1_4)
+    fields_ |= set(_ADDED_SINCE_1_3)
     missing = sorted(fields_ - set(payload))
     structural += [f"missing required field {key!r}" for key in missing]
     expected_types: dict[str, type | tuple[type, ...]] = {
@@ -881,6 +910,7 @@ def validate_record(payload: Mapping[str, Any]) -> None:
         "mcse": dict,
         "preprocessing": dict,
         "structural_disagreement": (dict, type(None)),
+        "observation_mismatch": (dict, type(None)),
     }
     structural += [
         f"{key} has the wrong type"
@@ -937,7 +967,7 @@ def _migrate_1_1(payload: dict[str, Any]) -> dict[str, Any]:
         "provenance": MIGRATED_INFERENCE.format(version=version),
         "evidence": NotEnumerated(UNLISTED_EVIDENCE.format(version=version)).to_dict(),
     }
-    for key, default in _ADDED_IN_1_4.items():
+    for key, default in _ADDED_SINCE_1_3.items():
         migrated.setdefault(key, default)
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["migrated_from"] = version
@@ -969,7 +999,7 @@ def _migrate_1_2(payload: dict[str, Any]) -> dict[str, Any]:
         **regime.to_dict(),
         "evidence": NotEnumerated(UNLISTED_EVIDENCE.format(version="1.2")).to_dict(),
     }
-    for key, default in _ADDED_IN_1_4.items():
+    for key, default in _ADDED_SINCE_1_3.items():
         migrated.setdefault(key, default)
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["migrated_from"] = "1.2"
@@ -979,13 +1009,27 @@ def _migrate_1_2(payload: dict[str, Any]) -> dict[str, Any]:
 def _migrate_1_3(payload: dict[str, Any]) -> dict[str, Any]:
     """Bring a 1.3 record to the current version without changing its content.
 
-    1.4 only adds ``structural_disagreement``, which a 1.3 record did not have.
+    1.4 and 1.5 only add ``structural_disagreement`` and
+    ``observation_mismatch``, which a 1.3 record did not have.
     """
     migrated = dict(payload)
-    for key, default in _ADDED_IN_1_4.items():
+    for key, default in _ADDED_SINCE_1_3.items():
         migrated.setdefault(key, default)
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["migrated_from"] = "1.3"
+    return migrated
+
+
+def _migrate_1_4(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.4 record to the current version without changing its content.
+
+    1.5 only adds ``observation_mismatch``, which a 1.4 record did not have.
+    """
+    migrated = dict(payload)
+    for key, default in _ADDED_IN_1_5.items():
+        migrated.setdefault(key, default)
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["migrated_from"] = "1.4"
     return migrated
 
 
@@ -1051,6 +1095,8 @@ def load_record(path: Path) -> dict[str, Any]:
         payload = _migrate_1_2(payload)
     elif version == "1.3":
         payload = _migrate_1_3(payload)
+    elif version == "1.4":
+        payload = _migrate_1_4(payload)
     validate_record(payload)
     loaded: dict[str, Any] = payload
     return loaded

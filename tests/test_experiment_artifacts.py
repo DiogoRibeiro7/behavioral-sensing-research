@@ -290,7 +290,7 @@ class TestValidation:
 
 class TestSchemaVersions:
     def test_the_writer_emits_the_current_version(self) -> None:
-        assert full_record().to_dict()["schema_version"] == SCHEMA_VERSION == "1.4"
+        assert full_record().to_dict()["schema_version"] == SCHEMA_VERSION == "1.5"
 
     def test_a_1_0_record_is_migrated_not_rewritten(self, tmp_path: Path) -> None:
         path = tmp_path / "legacy.json"
@@ -317,7 +317,7 @@ class TestSchemaVersions:
     @pytest.mark.parametrize(
         ("version", "message"),
         [
-            ("1.5", "newer than 1.4"),
+            ("1.6", "newer than 1.5"),
             ("2.0", "reads major version 1 only"),
             ("0.9", "reads major version 1 only"),
             ("one", "not MAJOR.MINOR"),
@@ -338,5 +338,5 @@ class TestSchemaVersions:
             load_record(write_json(tmp_path / "none.json", data))
 
     def test_only_current_payloads_can_be_rebuilt_directly(self) -> None:
-        with pytest.raises(ArtifactError, match="expected '1.4'"):
+        with pytest.raises(ArtifactError, match="expected '1.5'"):
             ExperimentRecord.from_dict(payload(schema_version="1.0"))
