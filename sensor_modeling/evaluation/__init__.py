@@ -37,6 +37,12 @@ from .detection import (
     run_detection_study,
     standard_arms,
 )
+from .disagreement import (
+    DisagreementReport,
+    DisagreementTrace,
+    compare_posteriors,
+    jensen_shannon,
+)
 from .households import (
     Estimate,
     HouseholdComparison,
@@ -100,6 +106,8 @@ __all__ = [
     "ConfusionMatrix",
     "DetectionMetrics",
     "DetectionStudy",
+    "DisagreementReport",
+    "DisagreementTrace",
     "Estimate",
     "ExperimentRecord",
     "HouseholdComparison",
@@ -120,11 +128,13 @@ __all__ = [
     "binary_metrics",
     "compare_scenario",
     "compare_households",
+    "compare_posteriors",
     "compare_results",
     "confusion_matrix",
     "detection_metrics",
     "environment",
     "household_values",
+    "jensen_shannon",
     "evaluate_configuration",
     "leave_one_out",
     "load_record",

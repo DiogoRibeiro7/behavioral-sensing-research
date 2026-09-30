@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added model-structure disagreement diagnostics for ROADMAP Phase 4, described in `docs/STRUCTURAL_DISAGREEMENT.md`. They are diagnostic infrastructure: no threshold, no abstention, and the deployed decision rule unchanged.
+  - **Measures.** `sensor_modeling.evaluation.disagreement` compares the posteriors of several fitted specifications over the same windows. For every window it gives each specification's posterior and most probable state, the pairwise Jensen-Shannon divergence in bits, the vote disagreement, each state's probability spread, the mean posterior, and the generalised Jensen-Shannon divergence. Each measure is symmetric, bounded and zero for identical specifications.
+  - **Traces.** `DisagreementTrace` holds one household's windows. It writes them as canonical gzip-compressed JSON with a SHA-256, and summarises them.
+  - **Specifications.** `sensor_modeling.datasets.structural_models` allows only variants the published evidence supports: the hurdle or hurdle negative-binomial observation model, population or partially pooled parameters, and the population fitted on all training households or on either half of them. Each cites its supporting record and finding. The time prior as a transition, fixed-lag smoothing and the declared rates are refused with reasons, and an ensemble holds at most six specifications.
+  - **Decision.** The reference, the Phase 3.3 follow-up's recursion, keeps the decision, bit for bit.
 - Added the pre-specified evaluation of the hurdle negative binomial, `sensor_modeling.datasets.dispersion_experiment`, with its frozen protocol, `artifacts/phase3/dispersion_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_NEGATIVE_BINOMIAL.md`.
   - **Models.** The declared rates, the fitted hurdle-Poisson and the fitted hurdle negative binomial, with the same prior, transition, channels, windows and inference, scored with current windows and in the filter's recursion.
   - **Questions.** Against the hurdle-Poisson, whether the negative binomial recovers `home_active` recall, preserves the calibration improvement, improves log loss and avoids degrading balanced accuracy. A rule fixed in advance adopts it only with a log-loss gain and every guard met, so extra complexity is never accepted for one improving metric.
@@ -67,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests.** The strict leakage tests stream a synthetic sequence whose later evidence changes an earlier posterior, and a simulated day through the online pipeline.
 
 ### Changed
+- The experiment-record schema is 1.4. It adds an optional, validated `structural_disagreement` section with the specifications and their support, the reference, and each household's summary and trace file with its digest. Records written at 1.0 to 1.3 are migrated with the section `null`, and are otherwise unchanged.
 - `ChannelStatistics` gains an optional `active_counts` table of active-window counts, built by `home_statistics` and merged by `combine_statistics`. It is excluded from `FittedChannels.to_dict`, so every fit's SHA-256, including the published populations', is unchanged.
 - `sensor_modeling.datasets.channel_models` gains `home_statistics`, `combine_statistics` and `pool_channels`, so that one household's statistics can be combined or pooled at several strengths without being counted again. `fit_channel_models` and `adapt_channels` now use them, and give identical results.
 - The experiment-record schema is 1.3. The `inference` block adds `causal`, `delay_seconds` and `evidence`, and `ExperimentRecord` requires `evidence`.
