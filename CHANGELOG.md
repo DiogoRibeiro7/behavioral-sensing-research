@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-09-30
+
+Completes the pre-specified Phase 3 inference-redesign evaluations, and records the first Phase 4 comparison of uncertainty diagnostics and the first Phase 5 evaluation on an independently collected dataset. Every experiment was pre-specified, with its protocol frozen before any household was scored. The Phase 3 and 4 experiments ran on the 20 development homes, so none of them is a held-out claim.
+
+- **Research results.**
+  - **Partial pooling.** Pooling household channel parameters improves log loss with current windows by 0.080, a pre-specified success.
+    - In the filter's recursion it is inconclusive.
+    - The declared pooling strength is stronger than a week of data needs.
+  - **Fixed-lag smoothing.** Five minutes of lag raises balanced accuracy by 0.031, a pre-specified smoothing gain; thirty and sixty minutes are trade-offs. Every figure is available only after the smoother's delay, and none is an online gain.
+  - **Posterior predictive checks.** The fitted hurdle model's active count is under-dispersed in every household, and long quiet runs are in excess. The checks route the next model family to within-state temporal dependence, which is not built.
+  - **The hurdle negative binomial.** It improves log loss by 0.48 with current windows and 0.78 in the recursion, and balanced accuracy by 0.044. It does not recover `home_active` recall, so its declared rule does not adopt it.
+  - **Uncertainty diagnostics.**
+    - Model-structure disagreement ranks errors better than confidence by the declared rule: household error AURC is 0.059 lower.
+    - Its gain is at low coverage, and it retains less of the activity states.
+    - Evidence-channel disagreement and predictive mismatch are worse than confidence.
+    - No abstention threshold is selected.
+  - **External evaluation.** The CASAS-trained model was tested, under a protocol frozen before scoring, on the two homes of the independently collected UCI ADL Binary dataset.
+    - It does not transfer: zero-shot balanced accuracy is 0.246 and 0.244, against chance 0.25.
+    - Limited adaptation leaves balanced accuracy unchanged.
+    - The Phase 4 direction is inconclusive there.
+- **Observation modelling.** A hurdle negative-binomial channel family, beside the unchanged hurdle-Poisson.
+- **Uncertainty.** Model-structure disagreement, evidence-group disagreement and observation-model mismatch diagnostics. None changes a decision.
+- **Evaluation.** A selective-prediction framework in which a signal's direction is always stated and households, not timestamps, are resampled.
+- **External generalisation.** The external-dataset contract, an adapter for the UCI ADL Binary dataset, the frozen Phase 5 protocol and its published run.
+- **Inference and reproducibility.** The inference-regime contract is enforced: estimates carry their evidence timestamps, and a record whose estimates read past its regime is refused. The experiment-record schema moves from 1.2 to 1.6, and older records are migrated when read.
+- **Documentation.** The roadmap is rewritten around what has been tested. The README and documentation no longer claim that every result is simulator-only, or that the pipeline is at the ceiling for the evidence it uses.
+
+It does not change the online pipeline's defaults, abstention thresholds, transition dynamics, the declared emissions, the behavioural ontology, or the frozen v0.3 external-validation result. `MultimodalBayesFilter.update` is refactored with every output unchanged to the last bit.
+
 ### Added
 - Ran the frozen Phase 5 external-generalisation protocol on the UCI ADL Binary dataset, `sensor_modeling.datasets.external_experiment`, without changing preprocessing, mapping, hyperparameters or eligibility.
   - **Run.** `scripts/run_phase5_external.py` refuses to run unless:
@@ -161,6 +190,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The published records and their generated summaries are unchanged.
 - A `StateEstimate`'s belief is read-only, so a reported estimate cannot be revised in place. `smooth_estimates` already returned new estimates.
 - `compare_households` refuses a `RegimeResult` and points to `compare_results`.
+- `ROADMAP.md` is rewritten for 0.9.0. Every phase states its status and the kind of evidence behind it, the measured results are kept, negative ones included, and the order of work lists only open questions.
+- Claims the evidence has overtaken are corrected:
+  - "every quantitative result comes from the bundled simulator" in `docs/index.md`;
+  - "the pipeline is close to the ceiling for the evidence it actually uses" in `README.md` and `docs/limitations.md`, which the Phase 1 matched comparison refutes;
+  - lists of future credibility gates in `docs/RESEARCH_QUESTIONS.md` and `docs/limitations.md` that have since been met;
+  - the stale version in the `ZENODO.md` citation;
+  - planned deep-learning change-point detection and HL7 work in the README, which the roadmap does not contain.
+
+  Frozen experiment reports are unchanged.
+- The version-bump configuration also covers the README badge and BibTeX entry, which the Release workflow checks, and the `ZENODO.md` citation.
 
 ## [0.8.0] - 2026-09-27
 
