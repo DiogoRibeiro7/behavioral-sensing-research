@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added observation-model mismatch diagnostics for ROADMAP Phase 4, described in `docs/OBSERVATION_MISMATCH.md`. They ask how surprising a window's evidence is under every state, which confidence cannot show. They are diagnostic infrastructure: no threshold, no abstention, no evaluation, and no decision changed.
+  - **Count laws.** `sensor_modeling.datasets.observation_mismatch.CountLaw` gives the hurdle, hurdle negative-binomial and Poisson channel models normalised laws, keeping the `log k!` their likelihoods drop. The laws have exact log-space upper and lower tails, a direct sum near underflow, and the entropy and varentropy of each state.
+  - **Measures.** `sensor_modeling.evaluation.MismatchTrace` keeps each window's per-channel, per-state log-probabilities and tails. From them it derives:
+    - the best achievable state;
+    - two-sided tails, which are valid p-values, and each channel's tail under its most lenient state;
+    - the standardised surprise per state, with its exact mean and variance;
+    - each channel's excess surprise, which sums to the window's;
+    - the posterior predictive and its gap below the best state;
+    - the activity pattern's exact tail and training support;
+    - counts beyond the training support.
+  - **Missing evidence.** Channels are available, missing or failed, a known sensor failure given as intervals. Only available channels are scored, so a failure is never read as novelty, and a window with none has no evidence.
+  - **Summaries.** Distributions, and shares at the tail levels 10⁻² to 10⁻⁹, with no single threshold.
+  - **Traces and households.** Traces are canonical gzip JSON with a SHA-256. `household_mismatch` scores a CASAS household against its channel models, with the recursion's prediction, the population's training support and the training households' activity patterns.
 - Added evidence-group disagreement diagnostics for ROADMAP Phase 4, `sensor_modeling.evaluation.evidence_groups`, described in `docs/EVIDENCE_GROUP_DISAGREEMENT.md`. They are diagnostic infrastructure: no abstention rule, no evaluation, and every filter output unchanged.
   - **Groups.** From each sensor's modality in the registry: `motion` (motion, radar), `contact` (door, contact, vibration), `bed`, `wearable` (wearable motion and physiology, proximity) and `other`. The `context` group is the filter's prediction before the window's evidence.
   - **Per window.** Each identifiable group's posterior from its own tempered evidence, the full posterior, whether the groups favour disjoint states, the vote disagreement, pairwise and generalised Jensen-Shannon divergence, each group's divergence from the full posterior, descriptive conflicts at a stated likelihood ratio, and each group's exact term in the decision's log odds, with the group that dominates it.
@@ -77,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests.** The strict leakage tests stream a synthetic sequence whose later evidence changes an earlier posterior, and a simulated day through the online pipeline.
 
 ### Changed
+- The experiment-record schema is 1.5. It adds an optional, validated `observation_mismatch` section with the model's family and training households, the tail levels, and each household's summary and trace file with its digest. Records written at 1.0 to 1.4 are migrated with the section `null`, and are otherwise unchanged.
 - `MultimodalBayesFilter.update` is split into `evidence_terms`, which computes an update's prediction and each sensor's tempered log-likelihood without changing the filter, and the fold of those terms. Observers appended to the new `observers` list are called after every update with its `WindowTerms` and estimate. Every belief, information gain, completeness and contribution is unchanged to the last bit.
 - The experiment-record schema is 1.4. It adds an optional, validated `structural_disagreement` section with the specifications and their support, the reference, and each household's summary and trace file with its digest. Records written at 1.0 to 1.3 are migrated with the section `null`, and are otherwise unchanged.
 - `ChannelStatistics` gains an optional `active_counts` table of active-window counts, built by `home_statistics` and merged by `combine_statistics`. It is excluded from `FittedChannels.to_dict`, so every fit's SHA-256, including the published populations', is unchanged.

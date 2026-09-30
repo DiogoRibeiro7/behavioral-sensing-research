@@ -514,6 +514,19 @@ no abstention rule and no evaluation yet.
   divergence, descriptive conflicts, and which group dominates the decision's
   log odds, in machine-readable results.
 
+Observation-model mismatch diagnostics are implemented; see
+`docs/OBSERVATION_MISMATCH.md`. They are diagnostic infrastructure, with no
+threshold and no evaluation yet.
+
+- **The question.** How surprising a window's evidence is under every state of
+  the fitted channel models, not which state it favours.
+- **What they record.** Exact per-channel and per-state log-probabilities,
+  tails and standardised surprise, the best achievable state, the posterior
+  predictive, activity patterns, and training support.
+- **Missing evidence.** Missing counts and known sensor failures are excluded,
+  never scored as novelty.
+- **The record.** Experiment records carry them from schema 1.5.
+
 ### Required evaluation
 
 Selective prediction must be presented as a risk--coverage curve, not a single

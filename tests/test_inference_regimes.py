@@ -64,7 +64,13 @@ from sensor_modeling.simulation import HouseholdConfig, simulate
 
 ROOT = Path(__file__).resolve().parents[1]
 #: Fields a migration changes; everything else is carried over unchanged.
-MIGRATED = {"schema_version", "migrated_from", "inference", "structural_disagreement"}
+MIGRATED = {
+    "schema_version",
+    "migrated_from",
+    "inference",
+    "structural_disagreement",
+    "observation_mismatch",
+}
 STEP = timedelta(minutes=5)
 #: A sticky two-state chain, A and B.
 TRANSITION = np.array([[0.95, 0.05], [0.05, 0.95]])

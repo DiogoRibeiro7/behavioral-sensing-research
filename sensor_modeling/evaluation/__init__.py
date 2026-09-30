@@ -76,6 +76,7 @@ from .metrics import (
     summarise,
     transition_timing,
 )
+from .mismatch import MismatchReport, MismatchTrace
 from .provenance import (
     METRIC_DEFINITIONS,
     RESULTS_DIR,
@@ -123,6 +124,8 @@ __all__ = [
     "HouseholdSummary",
     "InputArtifact",
     "Interval",
+    "MismatchReport",
+    "MismatchTrace",
     "ModelRecord",
     "PairedDifference",
     "PredictionMetrics",
