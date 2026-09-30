@@ -44,7 +44,7 @@ again = ExperimentRecord.load(path)  # the typed record
 
 | Field | Contents | Required |
 | --- | --- | --- |
-| `schema_version` | `MAJOR.MINOR`; currently `1.3` | yes |
+| `schema_version` | `MAJOR.MINOR`; currently `1.4` | yes |
 | `experiment` | experiment identifier | yes |
 | `recorded_at` | execution timestamp, ISO 8601 with time zone, fixed when the record is created | yes |
 | `environment` | `git_commit`, `git_dirty`, `sensor_modeling` (the package version), `python`, and library versions including NumPy, SciPy, pandas and scikit-learn | yes |
@@ -64,6 +64,7 @@ again = ExperimentRecord.load(path)  # the typed record
 | `household_metrics` | metrics per model, then per household | 1.1 |
 | `intervals` | estimates ready to quote: `label`, `estimate`, `low`, `high`, `confidence`, `method`, `unit`, `n` | 1.1 |
 | `mcse` | Monte Carlo standard errors of simulation summaries, by name | 1.1 |
+| `structural_disagreement` | how much the experiment's model specifications disagree, window by window: the specifications with their assumptions and published support, the reference, and each household's summary and trace file; `null` if the experiment has none. See [structural disagreement](STRUCTURAL_DISAGREEMENT.md) | 1.4 |
 | `notes` | anything a reader needs in order not to over-read the result | yes |
 | `migrated_from` | the version the record was read from, when it was migrated | only after migration |
 
@@ -139,13 +140,14 @@ The version is `MAJOR.MINOR`.
 - **Newer files.** A reader refuses a newer minor, and any other major, rather
   than guessing at fields it does not know.
 
-| File version | This reader (1.3) |
+| File version | This reader (1.4) |
 | --- | --- |
 | `1.0` | migrated on load: new fields given defaults, non-finite numbers made `null`, then as `1.1` with `migrated_from: "1.0"`, content otherwise unchanged |
 | `1.1` | migrated on load: `inference` added as the online filter, attested on migration, with its causality, its delay and its evidence marked not listed, and `migrated_from: "1.1"`, content otherwise unchanged |
 | `1.2` | migrated on load: causality and delay derived from the regime, evidence marked not listed, and `migrated_from: "1.2"`, content otherwise unchanged. A smoothed 1.2 record is refused |
-| `1.3` | read as written |
-| `1.4` or later | refused: written by a newer version of the package |
+| `1.3` | migrated on load: `structural_disagreement` added as `null`, and `migrated_from: "1.3"`, content otherwise unchanged |
+| `1.4` | read as written |
+| `1.5` or later | refused: written by a newer version of the package |
 | `0.x`, `2.x` | refused: another major version |
 
 Files written at 1.0 before `data_source` existed are migrated to `simulator`

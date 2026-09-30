@@ -79,6 +79,7 @@ nav:
       - Partial pooling: PARTIAL_POOLING.md
       - "Phase 3.4: partial pooling": PHASE3_PARTIAL_POOLING.md
       - "Phase 3.5: fixed-lag smoothing": PHASE3_SMOOTHING.md
+      - Structural disagreement: STRUCTURAL_DISAGREEMENT.md
       - Experiment artifacts: EXPERIMENT_ARTIFACTS.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md

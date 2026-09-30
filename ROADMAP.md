@@ -490,6 +490,17 @@ structure, for example:
 - expected loss under an explicit decision cost;
 - ensemble/model uncertainty where it can be estimated honestly.
 
+Model-structure disagreement diagnostics are implemented; see
+`docs/STRUCTURAL_DISAGREEMENT.md`. They are diagnostic infrastructure, with no
+threshold and no evaluation yet.
+
+- **What they compare.** Window by window, the posteriors of a few fitted
+  specifications. Each variant is supported by a published result.
+- **What they record.** Pairwise Jensen-Shannon divergence, vote disagreement,
+  per-state probability spread, and a consensus summary.
+- **The decision.** They leave the deployed decision unchanged.
+- **The record.** Experiment records carry them from schema 1.4.
+
 ### Required evaluation
 
 Selective prediction must be presented as a risk--coverage curve, not a single
