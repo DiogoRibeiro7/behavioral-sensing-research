@@ -43,6 +43,12 @@ from .disagreement import (
     compare_posteriors,
     jensen_shannon,
 )
+from .evidence_groups import (
+    EvidenceGroup,
+    GroupDisagreementRecorder,
+    GroupWindow,
+    group_window,
+)
 from .households import (
     Estimate,
     HouseholdComparison,
@@ -109,7 +115,10 @@ __all__ = [
     "DisagreementReport",
     "DisagreementTrace",
     "Estimate",
+    "EvidenceGroup",
     "ExperimentRecord",
+    "GroupDisagreementRecorder",
+    "GroupWindow",
     "HouseholdComparison",
     "HouseholdSummary",
     "InputArtifact",
@@ -136,6 +145,7 @@ __all__ = [
     "household_values",
     "jensen_shannon",
     "evaluate_configuration",
+    "group_window",
     "leave_one_out",
     "load_record",
     "monte_carlo_standard_error",

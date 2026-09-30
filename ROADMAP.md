@@ -501,6 +501,19 @@ threshold and no evaluation yet.
 - **The decision.** They leave the deployed decision unchanged.
 - **The record.** Experiment records carry them from schema 1.4.
 
+Evidence-group disagreement diagnostics are implemented; see
+`docs/EVIDENCE_GROUP_DISAGREEMENT.md`. They are diagnostic infrastructure, with
+no abstention rule and no evaluation yet.
+
+- **What they compare.** Within each filter update, what the motion, contact,
+  bed and wearable sensor groups and the filter's prediction each support.
+- **Missing evidence.** Absent, unavailable and uninformative groups are
+  excluded, never counted as disagreement; statuses keep the estimate's
+  missing and silent.
+- **What they record.** State disagreement, pairwise Jensen-Shannon
+  divergence, descriptive conflicts, and which group dominates the decision's
+  log odds, in machine-readable results.
+
 ### Required evaluation
 
 Selective prediction must be presented as a risk--coverage curve, not a single

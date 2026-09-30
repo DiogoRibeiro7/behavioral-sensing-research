@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added evidence-group disagreement diagnostics for ROADMAP Phase 4, `sensor_modeling.evaluation.evidence_groups`, described in `docs/EVIDENCE_GROUP_DISAGREEMENT.md`. They are diagnostic infrastructure: no abstention rule, no evaluation, and every filter output unchanged.
+  - **Groups.** From each sensor's modality in the registry: `motion` (motion, radar), `contact` (door, contact, vibration), `bed`, `wearable` (wearable motion and physiology, proximity) and `other`. The `context` group is the filter's prediction before the window's evidence.
+  - **Per window.** Each identifiable group's posterior from its own tempered evidence, the full posterior, whether the groups favour disjoint states, the vote disagreement, pairwise and generalised Jensen-Shannon divergence, each group's divergence from the full posterior, descriptive conflicts at a stated likelihood ratio, and each group's exact term in the decision's log odds, with the group that dominates it.
+  - **Missing evidence.** Sensor statuses keep the estimate's semantics: `unavailable` is its `missing`, and `silent` and `no data` together its `silent`. Absent, unavailable and uninformative groups are never compared, so missing evidence is never disagreement.
+  - **Results.** `GroupDisagreementRecorder` observes a filter and returns a JSON-safe results block, layout `evidence-group-disagreement/1`, with a canonical gzip trace referenced by SHA-256.
 - Added model-structure disagreement diagnostics for ROADMAP Phase 4, described in `docs/STRUCTURAL_DISAGREEMENT.md`. They are diagnostic infrastructure: no threshold, no abstention, and the deployed decision rule unchanged.
   - **Measures.** `sensor_modeling.evaluation.disagreement` compares the posteriors of several fitted specifications over the same windows. For every window it gives each specification's posterior and most probable state, the pairwise Jensen-Shannon divergence in bits, the vote disagreement, each state's probability spread, the mean posterior, and the generalised Jensen-Shannon divergence. Each measure is symmetric, bounded and zero for identical specifications.
   - **Traces.** `DisagreementTrace` holds one household's windows. It writes them as canonical gzip-compressed JSON with a SHA-256, and summarises them.
@@ -72,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests.** The strict leakage tests stream a synthetic sequence whose later evidence changes an earlier posterior, and a simulated day through the online pipeline.
 
 ### Changed
+- `MultimodalBayesFilter.update` is split into `evidence_terms`, which computes an update's prediction and each sensor's tempered log-likelihood without changing the filter, and the fold of those terms. Observers appended to the new `observers` list are called after every update with its `WindowTerms` and estimate. Every belief, information gain, completeness and contribution is unchanged to the last bit.
 - The experiment-record schema is 1.4. It adds an optional, validated `structural_disagreement` section with the specifications and their support, the reference, and each household's summary and trace file with its digest. Records written at 1.0 to 1.3 are migrated with the section `null`, and are otherwise unchanged.
 - `ChannelStatistics` gains an optional `active_counts` table of active-window counts, built by `home_statistics` and merged by `combine_statistics`. It is excluded from `FittedChannels.to_dict`, so every fit's SHA-256, including the published populations', is unchanged.
 - `sensor_modeling.datasets.channel_models` gains `home_statistics`, `combine_statistics` and `pool_channels`, so that one household's statistics can be combined or pooled at several strengths without being counted again. `fit_channel_models` and `adapt_channels` now use them, and give identical results.
