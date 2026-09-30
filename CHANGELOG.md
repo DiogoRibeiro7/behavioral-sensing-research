@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Ran the frozen Phase 5 external-generalisation protocol on the UCI ADL Binary dataset, `sensor_modeling.datasets.external_experiment`, without changing preprocessing, mapping, hyperparameters or eligibility.
+  - **Run.** `scripts/run_phase5_external.py` refuses to run unless:
+    - the code's protocol equals the frozen file;
+    - the mapping and every external and CASAS recording match their frozen digests;
+    - the CASAS populations reproduce their pinned fit digests.
+
+    The record, `artifacts/phase5/phase5-external-ordonez-results.json`, was made from a clean commit.
+  - **Reported per home.**
+    - Balanced accuracy, per-state recall, log loss, Brier score, calibration error, macro F1 and accuracy for the declared rates, zero-shot and adapted conditions, with day-block bootstrap intervals.
+    - The unsupported-observation fraction and the ontology-mapping coverage.
+  - **Per estimand.** Paired differences, intervals and verdicts, and homes improved and worsened.
+  - **Descriptive diagnostics.** Missing sensor semantics, ontology mismatch, room structure, event rates, calibration shift and state-prior shift. An in-sample oracle separates dataset incompatibility, the sensing-information limitation and model failure.
+  - **Output.** `external_summary.render_page` and `external_figures.draw_figures` generate `docs/PHASE5_EXTERNAL_RESULTS.md` and its figures from the record alone. An ineligible home would be reported, not dropped.
+  - **Result.**
+    - The CASAS-trained model does not transfer to either home.
+    - Zero-shot balanced accuracy is at chance: 0.246 and 0.244 against 0.25. It predicts `sleeping` or the unscorable `bed_awake` for every window.
+    - Limited adaptation improves log loss in both homes but leaves balanced accuracy unchanged.
+    - Structural disagreement beats confidence in one home and is uncertain in the other: inconclusive.
+    - The in-sample oracle reaches 0.437 and 0.559.
 - Froze the first Phase 5 external-generalisation protocol, `artifacts/phase5/external_protocol.json`, before any external scoring. `docs/PHASE5_EXTERNAL_PROTOCOL.md` is generated from it. No model performance on external data is computed or reported.
   - **Dataset.** The UCI ADL Binary dataset of Ordóñez et al. (DOI 10.24432/C5J02M, CC BY 4.0): two single-resident homes, independent of CASAS, with every file's SHA-256 and the archive's. `sensor_modeling.external.ordonez` reads it into the external-dataset contract.
   - **Mapping.** `artifacts/phase5/ordonez_mapping.json`, written from the dataset's documentation, with its SHA-256. Meal labels are ambiguous and unscored, `Leaving` maps approximately to `away`, and each sensor's type, room and model channel, or why it is unsupported, is recorded per home.

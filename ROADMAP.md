@@ -620,8 +620,8 @@ practical value survive outside the original CASAS development ecosystem.
 ### Status
 
 The external-dataset contract is implemented; see
-`docs/EXTERNAL_DATASET_CONTRACT.md`. No model has been scored on any external
-dataset.
+`docs/EXTERNAL_DATASET_CONTRACT.md`. It was merged before any model was scored
+on an external dataset.
 
 - **Adapters.** They expose each household in the dataset's own terms,
   without CASAS assumptions.
@@ -636,8 +636,7 @@ dataset.
 
 The first external protocol is frozen, before any external scoring; see
 `docs/PHASE5_EXTERNAL_PROTOCOL.md` and `artifacts/phase5/external_protocol.json`
-(SHA-256 `620f3fdc55e0…`). No model performance on the external dataset has
-been computed.
+(SHA-256 `620f3fdc55e0…`).
 
 - **Dataset.** The UCI "Activities of Daily Living Recognition Using Binary
   Sensors" dataset (DOI 10.24432/C5J02M, CC BY 4.0). It has two
@@ -661,6 +660,82 @@ been computed.
   are listed per home.
 - **Uncertainty.** Day blocks are resampled within each home. Two homes
   support no between-household claim.
+
+### Measured: the first external evaluation
+
+The frozen protocol has been run as declared; see
+`docs/PHASE5_EXTERNAL_RESULTS.md` and
+`artifacts/phase5/phase5-external-ordonez-results.json`.
+
+- **Scope.** The protocol was frozen in `a863bff` and the run made from the
+  clean commit `2d495e4`. Every CASAS population reproduced its frozen digest.
+- **Homes.** Both homes were eligible and both are reported.
+- **Scored periods.** They cover 1,826 and 3,666 windows over 8 and 17 local
+  dates. The protocol's text expected 7 and 14 days; its definition of the
+  scored period is what was run.
+- **The answer.** The CASAS-trained model does not transfer to these two
+  homes, and limited adaptation does not rescue it.
+
+Declared results:
+
+- **Zero-shot is at chance (C: not above chance).**
+  - **Balanced accuracy.** 0.246 [0.244, 0.249] and 0.244 [0.242, 0.246],
+    against chance 0.25.
+  - **What it predicts.** Every window is predicted `sleeping` (92.3% and
+    89.1%) or the unscorable `bed_awake`.
+  - **Recall.** `sleeping` recall is 0.98 in both homes; `away`,
+    `bathroom_activity` and `home_inactive` recall is at most 0.001.
+- **Transfer (T): does not transfer.**
+  - **OrdonezA.** The balanced-accuracy difference from the declared rates is
+    negligible, −0.005 [−0.007, −0.003]. Log loss is lower than the declared
+    rates' by 1.230 [1.128, 1.338].
+  - **OrdonezB.** The declared rates are better on every metric. Balanced
+    accuracy is 0.098 [0.086, 0.113] higher with them.
+- **Adaptation (A): does not help.**
+  - **Balanced accuracy.** Its difference from zero-shot is −0.001 and
+    +0.000, negligible in both homes.
+  - **Probabilities.** Log loss improves in both, by 0.396 [0.316, 0.465] and
+    0.422 [0.257, 0.583]. No state's recall changes by more than 0.01.
+  - **Calibration.** In OrdonezB its calibration error is worse, by 0.036
+    [0.025, 0.048].
+- **The Phase 4 direction (S): inconclusive.** Structural disagreement has a
+  lower error AURC than confidence in OrdonezB, 0.396 against 0.645, a
+  difference of 0.249 [0.163, 0.340]. In OrdonezA the difference is uncertain,
+  −0.025 [−0.054, +0.002].
+
+Descriptive diagnostics:
+
+- **Dataset incompatibility.**
+  - **Labels.** 97.6% and 96.0% of the scored annotated time is scorable.
+  - **Sensors.** 65.7% and 15.7% of sensor activations come from sensors that
+    feed no model channel: state, electric and contact sensors.
+  - **OrdonezA.** It has no sensor on the bedroom channel.
+- **Different event rates.**
+  - **Active windows.** A window with activity carries 1.0–2.1 events on
+    average, against 2.1–14.0 in CASAS. The mean is lower here in all 24
+    channel–state cells with activity.
+  - **Silence.** Silence is at least as frequent as in CASAS in all 32 cells,
+    and far more frequent in awake states. The bathroom channel is silent in
+    54% and 49% of `bathroom_activity` windows, against 11% in CASAS.
+- **Calibration shift.** Zero-shot confidence exceeds accuracy by 0.410 and
+  0.453, against 0.299 for the same model on the development panel.
+- **State-prior shift.**
+  - **Size.** It is modest: Jensen-Shannon 0.081 and 0.034 bits from the
+    development panel.
+  - **Direction.** `away` is rarer here (12% and 20% against 37%) and
+    `home_inactive` commoner.
+- **Separating the losses.** The oracle is the same recursion with each
+  home's own channel parameters, fitted on all its labelled windows including
+  the scored ones.
+  - **The oracle.** It reaches balanced accuracy 0.437 and 0.559.
+  - **Model failure.** The transferred parameters lose 0.191 and 0.315 of
+    balanced accuracy against the oracle.
+  - **Channels and model family.** 0.563 and 0.441 of balanced accuracy is
+    out of reach even in-sample. This shortfall mixes the sensing limitation
+    with the model family's.
+- **Limits.** Two homes are two case studies, not a population claim. The
+  diagnostics describe the data; they were not part of the declared
+  evaluation.
 
 ## Phase 6 — Sensor-Information Frontier
 
