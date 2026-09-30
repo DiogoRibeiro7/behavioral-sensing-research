@@ -1,15 +1,16 @@
 # Project Roadmap
 
-This roadmap describes the post-`0.5.0` direction of the Sensor Modeling
-Research Toolkit.
+This roadmap describes the research programme of the Sensor Modeling Research
+Toolkit as it stands at `0.9.0`: what has been tested, what the tests showed,
+and which questions remain open.
 
 The project is **research-first rather than release-first**. New software work
 must be justified by a scientific question, a reproducible evaluation need, or
 a stable public API requirement. A new numbered release is not a milestone by
 itself.
 
-The central objective for the next phase is stronger and more demanding than
-incremental feature growth:
+The central objective is stronger and more demanding than incremental feature
+growth:
 
 > Build and validate an ambient behavioural-sensing system that can outperform
 > strong reproducible baselines under matched information, while remaining
@@ -19,57 +20,138 @@ incremental feature growth:
 Any claim of improvement must be earned by pre-specified comparisons and
 held-out evidence. Headline accuracy alone is not sufficient.
 
+## Where the Programme Stands
+
+Three kinds of evidence appear below, and they are never merged:
+
+- **Development panel.** The 20 single-resident CASAS homes, cross-fitted on
+  two frozen household folds. Every Phase 1 to 4 result uses them. They have
+  been inspected many times, so none of those results is a held-out claim.
+- **Held-out CASAS.** The frozen v0.3 external test on 43 CASAS homes outside
+  the development panel. It evaluated an older model, before Phase 1.
+- **Independent external.** The Phase 5 evaluation on the two homes of the UCI
+  ADL Binary dataset, collected independently of CASAS with a different
+  sensing layout.
+
+| Phase | Status | Evidence | Headline |
+| --- | --- | --- | --- |
+| 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
+| 2. Baseline benchmark | Partly complete | Development panel | Baselines and a supervised diagnostic are in place; no held-out benchmark |
+| 3. Inference redesign | All five hypotheses evaluated | Development panel | The time prior and fitted channels succeed; the history state fails |
+| 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
+| 5. External generalisation | First evaluation complete | Independent external, 2 homes | The CASAS-trained model does not transfer |
+| 6. Sensor-information frontier | Not started | — | — |
+| 7. Reliability and failure robustness | Not started | — | — |
+| 8. Real-time system hardening | Deferred by its own gate | — | — |
+
+In one sentence: on the development panel the generative model has improved
+where a mechanism was tested one at a time, but no improvement has yet been
+confirmed on held-out homes, and on the first independent dataset the model is
+at chance.
+
 ## Current Stable Baseline
 
-`0.8.0` records the first Phase 3 inference-redesign results. Each is pre-specified and on the development panel:
+`0.9.0` completes the pre-specified Phase 3 evaluations and records the first
+Phase 4 comparison of uncertainty diagnostics and the first Phase 5 external
+evaluation. Phase 3 and 4 results are on the development panel:
 
-- a hierarchical time-of-day prior, a success;
-- an explicit history state, a failure;
-- a correlated-silence diagnostic, which weakens the hypothesis;
-- fitted silence and activity rates, a success.
+- partial pooling of household channel parameters: a success with current
+  windows, inconclusive in the filter's recursion;
+- fixed-lag smoothing: a five-minute smoothing gain, available only after the
+  smoother's delay and never an online gain;
+- posterior predictive checks of the fitted hurdle model: the active count is
+  under-dispersed, and silence comes in long runs;
+- a hurdle negative-binomial channel model: better probabilities, not adopted
+  by its declared rule;
+- richer uncertainty diagnostics: model-structure disagreement ranks errors
+  better than confidence by the declared rule, and no abstention rule is
+  selected;
+- the first external evaluation: the CASAS-trained model does not transfer to
+  two independently collected homes.
 
-It adds a partial-pooling framework for household parameters, and explicit inference regimes recorded in every experiment record. It does not change the online pipeline's defaults, abstention, the ontology or the frozen external-validation result.
+It also enforces the inference-regime contract and adds the external-dataset
+contract. It does not change the online pipeline's defaults, abstention, the
+behavioural ontology or the frozen v0.3 external-validation result.
 
-`0.7.0` records the first complete Phase 1 recoverable-information-gap result. It adds a versioned experiment-record schema, a cyclic time-of-day encoding, interpretable history summaries, a declared supervised diagnostic, and the generative filter's model restricted to the information sets it can consume. Like `0.6.0`, it does not change inference, abstention, the ontology or the frozen external-validation result.
+Earlier releases:
 
-`0.6.0` adds matched-information evaluation: information sets, the matched runner, four pre-declared baselines, household-level comparison, and the first exploratory Phase 1 run. Like `0.5.0`, it does not change inference, the ontology or the frozen external-validation result.
+- `0.8.0` recorded the first Phase 3 results: a hierarchical time-of-day prior
+  (a success), an explicit history state (a failure), a correlated-silence
+  diagnostic (the hypothesis weakened) and fitted silence and activity rates (a
+  success). It added the partial-pooling framework and explicit inference
+  regimes.
+- `0.7.0` recorded the first complete Phase 1 recoverable-information-gap
+  result, with a versioned experiment-record schema, a cyclic time-of-day
+  encoding, interpretable history summaries and the generative model restricted
+  to the information sets it can consume.
+- `0.6.0` added matched-information evaluation: information sets, the matched
+  runner, four pre-declared baselines, household-level comparison and the first
+  exploratory Phase 1 run.
+- `0.5.0`, released on 2026-09-16, was a platform and support-policy release:
+  Python 3.11--3.14, guarded release automation, fast and slow CI paths, and
+  manuscript assets outside the package repository.
 
-`0.5.0` was released on 2026-09-16. It is a platform and support-policy release:
-Python 3.11--3.14 are supported, release automation is guarded, CI is split into
-fast and slow paths, and manuscript-specific assets live outside the package
-repository.
+None of `0.5.0` to `0.9.0` changes the online pipeline's inference defaults,
+abstention thresholds, transition dynamics, declared emissions, the behavioural
+ontology or the frozen v0.3 external-validation result.
 
-`0.5.0` does **not** change inference, abstention thresholds, transition
-dynamics, emissions, the behavioural ontology, or the frozen external
-validation result.
+## The Evidence Base
 
-The current scientific evidence base is:
+Household balanced accuracy. The 22-home figures are medians; the 20-home
+figures are household means with 95% household bootstrap intervals.
 
-| Result | Current evidence |
-| --- | ---: |
-| Simulator balanced accuracy | 0.816 |
-| 22-home real CASAS development panel | 0.420 |
-| Supervised diagnostic ceiling on the same sensing problem | 0.607 |
-| Frozen external candidate gain over `0.2.0` | +0.0091 |
-| 95% household bootstrap interval | [+0.0054, +0.0117] |
-| External homes improved | 37 / 43 |
-| Frozen five-sensor non-inferiority gap | 0.1548 |
-| Frozen eight-sensor gap to full deployment | 0.00529 |
+| Result | Value | Evidence |
+| --- | ---: | --- |
+| Simulator balanced accuracy | 0.816 | Simulator |
+| Online pipeline with declared defaults, 22-home CASAS panel | 0.420 | Development |
+| Supervised diagnostic on that panel | 0.607 | Development |
+| Generative recursion, declared rates | 0.417 [0.392, 0.442] | Development, 20 homes |
+| Generative recursion, fitted hurdle channels, the current reference | 0.456 [0.425, 0.484] | Development, 20 homes |
+| Generative recursion, hurdle negative binomial, not adopted | 0.499 [0.470, 0.529] | Development, 20 homes |
+| Generative model with the time prior, current window and hour (`I1`) | 0.509 [0.486, 0.531] | Development, 20 homes |
+| Supervised diagnostic, current window, hour and history (`I3`) | 0.590 [0.550, 0.624] | Development, 20 homes |
+| Frozen v0.3 candidate gain over `0.2.0` | +0.0091 [+0.0054, +0.0117], 37 / 43 homes | Held-out CASAS |
+| Zero-shot transfer of the fitted hurdle recursion | 0.246 and 0.244, chance 0.25 | Independent external, 2 homes |
+| In-sample oracle on those homes | 0.437 and 0.559 | Independent external, descriptive |
+| Frozen five-sensor non-inferiority gap | 0.1548 | Simulator |
+| Frozen eight-sensor gap to full deployment | 0.00529 | Simulator |
 
-The main lessons are now established:
+The rows use different information and different models, so they rank nothing
+against each other. Matched comparisons are in the phase sections.
 
-1. The simulator is substantially easier than the corresponding real sensing
-   problem and must not be treated as a field-performance estimate.
-2. Time of day and recent room-resolved history contain useful information that
-   the current online generative filter does not fully exploit.
-3. Confidence is not a reliable proxy for correctness or information gain.
-4. Quiet-period posterior saturation can be driven by compounded silence
-   likelihoods even without activations.
-5. Sensor reduction is a multi-objective frontier problem, not a search for one
-   universal minimal kit.
-6. Improvements must be judged under matched information sets; a model that
-   sees more information has not demonstrated a modelling advantage merely by
-   scoring higher.
+## Established Lessons
+
+1. **The simulator is easier than the real problem.** It must not be treated as
+   a field-performance estimate.
+2. **Part of the real-data gap is the formulation.** On the development panel,
+   a supervised classifier given strictly less information than the online
+   filter, the current window and three previous ones, scores 0.081 higher
+   balanced accuracy, in 19 of 20 homes.
+3. **Time of day can be given to the generative model; recent history has not
+   been.**
+   - **The hour.** A hierarchical prior is worth +0.131 balanced accuracy.
+   - **History.** An explicit history state lowered balanced accuracy by 0.042
+     on identical information. With the hour known, the diagnostic still leads
+     by 0.079 when it also sees history.
+4. **Overstated silence evidence came mostly from the declared rates.** Fitting
+   the channels cut silence-evidence inflation from 3.38 to 1.62, near the
+   dependence-only 1.55. It cut overconfidence per quiet hour from 0.175 to
+   0.023.
+5. **Confidence is not a reliable proxy for correctness.** Model-structure
+   disagreement ranks errors better on the development panel, but it retains
+   less of the activity states.
+6. **Comparisons must hold the information and the regime fixed.** A model
+   that sees more has not shown a modelling advantage by scoring higher, and a
+   smoothing gain is not an online gain.
+7. **The development-panel model did not transfer.** On two independently
+   collected homes it is at chance.
+   - **Labels.** Label incompatibility is small: 96% to 98% of annotated time
+     is scorable.
+   - **Parameters.** The transferred parameters lose 0.19 and 0.32 of balanced
+     accuracy against an in-sample oracle.
+   - **The oracle.** Even the oracle reaches only 0.44 and 0.56.
+8. **Sensor reduction is a multi-objective frontier problem.** It is not a
+   search for one universal minimal kit.
 
 ## Completed Research Milestone — Paper 1
 
@@ -84,665 +166,413 @@ The uncertainty study is now frozen. Its pre-specified hypotheses all fail:
 - information gain exceeds confidence in only 5/22 homes.
 
 The conclusion is negative but useful: replacing one scalar uncertainty score
-with another is not a credible repair. The next uncertainty work must change
-the observation/inference formulation or use richer decision information.
+with another is not a credible repair. The next uncertainty work had to change
+the observation or inference formulation, or use richer decision information;
+Phase 4 records it.
 
 No further experiments belong to Paper 1 unless they are required by peer
 review.
 
 ## Phase 1 — Recoverable-Information Gap
 
-### Scientific question
+**Status: evaluated, exploratory, on the development panel.**
 
 How much of the real-data performance gap is caused by sensing limitations, and
-how much by the current probabilistic formulation?
+how much by the probabilistic formulation?
 
-### Required comparisons
+Every model is scored within nested, matched information sets on identical
+household folds:
 
-Construct nested, matched information sets and evaluate all candidate models on
-identical household splits. At minimum separate:
+- `I0`: the current window;
+- `I1`: the current window and the hour;
+- `I2`: the current window and the three previous windows;
+- `I3`: all three.
 
-1. current instantaneous evidence;
-2. current evidence + time of day;
-3. current evidence + recent room-resolved history;
-4. current evidence + time of day + recent history;
-5. any richer observation representation proposed later.
+The runs are in `docs/PHASE1_MATCHED_BASELINES.md` and
+`docs/PHASE1_RECOVERABLE_GAP.md`.
 
-The current generative filter and diagnostic supervised models must be compared
-**within the same information set** wherever possible.
+Measured:
 
-### Success criterion
-
-Produce a reproducible decomposition of:
-
-\[
-\text{observed performance gap}
-=
-\text{information gap}
-+
-\text{formulation gap}
-+
-\text{residual uncertainty}.
-\]
-
-The exact decomposition need not be additive in a strict causal sense, but the
-experimental design must make clear which information each model receives.
-
-### First result
-
-An exploratory first run on the 20 single-resident development homes is
-recorded in `docs/PHASE1_MATCHED_BASELINES.md`. For the pre-declared linear
-and tree baselines, time of day is worth +0.09 to +0.13 household balanced
-accuracy and recent history +0.02 to +0.04. The filter is not yet in the
-comparison, so the formulation gap remains to be measured.
-
-### Recoverable-information gap
-
-The first complete run is recorded in `docs/PHASE1_RECOVERABLE_GAP.md`. It is
-exploratory and uses the same homes and frozen folds. It compares the
-supervised diagnostic, logistic regression and the generative model, restricted
-to the sets it can consume exactly (`I0` and `I2`).
-
+- **Information.** For the pre-declared linear and tree baselines, time of day
+  is worth +0.09 to +0.13 household balanced accuracy, and recent history +0.02
+  to +0.04.
 - **Formulation.** Given the same current window and three previous windows,
-  the diagnostic leads the generative model by +0.116 household balanced
-  accuracy in all 20 homes. The generative model gains only +0.021 from that
-  history; the diagnostic gains +0.088.
-- **Time of day.** The current generative model has no time-of-day input, so
-  that comparison is recorded as unsupported.
+  the supervised diagnostic leads the generative model by +0.116, in all 20
+  homes. The generative model gains +0.021 from that history; the diagnostic
+  gains +0.088.
+- **Against the production filter.** The diagnostic at `I2`, strictly less
+  information than the filter, scores +0.081 [+0.052, +0.111] higher, in 19 of
+  20 homes.
 - **Not additive.** Information gains and formulation gaps interact, so the
   observed gap has no unique additive split.
 
-### Boundary
+Time of day was unsupported for the generative model in Phase 1. Phase 3.1
+supplied it: at `I1` the gap closes to +0.006 [−0.022, +0.030].
+
+**What remains.**
+
+- **The history part of the formulation gap.** At `I3` the diagnostic still
+  leads the generative model with the time prior by +0.079, and the Phase 3.2
+  history state did not close it.
+- **Confirmation.** No part of the decomposition is confirmed on held-out homes.
 
 The supervised diagnostic remains a measurement instrument, not a production
 replacement and not evidence of clinical effectiveness.
 
 ## Phase 2 — Strong Baseline Benchmark
 
-Before inventing a substantially new model, establish a benchmark suite that is
-hard to beat for legitimate reasons.
+**Status: partly complete.**
 
-### Baseline families
+What exists: four pre-declared baselines with fixed settings, described in
+`docs/BASELINES.md`:
 
-The benchmark should include, where scientifically appropriate:
+- state frequency;
+- persistence;
+- regularised multinomial logistic regression;
+- a depth-limited tree.
 
-- current probabilistic filter;
-- simple persistence and majority/state-frequency baselines;
-- regularised multinomial/logistic models;
-- tree-based supervised baselines;
-- sequence models only when they consume exactly the same permitted
-  information;
-- calibrated versions of discriminative baselines when calibration is being
-  compared.
+They sit alongside the gradient-boosted supervised diagnostic and the
+generative model. All are scored by the matched runner, `docs/MATCHED_EVALUATION.md`,
+with the following metrics:
 
-Deep learning should not be added merely because it is fashionable. It belongs
-in the benchmark only if sample size, information structure, and evaluation
-protocol make the comparison meaningful.
+- balanced accuracy and per-state recall;
+- Brier score, log loss and calibration error;
+- household-level paired differences with bootstrap intervals;
+- selective-risk curves, through the Phase 4 framework.
 
-### Metrics
+Measured, on the development panel:
 
-No single metric determines success. Report at least:
+- **Balanced accuracy.** The diagnostic has the highest, 0.590 at `I3`.
+- **Probabilities.** Logistic regression has the lowest log loss of any model
+  scored.
+  - **Identical information.** With current windows only, its median log loss
+    is 1.242, against 1.351 for the best generative channel model, the hurdle
+    negative binomial.
+  - **With the hour.** At `I1` and `I3` its median log loss is 0.925 and 0.909.
 
-- balanced accuracy;
-- per-state recall and confusion structure;
-- Brier score;
-- log loss;
-- calibration error / calibration curves;
-- abstention or selective-risk curves where applicable;
-- household-level paired differences with uncertainty intervals;
-- compute and latency when models are plausible for deployment.
+**What remains.**
 
-### Evidence rule
+- **Held-out benchmark.** No benchmark comparison has been run on held-out
+  households.
+- **Sequence models.** None has been added. One belongs in the benchmark only
+  if it consumes exactly the permitted information and the sample size and
+  protocol make the comparison meaningful. Deep learning is not added because
+  it is fashionable.
+- **Compute and latency.** Not measured.
 
-Model selection and final evaluation must be separated. Candidate architectures,
-hyperparameters and feature sets are chosen on development households only.
-Final claims use frozen held-out households or an external dataset.
+The evidence rule stands. Model selection and final evaluation are separated.
+Candidate architectures, hyperparameters and feature sets are chosen on
+development households only, and final claims use frozen held-out households or
+an external dataset.
 
 ## Phase 3 — Inference Redesign
 
-Only after Phases 1 and 2 should the core inference model be changed.
+**Status: all five hypotheses evaluated on the development panel.** Each
+evaluation was pre-specified, with its protocol frozen before any household was
+scored. None is a held-out claim.
 
-Priority hypotheses are:
+| Hypothesis | Result | Consequence |
+| --- | --- | --- |
+| 3.1 Hierarchical time structure | Success | The time prior is the generative model's hour term; it has not been evaluated in the recursion |
+| 3.2 Explicit recent-history state | Failure | Not adopted |
+| 3.3 Correlated silence | Weakened | Routed to fitted channel models, a success; the negative binomial is not adopted |
+| 3.4 Household adaptation | Success with current windows; inconclusive in the recursion | The declared pooling strength is too strong |
+| 3.5 Smoothing versus online inference | Contract enforced; smoothing gain measured | No smoothing result is reported as online |
+
+The current reference formulation is the online filter's recursion with fitted
+hurdle-Poisson channels and population parameters. Phases 4 and 5 use it.
 
 ### 3.1 Hierarchical time structure
 
-Introduce time-of-day effects in a way that remains probabilistically explicit
-and household-adaptable rather than hard-coding one global circadian schedule.
-Candidate approaches include hierarchical periodic priors and partial pooling
-across homes.
-
 A hierarchical periodic state prior is implemented; see
-`docs/PERIODIC_STATE_PRIOR.md`. It has a Fourier basis on the local hour, a
-population effect, and household deviations shrunk toward it. It enters the
-generative model through the existing circadian term. It lets the generative
-model take part in the matched `I1` and `I3` comparisons.
-
-Its pre-specified development-panel evaluation is in
-`docs/PHASE3_TIME_PRIOR.md`. The measured conclusions, all on the development
-panel, which earlier work has inspected, and none a held-out claim:
+`docs/PERIODIC_STATE_PRIOR.md`. Its evaluation is in `docs/PHASE3_TIME_PRIOR.md`.
 
 - **The hour.** It is worth +0.131 [+0.120, +0.142] household balanced
-  accuracy to the generative model, in all 20 homes: pre-specified success.
-  Against the original model the gain is +0.140.
-- **Where the gain comes from.** It is almost entirely `away`: median recall
-  rises from 0.006 to 0.824. Rare states do not meaningfully change.
-- **The diagnostic at `I1`.** The generative model with the hour is within
-  +0.006 [−0.022, +0.030] of the diagnostic, but its probabilities remain
-  poor: median log loss is 2.96, against 1.51 with no information.
+  accuracy to the generative model, in all 20 homes: a pre-specified success.
+- **Where the gain comes from.** Almost entirely `away`: median recall rises
+  from 0.006 to 0.824.
+- **Against the diagnostic at `I1`.** Within +0.006 [−0.022, +0.030], but its
+  probabilities stay poor: median log loss 2.96, against 1.51 with no
+  information.
 - **Recent history.** It adds nothing (+0.002). At `I3` the diagnostic still
-  leads by +0.079, so the history part of the gap is unchanged.
+  leads by +0.079.
 - **Household adaptation.** On a 7-day window it improves log loss and
-  calibration. Its balanced-accuracy gain (+0.011) is below the declared
-  minimal difference: pre-specified inconclusive.
+  calibration. The balanced-accuracy gain, +0.011, is below the declared
+  minimal difference: inconclusive.
 
 ### 3.2 Explicit recent-history state
 
-Represent recent event history directly rather than relying on the current
-filter state to absorb all temporal structure. The representation must remain
-interpretable enough to audit which historical evidence changed a posterior.
+An explicit history state is implemented; see `docs/HISTORY_STATE.md`. Each
+channel's activations over the three previous windows condition its current
+rate. Its evaluation is in `docs/PHASE3_HISTORY_STATE.md`.
 
-An explicit history state is implemented; see `docs/HISTORY_STATE.md`.
-
-- **The model.** Each channel's activations over the three previous windows
-  condition its current Poisson rate, relative to what the memoryless model
-  expects in each state. There are eleven coefficients, fitted on training
-  labels.
-- **Diagnostics.** Each prediction splits exactly into prior and transitions,
-  the current window, and recent history.
-- **Matched sets.** It can be scored in `I2` and `I3`.
-
-Its pre-specified development-panel evaluation is in
-`docs/PHASE3_HISTORY_STATE.md`. The measured conclusions, all on the
-development panel, which earlier work has inspected, and none a held-out
-claim:
-
-- **On identical information.** The history state lowers balanced accuracy by
-  0.042 [0.026, 0.060] in `I2`, and by 0.044 [0.028, 0.060] in `I3` with the
-  hour. At most 3 of 20 homes improve. Both are pre-specified failures.
+- **On identical information.** It lowers balanced accuracy by 0.042
+  [0.026, 0.060] in `I2`, and by 0.044 [0.028, 0.060] in `I3` with the hour. At
+  most 3 of 20 homes improve. Both are pre-specified failures.
 - **Recent history.** It is worth −0.021 to the model with the history state,
-  against +0.021 to the original model re-measured in the same run. The
-  history state recovers less from recent history, not more.
-- **Where the loss is.** It is mostly `home_active`, whose recall falls by
-  0.164. More of its moments are reported as `away`.
+  against +0.021 to the original model re-measured in the same run.
+- **Where the loss is.** Mostly `home_active`, whose recall falls by 0.164.
 - **Probabilities.** Log loss improves by 0.726, but Brier score and
-  calibration error do not, and log loss stays about twice the no-information
-  value.
-- **The formulation gap.** The diagnostic now leads by +0.158 at `I2` and
-  +0.123 at `I3`.
-- **Time and history.** The history gain is 0.013 to 0.021 smaller when the
-  hour is known, in every model family.
-- **What is not known.** The fitted coefficients are positive in nearly every
-  state, so recent activity raises the expected rate everywhere. Whether they
-  also absorb errors in the declared rates is not separated by this
-  experiment.
+  calibration error do not.
 
-### 3.3 Correlated silence model
+Consequence: the history state is not adopted, and the history part of the
+formulation gap remains open. Whether its coefficients also absorb errors in
+the declared rates was not separated.
 
-Replace the product of many independent room-level silence likelihoods only if
-the data support the need. The leading hypothesis is a two-stage model:
+### 3.3 Correlated silence and the channel observation model
 
-\[
-N_{\text{total}}(t)
-\rightarrow
-\text{conditional room allocation},
-\]
+The pre-specified diagnostic, `docs/PHASE3_CORRELATED_SILENCE.md`, **weakened**
+the correlated-silence hypothesis.
 
-rather than independent Poisson silence processes for strongly correlated room
-streams.
-
-This is intended to address over-concentration without arbitrary posterior caps.
-
-Its pre-specified diagnostic is in `docs/PHASE3_CORRELATED_SILENCE.md`. It
-changes no inference. By its declared rule the hypothesis is **weakened**. The
-measured conclusions, all on the development panel, which earlier work has
-inspected, and none a held-out claim:
-
-- **Dependence is real and material.** In the quiet states, the pairwise log
-  odds ratio of silence is +4.43, and counts correlate at +0.30. Independence
-  overstates the spread of joint-silence evidence across states by 1.55
-  [1.38, 1.75], in 19 of 20 homes.
+- **Dependence is real.** Independence overstates the spread of joint-silence
+  evidence across states by 1.55 [1.38, 1.75], in 19 of 20 homes.
 - **The declared rates matter more.** The filter's own silence terms overstate
-  that spread by 3.38. On the log scale, dependence accounts for 0.435 of it
-  and the declared rates for 0.784.
-- **Overconfidence does not grow with the number of silent channels.** Within
-  the predicted state it falls by 0.059 per silent channel, in 16 of 20 homes.
-  The model is most overconfident in windows with activity.
-- **Overconfidence grows along quiet runs.** It rises by 0.175 per hour of
-  consecutive fully silent windows, in 18 of 20 homes. After one silent hour
-  the model reports `sleeping` in 19 of 20 away runs and all 18
-  `home_inactive` runs.
-- **Implication.** A correlated-silence model would address the smaller of the
-  two measured sources of overstated silence evidence.
+  it by 3.38. On the log scale dependence accounts for 0.435 of that, and the
+  declared rates for 0.784.
+- **The predicted consequence is absent.** Overconfidence falls, by 0.059 per
+  silent channel. It grows along quiet runs, by 0.175 per hour.
 
-That result routes the work to fitting the channels' marginal observation
-models, keeping them independent: `docs/PHASE3_FITTED_RATES.md`. It uses a
-hurdle model per channel and state: a silence probability, and a
-zero-truncated Poisson rate for active windows, fitted on training households.
-The measured conclusions, on the development panel and none a held-out claim:
+The result routed the work to fitting each channel's marginal observation
+model, keeping channels independent: a hurdle model per channel and state,
+`docs/PHASE3_FITTED_RATES.md`.
 
 - **Pre-specified success in both primaries.**
-  - With current windows, calibration error improves by 0.058, and balanced
+  - **Current windows.** Calibration error improves by 0.058, and balanced
     accuracy is unchanged.
-  - In the filter's recursion over every window, calibration error improves
-    by 0.119 and balanced accuracy by 0.039.
-- **Probabilities.** With the Phase 3.1 time prior, median log loss is 1.448.
-  It is the first generative model below the no-information 1.510.
-- **The mechanism.**
-  - Silence-evidence inflation falls from 3.38 to 1.62, close to the
-    dependence-only 1.55.
-  - Overconfidence per quiet hour falls from 0.175 to 0.023.
-- **The cost.** `home_active` recall falls by 0.23. Active-window counts are
-  over-dispersed, which the zero-truncated Poisson does not model.
-- **Silence needs its own parameter.** A Poisson fitted to the mean count
-  improves balanced accuracy, but not calibration, and it makes silence
-  inflation four times worse.
+  - **The recursion.** Calibration error improves by 0.119 and balanced
+    accuracy by 0.039.
+- **The mechanism.** Silence-evidence inflation falls from 3.38 to 1.62.
+  Overconfidence per quiet hour falls from 0.175 to 0.023.
+- **The cost.** `home_active` recall falls by 0.23.
 
-Where the fitted hurdle model is misspecified was located by pre-specified
-posterior predictive checks; see `docs/PHASE3_PREDICTIVE_CHECKS.md`. They are
-diagnostic only, on the development panel. Each household's cells are checked
-against their own hurdle fit, which tests the family, and against the
-population fit.
+Posterior predictive checks located the misspecification;
+see `docs/PHASE3_PREDICTIVE_CHECKS.md`.
 
-- **The active count is systematically under-dispersed.** In the common states,
-  the observed active variance is 4.3 to 7.4 times the zero-truncated Poisson's,
-  in every household. The excess grows with the square of the mean: the
-  household slope of log variance on log mean is 1.94, where the model gives
-  1.15.
-- **Silence comes in long runs.** Windows in quiet runs of an hour or more are
-  1.3 to 5.2 times as common as independence given the state allows, in
-  `away`, `home_active` and `home_inactive`. `home_active` has both the largest
-  dispersion and the largest excess of quiet runs.
-- **Next model family.** The declared routing names within-state temporal
-  dependence: activity sub-states or a Markov-modulated emission within each
-  state.
-  - It would produce the long runs, which no marginal count distribution can.
-  - A latent intensity that varies over time would also produce the
-    over-dispersion.
-  - A zero-truncated negative binomial alone would address the dispersion but
-    not the runs.
+- **The active count is under-dispersed.** Observed variance is 4.3 to 7.4
+  times the model's in the common states, in every household.
+- **Silence comes in long runs.** They are 1.3 to 5.2 times as common as the
+  model allows in `away`, `home_active` and `home_inactive`.
+- **The declared routing.** It names within-state temporal dependence as the
+  next model family: activity sub-states or a Markov-modulated emission.
 
-The zero-truncated negative binomial for the active count was then evaluated in
-a pre-specified comparison with the hurdle-Poisson and the declared rates; see
-`docs/PHASE3_NEGATIVE_BINOMIAL.md`. Identical inference was used throughout,
-on the development panel.
+A zero-truncated negative-binomial active count was then evaluated against the
+hurdle-Poisson; see `docs/PHASE3_NEGATIVE_BINOMIAL.md`.
 
-- **Probabilities improve substantially.** Against the hurdle-Poisson, log
-  loss improves by 0.48 with current windows and 0.78 in the recursion, in
-  all 20 homes. Calibration error improves by 0.05 and 0.10.
-- **Balanced accuracy improves** by 0.044 in both settings.
+- **Probabilities.** Log loss improves by 0.48 with current windows and 0.78 in
+  the recursion, in all 20 homes.
+- **Balanced accuracy.** It improves by 0.044.
 - **`home_active` recall is not recovered.** With current windows it falls a
-  further 0.055; in the recursion the change is uncertain.
-- **Decision: not adopted.**
-  - The rule declared in advance adopts it in the recursion.
-  - With current windows it is a trade-off, because `home_active` recall is
-    worse. Adoption needed both settings.
-- **Dispersion estimates are mostly moderate.** The median is 1.23.
-  - Of 9 extreme estimates, only 2 rest on little data. Six are in `sleeping`,
-    where motion counts approach the logarithmic-series limit.
+  further 0.055.
+- **Not adopted.** The rule declared in advance needed both settings, and with
+  current windows the result is a trade-off.
+
+Consequence: the fitted hurdle-Poisson channels are the reference. Within-state
+temporal dependence is named but not built. The negative binomial addresses the
+dispersion but not the runs.
 
 ### 3.4 Household adaptation
 
-Separate population-level parameters from household-specific effects. Evaluate
-partial pooling before introducing unconstrained per-home fitting.
+A partial-pooling framework is implemented; see `docs/PARTIAL_POOLING.md`. Its
+evaluation is in `docs/PHASE3_PARTIAL_POOLING.md`.
 
-A partial-pooling framework is implemented; see `docs/PARTIAL_POOLING.md`.
+- **Pooling helps with current windows.** After a week of household data it
+  improves log loss by 0.080 [0.039, 0.118], in 17 of 20 homes: a
+  pre-specified success. Balanced accuracy and calibration are unchanged.
+- **In the recursion it is inconclusive.** One home improves greatly. Without
+  it the mean change is −0.032, and four homes worsen by more than 0.4.
+- **Unconstrained per-home fitting overfits.** After one day it is worse than
+  pooling by 0.175.
+- **The strength.** Selected on training homes only, it was the grid's
+  smallest, 24 windows, in both folds. The declared 288 pools more than a week
+  of data needs.
 
-- **The framework.** Each household gets the population parameter plus its own
-  deviation, shrunk toward zero with a declared strength. The strength's
-  limits are population-only and unconstrained per-home fitting.
-- **First application.** It is applied to the fitted hurdle channel
-  parameters, whose silence differs widely between homes. The periodic state
-  prior already has its own shrunk household deviation.
-- **Evaluation.** Its pre-specified evaluation is in
-  `docs/PHASE3_PARTIAL_POOLING.md`. The measured conclusions follow, all on the
-  development panel, which earlier work has inspected, and none a held-out
-  claim.
-
-- **Pooling helps with current windows.** After a week of household data,
-  pooling toward the population improves log loss by 0.080 [0.039, 0.118], in
-  17 of 20 homes. Balanced accuracy and calibration are unchanged. This is a
-  pre-specified success.
-- **In the recursion it is inconclusive.** One home improves greatly, and
-  without it the mean change is −0.032. Four homes worsen by more than 0.4.
-- **Unconstrained per-home fitting overfits small homes.** After one day it is
-  worse than pooling by 0.175, and worse than the population alone by 0.161.
-  After a week it is close to pooling.
-- **The strength.** Selected on training homes only, it was the smallest in
-  the grid, 24 windows, in both folds. With it, pooling improves log loss by
-  0.132. The declared 288 pools more than a week of data needs. After a day,
-  it barely moves a home.
+Consequence: pooling is supported with current windows only, and a strength
+selected on training homes has not been evaluated. The Phase 5 adaptation used
+the declared 288, as its protocol froze.
 
 ### 3.5 Smoothing versus online inference
 
-Keep fixed-lag smoothing and online filtering as separate operational regimes.
-A gain obtained with future evidence must never be reported as an online gain.
+The regime contract is enforced in code; see `docs/INFERENCE_REGIMES.md`.
 
-The rule is enforced in code; see `docs/INFERENCE_REGIMES.md`.
+- **Every experiment record states its regime.** It also records whether the
+  regime is causal, its reporting delay, and the timestamps of its estimates. A
+  record whose estimates read past its regime is refused.
+- **Reported online estimates are never revised.** Streaming tests show it.
+- **Regimes are never mixed silently.** A smoother against the online filter
+  must be requested as a smoothing gain, labelled with its delay.
 
-- **Every record states its regime.** Schema 1.2 records the regime of every
-  experiment: online filter, or fixed-lag smoother with its lag. Schema 1.3
-  adds whether it is causal, its reporting delay, and the prediction and
-  latest-evidence timestamps of the scored estimates. A record whose estimates
-  read past its regime is refused, so smoothed estimates cannot be recorded as
-  online.
-- **Every report states it.** Every generated report labels its regime.
-- **Reported online estimates are never revised.** Their beliefs are
-  read-only. Streaming tests show that an online estimate never changes as
-  later evidence arrives. A smoothed estimate changes only while its permitted
-  evidence arrives, and lag zero reproduces online filtering exactly.
-- **Regimes are never mixed silently.** The matched evaluation refuses
-  smoothing regimes and models. Results labelled with their regime can be
-  compared or pooled only within one regime. A smoother against the online
-  filter must be requested as a smoothing gain, and it is labelled with its
-  delay.
-- **Existing results.** Every published result is online, attested on
-  migration, and lists no prediction timestamps. The earlier smoothing
-  measurements in `docs/real_data.md` are labelled as smoothed.
+The smoothing evaluation is in `docs/PHASE3_SMOOTHING.md`. Every figure is a
+smoothing gain, available only after the smoother's delay; none is an online
+improvement.
 
-How much smoothing recovers was measured in a pre-specified evaluation; see
-`docs/PHASE3_SMOOTHING.md`.
+- **Five minutes of lag.** Balanced accuracy rises by 0.031 [0.021, 0.043], in
+  all 20 homes: a pre-specified gain.
+- **Thirty and sixty minutes.** Balanced accuracy rises by 0.043 and 0.049,
+  and log loss worsens by 0.101 and 0.119: trade-offs.
+- **Most changes are not corrections.** Only 37% of the states smoothing
+  changes at five minutes are corrections.
+- **No smoother reports a new state sooner** than the online filter. Smoothing
+  is no help to alerting or to any decision made when a state changes.
 
-- **The setup.** It uses the fitted-hurdle recursion, the current best, and
-  lags of 5, 30 and 60 minutes.
-- **Status.** The conclusions are on the development panel, and none is a
-  held-out claim.
-- **Every figure is a smoothing gain.** Each is available only after the
-  smoother's delay, and none is an online improvement.
+### What remains in Phase 3
 
-- **Five minutes of lag is a gain.** Balanced accuracy rises by 0.031 [0.021,
-  0.043], in all 20 homes. No probability metric favours the online filter.
-  Log loss worsens by 0.044, short of its minimal difference, an uncertain
-  verdict.
-- **Thirty and sixty minutes are trade-offs.**
-  - Balanced accuracy rises by 0.043 and 0.049.
-  - Log loss worsens by 0.101 and 0.119.
-  - The Brier score improves, and calibration error is negligible.
-- **Returns diminish.** Five minutes gives 63% of the sixty-minute gain in
-  balanced accuracy.
-- **Most changes are not corrections.** At five minutes the smoother changes
-  8.3% of reported states. It corrects 6.9% of the filter's errors and makes
-  3.9% of its correct windows wrong, so only 37% of its changes are
-  corrections.
-- **By state.**
-  - `away` recall gains 0.060 and 0.083 at thirty and sixty minutes.
-  - `home_active` recall is unchanged at every lag.
-  - `sleeping` recall is unchanged at five and thirty minutes, and uncertain at
-    sixty.
-  - The largest gains are in rare states, such as `bathroom_activity`, +0.089.
-- **Transitions.**
-  - Accuracy near true transitions rises by 0.022 to 0.051.
-  - No smoother reports a new state sooner than the online filter. The earlier
-    boundary it places recovers at most 12.5 minutes of its wait.
-  - Smoothing is therefore no help to alerting or to any decision made when a
-    state changes.
+- **Combining the two successes.** The time prior and the fitted channels have
+  not been evaluated together in the recursion.
+- **Within-state temporal dependence.** The family the predictive checks route
+  to has not been built.
+- **`home_active` recall.** The fitted channels lose 0.23 of it, and the
+  negative binomial does not recover it.
+- **Confirmation.** Every Phase 3 conclusion is on the development panel.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
-Paper 1 rules out a simple scalar-score swap as the main solution.
+**Status: diagnostics implemented; the first comparison evaluated on the
+development panel; no abstention rule selected.**
 
-Future abstention work should therefore evaluate decision rules based on richer
-structure, for example:
+Paper 1 ruled out a scalar-score swap. Four pieces of infrastructure are
+implemented. Each is diagnostic only and changes no decision:
 
-- posterior instability across plausible model specifications;
-- disagreement between independent evidence channels;
-- predictive checks for observation-model mismatch;
-- out-of-distribution or low-support household states;
-- expected loss under an explicit decision cost;
-- ensemble/model uncertainty where it can be estimated honestly.
-
-Model-structure disagreement diagnostics are implemented; see
-`docs/STRUCTURAL_DISAGREEMENT.md`. They are diagnostic infrastructure, with no
-threshold and no evaluation yet.
-
-- **What they compare.** Window by window, the posteriors of a few fitted
-  specifications. Each variant is supported by a published result.
-- **What they record.** Pairwise Jensen-Shannon divergence, vote disagreement,
-  per-state probability spread, and a consensus summary.
-- **The decision.** They leave the deployed decision unchanged.
-- **The record.** Experiment records carry them from schema 1.4.
-
-Evidence-group disagreement diagnostics are implemented; see
-`docs/EVIDENCE_GROUP_DISAGREEMENT.md`. They are diagnostic infrastructure, with
-no abstention rule and no evaluation yet.
-
-- **What they compare.** Within each filter update, what the motion, contact,
-  bed and wearable sensor groups and the filter's prediction each support.
-- **Missing evidence.** Absent, unavailable and uninformative groups are
-  excluded, never counted as disagreement; statuses keep the estimate's
-  missing and silent.
-- **What they record.** State disagreement, pairwise Jensen-Shannon
-  divergence, descriptive conflicts, and which group dominates the decision's
-  log odds, in machine-readable results.
-
-Observation-model mismatch diagnostics are implemented; see
-`docs/OBSERVATION_MISMATCH.md`. They are diagnostic infrastructure, with no
-threshold and no evaluation yet.
-
-- **The question.** How surprising a window's evidence is under every state of
-  the fitted channel models, not which state it favours.
-- **What they record.** Exact per-channel and per-state log-probabilities,
-  tails and standardised surprise, the best achievable state, the posterior
-  predictive, activity patterns, and training support.
-- **Missing evidence.** Missing counts and known sensor failures are excluded,
-  never scored as novelty.
-- **The record.** Experiment records carry them from schema 1.5.
-
-The selective-prediction evaluation framework is implemented; see
-`docs/SELECTIVE_PREDICTION.md`. It evaluates any candidate signal, with its
-direction stated, and selects no threshold.
-
-- **The curves.** Over a coverage grid: selective risk, error and balanced
-  accuracy, per-state coverage, calibration among retained predictions, and
-  the composition of the rejected windows. Pooled and per household.
-- **The references.** Random rejection and the oracle, summarised by the AURC,
-  its excess over the oracle, and the gain over random.
-- **Uncertainty.** Households, never timestamps, are resampled.
-- **The record.** Experiment records carry it from schema 1.6.
+- **Model-structure disagreement.** The posteriors of fitted specifications
+  that published results support, compared window by window;
+  `docs/STRUCTURAL_DISAGREEMENT.md`.
+- **Evidence-group disagreement.** What the motion, contact, bed and wearable
+  groups each support within a filter update. Missing groups are never counted
+  as disagreement; `docs/EVIDENCE_GROUP_DISAGREEMENT.md`.
+- **Observation-model mismatch.** How surprising a window's evidence is under
+  every state. Known sensor failures are excluded, never scored as novelty;
+  `docs/OBSERVATION_MISMATCH.md`.
+- **Selective-prediction evaluation.** Risk-coverage curves for any signal
+  with its direction stated, against random and oracle rejection. Households,
+  never timestamps, are resampled; `docs/SELECTIVE_PREDICTION.md`.
 
 ### Measured: the first comparison of the diagnostics
 
-The first pre-specified comparison is published; see
-`docs/PHASE4_UNCERTAINTY_DIAGNOSTICS.md` and
-`artifacts/phase4/phase4-uncertainty-diagnostics.json`.
+The protocol was frozen in `ad459f1`; see
+`docs/PHASE4_UNCERTAINTY_DIAGNOSTICS.md`. Every signal ranks the same
+cross-fitted hurdle-recursion predictions on the development panel, whose
+full-coverage error is 0.487.
 
-- **Scope.** The protocol was frozen in `ad459f1`. The data are the 20
-  development homes, 232,975 scored windows, so this is not a held-out claim.
-- **Predictions.** Every signal ranks the same cross-fitted hurdle-recursion
-  predictions, whose full-coverage error is 0.487.
-- **The answer.** Yes, by the declared rule, for model-structure disagreement
-  alone, with the limits below.
-
-Results:
-
-- **Confidence barely orders the predictions.** Its pooled gain over random
-  rejection is 0.04 [−0.22, 0.31].
-  - **Its most confident windows.** The most confident 10% of windows have an
-    error of 0.66, above the full-coverage 0.49.
-  - **Calibration.** The calibration error of its retained predictions grows
-    from 0.30 to 0.39 as coverage falls to 50%.
-  - **Entropy.** It is indistinguishable: household AURC difference +0.002,
-    negligible.
-- **Structural disagreement is materially better by the declared rule.**
+- **Confidence barely orders the predictions.**
+  - **Pooled gain.** Over random rejection it is 0.04 [−0.22, 0.31].
+  - **Its most confident windows.** The most confident 10% have an error of
+    0.66.
+  - **Entropy.** It is indistinguishable from confidence.
+- **Model-structure disagreement is materially better by the declared rule.**
   - **AURC.** Household error AURC is 0.059 [0.031, 0.087] lower than
     confidence's, lower in 16 of 20 homes.
-  - **Balanced accuracy.** Over the grid it is 0.032 [0.013, 0.051] higher.
-  - **Pooled gain.** 0.45 [0.37, 0.53].
-  - **Calibration.** Its retained predictions are better calibrated at every
-    inspection level, by 0.13 at 50% coverage.
-- **Its gain is at low coverage.** At 50%, 70% and 90% coverage, its paired
-  error and balanced-accuracy differences are uncertain or negligible.
-- **The minority-state guard was weak.** The frozen rule admitted only
-  `bed_awake`: 68 windows in 5 homes.
-  - **Activity states.** Structural disagreement retains less than confidence
-    of `kitchen_activity` and `bathroom_activity` at 50% and 70% coverage. At
-    50% it keeps 0.85 and 0.87 of their proportional share, where confidence
-    keeps 1.46 and 1.16.
-  - **`away`.** It keeps 0.73 of the proportional share at 50%.
+  - **Calibration.** Its retained predictions are better calibrated.
+- **Its gain is at low coverage.** At 50%, 70% and 90% coverage the paired
+  differences are uncertain or negligible.
+- **The minority-state guard was weak.**
+  - **What it admitted.** The frozen rule admitted only `bed_awake`.
+  - **Activity states.** At 50% coverage structural disagreement keeps 0.85
+    and 0.87 of the proportional share of `kitchen_activity` and
+    `bathroom_activity`, where confidence keeps 1.46 and 1.16.
 - **Evidence-channel disagreement and predictive mismatch are worse than
-  confidence.**
-  - **AURC.** Household AURC is 0.149 [0.110, 0.183] and 0.040 [0.020, 0.060]
-    higher.
-  - **Activity states.** Both reject them heavily: predictive mismatch keeps
-    0.08 of `kitchen_activity`'s share at 50%. Both fail the guard on
-    `bed_awake`.
-  - **Pooled selection.** Pooled, predictive mismatch's gain is 0.13
-    [0.01, 0.21], but a single threshold rejects every window of hh127 at 50%
-    and 70% coverage.
+  confidence.** Their household AURC is 0.149 and 0.040 higher, and both reject
+  activity states heavily.
 - **No threshold was selected**, and no abstention rule.
 
-### Required evaluation
+The external check, the Phase 5 estimand S, is **inconclusive**. Structural
+disagreement beats confidence in one external home, by 0.249 [0.163, 0.340],
+and is uncertain in the other.
 
-Selective prediction must be presented as a risk--coverage curve, not a single
-hand-picked threshold. Thresholds used for final reporting must be chosen on
-training/development data and frozen before held-out evaluation.
+### What remains in Phase 4
+
+- **An abstention rule.** None has been selected. A rule must be chosen on
+  development data with a guard that covers the activity states and `away`,
+  and frozen before held-out evaluation.
+- **Other decision information.** Expected loss under an explicit decision cost
+  has not been evaluated, and neither have out-of-distribution or low-support
+  states as abstention signals.
+
+Selective prediction is presented as a risk--coverage curve, not a single
+hand-picked threshold. Thresholds used for final reporting are chosen on
+development data and frozen before held-out evaluation.
 
 ## Phase 5 — External Generalisation
 
-CASAS provides multiple homes, but it remains one instrumentation ecosystem.
-The next major credibility gate is an independently collected annotated dataset
-with a materially different sensing layout.
+**Status: the infrastructure and the first external evaluation are complete.
+The result is negative.**
 
-### Required tests
+CASAS is one instrumentation ecosystem. Phase 5 tests the model on an
+independently collected annotated dataset with a different sensing layout.
 
-1. Freeze preprocessing, ontology mapping and evaluation rules before seeing
-   final external results.
-2. Report what can and cannot be mapped across datasets.
-3. Distinguish zero-shot transfer from any dataset-specific refitting.
-4. Compare household-level performance distributions rather than only pooled
-   event-level scores.
-5. Document failure modes caused by different sensor semantics or coverage.
-
-### Success criterion
-
-A modelling improvement is substantially more convincing if its direction and
-practical value survive outside the original CASAS development ecosystem.
-
-### Status
-
-The external-dataset contract is implemented; see
-`docs/EXTERNAL_DATASET_CONTRACT.md`. It was merged before any model was scored
-on an external dataset.
-
-- **Adapters.** They expose each household in the dataset's own terms,
-  without CASAS assumptions.
-- **The mapping.** Native labels, sensor types and locations map to the
+- **The contract.** `docs/EXTERNAL_DATASET_CONTRACT.md`. Adapters expose a
+  dataset in its own terms. Labels, sensor types and locations map to the
   ontology only through declared entries: exact, approximate, unmappable or
-  ambiguous. Anything undeclared is an error, never dropped. The mapping is
-  frozen by its SHA-256.
-- **Validation.** It reports timestamp order, duplicates, impossible intervals,
-  missing timezones, unknown sensors, overlapping labels, multi-resident
-  periods and sensor-semantic mismatches.
-- **Conversion.** It counts everything it cannot carry.
-
-The first external protocol is frozen, before any external scoring; see
-`docs/PHASE5_EXTERNAL_PROTOCOL.md` and `artifacts/phase5/external_protocol.json`
-(SHA-256 `620f3fdc55e0…`).
-
-- **Dataset.** The UCI "Activities of Daily Living Recognition Using Binary
-  Sensors" dataset (DOI 10.24432/C5J02M, CC BY 4.0). It has two
-  single-resident homes in Spain, collected independently of CASAS, and is
-  verified by file digests.
-- **Periods.** Each home's first seven days are its adaptation period, and
-  the rest is scored: 7 and 14 days.
-- **Conditions.** Two are frozen:
-  - **zero-shot:** the hurdle recursion with the 20-home CASAS population,
-    pinned by its fit digest;
-  - **limited adaptation:** partial pooling on the adaptation period's
-    labelled windows only.
-
-  Both are compared with the declared rates and with chance.
-- **The Phase 4 check.** Whether structural disagreement's advantage over
-  confidence keeps its direction.
-- **Mapping.** It was written from the dataset's documentation. Meal labels
-  are ambiguous and unscored, so `home_active`, `kitchen_activity` and
-  `bed_awake` cannot be scored.
-- **Unsupported sensors.** The contact, flush, pressure and electric sensors
-  are listed per home.
-- **Uncertainty.** Day blocks are resampled within each home. Two homes
-  support no between-household claim.
+  ambiguous. Anything undeclared is an error, and conversion counts everything
+  it cannot carry.
+- **The protocol.** `docs/PHASE5_EXTERNAL_PROTOCOL.md`, frozen in `a863bff`
+  before any external scoring.
+  - **Dataset.** The UCI ADL Binary dataset (DOI 10.24432/C5J02M, CC BY 4.0):
+    two single-resident homes in Spain.
+  - **Mapping.** Meal labels are ambiguous and unscored, so `home_active`,
+    `kitchen_activity` and `bed_awake` cannot be scored.
+  - **Conditions.** Zero-shot transfer of the fitted hurdle recursion, and
+    limited adaptation by partial pooling on each home's first seven days.
+- **The run.** `docs/PHASE5_EXTERNAL_RESULTS.md`, made from the clean commit
+  `2d495e4`. Every CASAS population reproduced its frozen digest, and both
+  homes are reported.
 
 ### Measured: the first external evaluation
 
-The frozen protocol has been run as declared; see
-`docs/PHASE5_EXTERNAL_RESULTS.md` and
-`artifacts/phase5/phase5-external-ordonez-results.json`.
-
-- **Scope.** The protocol was frozen in `a863bff` and the run made from the
-  clean commit `2d495e4`. Every CASAS population reproduced its frozen digest.
-- **Homes.** Both homes were eligible and both are reported.
-- **Scored periods.** They cover 1,826 and 3,666 windows over 8 and 17 local
-  dates. The protocol's text expected 7 and 14 days; its definition of the
-  scored period is what was run.
-- **The answer.** The CASAS-trained model does not transfer to these two
-  homes, and limited adaptation does not rescue it.
-
-Declared results:
-
-- **Zero-shot is at chance (C: not above chance).**
-  - **Balanced accuracy.** 0.246 [0.244, 0.249] and 0.244 [0.242, 0.246],
-    against chance 0.25.
-  - **What it predicts.** Every window is predicted `sleeping` (92.3% and
-    89.1%) or the unscorable `bed_awake`.
-  - **Recall.** `sleeping` recall is 0.98 in both homes; `away`,
-    `bathroom_activity` and `home_inactive` recall is at most 0.001.
-- **Transfer (T): does not transfer.**
+- **Zero-shot is at chance.** Balanced accuracy is 0.246 [0.244, 0.249] and
+  0.244 [0.242, 0.246], against 0.25. Every window is predicted `sleeping`
+  (92.3% and 89.1%) or the unscorable `bed_awake`.
+- **Transfer: it does not transfer.**
   - **OrdonezA.** The balanced-accuracy difference from the declared rates is
-    negligible, −0.005 [−0.007, −0.003]. Log loss is lower than the declared
-    rates' by 1.230 [1.128, 1.338].
-  - **OrdonezB.** The declared rates are better on every metric. Balanced
-    accuracy is 0.098 [0.086, 0.113] higher with them.
-- **Adaptation (A): does not help.**
-  - **Balanced accuracy.** Its difference from zero-shot is −0.001 and
-    +0.000, negligible in both homes.
-  - **Probabilities.** Log loss improves in both, by 0.396 [0.316, 0.465] and
-    0.422 [0.257, 0.583]. No state's recall changes by more than 0.01.
-  - **Calibration.** In OrdonezB its calibration error is worse, by 0.036
-    [0.025, 0.048].
-- **The Phase 4 direction (S): inconclusive.** Structural disagreement has a
-  lower error AURC than confidence in OrdonezB, 0.396 against 0.645, a
-  difference of 0.249 [0.163, 0.340]. In OrdonezA the difference is uncertain,
-  −0.025 [−0.054, +0.002].
+    negligible.
+  - **OrdonezB.** The declared rates are better on every metric, by 0.098
+    [0.086, 0.113] in balanced accuracy.
+- **Adaptation: it does not help.** Balanced accuracy is unchanged, −0.001 and
+  +0.000.
+  - **Log loss.** It improves by 0.396 and 0.422.
+  - **Recall.** No state's recall changes by more than 0.01.
+- **The Phase 4 direction: inconclusive.** Structural disagreement beats
+  confidence in OrdonezB and is uncertain in OrdonezA.
+- **The scored periods.** They cover 8 and 17 local dates, where the
+  protocol's text expected 7 and 14 days; its definition is what was run.
 
-Descriptive diagnostics:
+Descriptive diagnostics, which change no conclusion:
 
 - **Dataset incompatibility.**
-  - **Labels.** 97.6% and 96.0% of the scored annotated time is scorable.
+  - **Labels.** It is small for labels: 97.6% and 96.0% of annotated time is
+    scorable.
   - **Sensors.** 65.7% and 15.7% of sensor activations come from sensors that
-    feed no model channel: state, electric and contact sensors.
-  - **OrdonezA.** It has no sensor on the bedroom channel.
-- **Different event rates.**
-  - **Active windows.** A window with activity carries 1.0–2.1 events on
-    average, against 2.1–14.0 in CASAS. The mean is lower here in all 24
-    channel–state cells with activity.
-  - **Silence.** Silence is at least as frequent as in CASAS in all 32 cells,
-    and far more frequent in awake states. The bathroom channel is silent in
-    54% and 49% of `bathroom_activity` windows, against 11% in CASAS.
-- **Calibration shift.** Zero-shot confidence exceeds accuracy by 0.410 and
-  0.453, against 0.299 for the same model on the development panel.
-- **State-prior shift.**
-  - **Size.** It is modest: Jensen-Shannon 0.081 and 0.034 bits from the
-    development panel.
-  - **Direction.** `away` is rarer here (12% and 20% against 37%) and
-    `home_inactive` commoner.
-- **Separating the losses.** The oracle is the same recursion with each
-  home's own channel parameters, fitted on all its labelled windows including
-  the scored ones.
-  - **The oracle.** It reaches balanced accuracy 0.437 and 0.559.
-  - **Model failure.** The transferred parameters lose 0.191 and 0.315 of
-    balanced accuracy against the oracle.
-  - **Channels and model family.** 0.563 and 0.441 of balanced accuracy is
-    out of reach even in-sample. This shortfall mixes the sensing limitation
-    with the model family's.
-- **Limits.** Two homes are two case studies, not a population claim. The
-  diagnostics describe the data; they were not part of the declared
-  evaluation.
+    feed no model channel.
+- **Event rates differ.**
+  - **Active windows.** They carry 1.0 to 2.1 events against 2.1 to 14.0 in
+    CASAS.
+  - **Silence.** It is at least as frequent in every channel and state.
+- **Calibration shift.** Confidence exceeds accuracy by 0.410 and 0.453,
+  against 0.299 on the development panel.
+- **Separating the losses.** An in-sample oracle, the same recursion with each
+  home's own parameters, reaches 0.437 and 0.559.
+  - **The transferred parameters.** They lose 0.191 and 0.315 of balanced
+    accuracy against it.
+  - **The oracle's shortfall.** It mixes the sensing limitation with the model
+    family's.
+
+Consequence: no Phase 3 or Phase 4 result is supported beyond CASAS. The
+CASAS-fitted observation model is not portable to this sensing layout, and a
+week of adaptation at the declared strength does not change a decision.
+
+### What remains in Phase 5
+
+- **More independent evidence.** Two homes are two case studies. A
+  confirmatory claim needs an independent dataset with more homes.
+- **The Ordóñez homes are now inspected.** Any further analysis of them,
+  including another adaptation strength, is exploratory.
 
 ## Phase 6 — Sensor-Information Frontier
 
-The deployment study should move from isolated subset comparisons to a formal
-multi-objective frontier.
+**Status: not started.** The simulator ablation framework and the frozen five-
+and eight-sensor simulator results predate the programme.
 
-For each pre-specified candidate sensor configuration, quantify:
+The deployment study should move from isolated subset comparisons to a formal
+multi-objective frontier. For each pre-specified candidate sensor configuration,
+quantify:
 
 - discrimination;
 - calibration;
@@ -753,15 +583,21 @@ For each pre-specified candidate sensor configuration, quantify:
 - computational consequences when relevant.
 
 Candidate configurations must be selected before confirmatory scoring. Do not
-mine the final evaluation set for the best subset.
+mine the final evaluation set for the best subset. A frontier depends on the
+model scored, so it follows a confirmed reference formulation.
 
 ## Phase 7 — Reliability and Failure Robustness
 
-The current failure-aware weighting result shows that improving one metric can
-harm others. Future work should therefore treat sensor reliability as a
-statistical modelling problem rather than a heuristic multiplier.
+**Status: not started as statistical modelling.** Related infrastructure exists:
 
-Priorities:
+- online sensor health tempers each sensor's likelihood;
+- the observation-mismatch diagnostics exclude known failures rather than
+  scoring them as novelty;
+- evidence-group disagreement treats unavailable sensors as missing.
+
+The failure-aware weighting result showed that improving one metric can harm
+others, so sensor reliability should be treated as a statistical modelling
+problem rather than a heuristic multiplier. Priorities:
 
 1. estimate failure/missingness processes separately from behavioural state;
 2. distinguish sensor absence, communication failure and genuine zero-event
@@ -772,10 +608,12 @@ Priorities:
 
 ## Phase 8 — Real-Time System Hardening
 
-Only after the inference improvements survive held-out and external evaluation
-should the project expand its production surface.
+**Status: deferred.** Its gate is not met: no inference improvement has
+survived held-out or external evaluation, and the first external evaluation was
+negative.
 
-Potential work includes:
+Only after the inference improvements survive held-out and external evaluation
+should the project expand its production surface. Potential work includes:
 
 - bounded-latency streaming inference;
 - deterministic state/checkpoint recovery;
@@ -821,7 +659,7 @@ unless it blocks reproducibility or supported users.
 
 ## Release Policy
 
-`0.8.0` is the current stable release.
+`0.9.0` is the current stable release.
 
 Future versions are created only when the research programme produces a
 coherent user-facing software increment. Paper milestones do not automatically
@@ -832,20 +670,43 @@ the single source of truth for release notes.
 
 ## Immediate Order of Work
 
-1. **Recoverable-information gap:** freeze matched information sets and quantify
-   how much current performance is information-limited versus model-limited.
-2. **Strong baseline benchmark:** establish pre-specified classical,
-   probabilistic and selected sequence baselines under identical information
-   and household splits.
-3. **Inference redesign:** test hierarchical time structure, explicit recent
-   history and a correlated-silence formulation one mechanism at a time.
-4. **External generalisation:** test the frozen comparison protocol on an
-   independently collected annotated sensing dataset.
-5. **Uncertainty redesign:** evaluate structural/model-mismatch uncertainty and
-   selective-risk curves rather than another scalar threshold swap.
-6. **Sensor-information frontier:** formalise multi-objective deployment
-   trade-offs and confirm selected configurations without post-hoc search.
-7. **Reliability modelling:** separate failure processes from behavioural state
-   and quantify robustness under realistic missingness.
-8. **System hardening:** expand real-time operational capabilities only after
-   the scientific improvements survive held-out and external evaluation.
+Each item is an open question that a measured result left, in the order that
+lets each answer inform the next.
+
+1. **Evaluate the reference formulation with the time prior, then confirm it
+   on held-out homes.**
+   - **The combination.** The time prior (3.1) and the fitted hurdle channels
+     (3.3) are the two Phase 3 successes, and they have never been evaluated
+     together in the recursion. Evaluate the combination on the development
+     panel under a frozen protocol.
+   - **The confirmation.** Freeze the resulting formulation, with the Phase 2
+     baselines under matched information. Score it on CASAS households outside
+     the development panel, under a protocol frozen before scoring.
+
+   Until then, every Phase 3 and 4 conclusion is a development-panel result.
+2. **Explain the external transfer failure (Phase 5).**
+   - **The questions.** The transferred parameters lose 0.19 to 0.32 of
+     balanced accuracy against an in-sample oracle, and adaptation at the
+     declared strength changes no decision. Whether adaptation permitted before
+     scoring can recover part of that loss is open. Phase 3.4 found the
+     declared strength stronger than the data need. Whether the event-rate
+     mismatch is a property of the sensing layout is also open.
+   - **The data.** The Ordóñez homes are now exploratory only. A confirmatory
+     answer needs an independent dataset not yet inspected.
+3. **Within-state temporal dependence (Phase 3.3).**
+   - **The model family.** The predictive checks route to activity sub-states
+     or a Markov-modulated emission. These would produce the long quiet runs
+     that no marginal count distribution can.
+   - **What it must recover.** `home_active` recall, lost to the fitted
+     channels, is the test it must pass.
+4. **An abstention rule (Phase 4).** Select a selective-prediction rule on
+   development data, with a guard covering the activity states and `away`
+   that the first comparison under-retained. Freeze it before any held-out
+   evaluation.
+5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
+   deployment trade-offs for the confirmed formulation, with configurations
+   selected before confirmatory scoring.
+6. **Reliability modelling (Phase 7).** Separate failure processes from
+   behavioural state, and quantify robustness under realistic missingness.
+7. **System hardening (Phase 8).** Only after an improvement survives held-out
+   and external evaluation.
