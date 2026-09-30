@@ -617,6 +617,23 @@ with a materially different sensing layout.
 A modelling improvement is substantially more convincing if its direction and
 practical value survive outside the original CASAS development ecosystem.
 
+### Status
+
+The external-dataset contract is implemented; see
+`docs/EXTERNAL_DATASET_CONTRACT.md`. No model has been scored on any external
+dataset.
+
+- **Adapters.** They expose each household in the dataset's own terms,
+  without CASAS assumptions.
+- **The mapping.** Native labels, sensor types and locations map to the
+  ontology only through declared entries: exact, approximate, unmappable or
+  ambiguous. Anything undeclared is an error, never dropped. The mapping is
+  frozen by its SHA-256.
+- **Validation.** It reports timestamp order, duplicates, impossible intervals,
+  missing timezones, unknown sensors, overlapping labels, multi-resident
+  periods and sensor-semantic mismatches.
+- **Conversion.** It counts everything it cannot carry.
+
 ## Phase 6 — Sensor-Information Frontier
 
 The deployment study should move from isolated subset comparisons to a formal
