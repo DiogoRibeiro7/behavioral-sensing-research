@@ -361,6 +361,25 @@ population fit.
   - A zero-truncated negative binomial alone would address the dispersion but
     not the runs.
 
+The zero-truncated negative binomial for the active count was then evaluated in
+a pre-specified comparison with the hurdle-Poisson and the declared rates; see
+`docs/PHASE3_NEGATIVE_BINOMIAL.md`. Identical inference was used throughout,
+on the development panel.
+
+- **Probabilities improve substantially.** Against the hurdle-Poisson, log
+  loss improves by 0.48 with current windows and 0.78 in the recursion, in
+  all 20 homes. Calibration error improves by 0.05 and 0.10.
+- **Balanced accuracy improves** by 0.044 in both settings.
+- **`home_active` recall is not recovered.** With current windows it falls a
+  further 0.055; in the recursion the change is uncertain.
+- **Decision: not adopted.**
+  - The rule declared in advance adopts it in the recursion.
+  - With current windows it is a trade-off, because `home_active` recall is
+    worse. Adoption needed both settings.
+- **Dispersion estimates are mostly moderate.** The median is 1.23.
+  - Of 9 extreme estimates, only 2 rest on little data. Six are in `sleeping`,
+    where motion counts approach the logarithmic-series limit.
+
 ### 3.4 Household adaptation
 
 Separate population-level parameters from household-specific effects. Evaluate
