@@ -27,6 +27,12 @@ _COLOURS = {
     "predicted": "#D55E00",
 }
 
+_PRIOR_LABELS = {
+    "truth": "scored labels",
+    "development": "development panel",
+    "predicted": "zero-shot predictions",
+}
+
 
 def figure_data(payload: Mapping[str, Any]) -> dict[str, Any]:
     """What each figure plots, copied verbatim from the record."""
@@ -112,7 +118,7 @@ def _priors(plt: Any, data: Mapping[str, Any]) -> Any:
                 [shares.get(s, 0.0) for s in states],
                 width,
                 color=_COLOURS[name],
-                label=name,
+                label=_PRIOR_LABELS[name],
             )
         axis.set_xticks(range(len(states)))
         axis.set_xticklabels(
@@ -127,14 +133,18 @@ def _priors(plt: Any, data: Mapping[str, Any]) -> Any:
 
 def _rates(plt: Any, data: Mapping[str, Any]) -> Any:
     homes = list(data)
+    rows = max(sum(len(states) for states in data[h].values()) for h in homes)
     figure, axes = plt.subplots(
-        1, len(homes), figsize=(4.0 * len(homes), 3.4), squeeze=False
+        1,
+        len(homes),
+        figsize=(4.4 * len(homes), max(3.4, 0.3 * rows + 1.0)),
+        squeeze=False,
     )
     for axis, home in zip(axes[0], homes):
         labels, here, casas = [], [], []
         for channel, states in data[home].items():
             for state, v in states.items():
-                labels.append(f"{channel}\n{state}")
+                labels.append(f"{channel}, {state}")
                 here.append(1.0 - v["silence"])
                 casas.append(1.0 - v["casas_silence"])
         positions = range(len(labels))
@@ -147,7 +157,8 @@ def _rates(plt: Any, data: Mapping[str, Any]) -> Any:
         for y, a, b in zip(positions, here, casas):
             axis.plot([a, b], [y, y], color="#cccccc", zorder=1)
         axis.set_yticks(list(positions))
-        axis.set_yticklabels(labels, fontsize=6)
+        axis.set_yticklabels(labels, fontsize=7)
+        axis.invert_yaxis()
         axis.set_xlim(0.0, 1.0)
         axis.set_xlabel("share of windows with activity")
         axis.set_title(home)

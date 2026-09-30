@@ -36,7 +36,11 @@ from sensor_modeling.datasets.external_figures import (
     draw_figures,
     figure_data,
 )
-from sensor_modeling.datasets.external_protocol import declared_protocol
+from sensor_modeling.datasets.external_protocol import (
+    POPULATION_SHA256,
+    check_frozen_protocol,
+    declared_protocol,
+)
 from sensor_modeling.datasets.external_summary import render_page
 from sensor_modeling.datasets.information_sets import EvidenceResolution
 from sensor_modeling.datasets.recoverable_gap import load_frozen_splits
@@ -57,6 +61,7 @@ from sensor_modeling.states import StateOntology
 ROOT = Path(__file__).resolve().parents[1]
 SPLITS = ROOT / "artifacts" / "phase1" / "household_splits.json"
 SPACE = tuple(StateOntology().states)
+PROTOCOL = ROOT / "artifacts" / "phase5" / "external_protocol.json"
 
 
 # ----------------------------------------------------------------------------
@@ -398,3 +403,71 @@ class TestRun:
                 world["homes"],
                 Protocol(tuple(sorted(world["homes"])), EvidenceResolution(), 12.0),  # type: ignore[arg-type]
             )
+
+
+# ----------------------------------------------------------------------------
+# The published record
+# ----------------------------------------------------------------------------
+PUBLISHED = ROOT / "artifacts" / "phase5" / "phase5-external-ordonez-results.json"
+DOC = ROOT / "docs" / "PHASE5_EXTERNAL_RESULTS.md"
+FIGURE_DIR = ROOT / "docs" / "figures"
+
+
+@pytest.fixture(scope="module")
+def published() -> dict[str, Any]:
+    return load_record(PUBLISHED)
+
+
+class TestPublishedRecord:
+    """The run on the two Ordonez homes, as published."""
+
+    def test_it_ran_the_frozen_protocol_from_a_clean_commit(
+        self, published: dict[str, Any]
+    ) -> None:
+        declared = declared_protocol(load_frozen_splits(SPLITS))
+        assert published["configuration"] == {
+            **declared.to_dict(),
+            "protocol_sha256": declared.sha256(),
+        }
+        assert published["environment"]["git_dirty"] == "false"
+        assert published["environment"]["git_commit"].startswith("2d495e4")
+        digests = {i["name"]: i["sha256"] for i in published["inputs"]}
+        assert digests[PROTOCOL.name] == check_frozen_protocol(declared, PROTOCOL)
+        assert published["results"]["protocol"]["frozen_in"] == "a863bff"
+
+    def test_every_population_reproduced_its_frozen_digest(
+        self, published: dict[str, Any]
+    ) -> None:
+        populations = published["results"]["populations"]
+        assert {k: v["sha256"] for k, v in populations.items()} == dict(
+            POPULATION_SHA256
+        )
+        assert all(v["reproduced"] for v in populations.values())
+
+    def test_every_home_is_reported(self, published: dict[str, Any]) -> None:
+        households = published["results"]["households"]
+        assert sorted(households) == ["OrdonezA", "OrdonezB"]
+        assert published["results"]["conclusions"]["homes"] == sorted(households)
+        page = DOC.read_text(encoding="utf-8")
+        for home in households:
+            assert f"### {home}" in page
+
+    def test_the_conclusions_follow_the_per_home_verdicts(
+        self, published: dict[str, Any]
+    ) -> None:
+        results = published["results"]
+        assert results["conclusions"] == conclusions(results["households"])
+
+    def test_the_page_is_exactly_the_rendering_of_the_record(
+        self, published: dict[str, Any]
+    ) -> None:
+        committed = DOC.read_text(encoding="utf-8").replace("\r\n", "\n")
+        assert committed == render_page(published)
+
+    def test_the_figures_carry_the_record_data(self, published: dict[str, Any]) -> None:
+        data = figure_data(published)
+        for name in FIGURES:
+            svg = (FIGURE_DIR / f"phase5-external-{name}.svg").read_text(
+                encoding="utf-8"
+            )
+            assert f"data sha256 {data_sha256(data[name])}" in svg

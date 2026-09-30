@@ -23,6 +23,8 @@ _ESTIMANDS = {
     "C": "Above chance: zero-shot balanced accuracy against chance",
     "S": "Phase 4 direction: structural disagreement against confidence",
 }
+# The second model each estimand names: the record's "favours the other".
+_OTHER = {"T": "declared", "A": "zero-shot", "C": "chance", "S": "confidence"}
 _METRICS = (
     "balanced_accuracy",
     "log_loss",
@@ -70,6 +72,12 @@ def _table(header: Sequence[str], rows: Sequence[Sequence[Any]]) -> list[str]:
 
 def _pct(value: Any) -> str:
     return "—" if value is None else f"{100 * value:.1f}%"
+
+
+def _verdict(estimand: str, verdict: str) -> str:
+    if verdict == "favours the other":
+        verdict = f"favours {_OTHER[estimand]}"
+    return verdict.replace("zero_shot", "zero-shot")
 
 
 def render_page(payload: Mapping[str, Any]) -> str:
@@ -121,7 +129,9 @@ def render_page(payload: Mapping[str, Any]) -> str:
     for key, title in _ESTIMANDS.items():
         entry = conclusions[key]
         metric = "aurc" if key == "S" else "balanced_accuracy"
-        verdicts = "; ".join(f"{h}: {v}" for h, v in entry[metric].items())
+        verdicts = "; ".join(
+            f"{h}: {_verdict(key, v)}" for h, v in entry[metric].items()
+        )
         rows.append([key, title, verdicts, f"**{entry['conclusion']}**"])
     lines += _table(["", "Estimand", "Verdict per home", "Conclusion"], rows)
     add("")
@@ -163,6 +173,16 @@ def render_page(payload: Mapping[str, Any]) -> str:
             f"{entry['adaptation_end']}. Chance is {_n(entry['chance'])}."
         )
         add("")
+        expected = payload["configuration"]["periods"]["scored_days"].get(home)
+        if expected is not None and expected != len(entry["scored_days"]):
+            add(
+                f"The protocol expected {expected} scored days, from the labelled "
+                "days the dataset's description gives; its definition of the scored "
+                "period, from the end of the adaptation period to the end of the "
+                f"recording, covers {len(entry['scored_days'])} local dates here, "
+                "and the definition is what was run."
+            )
+            add("")
         rows = []
         for metric in _METRICS:
             row = [metric.replace("_", " ")]
@@ -185,7 +205,11 @@ def render_page(payload: Mapping[str, Any]) -> str:
             if v is not None
         ]
         lines += _table(
-            ["State", *[c.replace("_", "-") for c in CONDITIONS]],
+            [
+                "State",
+                *[c.replace("_", "-") for c in CONDITIONS],
+                "oracle (descriptive)",
+            ],
             [
                 [
                     f"`{s}`",
@@ -193,6 +217,7 @@ def render_page(payload: Mapping[str, Any]) -> str:
                         _n(entry["conditions"][c]["per_class_recall"][s])
                         for c in CONDITIONS
                     ],
+                    _n(oracle["per_class_recall"][s]),
                 ]
                 for s in states
             ],
@@ -220,7 +245,7 @@ def render_page(payload: Mapping[str, Any]) -> str:
                         _signed(item["estimate"]),
                         _band(item["interval"], signed=True),
                         _n(item["minimal"], 2),
-                        item["verdict"],
+                        _verdict(key, item["verdict"]),
                     ]
                 )
     lines += _table(
@@ -269,8 +294,8 @@ def render_page(payload: Mapping[str, Any]) -> str:
             f"- **Missing sensor semantics.** {_pct(obs['fraction'])} of the scored "
             f"period's {obs['activations']:,} sensor activations come from sensors "
             "that feed no model channel: "
-            + "; ".join(
-                f"{reason}: {count:,}"
+            + ", ".join(
+                f"{count:,} ({reason})"
                 for reason, count in obs["by_reason"].items()
                 if reason != "routed"
             )
@@ -441,10 +466,8 @@ def render_page(payload: Mapping[str, Any]) -> str:
     add("## What this does not show")
     add("")
     add("- **A population claim.** Two homes are two case studies.")
-    add(
-        "- **The unsupported states.** `home_active`, `kitchen_activity` and "
-        "`bed_awake` cannot be scored: the meal labels are ambiguous."
-    )
+    for state, why in payload["configuration"]["unsupported_states"].items():
+        add(f"- **`{state}` cannot be scored:** {why}.")
     add(
         "- **Causal proof of the failure causes.** The diagnostics describe the "
         "data; they were not part of the declared evaluation."

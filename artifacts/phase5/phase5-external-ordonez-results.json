@@ -1,0 +1,2720 @@
+{
+  "configuration": {
+    "adaptation_rules": {
+      "adapted": "each routed channel's silence probability and active mean, per state, by partial pooling",
+      "forbidden": "any event or label of the scored period, and any setting chosen by looking at external results",
+      "not_adapted": "the transition, the prior, the mapping, the channel set, the dispersion and the ensemble",
+      "permitted": "the adaptation period's events and mapped labels"
+    },
+    "bootstrap": {
+      "confidence": 0.95,
+      "interval": "percentile",
+      "paired": "every model and condition is resampled on the same days",
+      "reason": "two homes support no between-household inference; days keep within-day dependence intact",
+      "resamples": 10000,
+      "seed": 0,
+      "unit": "local calendar days of the scored period, within a home"
+    },
+    "conditions": {
+      "adapted": "each home's channel parameters are pooled toward the population on its adaptation period's labelled windows",
+      "same_windows": "both conditions, and the declared model, are scored on the same scored windows",
+      "zero_shot": "no parameter is fitted on external data; the adaptation period's events only run the recursion"
+    },
+    "criteria": {
+      "A": "helps when balanced accuracy favours adapted in both homes and log loss favours zero-shot in neither; does not help when balanced accuracy is negligible or favours zero-shot in both; inconclusive otherwise",
+      "C": "above chance when the difference favours zero-shot in both homes; not above chance when it is negligible or favours chance in both; inconclusive otherwise",
+      "S": "the direction survives when the AURC favours the structural signal in both homes; reverses when it favours confidence in both; inconclusive otherwise",
+      "T": "transfers when balanced accuracy favours zero-shot in both homes and log loss favours the declared model in neither; does not transfer when balanced accuracy is negligible or favours the declared model in both; inconclusive otherwise",
+      "claims": "two homes: every conclusion is about these two homes, not a population of homes"
+    },
+    "dataset": {
+      "archive": {
+        "sha256": "a03060857f2e9f9de2d0c7489e63bfd89b83c7d092e56e414b31f00c209964f5",
+        "url": "https://archive.ics.uci.edu/static/public/271/activities+of+daily+living+adls+recognition+using+binary+sensors.zip"
+      },
+      "choice": "it is independently collected, single-resident by its documentation, annotated with intervals, and legally and reproducibly obtainable: a stated licence, a DOI and a stable archive; datasets without a stated licence, or with more than one resident per home, were not considered",
+      "provenance": {
+        "citation": "Ordóñez, F.J.; de Toledo, P.; Sanchis, A. Activity Recognition Using Hybrid Generative/Discriminative Models on Home Environments Using Binary Sensors. Sensors 2013, 13, 5460-5477",
+        "files": {
+          "OrdonezA_ADLs.txt": "b018601885e1c62a9769f6b2ac7b47fcd51497d8880e272c1b3ff678eb63e15d",
+          "OrdonezA_Description.txt": "4ce4b8e4dbbaa9208069ac184e5686c2b8fdcf97a446a8357112f3ea2bc7b3dc",
+          "OrdonezA_Sensors.txt": "3ec41f2b1d15c90aec0753d02a21c9e7add0b6f761ef76f3d8d428fb2dd0fa9d",
+          "OrdonezB_ADLs.txt": "d2c59c9ada5da5dbebe26c6f02f02e331fc61a5d4ec425e19ef5a9de98852d58",
+          "OrdonezB_Description.txt": "727f35c52afca460dee311eff8f3897065dfd75bc755b3dbb9de6b616df4d43d",
+          "OrdonezB_Sensors.txt": "b0c77812b48f3b7d81afa446c80faba35b33bd99075350e929fa34a463c49a00",
+          "README.txt": "c80e86f00bbc279d09a7154ae2d0a1f7d3d72a84ec20d4d694ed4641a3341014"
+        },
+        "licence": "CC BY 4.0 (UCI Machine Learning Repository); the README also asks for the citation below and prohibits commercial use",
+        "name": "UCI Activities of Daily Living (ADLs) Recognition Using Binary Sensors",
+        "notes": [
+          "archive sha256 a03060857f2e9f9de2d0c7489e63bfd89b83c7d092e56e414b31f00c209964f5",
+          "two single-resident homes in Spain; no timezone is given, and Europe/Madrid is declared",
+          "OrdonezB_Description.txt lists door PIR sensors in the kitchen, bathroom and bedroom; the recorded sensors place them in the kitchen, living room and bedroom, and the recorded rooms are used"
+        ],
+        "retrieved": "2026-09-30",
+        "source": "https://doi.org/10.24432/C5J02M; archive https://archive.ics.uci.edu/static/public/271/activities+of+daily+living+adls+recognition+using+binary+sensors.zip",
+        "version": "1.0 (README, November 2013); UCI dataset 271, donated 2013-10-27"
+      },
+      "redistribution": "none: the scoring run downloads the archive and verifies every file's digest"
+    },
+    "estimands": {
+      "A": "adaptation: adapted minus zero-shot, per home",
+      "C": "above chance: zero-shot balanced accuracy minus chance, per home",
+      "S": "Phase 4 direction: confidence's error AURC minus the structural signal's, per home, zero-shot",
+      "T": "transfer: zero-shot minus declared, per home"
+    },
+    "households": {
+      "candidates": [
+        "OrdonezA",
+        "OrdonezB"
+      ],
+      "eligibility": "at least 7 labelled days after the adaptation period, a declared timezone, and at least two channels the model can use",
+      "exclusion": "a home whose validation under the frozen mapping has an error other than impossible_interval, undeclared_label, undeclared_sensor, unknown_sensor; tolerated errors leave their items unscored and reported",
+      "inclusion": "every candidate home, single-resident by the dataset's documentation",
+      "labelled_days": {
+        "OrdonezA": 14,
+        "OrdonezB": 21
+      }
+    },
+    "mapping": {
+      "file": "artifacts/phase5/ordonez_mapping.json",
+      "labels": {
+        "Breakfast": {
+          "outcome": "ambiguous",
+          "targets": [
+            "kitchen_activity",
+            "home_active"
+          ]
+        },
+        "Dinner": {
+          "outcome": "ambiguous",
+          "targets": [
+            "kitchen_activity",
+            "home_active"
+          ]
+        },
+        "Grooming": {
+          "outcome": "approximate",
+          "targets": [
+            "bathroom_activity"
+          ]
+        },
+        "Leaving": {
+          "outcome": "approximate",
+          "targets": [
+            "away"
+          ]
+        },
+        "Lunch": {
+          "outcome": "ambiguous",
+          "targets": [
+            "kitchen_activity",
+            "home_active"
+          ]
+        },
+        "Showering": {
+          "outcome": "approximate",
+          "targets": [
+            "bathroom_activity"
+          ]
+        },
+        "Sleeping": {
+          "outcome": "exact",
+          "targets": [
+            "sleeping"
+          ]
+        },
+        "Snack": {
+          "outcome": "ambiguous",
+          "targets": [
+            "kitchen_activity",
+            "home_active",
+            "home_inactive"
+          ]
+        },
+        "Spare_Time/TV": {
+          "outcome": "approximate",
+          "targets": [
+            "home_inactive"
+          ]
+        },
+        "Toileting": {
+          "outcome": "approximate",
+          "targets": [
+            "bathroom_activity"
+          ]
+        }
+      },
+      "new_values": "a label, sensor type or room first seen in the scored period is left unscored and reported; the frozen mapping is never edited",
+      "sha256": "ac82ba9a9d6bf70392b14e67eea8e22ca3dd00081b7b0b372ccbc5dd2728fbb5",
+      "written_from": "Written from the README and the two description files, which list every label and sensor; the rooms and the meaning of Leaving were checked on the first seven days of each home only. Frozen before any scoring."
+    },
+    "metrics": {
+      "chance": "one over the number of scored states present in the home's scored windows",
+      "primary": [
+        "balanced_accuracy",
+        "log_loss",
+        "calibration_error"
+      ],
+      "scoring": "per home, over the scored windows; predictions over every latent state; a prediction of an unsupported state is an error",
+      "secondary": [
+        "brier",
+        "macro_f1",
+        "per_class_recall"
+      ],
+      "selective": "error AURC of confidence and of the structural ensemble's normalised discordance over the default coverage grid, within the home"
+    },
+    "minimal_differences": {
+      "aurc": 0.01,
+      "balanced_accuracy": 0.02,
+      "brier": 0.01,
+      "calibration_error": 0.02,
+      "chance": 0.05,
+      "log_loss": 0.05
+    },
+    "models": {
+      "adapted": {
+        "adaptation": "pool_channels of the home's own statistics toward the population, with household_statistics(until=the end of the adaptation period)",
+        "from": "zero_shot",
+        "pooling": {
+          "strength": 288.0
+        },
+        "strength_source": "the Phase 3.4 declared strength: 288 five-minute windows, 24 labelled hours"
+      },
+      "code": "the scoring run's code must check this frozen file and reproduce every population digest before it scores",
+      "declared": {
+        "configuration": {
+          "attribution": 1.0,
+          "emissions": "default_emissions of the household registry, pooled per channel",
+          "fitted": "nothing: every parameter is the declared default",
+          "model": "restricted generative filter",
+          "prediction": "most probable state of the posterior; no abstention",
+          "prior": "stationary distribution of the default ontology, one step before the first declared window",
+          "reliability": 1.0,
+          "transition": "default StateOntology, time-homogeneous, one step per window",
+          "windows": "the set's current window, plus its lagged windows with recent history"
+        },
+        "description": "the filter's declared Poisson channel rates, from the external registry's default emissions, in the same recursion; nothing fitted",
+        "specification": "declared",
+        "use": "the reference for the transfer estimand"
+      },
+      "structural_ensemble": {
+        "halves": {
+          "half_a": [
+            "hh101",
+            "hh103",
+            "hh106",
+            "hh110",
+            "hh114",
+            "hh119",
+            "hh122",
+            "hh124",
+            "hh126",
+            "hh129"
+          ],
+          "half_b": [
+            "hh102",
+            "hh105",
+            "hh108",
+            "hh111",
+            "hh118",
+            "hh120",
+            "hh123",
+            "hh125",
+            "hh127",
+            "hh130"
+          ]
+        },
+        "population_sha256": {
+          "all": "50e00c3da80c2ae814575b69b0423b75584c0278307cdd54554c8b3ca91da7a4",
+          "half_a": "dd9381bb3388e2b9ee3f2584c59f70d56f1eac12b37cbde2bdfbfba45121b0a6",
+          "half_b": "f6f3b9f1e1271edf6c698e88ef8afb4aca8a542bbd6547746231e7043a6de611"
+        },
+        "source": "the Phase 4 population-only ensemble, fitted on the 20 development homes and their fixed halves",
+        "specifications": [
+          "hurdle/population/all",
+          "hurdle_nb/population/all",
+          "hurdle/population/half_a",
+          "hurdle/population/half_b"
+        ]
+      },
+      "zero_shot": {
+        "development_homes": [
+          "hh101",
+          "hh102",
+          "hh103",
+          "hh105",
+          "hh106",
+          "hh108",
+          "hh110",
+          "hh111",
+          "hh114",
+          "hh118",
+          "hh119",
+          "hh120",
+          "hh122",
+          "hh123",
+          "hh124",
+          "hh125",
+          "hh126",
+          "hh127",
+          "hh129",
+          "hh130"
+        ],
+        "family": "hurdle",
+        "inference": "filter_recursion over every step of the external recording from the stationary distribution, with the ontology's default transition",
+        "population": "fit_samples(...)['all'] of every development home's labelled windows",
+        "population_sha256": "50e00c3da80c2ae814575b69b0423b75584c0278307cdd54554c8b3ca91da7a4",
+        "pseudo_windows": 12.0,
+        "specification": "hurdle/population/all",
+        "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21"
+      }
+    },
+    "name": "phase5-external-ordonez",
+    "periods": {
+      "adaptation": "local midnight of the home's first annotated day, for 7 days",
+      "scored": "from the end of the adaptation period to the end of the recording",
+      "scored_days": {
+        "OrdonezA": 7,
+        "OrdonezB": 14
+      },
+      "timezone": "Europe/Madrid",
+      "use": "the adaptation period may inform the mapping and the adapted condition; the scored period informs nothing"
+    },
+    "preprocessing": {
+      "adapter": "sensor_modeling.external.ordonez.read_household: each activation row an ON event at its start and an OFF event at its end; each annotation row an interval",
+      "channels": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "conversion": "sensor_modeling.external.to_canonical with strict=False: events sorted, exact duplicates kept once, naive times placed in Europe/Madrid, overlapping annotations split, conflicting spans unscored, everything left out counted",
+      "labels": "truth_series of the canonical segments at each step; unlabelled, unmappable, ambiguous and conflicting steps are not scored",
+      "scored_windows": "labelled steps in the scored period whose state is one of the scored states",
+      "windows": "the evidence resolution's 5-minute steps from each recording's first observation to its last"
+    },
+    "protocol_sha256": "620f3fdc55e0fe9da6ebcc0737ccf3c2be584f9573c490ce30388e02a218b334",
+    "question": "do the fitted channel models, and the Phase 4 structural signal, keep their direction and practical value on an independently collected dataset with a different sensing layout",
+    "reporting": "every home's results, every estimand and every negative result; household-level first, pooled only as description; no threshold, no retuning, no added model or metric",
+    "schema": "external-protocol/1",
+    "scored_states": [
+      "away",
+      "home_inactive",
+      "sleeping",
+      "bathroom_activity"
+    ],
+    "sensor_mapping": {
+      "OrdonezA": [
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "bathroom_motion",
+          "native_type": "PIR/Basin",
+          "place": "Bathroom",
+          "room": "bathroom",
+          "room_status": "exact",
+          "sensor": "Basin.PIR.Bathroom",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": "state",
+          "modality": "bed_pressure",
+          "model_channel": null,
+          "native_type": "Pressure/Bed",
+          "place": "Bedroom",
+          "room": "bedroom",
+          "room_status": "exact",
+          "sensor": "Bed.Pressure.Bedroom",
+          "type_status": "exact",
+          "unsupported_because": "a state sensor; the channels count events"
+        },
+        {
+          "kind": "event",
+          "modality": "contact",
+          "model_channel": null,
+          "native_type": "Magnetic/Cabinet",
+          "place": "Bathroom",
+          "room": "bathroom",
+          "room_status": "exact",
+          "sensor": "Cabinet.Magnetic.Bathroom",
+          "type_status": "exact",
+          "unsupported_because": "no bathroom_contact channel in the CASAS-trained model"
+        },
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "kitchen_motion",
+          "native_type": "PIR/Cooktop",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Cooktop.PIR.Kitchen",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": "event",
+          "modality": "contact",
+          "model_channel": null,
+          "native_type": "Magnetic/Cupboard",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Cupboard.Magnetic.Kitchen",
+          "type_status": "exact",
+          "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+        },
+        {
+          "kind": "event",
+          "modality": "contact",
+          "model_channel": null,
+          "native_type": "Magnetic/Fridge",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Fridge.Magnetic.Kitchen",
+          "type_status": "exact",
+          "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+        },
+        {
+          "kind": "event",
+          "modality": "door",
+          "model_channel": "hall_door",
+          "native_type": "Magnetic/Maindoor",
+          "place": "Entrance",
+          "room": "hall",
+          "room_status": "approximate",
+          "sensor": "Maindoor.Magnetic.Entrance",
+          "type_status": "exact",
+          "unsupported_because": null
+        },
+        {
+          "kind": null,
+          "modality": null,
+          "model_channel": null,
+          "native_type": "Electric/Microwave",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Microwave.Electric.Kitchen",
+          "type_status": "unmappable",
+          "unsupported_because": "its type is unmappable: appliance power use has no modality in the observation model"
+        },
+        {
+          "kind": "state",
+          "modality": "bed_pressure",
+          "model_channel": null,
+          "native_type": "Pressure/Seat",
+          "place": "Living",
+          "room": "living",
+          "room_status": "exact",
+          "sensor": "Seat.Pressure.Living",
+          "type_status": "exact",
+          "unsupported_because": "a state sensor; the channels count events"
+        },
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "bathroom_motion",
+          "native_type": "PIR/Shower",
+          "place": "Bathroom",
+          "room": "bathroom",
+          "room_status": "exact",
+          "sensor": "Shower.PIR.Bathroom",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": null,
+          "modality": null,
+          "model_channel": null,
+          "native_type": "Electric/Toaster",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Toaster.Electric.Kitchen",
+          "type_status": "unmappable",
+          "unsupported_because": "its type is unmappable: appliance power use has no modality in the observation model"
+        },
+        {
+          "kind": "event",
+          "modality": "contact",
+          "model_channel": null,
+          "native_type": "Flush/Toilet",
+          "place": "Bathroom",
+          "room": "bathroom",
+          "room_status": "exact",
+          "sensor": "Toilet.Flush.Bathroom",
+          "type_status": "approximate",
+          "unsupported_because": "no bathroom_contact channel in the CASAS-trained model"
+        }
+      ],
+      "OrdonezB": [
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "bathroom_motion",
+          "native_type": "PIR/Basin",
+          "place": "Bathroom",
+          "room": "bathroom",
+          "room_status": "exact",
+          "sensor": "Basin.PIR.Bathroom",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": "state",
+          "modality": "bed_pressure",
+          "model_channel": null,
+          "native_type": "Pressure/Bed",
+          "place": "Bedroom",
+          "room": "bedroom",
+          "room_status": "exact",
+          "sensor": "Bed.Pressure.Bedroom",
+          "type_status": "exact",
+          "unsupported_because": "a state sensor; the channels count events"
+        },
+        {
+          "kind": "event",
+          "modality": "contact",
+          "model_channel": null,
+          "native_type": "Magnetic/Cupboard",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Cupboard.Magnetic.Kitchen",
+          "type_status": "exact",
+          "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+        },
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "bedroom_motion",
+          "native_type": "PIR/Door",
+          "place": "Bedroom",
+          "room": "bedroom",
+          "room_status": "exact",
+          "sensor": "Door.PIR.Bedroom",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "kitchen_motion",
+          "native_type": "PIR/Door",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Door.PIR.Kitchen",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "living_motion",
+          "native_type": "PIR/Door",
+          "place": "Living",
+          "room": "living",
+          "room_status": "exact",
+          "sensor": "Door.PIR.Living",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": "event",
+          "modality": "contact",
+          "model_channel": null,
+          "native_type": "Magnetic/Fridge",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Fridge.Magnetic.Kitchen",
+          "type_status": "exact",
+          "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+        },
+        {
+          "kind": "event",
+          "modality": "door",
+          "model_channel": "hall_door",
+          "native_type": "Magnetic/Maindoor",
+          "place": "Entrance",
+          "room": "hall",
+          "room_status": "approximate",
+          "sensor": "Maindoor.Magnetic.Entrance",
+          "type_status": "exact",
+          "unsupported_because": null
+        },
+        {
+          "kind": null,
+          "modality": null,
+          "model_channel": null,
+          "native_type": "Electric/Microwave",
+          "place": "Kitchen",
+          "room": "kitchen",
+          "room_status": "exact",
+          "sensor": "Microwave.Electric.Kitchen",
+          "type_status": "unmappable",
+          "unsupported_because": "its type is unmappable: appliance power use has no modality in the observation model"
+        },
+        {
+          "kind": "state",
+          "modality": "bed_pressure",
+          "model_channel": null,
+          "native_type": "Pressure/Seat",
+          "place": "Living",
+          "room": "living",
+          "room_status": "exact",
+          "sensor": "Seat.Pressure.Living",
+          "type_status": "exact",
+          "unsupported_because": "a state sensor; the channels count events"
+        },
+        {
+          "kind": "event",
+          "modality": "motion",
+          "model_channel": "bathroom_motion",
+          "native_type": "PIR/Shower",
+          "place": "Bathroom",
+          "room": "bathroom",
+          "room_status": "exact",
+          "sensor": "Shower.PIR.Bathroom",
+          "type_status": "approximate",
+          "unsupported_because": null
+        },
+        {
+          "kind": "event",
+          "modality": "contact",
+          "model_channel": null,
+          "native_type": "Flush/Toilet",
+          "place": "Bathroom",
+          "room": "bathroom",
+          "room_status": "exact",
+          "sensor": "Toilet.Flush.Bathroom",
+          "type_status": "approximate",
+          "unsupported_because": "no bathroom_contact channel in the CASAS-trained model"
+        }
+      ]
+    },
+    "status": "frozen before any external scoring; no model performance on the external dataset was computed or viewed",
+    "uninstrumented_channels": {
+      "OrdonezA": [
+        "bedroom_motion",
+        "hall_motion",
+        "living_motion"
+      ],
+      "OrdonezB": [
+        "hall_motion"
+      ]
+    },
+    "unsupported_sensors": {
+      "OrdonezA": {
+        "Bed.Pressure.Bedroom": "a state sensor; the channels count events",
+        "Cabinet.Magnetic.Bathroom": "no bathroom_contact channel in the CASAS-trained model",
+        "Cupboard.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+        "Fridge.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+        "Microwave.Electric.Kitchen": "its type is unmappable: appliance power use has no modality in the observation model",
+        "Seat.Pressure.Living": "a state sensor; the channels count events",
+        "Toaster.Electric.Kitchen": "its type is unmappable: appliance power use has no modality in the observation model",
+        "Toilet.Flush.Bathroom": "no bathroom_contact channel in the CASAS-trained model"
+      },
+      "OrdonezB": {
+        "Bed.Pressure.Bedroom": "a state sensor; the channels count events",
+        "Cupboard.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+        "Fridge.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+        "Microwave.Electric.Kitchen": "its type is unmappable: appliance power use has no modality in the observation model",
+        "Seat.Pressure.Living": "a state sensor; the channels count events",
+        "Toilet.Flush.Bathroom": "no bathroom_contact channel in the CASAS-trained model"
+      }
+    },
+    "unsupported_states": {
+      "bed_awake": "no label names it",
+      "home_active": "a candidate of the ambiguous labels Breakfast, Dinner, Lunch, Snack, which are not scored",
+      "kitchen_activity": "a candidate of the ambiguous labels Breakfast, Dinner, Lunch, Snack, which are not scored"
+    },
+    "verdicts": "per home and metric, oriented so that positive favours the first model: favours it when the mean is at least the minimal difference and the day-bootstrap interval lies above 0; favours the second when at most minus it with the interval below 0; negligible when the interval lies within plus or minus it; uncertain otherwise"
+  },
+  "data_source": "uci-adl-binary-ordonez",
+  "environment": {
+    "git_commit": "2d495e49dfdcf29828a73cfbb0c9eaf0b54fd37d",
+    "git_dirty": "false",
+    "numpy": "2.3.5",
+    "pandas": "2.3.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.5",
+    "scipy": "1.15.3",
+    "sensor_modeling": "0.8.0",
+    "sklearn": "1.6.1"
+  },
+  "experiment": "phase5-external-ordonez-results",
+  "household_metrics": {
+    "adapted": {
+      "OrdonezA": {
+        "accuracy": 0.42880613362541076,
+        "balanced_accuracy": 0.24499374217772216,
+        "brier": 0.8860458517093961,
+        "calibration_error": 0.3919024123142119,
+        "log_loss": 1.911103224147436,
+        "macro_f1": 0.15934065934065933,
+        "mean_confidence": 0.8207085459396227,
+        "n": 1826,
+        "per_class_recall": {
+          "away": 0.0,
+          "bathroom_activity": 0.0,
+          "bed_awake": null,
+          "home_active": null,
+          "home_inactive": 0.0,
+          "kitchen_activity": null,
+          "sleeping": 0.9799749687108886
+        }
+      },
+      "OrdonezB": {
+        "accuracy": 0.41816693944353517,
+        "balanced_accuracy": 0.24438472755258067,
+        "brier": 1.0236908664174167,
+        "calibration_error": 0.4893554176474927,
+        "log_loss": 2.8402228695680853,
+        "macro_f1": 0.1607007459878707,
+        "mean_confidence": 0.9075223570910279,
+        "n": 3666,
+        "per_class_recall": {
+          "away": 0.0,
+          "bathroom_activity": 0.0,
+          "bed_awake": null,
+          "home_active": null,
+          "home_inactive": 0.005564387917329093,
+          "kitchen_activity": null,
+          "sleeping": 0.9719745222929936
+        }
+      }
+    },
+    "declared": {
+      "OrdonezA": {
+        "accuracy": 0.4403066812705367,
+        "balanced_accuracy": 0.25162337662337664,
+        "brier": 0.9963128812112936,
+        "calibration_error": 0.4342149035977543,
+        "log_loss": 3.5365904332618676,
+        "macro_f1": 0.15623231736697102,
+        "mean_confidence": 0.874521584868291,
+        "n": 1826,
+        "per_class_recall": {
+          "away": 0.0,
+          "bathroom_activity": 0.0,
+          "bed_awake": null,
+          "home_active": null,
+          "home_inactive": 0.006493506493506494,
+          "kitchen_activity": null,
+          "sleeping": 1.0
+        }
+      },
+      "OrdonezB": {
+        "accuracy": 0.5283687943262412,
+        "balanced_accuracy": 0.3426121248659705,
+        "brier": 0.794664380956836,
+        "calibration_error": 0.35071278191014255,
+        "log_loss": 2.691914327360612,
+        "macro_f1": 0.3207160461937204,
+        "mean_confidence": 0.8786930228323387,
+        "n": 3666,
+        "per_class_recall": {
+          "away": 0.16955941255006676,
+          "bathroom_activity": 0.0,
+          "bed_awake": null,
+          "home_active": null,
+          "home_inactive": 0.24165341812400637,
+          "kitchen_activity": null,
+          "sleeping": 0.9592356687898089
+        }
+      }
+    },
+    "zero_shot": {
+      "OrdonezA": {
+        "accuracy": 0.43099671412924423,
+        "balanced_accuracy": 0.2462453066332916,
+        "brier": 0.9359572032354901,
+        "calibration_error": 0.40975552371517937,
+        "log_loss": 2.3070308036135803,
+        "macro_f1": 0.15841384863123995,
+        "mean_confidence": 0.8407522378444237,
+        "n": 1826,
+        "per_class_recall": {
+          "away": 0.0,
+          "bathroom_activity": 0.0,
+          "bed_awake": null,
+          "home_active": null,
+          "home_inactive": 0.0,
+          "kitchen_activity": null,
+          "sleeping": 0.9849812265331664
+        }
+      },
+      "OrdonezB": {
+        "accuracy": 0.41843971631205673,
+        "balanced_accuracy": 0.24430700839468167,
+        "brier": 1.0364628778129747,
+        "calibration_error": 0.4529669390028104,
+        "log_loss": 3.2619579379204957,
+        "macro_f1": 0.15892868143575153,
+        "mean_confidence": 0.871406655314867,
+        "n": 3666,
+        "per_class_recall": {
+          "away": 0.0,
+          "bathroom_activity": 0.0,
+          "bed_awake": null,
+          "home_active": null,
+          "home_inactive": 0.000794912559618442,
+          "kitchen_activity": null,
+          "sleeping": 0.9764331210191083
+        }
+      }
+    }
+  },
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": false,
+      "reason": "per-home 5-minute online windows of the external recordings; the recursion reads no window after the scored one"
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [
+    {
+      "name": "external_protocol.json",
+      "role": "frozen protocol",
+      "sha256": "4488e326a4e9a6ac84e74d5424b0040f8aeacc55350d6b829b0f5a38768ec57c",
+      "source": "artifacts\\phase5\\external_protocol.json"
+    },
+    {
+      "name": "ordonez_mapping.json",
+      "role": "frozen mapping",
+      "sha256": "ff7acb724961425ca4d24b50edd355b917af2acb410d7e1532a51ab4bf9f5d3c",
+      "source": "artifacts\\phase5\\ordonez_mapping.json"
+    },
+    {
+      "name": "household_splits.json",
+      "role": "frozen development splits",
+      "sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+      "source": "artifacts\\phase1\\household_splits.json"
+    },
+    {
+      "name": "phase4-uncertainty-diagnostics.json",
+      "role": "the same model on the development panel, for descriptive shifts",
+      "sha256": "faeb9d679ee251b493586292b9d2dd55913cab6cb986f9ad14cc4e8f3bc5c2cb",
+      "source": "artifacts\\phase4\\phase4-uncertainty-diagnostics.json"
+    },
+    {
+      "name": "OrdonezA_ADLs.txt",
+      "role": "external recording",
+      "sha256": "b018601885e1c62a9769f6b2ac7b47fcd51497d8880e272c1b3ff678eb63e15d",
+      "source": "https://doi.org/10.24432/C5J02M"
+    },
+    {
+      "name": "OrdonezA_Description.txt",
+      "role": "external recording",
+      "sha256": "4ce4b8e4dbbaa9208069ac184e5686c2b8fdcf97a446a8357112f3ea2bc7b3dc",
+      "source": "https://doi.org/10.24432/C5J02M"
+    },
+    {
+      "name": "OrdonezA_Sensors.txt",
+      "role": "external recording",
+      "sha256": "3ec41f2b1d15c90aec0753d02a21c9e7add0b6f761ef76f3d8d428fb2dd0fa9d",
+      "source": "https://doi.org/10.24432/C5J02M"
+    },
+    {
+      "name": "OrdonezB_ADLs.txt",
+      "role": "external recording",
+      "sha256": "d2c59c9ada5da5dbebe26c6f02f02e331fc61a5d4ec425e19ef5a9de98852d58",
+      "source": "https://doi.org/10.24432/C5J02M"
+    },
+    {
+      "name": "OrdonezB_Description.txt",
+      "role": "external recording",
+      "sha256": "727f35c52afca460dee311eff8f3897065dfd75bc755b3dbb9de6b616df4d43d",
+      "source": "https://doi.org/10.24432/C5J02M"
+    },
+    {
+      "name": "OrdonezB_Sensors.txt",
+      "role": "external recording",
+      "sha256": "b0c77812b48f3b7d81afa446c80faba35b33bd99075350e929fa34a463c49a00",
+      "source": "https://doi.org/10.24432/C5J02M"
+    },
+    {
+      "name": "README.txt",
+      "role": "external recording",
+      "sha256": "c80e86f00bbc279d09a7154ae2d0a1f7d3d72a84ec20d4d694ed4641a3341014",
+      "source": "https://doi.org/10.24432/C5J02M"
+    },
+    {
+      "name": "hh101.csv",
+      "role": "development recording",
+      "sha256": "3f4d4a53ef4940670ef855c66cd9dee0a458700656afb112f2c80b703b65666d",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh102.csv",
+      "role": "development recording",
+      "sha256": "3720812ee71d89f230149cc0b6562f308eb8658e9198ff69d27be9a1d77b29d2",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh103.csv",
+      "role": "development recording",
+      "sha256": "bb589e6e350d971533a1e75eff4a960a590eb034d54b5e76855ee55e04d0e18b",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh105.csv",
+      "role": "development recording",
+      "sha256": "e50b80bab18551ae365c259b5b19210833cdbfecdf85fa6a2e760018e12e5f85",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh106.csv",
+      "role": "development recording",
+      "sha256": "d7bc4b7d43e24dc7d826c06c618a2206a2290302da6998dba9a5e7d23b5186a4",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh108.csv",
+      "role": "development recording",
+      "sha256": "02dc7a30cf16fd82605084bae34e8b1c2929fe306afef6dd75fc13c316151c6b",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh110.csv",
+      "role": "development recording",
+      "sha256": "c89fbf594549cd749d83e1b57c3d4b424d519211456c45d74c691e3bfe476c33",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh111.csv",
+      "role": "development recording",
+      "sha256": "10cdf20436acf834fea9d4b3bd40e6bd634050da7e1cff89ee4d79f817532b38",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh114.csv",
+      "role": "development recording",
+      "sha256": "51dace896e9e8ebb0dd62fafcadc7319c0b54ef60aacf8d62630fd45401d85d1",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh118.csv",
+      "role": "development recording",
+      "sha256": "5fa3f1e2b3c4dde5ce251f635abea710aadc382c6c554595eec8f2e80011ee36",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh119.csv",
+      "role": "development recording",
+      "sha256": "8bf08d3568c4eec3d236bd62ef5c0e9ad38ea03a2ddd79e32db7324db11f10f6",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh120.csv",
+      "role": "development recording",
+      "sha256": "3d2b52061cd1f6660fe1f2bb1ac84f7784756a756ee8d6b6fcb7c9bfbaad6b1a",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh122.csv",
+      "role": "development recording",
+      "sha256": "d4143027bc742e0c7dbdeb16d7095fafa5c69b8f5026aceb22954b8b50d17ac9",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh123.csv",
+      "role": "development recording",
+      "sha256": "05f149f788bd4d42fc4314a955f1dd6e55742aa366e3f2fa5fdf334ba2a4a5fb",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh124.csv",
+      "role": "development recording",
+      "sha256": "9c944a1460d194bde94a617ba8d4818ffa80cfb3adf67fb70fb2960fb1b6a5ce",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh125.csv",
+      "role": "development recording",
+      "sha256": "6723cce771fd0f41e088f23bc59f02a45b275303bcf1bbf5ceff569e4822d4b4",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh126.csv",
+      "role": "development recording",
+      "sha256": "c315fb1549522a6dfcd7d4b90540c8c780e27bf3dca0ea3b039825995e0e66d1",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh127.csv",
+      "role": "development recording",
+      "sha256": "d3d91e4d08600deabff70ae2fbb63e4aff763ff9c194d643a081920f7d36fe84",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh129.csv",
+      "role": "development recording",
+      "sha256": "a6065cbec7a1f9e2bc14cb9a63a2697f3010b9427cebc5338ad90d4925e5d37f",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh130.csv",
+      "role": "development recording",
+      "sha256": "34f48db608acea7a325721a4f81a71fc8fda3c6069f32ed4964a0c7023824103",
+      "source": "zenodo:15708568 labeled_data.zip"
+    }
+  ],
+  "intervals": [],
+  "mcse": {},
+  "metric_definitions": {
+    "aurc": "Error averaged over the default coverage grid when rejecting by the signal, within the home.",
+    "balanced_accuracy": "Mean recall over the scored states present in the home's scored windows.",
+    "brier": "Mean squared error of the posterior against the one-hot truth, summed over the states.",
+    "calibration_error": "Expected calibration error over 10 confidence bins.",
+    "chance": "One over the number of scored states present.",
+    "log_loss": "Mean negative log posterior of the true state, floored at 1e-12."
+  },
+  "models": [
+    {
+      "build": "filter_recursion",
+      "configuration": {
+        "specification": "declared"
+      },
+      "name": "declared"
+    },
+    {
+      "build": "filter_recursion",
+      "configuration": {
+        "specification": "hurdle/population/all"
+      },
+      "name": "zero_shot"
+    },
+    {
+      "build": "pool_channels and filter_recursion",
+      "configuration": {
+        "pooling": {
+          "strength": 288.0
+        },
+        "until": "adaptation end"
+      },
+      "name": "adapted"
+    },
+    {
+      "build": "descriptive in-sample ceiling",
+      "configuration": {
+        "pooling": {
+          "strength": 0.5
+        },
+        "until": "last window"
+      },
+      "name": "oracle"
+    }
+  ],
+  "notes": [
+    "The protocol was frozen in a863bff before any external scoring; this run checks the frozen file and reproduces every population digest before it scores.",
+    "Intervals resample the scored period's local days within each home; two homes support no between-household inference.",
+    "Diagnostics, the oracle and the attribution are descriptive and enter no conclusion."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {},
+  "recorded_at": "2026-09-30T17:45:37.431944+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "conclusions": {
+      "A": {
+        "balanced_accuracy": {
+          "OrdonezA": "negligible",
+          "OrdonezB": "negligible"
+        },
+        "conclusion": "does not help",
+        "log_loss": {
+          "OrdonezA": "favours adapted",
+          "OrdonezB": "favours adapted"
+        }
+      },
+      "C": {
+        "balanced_accuracy": {
+          "OrdonezA": "negligible",
+          "OrdonezB": "negligible"
+        },
+        "conclusion": "not above chance"
+      },
+      "S": {
+        "aurc": {
+          "OrdonezA": "uncertain",
+          "OrdonezB": "favours structural"
+        },
+        "conclusion": "inconclusive"
+      },
+      "T": {
+        "balanced_accuracy": {
+          "OrdonezA": "negligible",
+          "OrdonezB": "favours the other"
+        },
+        "conclusion": "does not transfer",
+        "log_loss": {
+          "OrdonezA": "favours zero_shot",
+          "OrdonezB": "favours the other"
+        }
+      },
+      "homes": [
+        "OrdonezA",
+        "OrdonezB"
+      ],
+      "improved": {
+        "A": {
+          "balanced_accuracy": {
+            "improved": 1,
+            "worsened": 1
+          },
+          "brier": {
+            "improved": 2,
+            "worsened": 0
+          },
+          "calibration_error": {
+            "improved": 1,
+            "worsened": 1
+          },
+          "log_loss": {
+            "improved": 2,
+            "worsened": 0
+          }
+        },
+        "T": {
+          "balanced_accuracy": {
+            "improved": 0,
+            "worsened": 2
+          },
+          "brier": {
+            "improved": 1,
+            "worsened": 1
+          },
+          "calibration_error": {
+            "improved": 1,
+            "worsened": 1
+          },
+          "log_loss": {
+            "improved": 1,
+            "worsened": 1
+          }
+        }
+      }
+    },
+    "descriptive_note": "diagnostics and attribution are descriptive, declared in the scoring code before the run, and enter no estimand or conclusion",
+    "development": {
+      "calibration": {
+        "accuracy": 0.5129391565618628,
+        "balanced_accuracy": 0.42135460444874767,
+        "calibration_error": 0.299364542198465,
+        "mean_confidence": 0.8123036987603278
+      },
+      "record": "phase4-uncertainty-diagnostics",
+      "states": {
+        "away": {
+          "share": 0.32478592123618416
+        },
+        "bathroom_activity": {
+          "share": 0.034149586865543514
+        },
+        "bed_awake": {
+          "share": 0.0002918768108166112
+        },
+        "home_active": {
+          "share": 0.10660800515076725
+        },
+        "home_inactive": {
+          "share": 0.17484708659727438
+        },
+        "kitchen_activity": {
+          "share": 0.025577851700826267
+        },
+        "sleeping": {
+          "share": 0.3337396716385878
+        }
+      }
+    },
+    "households": {
+      "OrdonezA": {
+        "adaptation_end": "2011-12-05T00:00:00+01:00",
+        "attribution": {
+          "dataset_incompatibility": {
+            "unscorable_labelled_fraction": 0.024189526184538623,
+            "unsupported_observation_fraction": 0.6568627450980392
+          },
+          "model_failure": {
+            "calibration_gap": 0.4097555237151794,
+            "zero_shot_below_oracle": 0.19112672357353214
+          },
+          "sensing_limitation": {
+            "oracle_above_chance": 0.18737203020682375,
+            "oracle_balanced_accuracy": 0.43737203020682375,
+            "oracle_shortfall": 0.5626279697931762
+          }
+        },
+        "chance": 0.25,
+        "conditions": {
+          "adapted": {
+            "accuracy": {
+              "estimate": 0.42880613362541076,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.45199393570743934,
+                "low": 0.4047287899860918
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.24499374217772216,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.2484709480122324,
+                "low": 0.24179829890643986
+              }
+            },
+            "brier": {
+              "estimate": 0.8860458517093961,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.9417578045982189,
+                "low": 0.8317823571294323
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.3919024123142119,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.42185792188037446,
+                "low": 0.36316368041488073
+              }
+            },
+            "log_loss": {
+              "estimate": 1.911103224147436,
+              "interval": {
+                "confidence": 0.95,
+                "high": 2.0727715338635253,
+                "low": 1.77352629869154
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.15934065934065933,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.1658357780218733,
+                "low": 0.1530274361400189
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.8207085459396227,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.8323921978059132,
+                "low": 0.8091682367516221
+              }
+            },
+            "n": 1826,
+            "per_class_recall": {
+              "away": 0.0,
+              "bathroom_activity": 0.0,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.0,
+              "kitchen_activity": null,
+              "sleeping": 0.9799749687108886
+            }
+          },
+          "declared": {
+            "accuracy": {
+              "estimate": 0.4403066812705367,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.46426899817843464,
+                "low": 0.4152947424322889
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.25162337662337664,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.25387605252606255,
+                "low": 0.25
+              }
+            },
+            "brier": {
+              "estimate": 0.9963128812112936,
+              "interval": {
+                "confidence": 0.95,
+                "high": 1.0390722840243218,
+                "low": 0.9554541072104356
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.4342149035977543,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.45851698765881793,
+                "low": 0.41131216825694294
+              }
+            },
+            "log_loss": {
+              "estimate": 3.5365904332618676,
+              "interval": {
+                "confidence": 0.95,
+                "high": 3.703603138993018,
+                "low": 3.400279060111353
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.15623231736697102,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.1607413120882774,
+                "low": 0.15167353686462043
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.874521584868291,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.877933610667007,
+                "low": 0.8712445590526205
+              }
+            },
+            "n": 1826,
+            "per_class_recall": {
+              "away": 0.0,
+              "bathroom_activity": 0.0,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.006493506493506494,
+              "kitchen_activity": null,
+              "sleeping": 1.0
+            }
+          },
+          "zero_shot": {
+            "accuracy": {
+              "estimate": 0.43099671412924423,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.4549019607843137,
+                "low": 0.40617545165873414
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.2462453066332916,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.24887048192771086,
+                "low": 0.2437314361932468
+              }
+            },
+            "brier": {
+              "estimate": 0.9359572032354901,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.9822224637648272,
+                "low": 0.8907459706789792
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.40975552371517937,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.43751616686087175,
+                "low": 0.3839997914033806
+              }
+            },
+            "log_loss": {
+              "estimate": 2.3070308036135803,
+              "interval": {
+                "confidence": 0.95,
+                "high": 2.41406665561713,
+                "low": 2.1991439876263654
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.15841384863123995,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.16455473424850406,
+                "low": 0.1521997621878716
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.8407522378444237,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.8500551698546366,
+                "low": 0.8317937524525143
+              }
+            },
+            "n": 1826,
+            "per_class_recall": {
+              "away": 0.0,
+              "bathroom_activity": 0.0,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.0,
+              "kitchen_activity": null,
+              "sleeping": 0.9849812265331664
+            }
+          }
+        },
+        "diagnostics": {
+          "calibration_shift": {
+            "accuracy": 0.43099671412924423,
+            "development": {
+              "accuracy": 0.5129391565618628,
+              "balanced_accuracy": 0.42135460444874767,
+              "calibration_error": 0.299364542198465,
+              "gap": 0.299364542198465,
+              "mean_confidence": 0.8123036987603278
+            },
+            "gap": 0.4097555237151794,
+            "mean_confidence": 0.8407522378444237
+          },
+          "event_rates": {
+            "bathroom_motion": {
+              "away": {
+                "active_mean": null,
+                "casas_active_mean": 7.553395963541328,
+                "casas_silence": 0.9842481132403442,
+                "silence": 1.0,
+                "windows": 222
+              },
+              "bathroom_activity": {
+                "active_mean": 1.3125,
+                "casas_active_mean": 13.998190453571846,
+                "casas_silence": 0.10601215763279068,
+                "silence": 0.5428571428571428,
+                "windows": 35
+              },
+              "home_inactive": {
+                "active_mean": 1.0833333333333333,
+                "casas_active_mean": 7.652944580128233,
+                "casas_silence": 0.9620863654702055,
+                "silence": 0.9844155844155844,
+                "windows": 770
+              },
+              "sleeping": {
+                "active_mean": 1.0,
+                "casas_active_mean": 8.873643386002378,
+                "casas_silence": 0.9801202866107852,
+                "silence": 0.9987484355444305,
+                "windows": 799
+              }
+            },
+            "hall_door": {
+              "away": {
+                "active_mean": 1.0,
+                "casas_active_mean": 4.7124520365147,
+                "casas_silence": 0.9617938711627649,
+                "silence": 0.963963963963964,
+                "windows": 222
+              },
+              "bathroom_activity": {
+                "active_mean": null,
+                "casas_active_mean": 2.8616096480172,
+                "casas_silence": 0.8147403280127921,
+                "silence": 1.0,
+                "windows": 35
+              },
+              "home_inactive": {
+                "active_mean": null,
+                "casas_active_mean": 3.323673240290999,
+                "casas_silence": 0.962373940010453,
+                "silence": 1.0,
+                "windows": 770
+              },
+              "sleeping": {
+                "active_mean": null,
+                "casas_active_mean": 2.1339670402723194,
+                "casas_silence": 0.995921699139792,
+                "silence": 1.0,
+                "windows": 799
+              }
+            },
+            "kitchen_motion": {
+              "away": {
+                "active_mean": null,
+                "casas_active_mean": 8.073231953413034,
+                "casas_silence": 0.9786711099988891,
+                "silence": 1.0,
+                "windows": 222
+              },
+              "bathroom_activity": {
+                "active_mean": null,
+                "casas_active_mean": 9.968863467261674,
+                "casas_silence": 0.7801017737959246,
+                "silence": 1.0,
+                "windows": 35
+              },
+              "home_inactive": {
+                "active_mean": null,
+                "casas_active_mean": 11.33113137856854,
+                "casas_silence": 0.9329212760731787,
+                "silence": 1.0,
+                "windows": 770
+              },
+              "sleeping": {
+                "active_mean": null,
+                "casas_active_mean": 4.066553039549986,
+                "casas_silence": 0.993568455392605,
+                "silence": 1.0,
+                "windows": 799
+              }
+            }
+          },
+          "mapping_coverage": {
+            "dispositions": {
+              "events": {
+                "deactivation": 279,
+                "emitted": 471,
+                "sensor_unmappable": 68
+              },
+              "impossible_intervals": 3,
+              "point_annotations": 0
+            },
+            "scorable_fraction": 0.9758104738154614,
+            "seconds": {
+              "ambiguous": 13580.0,
+              "approximate": 308226.0,
+              "exact": 239594.0
+            }
+          },
+          "oracle": {
+            "accuracy": {
+              "estimate": 0.5399780941949617,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.6196779517117971,
+                "low": 0.4523352527191299
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.43737203020682375,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.5034609665813784,
+                "low": 0.3927882206295128
+              }
+            },
+            "brier": {
+              "estimate": 0.6261425968422011,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.7214576977190925,
+                "low": 0.5381889715342508
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.1488575737098645,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.23483526492539086,
+                "low": 0.08463765947138269
+              }
+            },
+            "log_loss": {
+              "estimate": 1.194014896511397,
+              "interval": {
+                "confidence": 0.95,
+                "high": 1.3552662783894915,
+                "low": 1.0441057304830061
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.4547726893029651,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.5177520061540498,
+                "low": 0.4087670550415362
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.6882039817775161,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.6975383118707404,
+                "low": 0.6785215960355571
+              }
+            },
+            "n": 1826,
+            "per_class_recall": {
+              "away": 0.12612612612612611,
+              "bathroom_activity": 0.42857142857142855,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.4012987012987013,
+              "kitchen_activity": null,
+              "sleeping": 0.7934918648310388
+            }
+          },
+          "room_structure": {
+            "approximate_sensor_types": [
+              "Flush/Toilet",
+              "PIR/Basin",
+              "PIR/Cooktop",
+              "PIR/Shower"
+            ],
+            "routed_channels": [
+              "bathroom_motion",
+              "hall_door",
+              "kitchen_motion"
+            ],
+            "scored_state_rooms": {
+              "away": {
+                "channel": null,
+                "room": null
+              },
+              "bathroom_activity": {
+                "channel": "bathroom_motion",
+                "room": "bathroom"
+              },
+              "home_inactive": {
+                "channel": null,
+                "room": null
+              },
+              "sleeping": {
+                "channel": null,
+                "room": "bedroom"
+              }
+            },
+            "uninstrumented_channels": [
+              "bedroom_motion",
+              "hall_motion",
+              "living_motion"
+            ]
+          },
+          "state_prior_shift": {
+            "development": {
+              "away": 0.37438338338833616,
+              "bathroom_activity": 0.03936450762204927,
+              "home_inactive": 0.2015476644022344,
+              "sleeping": 0.3847044445873802
+            },
+            "divergence_truth_development": 0.08118634057599428,
+            "divergence_truth_stationary": 0.03746877238786972,
+            "predicted": {
+              "away": 0.0,
+              "bathroom_activity": 0.0,
+              "bed_awake": 0.07721796276013143,
+              "home_active": 0.0,
+              "home_inactive": 0.0,
+              "kitchen_activity": 0.0,
+              "sleeping": 0.9227820372398685
+            },
+            "predicted_unsupported": 0.07721796276013143,
+            "stationary": {
+              "away": 0.2899999999989317,
+              "bathroom_activity": 0.03000000000003549,
+              "home_inactive": 0.28000000000030295,
+              "sleeping": 0.40000000000072994
+            },
+            "truth": {
+              "away": 0.12157721796276014,
+              "bathroom_activity": 0.019167579408543262,
+              "home_inactive": 0.42168674698795183,
+              "sleeping": 0.4375684556407448
+            }
+          },
+          "unsupported_observations": {
+            "activations": 204,
+            "by_reason": {
+              "a state sensor; the channels count events": 46,
+              "its type is unmappable: appliance power use has no modality in the observation model": 17,
+              "no bathroom_contact channel in the CASAS-trained model": 26,
+              "no kitchen_contact channel in the CASAS-trained model": 45,
+              "routed": 70
+            },
+            "fraction": 0.6568627450980392,
+            "unsupported": 134
+          }
+        },
+        "eligibility": {
+          "routed_channels": [
+            "bathroom_motion",
+            "hall_door",
+            "kitchen_motion"
+          ],
+          "scored_days": 8,
+          "timezone": "Europe/Madrid"
+        },
+        "eligible": true,
+        "estimands": {
+          "A": {
+            "balanced_accuracy": {
+              "estimate": -0.0012515644555694538,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.0003742514970060118,
+                "low": -0.0019231828193832523
+              },
+              "minimal": 0.02,
+              "verdict": "negligible"
+            },
+            "brier": {
+              "estimate": 0.04991135152609405,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.060124505729145405,
+                "low": 0.03987157834316368
+              },
+              "minimal": 0.01,
+              "verdict": "favours adapted"
+            },
+            "calibration_error": {
+              "estimate": 0.01785311140096746,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.021910579756149153,
+                "low": 0.014029676557807125
+              },
+              "minimal": 0.02,
+              "verdict": "uncertain"
+            },
+            "log_loss": {
+              "estimate": 0.3959275794661443,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.46536580863462557,
+                "low": 0.31564612119666513
+              },
+              "minimal": 0.05,
+              "verdict": "favours adapted"
+            }
+          },
+          "C": {
+            "balanced_accuracy": {
+              "estimate": -0.0037546933667083893,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.001129518072289143,
+                "low": -0.006268563806753191
+              },
+              "minimal": 0.05,
+              "verdict": "negligible"
+            }
+          },
+          "S": {
+            "aurc": {
+              "estimate": -0.025346399488077154,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.00212526529820406,
+                "low": -0.053805360530920554
+              },
+              "minimal": 0.01,
+              "verdict": "uncertain"
+            }
+          },
+          "T": {
+            "balanced_accuracy": {
+              "estimate": -0.005378069990085027,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.0033104771008738154,
+                "low": -0.006936284110197172
+              },
+              "minimal": 0.02,
+              "verdict": "negligible"
+            },
+            "brier": {
+              "estimate": 0.060355677975803435,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.08278313276925788,
+                "low": 0.041186588690576405
+              },
+              "minimal": 0.01,
+              "verdict": "favours zero_shot"
+            },
+            "calibration_error": {
+              "estimate": 0.024459379882574905,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.03777495352887389,
+                "low": 0.011498265758905963
+              },
+              "minimal": 0.02,
+              "verdict": "favours zero_shot"
+            },
+            "log_loss": {
+              "estimate": 1.2295596296482874,
+              "interval": {
+                "confidence": 0.95,
+                "high": 1.3380029813135628,
+                "low": 1.128193000273479
+              },
+              "minimal": 0.05,
+              "verdict": "favours zero_shot"
+            }
+          }
+        },
+        "scored_days": [
+          "2011-12-04",
+          "2011-12-05",
+          "2011-12-06",
+          "2011-12-07",
+          "2011-12-08",
+          "2011-12-09",
+          "2011-12-10",
+          "2011-12-11"
+        ],
+        "scored_windows": 1826,
+        "selective": {
+          "confidence_aurc": 0.29816912997494804,
+          "structural_aurc": 0.3235155294630252
+        },
+        "validation": {
+          "blocking": [],
+          "issues": [
+            {
+              "code": "impossible_interval",
+              "count": 3,
+              "examples": [
+                "Toileting: 2011-12-01T19:28:51 to 2011-12-01T16:29:59",
+                "Grooming: 2011-12-02T12:20:41 to 2011-12-01T10:20:59",
+                "Breakfast: 2011-12-02T12:27:47 to 2011-12-01T11:35:49"
+              ],
+              "household": "OrdonezA",
+              "message": "intervals that cannot exist",
+              "severity": "error"
+            },
+            {
+              "code": "overlapping_labels",
+              "count": 2,
+              "examples": [
+                "Toileting and Spare_Time/TV from 2011-12-01T16:27:03",
+                "Grooming and Spare_Time/TV from 2011-12-03T13:29:48"
+              ],
+              "household": "OrdonezA",
+              "message": "annotations overlap; where their states differ, conversion leaves the overlap unscored",
+              "severity": "warning"
+            },
+            {
+              "code": "sensor_semantics",
+              "count": 7,
+              "examples": [
+                "Basin.PIR.Bathroom: type 'PIR/Basin' is approximate",
+                "Cooktop.PIR.Kitchen: type 'PIR/Cooktop' is approximate",
+                "Maindoor.Magnetic.Entrance: location 'Entrance' is approximate",
+                "Microwave.Electric.Kitchen: type 'Electric/Microwave' is unmappable",
+                "Shower.PIR.Bathroom: type 'PIR/Shower' is approximate"
+              ],
+              "household": "OrdonezA",
+              "message": "sensors whose semantics do not match the ontology exactly",
+              "severity": "warning"
+            },
+            {
+              "code": "timestamp_order",
+              "count": 58,
+              "examples": [
+                "2011-11-28T10:23:02 after 2011-11-28T10:23:31",
+                "2011-11-28T10:38:33 after 2011-11-28T10:42:41",
+                "2011-11-28T14:31:44 after 2011-11-28T14:41:54",
+                "2011-11-29T11:38:16 after 2011-11-29T11:48:29",
+                "2011-11-29T12:09:09 after 2011-11-29T12:09:21"
+              ],
+              "household": "OrdonezA",
+              "message": "events are not in time order as delivered; conversion sorts them",
+              "severity": "warning"
+            }
+          ]
+        }
+      },
+      "OrdonezB": {
+        "adaptation_end": "2012-11-18T00:00:00+01:00",
+        "attribution": {
+          "dataset_incompatibility": {
+            "unscorable_labelled_fraction": 0.03958553243248908,
+            "unsupported_observation_fraction": 0.15706488781079442
+          },
+          "model_failure": {
+            "calibration_gap": 0.4529669390028103,
+            "zero_shot_below_oracle": 0.3150278766500434
+          },
+          "sensing_limitation": {
+            "oracle_above_chance": 0.30933488504472506,
+            "oracle_balanced_accuracy": 0.5593348850447251,
+            "oracle_shortfall": 0.44066511495527494
+          }
+        },
+        "chance": 0.25,
+        "conditions": {
+          "adapted": {
+            "accuracy": {
+              "estimate": 0.41816693944353517,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.4509279145099489,
+                "low": 0.3896714565454971
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.24438472755258067,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.2462685149506954,
+                "low": 0.24264589098443679
+              }
+            },
+            "brier": {
+              "estimate": 1.0236908664174167,
+              "interval": {
+                "confidence": 0.95,
+                "high": 1.0769531513613035,
+                "low": 0.9638105748252529
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.4893554176474927,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.5162373231689984,
+                "low": 0.45853925147563407
+              }
+            },
+            "log_loss": {
+              "estimate": 2.8402228695680853,
+              "interval": {
+                "confidence": 0.95,
+                "high": 3.003758946157562,
+                "low": 2.6528741026295526
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.1607007459878707,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.1682799939129892,
+                "low": 0.15397140947506371
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.9075223570910279,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.9121355282385422,
+                "low": 0.9025182151530959
+              }
+            },
+            "n": 3666,
+            "per_class_recall": {
+              "away": 0.0,
+              "bathroom_activity": 0.0,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.005564387917329093,
+              "kitchen_activity": null,
+              "sleeping": 0.9719745222929936
+            }
+          },
+          "declared": {
+            "accuracy": {
+              "estimate": 0.5283687943262412,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.5603607395028567,
+                "low": 0.498032268675463
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.3426121248659705,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.3573322607856571,
+                "low": 0.3295984852363925
+              }
+            },
+            "brier": {
+              "estimate": 0.794664380956836,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.8483367811213467,
+                "low": 0.7377017360916651
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.35071278191014255,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.3828579111058883,
+                "low": 0.3196020496527133
+              }
+            },
+            "log_loss": {
+              "estimate": 2.691914327360612,
+              "interval": {
+                "confidence": 0.95,
+                "high": 2.8780022417498388,
+                "low": 2.492508661280214
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.3207160461937204,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.34274353047931666,
+                "low": 0.29959421416323384
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.8786930228323387,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.888517931531897,
+                "low": 0.8689507055087983
+              }
+            },
+            "n": 3666,
+            "per_class_recall": {
+              "away": 0.16955941255006676,
+              "bathroom_activity": 0.0,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.24165341812400637,
+              "kitchen_activity": null,
+              "sleeping": 0.9592356687898089
+            }
+          },
+          "zero_shot": {
+            "accuracy": {
+              "estimate": 0.41843971631205673,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.4512334774340063,
+                "low": 0.38975777515007715
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.24430700839468167,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.24623736012946362,
+                "low": 0.24216747222051274
+              }
+            },
+            "brier": {
+              "estimate": 1.0364628778129747,
+              "interval": {
+                "confidence": 0.95,
+                "high": 1.082837336544741,
+                "low": 0.9811123711221879
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.4529669390028104,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.4876286452656497,
+                "low": 0.4129815112627533
+              }
+            },
+            "log_loss": {
+              "estimate": 3.2619579379204957,
+              "interval": {
+                "confidence": 0.95,
+                "high": 3.4686040767755855,
+                "low": 3.0294063585116384
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.15892868143575153,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.16669593942754857,
+                "low": 0.15169305146354398
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.871406655314867,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.8839647314439883,
+                "low": 0.8584874467330832
+              }
+            },
+            "n": 3666,
+            "per_class_recall": {
+              "away": 0.0,
+              "bathroom_activity": 0.0,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.000794912559618442,
+              "kitchen_activity": null,
+              "sleeping": 0.9764331210191083
+            }
+          }
+        },
+        "diagnostics": {
+          "calibration_shift": {
+            "accuracy": 0.41843971631205673,
+            "development": {
+              "accuracy": 0.5129391565618628,
+              "balanced_accuracy": 0.42135460444874767,
+              "calibration_error": 0.299364542198465,
+              "gap": 0.299364542198465,
+              "mean_confidence": 0.8123036987603278
+            },
+            "gap": 0.4529669390028103,
+            "mean_confidence": 0.871406655314867
+          },
+          "event_rates": {
+            "bathroom_motion": {
+              "away": {
+                "active_mean": 1.0,
+                "casas_active_mean": 7.553395963541328,
+                "casas_silence": 0.9842481132403442,
+                "silence": 0.9973297730307076,
+                "windows": 749
+              },
+              "bathroom_activity": {
+                "active_mean": 1.0444444444444445,
+                "casas_active_mean": 13.998190453571846,
+                "casas_silence": 0.10601215763279068,
+                "silence": 0.4943820224719101,
+                "windows": 89
+              },
+              "home_inactive": {
+                "active_mean": 1.1428571428571428,
+                "casas_active_mean": 7.652944580128233,
+                "casas_silence": 0.9620863654702055,
+                "silence": 0.994435612082671,
+                "windows": 1258
+              },
+              "sleeping": {
+                "active_mean": 1.0,
+                "casas_active_mean": 8.873643386002378,
+                "casas_silence": 0.9801202866107852,
+                "silence": 0.9974522292993631,
+                "windows": 1570
+              }
+            },
+            "bedroom_motion": {
+              "away": {
+                "active_mean": 2.0,
+                "casas_active_mean": 6.897282399269656,
+                "casas_silence": 0.9757244537270038,
+                "silence": 0.9919893190921228,
+                "windows": 749
+              },
+              "bathroom_activity": {
+                "active_mean": 1.6111111111111112,
+                "casas_active_mean": 9.813917298928203,
+                "casas_silence": 0.37498129186821366,
+                "silence": 0.797752808988764,
+                "windows": 89
+              },
+              "home_inactive": {
+                "active_mean": 1.5625,
+                "casas_active_mean": 7.926793422463302,
+                "casas_silence": 0.8337237891416254,
+                "silence": 0.9872813990461049,
+                "windows": 1258
+              },
+              "sleeping": {
+                "active_mean": 1.0434782608695652,
+                "casas_active_mean": 5.346286074409868,
+                "casas_silence": 0.8822635643775526,
+                "silence": 0.9853503184713376,
+                "windows": 1570
+              }
+            },
+            "hall_door": {
+              "away": {
+                "active_mean": 1.0,
+                "casas_active_mean": 4.7124520365147,
+                "casas_silence": 0.9617938711627649,
+                "silence": 0.9639519359145527,
+                "windows": 749
+              },
+              "bathroom_activity": {
+                "active_mean": 1.0,
+                "casas_active_mean": 2.8616096480172,
+                "casas_silence": 0.8147403280127921,
+                "silence": 0.9775280898876404,
+                "windows": 89
+              },
+              "home_inactive": {
+                "active_mean": 1.0,
+                "casas_active_mean": 3.323673240290999,
+                "casas_silence": 0.962373940010453,
+                "silence": 0.9968203497615262,
+                "windows": 1258
+              },
+              "sleeping": {
+                "active_mean": 1.0,
+                "casas_active_mean": 2.1339670402723194,
+                "casas_silence": 0.995921699139792,
+                "silence": 0.9993630573248408,
+                "windows": 1570
+              }
+            },
+            "kitchen_motion": {
+              "away": {
+                "active_mean": 2.0,
+                "casas_active_mean": 8.073231953413034,
+                "casas_silence": 0.9786711099988891,
+                "silence": 0.9986648865153538,
+                "windows": 749
+              },
+              "bathroom_activity": {
+                "active_mean": 1.5555555555555556,
+                "casas_active_mean": 9.968863467261674,
+                "casas_silence": 0.7801017737959246,
+                "silence": 0.898876404494382,
+                "windows": 89
+              },
+              "home_inactive": {
+                "active_mean": 1.5517241379310345,
+                "casas_active_mean": 11.33113137856854,
+                "casas_silence": 0.9329212760731787,
+                "silence": 0.9538950715421304,
+                "windows": 1258
+              },
+              "sleeping": {
+                "active_mean": 1.0,
+                "casas_active_mean": 4.066553039549986,
+                "casas_silence": 0.993568455392605,
+                "silence": 0.9987261146496815,
+                "windows": 1570
+              }
+            },
+            "living_motion": {
+              "away": {
+                "active_mean": 1.5238095238095237,
+                "casas_active_mean": 8.402479579101293,
+                "casas_silence": 0.9638683341233619,
+                "silence": 0.9719626168224299,
+                "windows": 749
+              },
+              "bathroom_activity": {
+                "active_mean": 2.0833333333333335,
+                "casas_active_mean": 8.773965067443266,
+                "casas_silence": 0.6167925590774573,
+                "silence": 0.7303370786516854,
+                "windows": 89
+              },
+              "home_inactive": {
+                "active_mean": 1.4017094017094016,
+                "casas_active_mean": 6.763733998772371,
+                "casas_silence": 0.6165943308372422,
+                "silence": 0.9069952305246423,
+                "windows": 1258
+              },
+              "sleeping": {
+                "active_mean": 1.8,
+                "casas_active_mean": 3.6353213453010866,
+                "casas_silence": 0.9890134529189397,
+                "silence": 0.9968152866242038,
+                "windows": 1570
+              }
+            }
+          },
+          "mapping_coverage": {
+            "dispositions": {
+              "events": {
+                "deactivation": 2169,
+                "emitted": 2455,
+                "sensor_unmappable": 44
+              },
+              "impossible_intervals": 0,
+              "point_annotations": 0
+            },
+            "scorable_fraction": 0.9604144675675109,
+            "seconds": {
+              "ambiguous": 45066.0,
+              "approximate": 628085.0,
+              "conflict": 236.0,
+              "exact": 471021.0
+            }
+          },
+          "oracle": {
+            "accuracy": {
+              "estimate": 0.6522094926350246,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.7164686396814937,
+                "low": 0.5847883131675351
+              }
+            },
+            "balanced_accuracy": {
+              "estimate": 0.5593348850447251,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.6035866340692233,
+                "low": 0.5220821794135578
+              }
+            },
+            "brier": {
+              "estimate": 0.501256624283528,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.5955318235829272,
+                "low": 0.41109237102847257
+              }
+            },
+            "calibration_error": {
+              "estimate": 0.1597770561520954,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.22158605119507474,
+                "low": 0.09802637711238416
+              }
+            },
+            "log_loss": {
+              "estimate": 0.9824957766522034,
+              "interval": {
+                "confidence": 0.95,
+                "high": 1.1558150881274292,
+                "low": 0.8204939042401291
+              }
+            },
+            "macro_f1": {
+              "estimate": 0.5187651500349941,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.5733270108925249,
+                "low": 0.47570117218328556
+              }
+            },
+            "mean_confidence": {
+              "estimate": 0.81198654878712,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.827218452781261,
+                "low": 0.7947372845910068
+              }
+            },
+            "n": 3666,
+            "per_class_recall": {
+              "away": 0.04005340453938585,
+              "bathroom_activity": 0.5730337078651685,
+              "bed_awake": null,
+              "home_active": null,
+              "home_inactive": 0.7694753577106518,
+              "kitchen_activity": null,
+              "sleeping": 0.8547770700636943
+            }
+          },
+          "room_structure": {
+            "approximate_sensor_types": [
+              "Flush/Toilet",
+              "PIR/Basin",
+              "PIR/Door",
+              "PIR/Shower"
+            ],
+            "routed_channels": [
+              "bathroom_motion",
+              "bedroom_motion",
+              "hall_door",
+              "kitchen_motion",
+              "living_motion"
+            ],
+            "scored_state_rooms": {
+              "away": {
+                "channel": null,
+                "room": null
+              },
+              "bathroom_activity": {
+                "channel": "bathroom_motion",
+                "room": "bathroom"
+              },
+              "home_inactive": {
+                "channel": null,
+                "room": null
+              },
+              "sleeping": {
+                "channel": "bedroom_motion",
+                "room": "bedroom"
+              }
+            },
+            "uninstrumented_channels": [
+              "hall_motion"
+            ]
+          },
+          "state_prior_shift": {
+            "development": {
+              "away": 0.37438338338833616,
+              "bathroom_activity": 0.03936450762204927,
+              "home_inactive": 0.2015476644022344,
+              "sleeping": 0.3847044445873802
+            },
+            "divergence_truth_development": 0.03387230839751365,
+            "divergence_truth_stationary": 0.008263081513553816,
+            "predicted": {
+              "away": 0.0,
+              "bathroom_activity": 0.0,
+              "bed_awake": 0.10911074740861974,
+              "home_active": 0.0,
+              "home_inactive": 0.00027277686852154935,
+              "kitchen_activity": 0.0,
+              "sleeping": 0.8906164757228587
+            },
+            "predicted_unsupported": 0.10911074740861974,
+            "stationary": {
+              "away": 0.2899999999989317,
+              "bathroom_activity": 0.03000000000003549,
+              "home_inactive": 0.28000000000030295,
+              "sleeping": 0.40000000000072994
+            },
+            "truth": {
+              "away": 0.2043098745226405,
+              "bathroom_activity": 0.024277141298417893,
+              "home_inactive": 0.3431533006001091,
+              "sleeping": 0.42825968357883254
+            }
+          },
+          "unsupported_observations": {
+            "activations": 1649,
+            "by_reason": {
+              "a state sensor; the channels count events": 96,
+              "its type is unmappable: appliance power use has no modality in the observation model": 6,
+              "no bathroom_contact channel in the CASAS-trained model": 67,
+              "no kitchen_contact channel in the CASAS-trained model": 90,
+              "routed": 1390
+            },
+            "fraction": 0.15706488781079442,
+            "unsupported": 259
+          }
+        },
+        "eligibility": {
+          "routed_channels": [
+            "bathroom_motion",
+            "bedroom_motion",
+            "hall_door",
+            "kitchen_motion",
+            "living_motion"
+          ],
+          "scored_days": 17,
+          "timezone": "Europe/Madrid"
+        },
+        "eligible": true,
+        "estimands": {
+          "A": {
+            "balanced_accuracy": {
+              "estimate": 7.77191578990033e-05,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.002509702363735455,
+                "low": -0.0018379616235644517
+              },
+              "minimal": 0.02,
+              "verdict": "negligible"
+            },
+            "brier": {
+              "estimate": 0.012772011395558058,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.03147396984604062,
+                "low": -0.006127465686129328
+              },
+              "minimal": 0.01,
+              "verdict": "uncertain"
+            },
+            "calibration_error": {
+              "estimate": -0.03638847864468231,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.024640123237584143,
+                "low": -0.0483769066233932
+              },
+              "minimal": 0.02,
+              "verdict": "favours the other"
+            },
+            "log_loss": {
+              "estimate": 0.42173506835241037,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.5831628629979464,
+                "low": 0.25722692429188715
+              },
+              "minimal": 0.05,
+              "verdict": "favours adapted"
+            }
+          },
+          "C": {
+            "balanced_accuracy": {
+              "estimate": -0.005692991605318332,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.003762639870536387,
+                "low": -0.00783252777948725
+              },
+              "minimal": 0.05,
+              "verdict": "negligible"
+            }
+          },
+          "S": {
+            "aurc": {
+              "estimate": 0.24884753377706292,
+              "interval": {
+                "confidence": 0.95,
+                "high": 0.3404574631367529,
+                "low": 0.16276181386612984
+              },
+              "minimal": 0.01,
+              "verdict": "favours structural"
+            }
+          },
+          "T": {
+            "balanced_accuracy": {
+              "estimate": -0.09830511647128881,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.08565261380824152,
+                "low": -0.11313552575834529
+              },
+              "minimal": 0.02,
+              "verdict": "favours the other"
+            },
+            "brier": {
+              "estimate": -0.24179849685613874,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.21217703561738518,
+                "low": -0.2748766141785281
+              },
+              "minimal": 0.01,
+              "verdict": "favours the other"
+            },
+            "calibration_error": {
+              "estimate": -0.10225415709266783,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.08357028106022567,
+                "low": -0.1175671997053119
+              },
+              "minimal": 0.02,
+              "verdict": "favours the other"
+            },
+            "log_loss": {
+              "estimate": -0.5700436105598836,
+              "interval": {
+                "confidence": 0.95,
+                "high": -0.40156137215096016,
+                "low": -0.7293231847681056
+              },
+              "minimal": 0.05,
+              "verdict": "favours the other"
+            }
+          }
+        },
+        "scored_days": [
+          "2012-11-17",
+          "2012-11-18",
+          "2012-11-19",
+          "2012-11-20",
+          "2012-11-21",
+          "2012-11-22",
+          "2012-11-23",
+          "2012-11-24",
+          "2012-11-25",
+          "2012-11-26",
+          "2012-11-27",
+          "2012-11-28",
+          "2012-11-29",
+          "2012-11-30",
+          "2012-12-01",
+          "2012-12-02",
+          "2012-12-03"
+        ],
+        "scored_windows": 3666,
+        "selective": {
+          "confidence_aurc": 0.6447777722898685,
+          "structural_aurc": 0.3959302385128056
+        },
+        "validation": {
+          "blocking": [],
+          "issues": [
+            {
+              "code": "outside_recording",
+              "count": 2,
+              "examples": [
+                "Spare_Time/TV: 2012-11-11T21:14:00 to 2012-11-12T00:22:59",
+                "Spare_Time/TV: 2012-12-02T20:41:00 to 2012-12-03T01:03:59"
+              ],
+              "household": "OrdonezB",
+              "message": "annotations extend beyond the span of the events",
+              "severity": "warning"
+            },
+            {
+              "code": "overlapping_labels",
+              "count": 24,
+              "examples": [
+                "Toileting and Sleeping from 2012-11-14T00:29:00",
+                "Spare_Time/TV and Leaving from 2012-11-14T12:52:00",
+                "Spare_Time/TV and Dinner from 2012-11-14T21:37:00",
+                "Spare_Time/TV and Snack from 2012-11-14T22:14:00",
+                "Grooming and Sleeping from 2012-11-15T00:10:00"
+              ],
+              "household": "OrdonezB",
+              "message": "annotations overlap; where their states differ, conversion leaves the overlap unscored",
+              "severity": "warning"
+            },
+            {
+              "code": "sensor_semantics",
+              "count": 8,
+              "examples": [
+                "Basin.PIR.Bathroom: type 'PIR/Basin' is approximate",
+                "Door.PIR.Bedroom: type 'PIR/Door' is approximate",
+                "Door.PIR.Kitchen: type 'PIR/Door' is approximate",
+                "Door.PIR.Living: type 'PIR/Door' is approximate",
+                "Maindoor.Magnetic.Entrance: location 'Entrance' is approximate"
+              ],
+              "household": "OrdonezB",
+              "message": "sensors whose semantics do not match the ontology exactly",
+              "severity": "warning"
+            },
+            {
+              "code": "timestamp_order",
+              "count": 57,
+              "examples": [
+                "2012-11-12T01:53:53 after 2012-11-12T01:54:27",
+                "2012-11-12T15:39:05 after 2012-11-12T15:39:48",
+                "2012-11-12T17:43:55 after 2012-11-12T17:44:31",
+                "2012-11-13T08:59:12 after 2012-11-13T09:00:26",
+                "2012-11-13T16:07:27 after 2012-11-13T16:08:02"
+              ],
+              "household": "OrdonezB",
+              "message": "events are not in time order as delivered; conversion sorts them",
+              "severity": "warning"
+            }
+          ]
+        }
+      }
+    },
+    "populations": {
+      "all": {
+        "reproduced": true,
+        "sha256": "50e00c3da80c2ae814575b69b0423b75584c0278307cdd54554c8b3ca91da7a4"
+      },
+      "half_a": {
+        "reproduced": true,
+        "sha256": "dd9381bb3388e2b9ee3f2584c59f70d56f1eac12b37cbde2bdfbfba45121b0a6"
+      },
+      "half_b": {
+        "reproduced": true,
+        "sha256": "f6f3b9f1e1271edf6c698e88ef8afb4aca8a542bbd6547746231e7043a6de611"
+      }
+    },
+    "protocol": {
+      "file": "artifacts/phase5/external_protocol.json",
+      "file_sha256": "4488e326a4e9a6ac84e74d5424b0040f8aeacc55350d6b829b0f5a38768ec57c",
+      "frozen_in": "a863bff",
+      "sha256": "620f3fdc55e0fe9da6ebcc0737ccf3c2be584f9573c490ce30388e02a218b334"
+    },
+    "result_schema": "external-results/1",
+    "scored_states": [
+      "away",
+      "home_inactive",
+      "sleeping",
+      "bathroom_activity"
+    ]
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    0
+  ],
+  "selective_prediction": null,
+  "sensor_subset": null,
+  "split": null,
+  "structural_disagreement": null
+}
