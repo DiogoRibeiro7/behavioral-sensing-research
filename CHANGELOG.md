@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added the pre-specified Phase 4 comparison of richer uncertainty diagnostics, `sensor_modeling.datasets.uncertainty_experiment`, with its frozen protocol, `artifacts/phase4/uncertainty_protocol.json`, committed before any household was scored.
+  - **Signals.** Posterior confidence, entropy, model-structure disagreement over a population-only ensemble, evidence-channel disagreement, and predictive mismatch. Each ranks the same predictions: the Phase 3.3 follow-up's hurdle recursion on the 20 development homes, cross-fitted on the frozen folds.
+  - **Evaluation.** Selective-prediction curves of error, balanced accuracy, calibration and per-state retained coverage, pooled and per household. Each signal is compared with confidence by paired household differences with household bootstrap intervals.
+  - **Rule.** Declared in advance: a structural diagnostic is materially better when its error AURC beats confidence's by at least 0.01, with the interval above 0, and no difficult minority state is retained less than under confidence. No threshold is selected.
+  - **Output.** `uncertainty_summary.render_page` and `uncertainty_figures.draw_figures` generate the documentation page and its figures entirely from the record. `scripts/run_phase4_uncertainty.py` refuses to run unless the code's protocol equals the frozen file.
 - Added a selective-prediction evaluation framework for ROADMAP Phase 4, `sensor_modeling.evaluation.selective`, described in `docs/SELECTIVE_PREDICTION.md`. It evaluates any candidate risk signal without selecting a threshold or an abstention rule.
   - **Signals.** A `Signal` states its direction, `higher_is_riskier` or `higher_is_safer`, which is never assumed. A missing value is refused unless a policy ranks it for rejection or retention.
   - **Curves.** Over a grid of coverage levels, pooled over the panel and per household:
