@@ -1,0 +1,359 @@
+{
+  "dataset": "uci-adl-binary-ordonez",
+  "description": "Written from the README and the two description files, which list every label and sensor; the rooms and the meaning of Leaving were checked on the first seven days of each home only. Frozen before any scoring.",
+  "labels": [
+    {
+      "native": "Breakfast",
+      "outcome": "ambiguous",
+      "rationale": "the label covers preparing and eating the meal, and does not say which, or where it was eaten",
+      "targets": [
+        "kitchen_activity",
+        "home_active"
+      ]
+    },
+    {
+      "native": "Dinner",
+      "outcome": "ambiguous",
+      "rationale": "the label covers preparing and eating the meal, and does not say which, or where it was eaten",
+      "targets": [
+        "kitchen_activity",
+        "home_active"
+      ]
+    },
+    {
+      "native": "Grooming",
+      "outcome": "approximate",
+      "rationale": "grooming at the bathroom basin; one kind of bathroom activity",
+      "targets": [
+        "bathroom_activity"
+      ]
+    },
+    {
+      "native": "Leaving",
+      "outcome": "approximate",
+      "rationale": "named for the act, but in this annotation format it spans the absence: from 3 minutes to over 4 hours in the adaptation period",
+      "targets": [
+        "away"
+      ]
+    },
+    {
+      "native": "Lunch",
+      "outcome": "ambiguous",
+      "rationale": "the label covers preparing and eating the meal, and does not say which, or where it was eaten",
+      "targets": [
+        "kitchen_activity",
+        "home_active"
+      ]
+    },
+    {
+      "native": "Showering",
+      "outcome": "approximate",
+      "rationale": "one kind of bathroom activity",
+      "targets": [
+        "bathroom_activity"
+      ]
+    },
+    {
+      "native": "Sleeping",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "sleeping"
+      ]
+    },
+    {
+      "native": "Snack",
+      "outcome": "ambiguous",
+      "rationale": "a snack may be prepared in the kitchen or eaten anywhere",
+      "targets": [
+        "kitchen_activity",
+        "home_active",
+        "home_inactive"
+      ]
+    },
+    {
+      "native": "Spare_Time/TV",
+      "outcome": "approximate",
+      "rationale": "leisure at home, mostly watching television and assumed seated; some spare time may be active",
+      "targets": [
+        "home_inactive"
+      ]
+    },
+    {
+      "native": "Toileting",
+      "outcome": "approximate",
+      "rationale": "one kind of bathroom activity",
+      "targets": [
+        "bathroom_activity"
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "native": "Bathroom",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "bathroom"
+      ]
+    },
+    {
+      "native": "Bedroom",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "bedroom"
+      ]
+    },
+    {
+      "native": "Entrance",
+      "outcome": "approximate",
+      "rationale": "the entrance, where the main door is",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Kitchen",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "kitchen"
+      ]
+    },
+    {
+      "native": "Living",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "living"
+      ]
+    }
+  ],
+  "mapping_sha256": "ac82ba9a9d6bf70392b14e67eea8e22ca3dd00081b7b0b372ccbc5dd2728fbb5",
+  "schema": "external-ontology-mapping/1",
+  "sensor_types": [
+    {
+      "native": "Electric/Microwave",
+      "outcome": "unmappable",
+      "rationale": "appliance power use has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Electric/Toaster",
+      "outcome": "unmappable",
+      "rationale": "appliance power use has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Flush/Toilet",
+      "outcome": "approximate",
+      "rationale": "a toilet flush is the use of a fixture, recorded like a contact",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Magnetic/Cabinet",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Magnetic/Cupboard",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Magnetic/Fridge",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Magnetic/Maindoor",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "door",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "PIR/Basin",
+      "outcome": "approximate",
+      "rationale": "a PIR aimed at a fixture, detecting movement near it rather than across the room, as the CASAS area sensors do",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "motion",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "PIR/Cooktop",
+      "outcome": "approximate",
+      "rationale": "a PIR aimed at a fixture, detecting movement near it rather than across the room, as the CASAS area sensors do",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "motion",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "PIR/Door",
+      "outcome": "approximate",
+      "rationale": "a PIR at a room's doorway, detecting passage rather than presence across the room",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "motion",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "PIR/Shower",
+      "outcome": "approximate",
+      "rationale": "a PIR aimed at a fixture, detecting movement near it rather than across the room, as the CASAS area sensors do",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "motion",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Pressure/Bed",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "state",
+          "modality": "bed_pressure",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Pressure/Seat",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "state",
+          "modality": "bed_pressure",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    }
+  ],
+  "version": "1.0"
+}
