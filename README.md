@@ -13,15 +13,16 @@ non-homogeneous Poisson processes.
 > **This is a research toolkit, not a medical device.** Nothing it produces is
 > a diagnosis, and no claim of clinical effectiveness is made or supported.
 > Simulator results are not estimates of field performance; the pipeline has
-> now been evaluated on real CASAS recordings and externally tested on a frozen
-> 43-home cohort, with the evidence boundaries described below.
+> now been evaluated on real CASAS recordings, externally tested on a frozen
+> 43-home CASAS cohort, and tested on two independently collected homes, to
+> which it does not transfer. The evidence boundaries are described below.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.11--3.14-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/sensor-modeling/badge/?version=latest)](https://sensor-modeling.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21337272.svg)](https://doi.org/10.5281/zenodo.21337272)
-[![Version](https://img.shields.io/badge/version-0.8.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.9.0-informational.svg)](CHANGELOG.md)
 
 ## 🎯 Overview
 
@@ -42,14 +43,27 @@ matters when reading them:
 The simulator's figure sits **above** what that instrumentation supports even
 for a supervised classifier with access to the labels. Simulator results are
 therefore not an estimate of real-world performance, and should not be read as
-one. The pipeline is close to the ceiling for the evidence it actually uses;
-the gap is in information those deployments do not carry.
+one. The gap between the pipeline and that ceiling is not only missing
+information. In a matched comparison on 20 single-resident development homes, a
+supervised classifier given strictly less information than the online filter,
+the current window and three previous ones, still scored 0.081 higher balanced
+accuracy, in 19 of 20 homes; part of the gap is the formulation. See
+[the recoverable-information gap](docs/PHASE1_RECOVERABLE_GAP.md). Pre-specified
+changes to the generative model have since been measured on the same homes; see
+[`ROADMAP.md`](ROADMAP.md). None of them is a held-out claim.
 
 The frozen v0.3 candidate was also tested once on 43 single-resident CASAS homes
 outside the development panel. The optional circadian prior improved the median
 paired household balanced accuracy by **+0.0091**, with a 95% household bootstrap
 interval of **[+0.0054, +0.0117]**; 37 of 43 homes improved. The effect is small
 and does not establish clinical effectiveness or general smart-home performance.
+
+Under a protocol frozen before any external scoring, the CASAS-trained model was
+then tested on the two homes of the independently collected UCI ADL Binary
+dataset, which has a different sensing layout. **It does not transfer**: zero-shot
+balanced accuracy is 0.246 and 0.244, against chance at 0.25, and a week of
+limited adaptation leaves balanced accuracy unchanged. See
+[Phase 5 external results](docs/PHASE5_EXTERNAL_RESULTS.md).
 
 See [Real-data validation](docs/real_data.md) and
 [Known limitations](docs/limitations.md).
@@ -102,8 +116,10 @@ The system can also return `unknown`. Abstention is a first-class output, not
 a failure. Current real-data diagnostics show that the implemented confidence
 threshold is not yet a reliable safety mechanism: confidence weakly separates
 correct from incorrect predictions and becomes less reliable in the highest
-confidence band. Version 0.3.0 exposes additional uncertainty diagnostics but
-does not claim that abstention has been solved.
+confidence band. Version 0.9.0 adds structural uncertainty diagnostics and a
+selective-prediction evaluation. On the development homes, disagreement between
+fitted model specifications ranks errors better than confidence, but no
+abstention rule has been selected, and abstention is not solved.
 
 ### Supported and unsupported claims
 
@@ -424,7 +440,7 @@ Feature                             | Status     | Implementation
 ----------------------------------- | ---------- | -----------------------------------------
 **Bernoulli Autoregressive Models** | ✅ Complete | Single/multivariate, automatic selection
 **Hidden Markov Models**            | ✅ Complete | 5 variants with different emission models
-**Change Point Detection**          | 🟡 Partial | 4 algorithms, expanding to deep learning
+**Change Point Detection**          | ✅ Complete | 4 algorithms
 **NHPP-PELT**                       | ✅ Complete | B-spline intensities, diagnostics
 **Causal Network Analysis**         | ✅ Complete | Granger tests, network metrics
 **Missing Data Handling**           | ✅ Complete | Gap-aware workflows plus reliability-tempered fusion
@@ -433,9 +449,8 @@ Feature                             | Status     | Implementation
 **Occupancy & Attribution**         | ✅ Complete | Probabilistic visitor/resident attribution
 **Adaptive Baselines**              | ✅ Complete | Robust, weekday-aware, non-stationary
 **Sensor Ablation Studies**         | ✅ Complete | Paired designs with effect sizes
-**Deep Learning CPD**               | 🔵 Planned | Transformer and CNN-based approaches
 **Real-time Processing**            | ✅ Complete | Incremental pipeline, bounded memory, snapshot/restore
-**Clinical Integration**            | 🟡 Partial | Minimal FHIR-style export, expanding toward validated HL7 profiles
+**Clinical Integration**            | 🟡 Partial | Minimal FHIR-style export; no validated clinical profile
 
 ## 📚 Research Foundation
 
@@ -590,7 +605,7 @@ If you use this software in your research, please cite it as:
   author={Ribeiro, Diogo},
   year={2026},
   url={https://github.com/DiogoRibeiro7/behavioral-sensing-research},
-  version={0.8.0},
+  version={0.9.0},
   doi={10.5281/zenodo.21337272}
 }
 ```
