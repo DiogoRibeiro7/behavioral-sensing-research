@@ -24,6 +24,8 @@ from .filter import (
     FusionConfig,
     MultimodalBayesFilter,
     NonMonotonicUpdateError,
+    UpdateObserver,
+    WindowTerms,
 )
 from .history import (
     ChannelHistory,
@@ -52,6 +54,8 @@ from .regime import (
 from .smoothing import smooth_beliefs, smooth_estimates
 
 __all__ = [
+    "UpdateObserver",
+    "WindowTerms",
     "ONLINE",
     "EvidenceLeakageError",
     "EvidenceSummary",
