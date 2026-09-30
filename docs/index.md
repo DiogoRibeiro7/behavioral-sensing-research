@@ -7,10 +7,11 @@ ambient sensing in assisted-living and digital-health research.
 !!! warning "This is a research toolkit, not a medical device"
 
     Nothing it produces is a diagnosis, and no claim of clinical
-    effectiveness is made or supported anywhere in this project. Every
-    quantitative result in this documentation comes from the bundled
-    simulator and has **not** been validated against real sensor data. See
-    [Limitations](limitations.md).
+    effectiveness is made or supported anywhere in this project. Simulator
+    results are not estimates of field performance. Real-data results, on
+    annotated CASAS homes and on one independently collected dataset, are
+    reported separately with their evidence boundaries. See
+    [Limitations](limitations.md) and [Real-data validation](real_data.md).
 
 ## Five kinds of thing, kept distinct
 
