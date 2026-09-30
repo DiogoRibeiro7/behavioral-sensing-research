@@ -273,8 +273,13 @@ class TestOnSimulatedHouseholds:
             assert f"data sha256 {data_sha256(data[name])}" in first[name].read_text(
                 encoding="utf-8"
             )
-        assert set(data["retention"]["states"]) == set(
-            payload["results"]["difficult_minority_states"]
+        results = payload["results"]
+        share = payload["configuration"]["difficult_minority_states"]["minority_share"]
+        assert set(results["difficult_minority_states"]) <= set(
+            data["retention"]["states"]
+        )
+        assert all(
+            results["states"][s]["share"] < share for s in data["retention"]["states"]
         )
 
     def test_the_record_is_strict_json(self, written: dict[str, Any]) -> None:
@@ -285,4 +290,105 @@ class TestOnSimulatedHouseholds:
         assert all(
             math.isfinite(e["summary"]["aurc"]["estimate"])
             for e in results["signals"].values()
+        )
+
+
+# ----------------------------------------------------------------------------
+# The published record
+# ----------------------------------------------------------------------------
+PUBLISHED = ROOT / "artifacts" / "phase4" / "phase4-uncertainty-diagnostics.json"
+NEGATIVE_BINOMIAL = (
+    ROOT / "artifacts" / "phase3" / "phase3-hurdle-negative-binomial.json"
+)
+DOC = ROOT / "docs" / "PHASE4_UNCERTAINTY_DIAGNOSTICS.md"
+FIGURE_DIR = ROOT / "docs" / "figures"
+
+
+@pytest.fixture(scope="module")
+def published() -> dict[str, Any]:
+    return load_record(PUBLISHED)
+
+
+class TestPublishedRecord:
+    """The run on the development households, as published."""
+
+    def test_it_ran_the_frozen_protocol_from_a_clean_commit(
+        self, published: dict[str, Any]
+    ) -> None:
+        declared = declared_protocol(load_frozen_splits(SPLITS))
+        assert published["configuration"] == {
+            **declared.to_dict(),
+            "protocol_sha256": declared.sha256(),
+        }
+        assert published["environment"]["git_dirty"] == "false"
+        assert published["environment"]["git_commit"].startswith("ad459f1")
+        digests = {i["name"]: i["sha256"] for i in published["inputs"]}
+        assert digests[PROTOCOL.name] == check_frozen_protocol(declared, PROTOCOL)
+
+    def test_the_page_is_exactly_the_rendering_of_the_record(
+        self, published: dict[str, Any]
+    ) -> None:
+        committed = DOC.read_text(encoding="utf-8").replace("\r\n", "\n")
+        assert committed == render_page(published)
+
+    def test_the_figures_carry_the_record_data(self, published: dict[str, Any]) -> None:
+        data = figure_data(published)
+        for name in FIGURES:
+            svg = (FIGURE_DIR / f"phase4-uncertainty-{name}.svg").read_text(
+                encoding="utf-8"
+            )
+            assert f"data sha256 {data_sha256(data[name])}" in svg
+
+    def test_the_decisions_follow_the_declared_rules(
+        self, published: dict[str, Any]
+    ) -> None:
+        results = published["results"]
+        difficult = set(results["difficult_minority_states"])
+        for name, entry in results["comparisons"].items():
+            failures = {
+                (state, level)
+                for level, states in entry["state_coverage"].items()
+                for state, item in states.items()
+                if state in difficult and item["verdict"] == "favours confidence"
+            }
+            assert entry["guard"]["holds"] is (not failures)
+            assert entry["decision"] == decide(
+                entry["aurc"]["verdict"], entry["guard"]["holds"]
+            )
+        better = [
+            s
+            for s in STRUCTURAL_SIGNALS
+            if results["decisions"][s] == "materially better"
+        ]
+        assert results["key_question"]["answer"] == ("yes" if better else "no")
+        assert results["key_question"]["materially_better"] == better
+
+    def test_the_difficult_minority_states_follow_the_rule(
+        self, published: dict[str, Any]
+    ) -> None:
+        results = published["results"]
+        share = published["configuration"]["difficult_minority_states"][
+            "minority_share"
+        ]
+        recalls = [e["recall"] for e in results["states"].values() if e["recall"]]
+        balanced = sum(recalls) / len(recalls)
+        expected = [
+            s
+            for s, e in results["states"].items()
+            if e["recall"] is not None and e["share"] < share and e["recall"] < balanced
+        ]
+        assert results["difficult_minority_states"] == expected
+
+    def test_the_predictions_reproduce_the_published_recursion(
+        self, published: dict[str, Any]
+    ) -> None:
+        reference = load_record(NEGATIVE_BINOMIAL)["household_metrics"]["hurdle@R"]
+        ours = published["results"]["reproduction"]["households"]
+        assert set(ours) == set(reference)
+        for home, values in ours.items():
+            for metric, value in values.items():
+                assert value == pytest.approx(reference[home][metric], abs=1e-9)
+        assert (
+            published["results"]["reproduction"]["published"]["max_abs_difference"]
+            < 1e-9
         )

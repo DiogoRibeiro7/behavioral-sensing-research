@@ -196,6 +196,61 @@ def render_page(payload: Mapping[str, Any]) -> str:
         f"is {_n(minimal['aurc'], 2)}."
     )
     add("")
+    add("### Read with")
+    add("")
+    homes = section["households"]
+    for state in difficult:
+        windows = sum(h["states"][state] for h in homes.values())
+        present = sum(1 for h in homes.values() if h["states"][state])
+        add(
+            f"- **The guard's reach.** It covers `{state}`: {windows:,} windows in "
+            f"{present} households."
+        )
+    if not difficult:
+        add("- **The guard's reach.** No state met the difficult-minority rule.")
+    minority_share = config["difficult_minority_states"]["minority_share"]
+    others = [
+        s
+        for s, e in results["states"].items()
+        if e["share"] < minority_share and s not in difficult
+    ]
+    for name in key["materially_better"] or compared:
+        entry = results["comparisons"][name]
+        at_levels = [
+            f"{metric.replace('_', ' ')} at {level}: {entry['at'][level][metric]['verdict']}"
+            for level in levels
+            for metric in ("error", "balanced_accuracy")
+        ]
+        rejected = sorted(
+            {
+                (state, level)
+                for state in others
+                for level in levels
+                if entry["state_coverage"][level][state]["verdict"]
+                == "favours confidence"
+            }
+        )
+        if name not in key["materially_better"]:
+            continue
+        add(
+            f"- **`{name}` at the inspection levels.** "
+            + _sentence("; ".join(at_levels))
+            + "."
+        )
+        if rejected:
+            by_state: dict[str, list[str]] = {}
+            for state, level in rejected:
+                by_state.setdefault(state, []).append(level)
+            add(
+                f"- **`{name}` and the other minority states.** It retains less "
+                "than confidence of "
+                + "; ".join(
+                    f"`{state}` at {', '.join(lvls)}"
+                    for state, lvls in by_state.items()
+                )
+                + ": minority states the guard does not cover."
+            )
+    add("")
 
     # ------------------------------------------------------------------
     add("## Protocol")
@@ -350,6 +405,46 @@ def render_page(payload: Mapping[str, Any]) -> str:
         lines += _table(["Signal", *[f"coverage {c}" for c in levels]], rows)
         add("")
 
+    add("### Household coverage under the pooled selection")
+    add("")
+    add(
+        "One threshold over the panel retains different shares of each "
+        "household. Smallest, median and largest household coverage:"
+    )
+    add("")
+    rows = []
+    for name in SIGNALS:
+        spread = section["signals"][name]["pooled"]["household_coverage"]
+        cells = [f"`{name}`"]
+        for level in inspection:
+            k = _index(grid, level)
+            cells.append(
+                f"{_n(spread['min'][k], 2)} / {_n(spread['median'][k], 2)} / "
+                f"{_n(spread['max'][k], 2)}"
+            )
+        rows.append(cells)
+    lines += _table(["Signal", *[f"coverage {c}" for c in levels]], rows)
+    add("")
+    emptied = []
+    for name in SIGNALS:
+        for home, entry in section["signals"][name]["households"].items():
+            gone = [
+                f"{level:g}"
+                for level in inspection
+                if entry["pooled_coverage"][_index(grid, level)] == 0.0
+            ]
+            if gone:
+                emptied.append(
+                    f"`{name}` rejects every window of {home} at {', '.join(gone)}"
+                )
+    if emptied:
+        add(
+            "Households wholly rejected by the pooled selection: "
+            + "; ".join(emptied)
+            + "."
+        )
+        add("")
+
     # ------------------------------------------------------------------
     add("## Household-level paired differences")
     add("")
@@ -398,16 +493,31 @@ def render_page(payload: Mapping[str, Any]) -> str:
     add("## Rejection bias by behavioural state")
     add("")
     add(
-        f"![Retained share of each difficult minority state over coverage]"
+        f"![Retained share of each minority state over coverage]"
         f"({FIGURE_DIR}/phase4-uncertainty-retention.svg)"
     )
     add("")
     add("### The states")
     add("")
+    homes = section["households"]
     lines += _table(
-        ["State", "Share of scored windows", "Reference recall", "Difficult minority"],
         [
-            [f"`{state}`", _n(e["share"]), _n(e["recall"]), _n(e["difficult_minority"])]
+            "State",
+            "Windows",
+            "Households",
+            "Share of scored windows",
+            "Reference recall",
+            "Difficult minority",
+        ],
+        [
+            [
+                f"`{state}`",
+                f"{sum(h['states'][state] for h in homes.values()):,}",
+                str(sum(1 for h in homes.values() if h["states"][state])),
+                f"{100 * e['share']:.2f}%",
+                _n(e["recall"]),
+                _n(e["difficult_minority"]),
+            ]
             for state, e in results["states"].items()
         ],
     )
@@ -417,6 +527,46 @@ def render_page(payload: Mapping[str, Any]) -> str:
         + (", ".join(f"`{s}`" for s in difficult) if difficult else "none")
         + "."
     )
+    add("")
+    share = config["difficult_minority_states"]["minority_share"]
+    others = [
+        s
+        for s, e in results["states"].items()
+        if e["share"] < share and s not in difficult and e["recall"] is not None
+    ]
+    add("### The other minority states, outside the decision rule")
+    add("")
+    if not others:
+        add("Every minority state is a difficult minority state.")
+    else:
+        add(
+            "Descriptive only: these states are below the minority share, but the "
+            "reference's recall on them is not below its balanced accuracy, so the "
+            "guard does not cover them. Listed are the inspection levels where a "
+            "signal's paired comparison of the retained share favours confidence."
+        )
+        add("")
+        rows = []
+        for name in compared:
+            for state in others:
+                where = [
+                    level
+                    for level in levels
+                    if results["comparisons"][name]["state_coverage"][level][state][
+                        "verdict"
+                    ]
+                    == "favours confidence"
+                ]
+                rows.append(
+                    [
+                        f"`{name}`",
+                        f"`{state}`",
+                        ", ".join(where) if where else "none",
+                    ]
+                )
+        lines += _table(
+            ["Signal", "State", "Rejected more than under confidence at"], rows
+        )
     add("")
     bias = results["rejection_bias"]
     states = list(results["states"])

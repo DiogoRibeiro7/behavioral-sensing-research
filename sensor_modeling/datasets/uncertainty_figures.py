@@ -47,6 +47,11 @@ def figure_data(payload: Mapping[str, Any]) -> dict[str, Any]:
         }
 
     random = section["reference"]["random"]
+    share = payload["configuration"]["difficult_minority_states"]["minority_share"]
+    difficult = results["difficult_minority_states"]
+    minority = [
+        s for s, e in results["states"].items() if e["share"] < share or s in difficult
+    ]
     return {
         "error": {
             "coverages": grid,
@@ -66,12 +71,13 @@ def figure_data(payload: Mapping[str, Any]) -> dict[str, Any]:
         },
         "retention": {
             "coverages": grid,
+            "difficult": difficult,
             "states": {
                 state: {
                     name: signals[name]["pooled"]["state_coverage"][state]
                     for name in SIGNALS
                 }
-                for state in results["difficult_minority_states"]
+                for state in minority
             },
         },
     }
@@ -121,12 +127,13 @@ def _retention(plt: Any, data: Mapping[str, Any]) -> Any:
             ]
             axis.plot(grid, ratios, color=_COLOURS[name], label=name.replace("_", " "))
         axis.axhline(1.0, color="#777777", ls=":", lw=1.0)
-        axis.set_title(state.replace("_", " "))
+        marker = " (difficult)" if state in data["difficult"] else ""
+        axis.set_title(state.replace("_", " ") + marker)
         axis.set_xlabel("coverage")
         axis.set_xlim(0.0, 1.0)
     axes[0][0].set_ylabel("retained share / coverage")
     if not states:
-        axes[0][0].text(0.5, 0.5, "no difficult minority state", ha="center")
+        axes[0][0].text(0.5, 0.5, "no minority state", ha="center")
     else:
         axes[0][-1].legend(frameon=False, fontsize=7)
     figure.tight_layout()
