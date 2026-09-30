@@ -634,6 +634,34 @@ dataset.
   periods and sensor-semantic mismatches.
 - **Conversion.** It counts everything it cannot carry.
 
+The first external protocol is frozen, before any external scoring; see
+`docs/PHASE5_EXTERNAL_PROTOCOL.md` and `artifacts/phase5/external_protocol.json`
+(SHA-256 `620f3fdc55e0…`). No model performance on the external dataset has
+been computed.
+
+- **Dataset.** The UCI "Activities of Daily Living Recognition Using Binary
+  Sensors" dataset (DOI 10.24432/C5J02M, CC BY 4.0). It has two
+  single-resident homes in Spain, collected independently of CASAS, and is
+  verified by file digests.
+- **Periods.** Each home's first seven days are its adaptation period, and
+  the rest is scored: 7 and 14 days.
+- **Conditions.** Two are frozen:
+  - **zero-shot:** the hurdle recursion with the 20-home CASAS population,
+    pinned by its fit digest;
+  - **limited adaptation:** partial pooling on the adaptation period's
+    labelled windows only.
+
+  Both are compared with the declared rates and with chance.
+- **The Phase 4 check.** Whether structural disagreement's advantage over
+  confidence keeps its direction.
+- **Mapping.** It was written from the dataset's documentation. Meal labels
+  are ambiguous and unscored, so `home_active`, `kitchen_activity` and
+  `bed_awake` cannot be scored.
+- **Unsupported sensors.** The contact, flush, pressure and electric sensors
+  are listed per home.
+- **Uncertainty.** Day blocks are resampled within each home. Two homes
+  support no between-household claim.
+
 ## Phase 6 — Sensor-Information Frontier
 
 The deployment study should move from isolated subset comparisons to a formal

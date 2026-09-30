@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Froze the first Phase 5 external-generalisation protocol, `artifacts/phase5/external_protocol.json`, before any external scoring. `docs/PHASE5_EXTERNAL_PROTOCOL.md` is generated from it. No model performance on external data is computed or reported.
+  - **Dataset.** The UCI ADL Binary dataset of Ordóñez et al. (DOI 10.24432/C5J02M, CC BY 4.0): two single-resident homes, independent of CASAS, with every file's SHA-256 and the archive's. `sensor_modeling.external.ordonez` reads it into the external-dataset contract.
+  - **Mapping.** `artifacts/phase5/ordonez_mapping.json`, written from the dataset's documentation, with its SHA-256. Meal labels are ambiguous and unscored, `Leaving` maps approximately to `away`, and each sensor's type, room and model channel, or why it is unsupported, is recorded per home.
+  - **Protocol.** `sensor_modeling.datasets.external_protocol` declares every item:
+    - households, eligibility and a seven-day adaptation period per home;
+    - preprocessing, and the unsupported states and sensors;
+    - model versions pinned by the CASAS population's fit digests;
+    - zero-shot and limited-adaptation conditions, with their adaptation rules;
+    - metrics, a day-block bootstrap within each home, and minimal differences;
+    - the success and failure criteria.
+  - **Checks.** `scripts/check_phase5_inputs.py` verifies a downloaded archive against the frozen digests, and validates each home's adaptation period only.
 - Added the Phase 5 external-dataset contract, `sensor_modeling.external`, described in `docs/EXTERNAL_DATASET_CONTRACT.md`. It is infrastructure: no model is scored on external data.
   - **Contract.** `HouseholdData`, `SensorDescription`, `RawEvent`, `Annotation` with interval or point semantics, `OccupancyPeriod`, and `DatasetProvenance`, in the dataset's own terms, behind a `DatasetAdapter` protocol. `InMemoryAdapter` and a column-declared long-format `CsvAdapter` are the reference adapters.
   - **Mapping.** `OntologyMapping` declares every native label, sensor type and location as exact, approximate, unmappable or ambiguous, with a rationale for all but exact. Undeclared values are reported, never dropped. A mapping is written and read with its SHA-256, so it can be frozen before external results.
