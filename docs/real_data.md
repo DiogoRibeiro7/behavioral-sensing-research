@@ -672,3 +672,8 @@ The obvious next steps are refitting emissions from a subset of homes and
 scoring on held-out ones, and checking whether the `home_inactive`/`away`
 confusion closes when a presence-confirming sensor is present in the
 deployment.
+
+> **Since then.** Emissions were refitted on training homes and scored on
+> held-out ones, with frozen household folds over the 20 single-resident homes;
+> see [fitted silence and activity rates](PHASE3_FITTED_RATES.md). The
+> presence-confirming-sensor check has not been run.

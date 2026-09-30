@@ -1,0 +1,268 @@
+{
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "statistics": "mean and median paired differences",
+    "unit": "household"
+  },
+  "calibration": "expected calibration error over 10 confidence bins",
+  "criteria": {
+    "adopt": "log loss favours the negative binomial, calibration is preserved, balanced accuracy is not degraded, and home_active recall does not favour the hurdle-Poisson",
+    "balanced_accuracy": "question 4, from the primary estimand: not degraded if negligible or favouring the negative binomial, degraded if favouring the hurdle-Poisson, uncertain otherwise",
+    "calibration": "question 2: preserved if calibration error does not favour the hurdle-Poisson in the primary estimand and favours the negative binomial against the declared rates; lost if it favours the hurdle-Poisson, or is negligible or favours the declared rates against them; uncertain otherwise",
+    "complexity": "extra complexity is never accepted because one metric improves: adoption needs the log-loss gain and every guard",
+    "inconclusive": "anything else",
+    "log_loss": "question 3, from the primary estimand: improves, no change, worsens or uncertain",
+    "overall": "adopt if adopted in both settings, reject if rejected in both, and otherwise not adopted, with each setting's decision reported",
+    "recall": "question 1, from the primary estimand's home_active recall: recovers if it favours the negative binomial, no change if negligible, loses more if it favours the hurdle-Poisson, uncertain otherwise",
+    "reject": "log loss is negligible or favours the hurdle-Poisson: the extra parameter is not accepted, whatever else improves",
+    "trade-off": "log loss favours the negative binomial, but calibration is lost, or balanced accuracy or home_active recall favours the hurdle-Poisson",
+    "verdicts": "favours model: mean >= delta and lower bound > 0; favours reference: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else"
+  },
+  "dispersion": {
+    "classes": "poisson (alpha 0); moderate (below extreme); extreme, low data; extreme, flat; extreme, supported",
+    "extreme": "alpha of at least 10",
+    "flat": "the observed table's log-likelihood at alpha exceeds that at alpha / 2 by less than 1 nat: weakly identified",
+    "low_data": "fewer than 100 active training windows",
+    "question": "extreme estimates indicate insufficient data if more than half of them are low data; otherwise they are not a data shortage",
+    "recorded": "each fold's alpha, size, mu and active mean per channel and state, with its active training windows"
+  },
+  "estimands": [
+    {
+      "key": "N0",
+      "model": "hurdle_nb@I0",
+      "question": "the negative binomial against the hurdle-Poisson, current windows",
+      "reference": "hurdle@I0",
+      "role": "primary"
+    },
+    {
+      "key": "NR",
+      "model": "hurdle_nb@R",
+      "question": "the same, the recursion",
+      "reference": "hurdle@R",
+      "role": "primary"
+    },
+    {
+      "key": "D0",
+      "model": "hurdle_nb@I0",
+      "question": "the negative binomial against the declared rates, current windows: is the calibration improvement preserved",
+      "reference": "declared@I0",
+      "role": "secondary"
+    },
+    {
+      "key": "DR",
+      "model": "hurdle_nb@R",
+      "question": "the same, the recursion",
+      "reference": "declared@R",
+      "role": "secondary"
+    },
+    {
+      "key": "H0",
+      "model": "hurdle@I0",
+      "question": "the hurdle-Poisson against the declared rates, current windows, as in the Phase 3.3 follow-up",
+      "reference": "declared@I0",
+      "role": "context"
+    },
+    {
+      "key": "HR",
+      "model": "hurdle@R",
+      "question": "the same, the recursion",
+      "reference": "declared@R",
+      "role": "context"
+    }
+  ],
+  "fitting": {
+    "hurdle": "pi = (Z + k pi0) / (W + k); m = (S + k m0) / (P + k); mu solves mu / (1 - exp(-mu)) = m",
+    "hurdle_nb": "the same pi and m; alpha maximises the profile likelihood of the active-count table plus k pseudo-windows distributed as the zero-truncated Poisson with mean m, over {0} and [1e-4, max_dispersion]; mu solves the zero-truncated negative binomial's mean for m",
+    "max_dispersion": 100.0,
+    "pseudo_windows": 12.0
+  },
+  "households": {
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+    "use": "each household is held out once; its fold's training households fit every channel model"
+  },
+  "identical": "prior, transition, channels, windows and inference; the models differ only in each channel's observation model",
+  "inference": "online filter: I0 and R read no window after the scored one",
+  "metrics": [
+    "balanced_accuracy",
+    "log_loss",
+    "brier",
+    "calibration_error"
+  ],
+  "minimal_differences": {
+    "accumulation_slope": 0.02,
+    "balanced_accuracy": 0.02,
+    "brier": 0.01,
+    "calibration_error": 0.02,
+    "log_loss": 0.05,
+    "recall": 0.05
+  },
+  "models": {
+    "declared": {
+      "attribution": 1.0,
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "nothing: every parameter is the declared default",
+      "model": "restricted generative filter",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "hurdle": {
+      "attribution": 1.0,
+      "emissions": "per channel and state: P(silent) = pi, and a zero-truncated Poisson with rate mu for an active window's count",
+      "fitted": "pi and mu per fold, per channel and state, on the fold's training households' labelled windows only, shrunk toward the declared model by the pseudo-windows",
+      "model": "restricted generative filter with fitted hurdle channels",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "hurdle_nb": {
+      "attribution": 1.0,
+      "emissions": "per channel and state: P(silent) = pi, and a zero-truncated negative binomial with mean mu and dispersion alpha for an active window's count",
+      "fitted": "pi and the active mean as for the hurdle; alpha maximises the profile likelihood of the training households' active-count table plus the pseudo-windows, Poisson-shaped at the same mean; per fold, channel and state, on the fold's training households only",
+      "model": "restricted generative filter with fitted hurdle negative-binomial channels",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    }
+  },
+  "motivation": "the posterior predictive checks found the zero-truncated Poisson active count systematically under-dispersed, with a variance growing with the square of the mean; their routing named within-state temporal dependence as the next family, which a count distribution cannot address, and this experiment measures what the over-dispersed count alone does",
+  "name": "phase3-hurdle-negative-binomial",
+  "per_state_recall": {
+    "estimands": "every estimand",
+    "focus_state": "home_active",
+    "rare_rule": "share of labelled time below 0.05 in either fold's training households"
+  },
+  "protocol_sha256": "e85c21744e3d89cf19451eee47de6c7d16c88858a923ff7329276b26f411828e",
+  "questions": {
+    "1": "does the negative binomial recover some of the home_active recall the hurdle-Poisson lost",
+    "2": "does it preserve the calibration improvement",
+    "3": "does it improve log loss",
+    "4": "does it avoid degrading balanced accuracy",
+    "settings": "each question is answered in each setting from its primary estimand, N0 or NR, and for calibration also D0 or DR"
+  },
+  "quiet_runs": {
+    "comparison": "paired household difference, lower is better",
+    "setting": "the recursion only: a fully silent window has the same likelihood under both hurdle families, so with current windows their slopes coincide",
+    "statistic": "Phase 3.3's accumulation slope: within the predicted state, the least-squares slope per hour of confidence minus correctness on the position in a run of consecutive fully silent windows, over labelled windows at positions 1 to 36"
+  },
+  "schema": "dispersion-protocol/1",
+  "seeds": {
+    "bootstrap": 0
+  },
+  "settings": {
+    "I0": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0"
+      ],
+      "components": [
+        "current_evidence"
+      ],
+      "history_steps": 3,
+      "name": "current",
+      "sha256": "c4ef81951d5c35bca43ed458926c4a14dbb48c1af3e7496721f2a139c0649bdb",
+      "step_seconds": 300.0
+    },
+    "R": "the filter's recursion fed every window of the recording from the stationary distribution; every model receives the same windows"
+  },
+  "tuning": "none: every setting is declared here, before scoring"
+}

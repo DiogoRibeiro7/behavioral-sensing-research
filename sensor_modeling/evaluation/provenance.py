@@ -40,7 +40,17 @@ from typing import Any
 
 import numpy as np
 
-from ..fusion.regime import ONLINE, InferenceRegime
+from ..fusion.regime import (
+    ONLINE,
+    EvidenceSummary,
+    InferenceRegime,
+    NotEnumerated,
+    check_evidence,
+    evidence_from_dict,
+)
+from .disagreement import DisagreementReport, validate_disagreement
+from .mismatch import MismatchReport, validate_mismatch
+from .selective import SelectiveReport, validate_selective
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +64,19 @@ RESULTS_DIR = Path("results")
 #: existing field means and would need an explicit migration. A reader refuses
 #: any version newer than its own rather than guessing at fields it does not
 #: know. See ``docs/EXPERIMENT_ARTIFACTS.md``.
-SCHEMA_VERSION = "1.2"
+SCHEMA_VERSION = "1.6"
 
 #: Versions :func:`load_record` accepts, oldest first.
-READABLE_VERSIONS = ("1.0", "1.1", "1.2")
+READABLE_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6")
 
 #: How a record written at 1.2 or later knows its inference regime.
 DECLARED_INFERENCE = "declared by the experiment that wrote the record"
+
+#: Why a record migrated from an earlier schema lists no prediction timestamps.
+UNLISTED_EVIDENCE = (
+    "written at schema {version}, before prediction and evidence timestamps were "
+    "recorded; its estimates read no evidence after their prediction moments"
+)
 
 #: How a 1.0 or 1.1 record is given its inference regime when migrated.
 #:
@@ -410,6 +426,20 @@ class ExperimentRecord:
         Estimates with uncertainty intervals, ready to quote.
     mcse
         Monte Carlo standard errors of simulation-derived summaries, by name.
+    structural_disagreement
+        How much the experiment's model specifications disagree, window by
+        window, as a :class:`~sensor_modeling.evaluation.DisagreementReport`, or
+        ``None``. Added in 1.4.
+    observation_mismatch
+        How surprising each window's evidence is under every state of the
+        observation model, as a
+        :class:`~sensor_modeling.evaluation.MismatchReport`, or ``None``. Added
+        in 1.5.
+    selective_prediction
+        How well candidate risk signals order predictions for rejection, over a
+        grid of coverage levels, as a
+        :class:`~sensor_modeling.evaluation.SelectiveReport`, or ``None``. Added
+        in 1.6.
     recorded_at, environment, resolved_defaults
         Captured at creation. Pass them only when rebuilding a record that
         was already written, as :meth:`load` does.
@@ -422,12 +452,19 @@ class ExperimentRecord:
     inference_provenance
         How the regime is known: declared by the writer, or attested when an
         older record was migrated.
+    evidence
+        The prediction and latest-evidence timestamps behind the record's
+        estimates, as an :class:`~sensor_modeling.fusion.EvidenceSummary`. A
+        causal result that cannot list them may give a
+        :class:`~sensor_modeling.fusion.NotEnumerated` reason instead; a
+        smoothed result may not. Required and keyword-only.
     """
 
     experiment: str
     configuration: Mapping[str, Any]
     inference: InferenceRegime = field(kw_only=True)
     inference_provenance: str = field(default=DECLARED_INFERENCE, kw_only=True)
+    evidence: EvidenceSummary | NotEnumerated = field(kw_only=True)
     seeds: Sequence[int] = field(default_factory=list)
     results: Mapping[str, Any] = field(default_factory=dict)
     sensor_subset: Sequence[str] | None = None
@@ -444,6 +481,9 @@ class ExperimentRecord:
     )
     intervals: Sequence[ReportedInterval] = field(default_factory=list)
     mcse: Mapping[str, float] = field(default_factory=dict)
+    structural_disagreement: DisagreementReport | None = None
+    observation_mismatch: MismatchReport | None = None
+    selective_prediction: SelectiveReport | None = None
     recorded_at: str = field(default_factory=_now)
     environment: Mapping[str, str] = field(default_factory=environment)
     resolved_defaults: Mapping[str, Any] = field(default_factory=resolved_defaults)
@@ -459,6 +499,21 @@ class ExperimentRecord:
             raise TypeError("inference must be an InferenceRegime")
         if not str(self.inference_provenance).strip():
             raise ValueError("an inference regime needs its provenance")
+        if not isinstance(self.evidence, (EvidenceSummary, NotEnumerated)):
+            raise TypeError("evidence must be an EvidenceSummary or NotEnumerated")
+        check_evidence(self.evidence, self.inference)
+        if self.structural_disagreement is not None and not isinstance(
+            self.structural_disagreement, DisagreementReport
+        ):
+            raise TypeError("structural_disagreement must be a DisagreementReport")
+        if self.observation_mismatch is not None and not isinstance(
+            self.observation_mismatch, MismatchReport
+        ):
+            raise TypeError("observation_mismatch must be a MismatchReport")
+        if self.selective_prediction is not None and not isinstance(
+            self.selective_prediction, SelectiveReport
+        ):
+            raise TypeError("selective_prediction must be a SelectiveReport")
         notes = list(self.notes)
         if self.data_source == "simulator" and SIMULATOR_NOTE not in notes:
             notes.append(SIMULATOR_NOTE)
@@ -480,6 +535,7 @@ class ExperimentRecord:
             "inference": {
                 **self.inference.to_dict(),
                 "provenance": self.inference_provenance,
+                "evidence": self.evidence.to_dict(),
             },
             "inputs": [item.to_dict() for item in self.inputs],
             "split": dict(self.split) if self.split is not None else None,
@@ -506,6 +562,21 @@ class ExperimentRecord:
             },
             "intervals": [interval.to_dict() for interval in self.intervals],
             "mcse": dict(self.mcse),
+            "structural_disagreement": (
+                self.structural_disagreement.to_dict()
+                if self.structural_disagreement is not None
+                else None
+            ),
+            "observation_mismatch": (
+                self.observation_mismatch.to_dict()
+                if self.observation_mismatch is not None
+                else None
+            ),
+            "selective_prediction": (
+                self.selective_prediction.to_dict()
+                if self.selective_prediction is not None
+                else None
+            ),
             "notes": list(self.notes),
         }
         if self.migrated_from is not None:
@@ -545,6 +616,7 @@ class ExperimentRecord:
             configuration=payload["configuration"],
             inference=InferenceRegime.from_dict(payload["inference"]),
             inference_provenance=payload["inference"]["provenance"],
+            evidence=evidence_from_dict(payload["inference"]["evidence"]),
             seeds=payload["seeds"],
             results=payload["results"],
             sensor_subset=payload["sensor_subset"],
@@ -559,6 +631,21 @@ class ExperimentRecord:
             household_metrics=payload["household_metrics"],
             intervals=[ReportedInterval(**item) for item in payload["intervals"]],
             mcse=payload["mcse"],
+            structural_disagreement=(
+                DisagreementReport.from_dict(payload["structural_disagreement"])
+                if payload["structural_disagreement"] is not None
+                else None
+            ),
+            observation_mismatch=(
+                MismatchReport.from_dict(payload["observation_mismatch"])
+                if payload["observation_mismatch"] is not None
+                else None
+            ),
+            selective_prediction=(
+                SelectiveReport.from_dict(payload["selective_prediction"])
+                if payload["selective_prediction"] is not None
+                else None
+            ),
             recorded_at=payload["recorded_at"],
             environment=payload["environment"],
             resolved_defaults=payload["resolved_defaults"],
@@ -644,7 +731,32 @@ _ADDED_IN_1_1: Mapping[str, Any] = {
 #: Fields added in 1.2. They have no default: a migration must supply them.
 _ADDED_IN_1_2: Mapping[str, type] = {"inference": dict}
 
-_INFERENCE_KEYS = {"mode", "lag_steps", "step_seconds", "label", "provenance"}
+#: Fields added in 1.4, with the default an older record is given.
+_ADDED_IN_1_4: Mapping[str, Any] = {"structural_disagreement": None}
+
+#: Fields added in 1.5, with the default an older record is given.
+_ADDED_IN_1_5: Mapping[str, Any] = {"observation_mismatch": None}
+
+#: Fields added in 1.6, with the default an older record is given.
+_ADDED_IN_1_6: Mapping[str, Any] = {"selective_prediction": None}
+
+#: Every optional section added since 1.3, with its default.
+_ADDED_SINCE_1_3: Mapping[str, Any] = {
+    **_ADDED_IN_1_4,
+    **_ADDED_IN_1_5,
+    **_ADDED_IN_1_6,
+}
+
+_INFERENCE_KEYS = {
+    "mode",
+    "lag_steps",
+    "step_seconds",
+    "label",
+    "causal",
+    "delay_seconds",
+    "provenance",
+    "evidence",
+}
 
 _ENVIRONMENT_KEYS = ("git_commit", "git_dirty", "python", "sensor_modeling")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -776,14 +888,28 @@ def _check_sections(payload: Mapping[str, Any]) -> list[str]:
         problems.append(f"inference must have exactly {sorted(_INFERENCE_KEYS)}")
     else:
         try:
-            InferenceRegime.from_dict(inference)
+            regime = InferenceRegime.from_dict(inference)
         except (ValueError, TypeError, KeyError) as exc:
             problems.append(f"inference is not a valid regime: {exc}")
+        else:
+            if not isinstance(inference["evidence"], dict):
+                problems.append("inference.evidence must be an object")
+            else:
+                try:
+                    check_evidence(evidence_from_dict(inference["evidence"]), regime)
+                except (ValueError, TypeError, KeyError) as exc:
+                    problems.append(f"inference.evidence is not valid: {exc}")
         if (
             not isinstance(inference["provenance"], str)
             or not inference["provenance"].strip()
         ):
             problems.append("inference.provenance must be non-empty text")
+    if payload["structural_disagreement"] is not None:
+        problems += validate_disagreement(payload["structural_disagreement"])
+    if payload["observation_mismatch"] is not None:
+        problems += validate_mismatch(payload["observation_mismatch"])
+    if payload["selective_prediction"] is not None:
+        problems += validate_selective(payload["selective_prediction"])
     return problems
 
 
@@ -801,6 +927,7 @@ def validate_record(payload: Mapping[str, Any]) -> None:
     # field being present with the right type. Everything else is collected.
     structural: list[str] = []
     fields_ = set(_REQUIRED) | set(_ADDED_IN_1_1) | set(_ADDED_IN_1_2)
+    fields_ |= set(_ADDED_SINCE_1_3)
     missing = sorted(fields_ - set(payload))
     structural += [f"missing required field {key!r}" for key in missing]
     expected_types: dict[str, type | tuple[type, ...]] = {
@@ -812,6 +939,9 @@ def validate_record(payload: Mapping[str, Any]) -> None:
         "household_metrics": dict,
         "mcse": dict,
         "preprocessing": dict,
+        "structural_disagreement": (dict, type(None)),
+        "observation_mismatch": (dict, type(None)),
+        "selective_prediction": (dict, type(None)),
     }
     structural += [
         f"{key} has the wrong type"
@@ -866,9 +996,85 @@ def _migrate_1_1(payload: dict[str, Any]) -> dict[str, Any]:
     migrated["inference"] = {
         **ONLINE.to_dict(),
         "provenance": MIGRATED_INFERENCE.format(version=version),
+        "evidence": NotEnumerated(UNLISTED_EVIDENCE.format(version=version)).to_dict(),
     }
+    for key, default in _ADDED_SINCE_1_3.items():
+        migrated.setdefault(key, default)
     migrated["schema_version"] = SCHEMA_VERSION
     migrated["migrated_from"] = version
+    return migrated
+
+
+def _migrate_1_2(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.2 record to the current version without changing its content.
+
+    1.2 recorded the regime but not its causality, its delay or its
+    prediction and evidence timestamps. Causality and delay follow from the
+    regime. A causal record's timestamps are marked as not listed, with the
+    reason. A smoothed one is refused: a smoother must list the future
+    information it used, and 1.2 did not record it. None was published.
+    """
+    migrated = dict(payload)
+    try:
+        inference = dict(migrated["inference"])
+        regime = InferenceRegime.from_dict(inference)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ArtifactError(f"the 1.2 inference is not a valid regime: {exc}") from exc
+    if not regime.is_causal:
+        raise ArtifactError(
+            f"a 1.2 record of the {regime.label} does not list its prediction and "
+            "evidence timestamps, which a smoother must; re-run it"
+        )
+    migrated["inference"] = {
+        **inference,
+        **regime.to_dict(),
+        "evidence": NotEnumerated(UNLISTED_EVIDENCE.format(version="1.2")).to_dict(),
+    }
+    for key, default in _ADDED_SINCE_1_3.items():
+        migrated.setdefault(key, default)
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["migrated_from"] = "1.2"
+    return migrated
+
+
+def _migrate_1_3(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.3 record to the current version without changing its content.
+
+    1.4 to 1.6 only add ``structural_disagreement``, ``observation_mismatch``
+    and ``selective_prediction``, which a 1.3 record did not have.
+    """
+    migrated = dict(payload)
+    for key, default in _ADDED_SINCE_1_3.items():
+        migrated.setdefault(key, default)
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["migrated_from"] = "1.3"
+    return migrated
+
+
+def _migrate_1_4(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.4 record to the current version without changing its content.
+
+    1.5 and 1.6 only add ``observation_mismatch`` and ``selective_prediction``,
+    which a 1.4 record did not have.
+    """
+    migrated = dict(payload)
+    for key, default in {**_ADDED_IN_1_5, **_ADDED_IN_1_6}.items():
+        migrated.setdefault(key, default)
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["migrated_from"] = "1.4"
+    return migrated
+
+
+def _migrate_1_5(payload: dict[str, Any]) -> dict[str, Any]:
+    """Bring a 1.5 record to the current version without changing its content.
+
+    1.6 only adds ``selective_prediction``, which a 1.5 record did not have.
+    """
+    migrated = dict(payload)
+    for key, default in _ADDED_IN_1_6.items():
+        migrated.setdefault(key, default)
+    migrated["schema_version"] = SCHEMA_VERSION
+    migrated["migrated_from"] = "1.5"
     return migrated
 
 
@@ -930,6 +1136,14 @@ def load_record(path: Path) -> dict[str, Any]:
         )
     elif version == "1.1":
         payload = _migrate_1_1(payload)
+    elif version == "1.2":
+        payload = _migrate_1_2(payload)
+    elif version == "1.3":
+        payload = _migrate_1_3(payload)
+    elif version == "1.4":
+        payload = _migrate_1_4(payload)
+    elif version == "1.5":
+        payload = _migrate_1_5(payload)
     validate_record(payload)
     loaded: dict[str, Any] = payload
     return loaded

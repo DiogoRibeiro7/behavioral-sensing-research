@@ -73,12 +73,25 @@ nav:
       - "Phase 3.2: explicit history state": PHASE3_HISTORY_STATE.md
       - "Phase 3.3: correlated silence": PHASE3_CORRELATED_SILENCE.md
       - "Phase 3.3 follow-up: fitted rates": PHASE3_FITTED_RATES.md
+      - "Phase 3.3 follow-up: predictive checks": PHASE3_PREDICTIVE_CHECKS.md
+      - Hurdle negative binomial: HURDLE_NEGATIVE_BINOMIAL.md
+      - "Phase 3.3 follow-up: negative binomial": PHASE3_NEGATIVE_BINOMIAL.md
       - Partial pooling: PARTIAL_POOLING.md
+      - "Phase 3.4: partial pooling": PHASE3_PARTIAL_POOLING.md
+      - "Phase 3.5: fixed-lag smoothing": PHASE3_SMOOTHING.md
+      - Structural disagreement: STRUCTURAL_DISAGREEMENT.md
+      - Evidence-group disagreement: EVIDENCE_GROUP_DISAGREEMENT.md
+      - Observation mismatch: OBSERVATION_MISMATCH.md
+      - Selective prediction: SELECTIVE_PREDICTION.md
+      - "Phase 4: uncertainty diagnostics": PHASE4_UNCERTAINTY_DIAGNOSTICS.md
       - Experiment artifacts: EXPERIMENT_ARTIFACTS.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md
       - v0.3 freeze verification: V03_PROFILE_FREEZE_VERIFICATION.md
       - External cohort composition: EXTERNAL_COHORT_COMPOSITION.md
+      - External dataset contract: EXTERNAL_DATASET_CONTRACT.md
+      - "Phase 5: external protocol": PHASE5_EXTERNAL_PROTOCOL.md
+      - "Phase 5: external results": PHASE5_EXTERNAL_RESULTS.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:

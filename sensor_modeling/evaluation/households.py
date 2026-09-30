@@ -367,6 +367,11 @@ def compare_households(
     ValueError
         If no household has a value from both, or a setting is invalid.
     """
+    if any(hasattr(side, "regime") for side in (model, reference)):
+        raise TypeError(
+            "a result labelled with its inference regime is compared with "
+            "compare_results, which checks the regimes"
+        )
     check_settings(confidence, resamples)
     if interval not in INTERVAL_METHODS:
         raise ValueError(f"interval must be one of {INTERVAL_METHODS}")

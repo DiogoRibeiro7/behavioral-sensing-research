@@ -37,6 +37,18 @@ from .detection import (
     run_detection_study,
     standard_arms,
 )
+from .disagreement import (
+    DisagreementReport,
+    DisagreementTrace,
+    compare_posteriors,
+    jensen_shannon,
+)
+from .evidence_groups import (
+    EvidenceGroup,
+    GroupDisagreementRecorder,
+    GroupWindow,
+    group_window,
+)
 from .households import (
     Estimate,
     HouseholdComparison,
@@ -64,6 +76,7 @@ from .metrics import (
     summarise,
     transition_timing,
 )
+from .mismatch import MismatchReport, MismatchTrace
 from .provenance import (
     METRIC_DEFINITIONS,
     RESULTS_DIR,
@@ -77,12 +90,30 @@ from .provenance import (
     load_record,
     validate_record,
 )
+from .regime_results import (
+    RegimeComparison,
+    RegimeResult,
+    compare_results,
+    pool_results,
+)
 from .resampling import Interval, monte_carlo_standard_error
+from .selective import (
+    HIGHER_IS_RISKIER,
+    HIGHER_IS_SAFER,
+    SelectiveData,
+    SelectiveReport,
+    Signal,
+    SignalEvaluation,
+    evaluate_signal,
+    evaluate_signals,
+)
 
 __all__ = [
     "METRIC_DEFINITIONS",
     "RESULTS_DIR",
     "SCHEMA_VERSION",
+    "HIGHER_IS_RISKIER",
+    "HIGHER_IS_SAFER",
     "AblationReport",
     "ArmOutcome",
     "ArmResult",
@@ -94,17 +125,30 @@ __all__ = [
     "ConfusionMatrix",
     "DetectionMetrics",
     "DetectionStudy",
+    "DisagreementReport",
+    "DisagreementTrace",
     "Estimate",
+    "EvidenceGroup",
     "ExperimentRecord",
+    "GroupDisagreementRecorder",
+    "GroupWindow",
     "HouseholdComparison",
     "HouseholdSummary",
     "InputArtifact",
     "Interval",
+    "MismatchReport",
+    "MismatchTrace",
     "ModelRecord",
     "PairedDifference",
     "PredictionMetrics",
+    "RegimeComparison",
+    "RegimeResult",
     "ReportedInterval",
     "Scenario",
+    "SelectiveData",
+    "SelectiveReport",
+    "Signal",
+    "SignalEvaluation",
     "ScenarioComparison",
     "SensorConfiguration",
     "StateMetrics",
@@ -112,16 +156,23 @@ __all__ = [
     "binary_metrics",
     "compare_scenario",
     "compare_households",
+    "compare_posteriors",
+    "compare_results",
     "confusion_matrix",
     "detection_metrics",
     "environment",
     "household_values",
+    "jensen_shannon",
     "evaluate_configuration",
+    "evaluate_signal",
+    "evaluate_signals",
+    "group_window",
     "leave_one_out",
     "load_record",
     "monte_carlo_standard_error",
     "named_subsets",
     "paired_difference",
+    "pool_results",
     "prediction_metrics",
     "recall_of",
     "run_ablation",

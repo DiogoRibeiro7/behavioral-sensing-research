@@ -86,11 +86,15 @@ def _record(
 ) -> object:
     """Wrap a result in the provenance needed to interpret it later."""
     from .evaluation.provenance import ExperimentRecord
-    from .fusion.regime import ONLINE
+    from .fusion.regime import ONLINE, NotEnumerated
 
     return ExperimentRecord(
         experiment=experiment,
         inference=ONLINE,
+        evidence=NotEnumerated(
+            "aggregate simulation study; every estimate is the online pipeline's "
+            "at its own step, and individual predictions are not listed"
+        ),
         configuration=configuration,
         seeds=seeds,
         results=results,

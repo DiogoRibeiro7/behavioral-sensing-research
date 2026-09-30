@@ -71,6 +71,20 @@ The continuous-time Markov prior models how long a state lasts but not when in
 the day it is plausible, so a resident motionless at 02:00 and at 14:00 look
 alike to it. A circadian prior recovers about a tenth of that.
 
+**That conclusion did not survive a matched comparison.** The Phase 1 run used
+the 20 single-resident development homes and frozen folds. With current windows
+only, the diagnostic and the production filter are level, −0.008 [−0.031,
++0.019]. But the filter also conditions on every earlier window. Given strictly
+less than that, the current window and three previous ones, the diagnostic
+scores 0.081 [0.052, 0.111] higher balanced accuracy, in 19 of 20 homes. Part of
+the gap is the formulation, not only the missing information; see
+[the recoverable-information gap](PHASE1_RECOVERABLE_GAP.md). Of the two missing
+pieces, time of day has since been given to the generative model as a
+hierarchical prior, worth +0.131 balanced accuracy on the development homes. An
+explicit recent-history state lowered balanced accuracy by 0.042 on identical
+information. See [the time prior](PHASE3_TIME_PRIOR.md) and
+[the history state](PHASE3_HISTORY_STATE.md).
+
 The three components added in response — fitted emission rates, the circadian
 prior and smoothing — **do not combine.** All three together score 0.435
 balanced accuracy against 0.463 for smoothing alone, with calibration worse than
@@ -274,20 +288,37 @@ The privacy posture depends on what a deployment chooses to install.
 
 ## What would make this scientifically trustworthy
 
-In rough priority order:
+In rough priority order, with what has been done since this list was written:
 
-1. **Validation on a public annotated dataset** (for example CASAS, ARAS or
-   MARBLE), reporting the same metrics against real annotations. Until this
-   exists, every number here is conditional on the simulator.
-2. **Parameter estimation from data** rather than declaration, with the fitted
-   values compared against the hand-specified defaults.
+1. **Validation on public annotated datasets**, reporting the same metrics
+   against real annotations.
+   - **CASAS.** Done: a 22-home development panel and a frozen 43-home external
+     cohort; see [Real-data validation](real_data.md).
+   - **An independent dataset.** The two homes of UCI ADL Binary were evaluated
+     under a frozen protocol, and the CASAS-trained model does not transfer;
+     see [Phase 5 external results](PHASE5_EXTERNAL_RESULTS.md).
+   - **Still needed.** Independent datasets with more homes.
+2. **Parameter estimation from data** rather than declaration.
+   - **Done for the evidence channels.** Fitted channel models improve
+     calibration on the development homes; see
+     [fitted rates](PHASE3_FITTED_RATES.md).
+   - **Partial pooling.** Household parameters with partial pooling are
+     evaluated; see [partial pooling](PHASE3_PARTIAL_POOLING.md).
+   - **Transfer.** The fitted parameters did not transfer to the external
+     homes.
 3. **A second, independently written simulator** with different structural
-   assumptions, to test how much of the performance depends on this one.
+   assumptions, to test how much of the performance depends on this one. Not
+   done.
 4. **Calibration assessment across households**, not only within one, since a
    model calibrated on average may be badly calibrated per person.
+   - **Per household.** The matched evaluations since Phase 1 report
+     calibration error per household.
+   - **Across datasets.** The calibration gap widens: zero-shot confidence
+     exceeds accuracy by 0.41 and 0.45 in the external homes, against 0.30 on
+     the development homes.
 5. **A prospective evaluation of alert burden** with people who would act on
    the alerts, since false-positive tolerance is a human judgement the metrics
-   cannot supply.
+   cannot supply. Not done.
 6. **Explicit modelling of the dependency** between the occupancy and state
    layers, so that shared-evidence correlation is reflected in the reported
-   uncertainty.
+   uncertainty. Not done.

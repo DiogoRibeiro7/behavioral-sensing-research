@@ -1,0 +1,639 @@
+{
+  "adaptation_rules": {
+    "adapted": "each routed channel's silence probability and active mean, per state, by partial pooling",
+    "forbidden": "any event or label of the scored period, and any setting chosen by looking at external results",
+    "not_adapted": "the transition, the prior, the mapping, the channel set, the dispersion and the ensemble",
+    "permitted": "the adaptation period's events and mapped labels"
+  },
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "paired": "every model and condition is resampled on the same days",
+    "reason": "two homes support no between-household inference; days keep within-day dependence intact",
+    "resamples": 10000,
+    "seed": 0,
+    "unit": "local calendar days of the scored period, within a home"
+  },
+  "conditions": {
+    "adapted": "each home's channel parameters are pooled toward the population on its adaptation period's labelled windows",
+    "same_windows": "both conditions, and the declared model, are scored on the same scored windows",
+    "zero_shot": "no parameter is fitted on external data; the adaptation period's events only run the recursion"
+  },
+  "criteria": {
+    "A": "helps when balanced accuracy favours adapted in both homes and log loss favours zero-shot in neither; does not help when balanced accuracy is negligible or favours zero-shot in both; inconclusive otherwise",
+    "C": "above chance when the difference favours zero-shot in both homes; not above chance when it is negligible or favours chance in both; inconclusive otherwise",
+    "S": "the direction survives when the AURC favours the structural signal in both homes; reverses when it favours confidence in both; inconclusive otherwise",
+    "T": "transfers when balanced accuracy favours zero-shot in both homes and log loss favours the declared model in neither; does not transfer when balanced accuracy is negligible or favours the declared model in both; inconclusive otherwise",
+    "claims": "two homes: every conclusion is about these two homes, not a population of homes"
+  },
+  "dataset": {
+    "archive": {
+      "sha256": "a03060857f2e9f9de2d0c7489e63bfd89b83c7d092e56e414b31f00c209964f5",
+      "url": "https://archive.ics.uci.edu/static/public/271/activities+of+daily+living+adls+recognition+using+binary+sensors.zip"
+    },
+    "choice": "it is independently collected, single-resident by its documentation, annotated with intervals, and legally and reproducibly obtainable: a stated licence, a DOI and a stable archive; datasets without a stated licence, or with more than one resident per home, were not considered",
+    "provenance": {
+      "citation": "Ordóñez, F.J.; de Toledo, P.; Sanchis, A. Activity Recognition Using Hybrid Generative/Discriminative Models on Home Environments Using Binary Sensors. Sensors 2013, 13, 5460-5477",
+      "files": {
+        "OrdonezA_ADLs.txt": "b018601885e1c62a9769f6b2ac7b47fcd51497d8880e272c1b3ff678eb63e15d",
+        "OrdonezA_Description.txt": "4ce4b8e4dbbaa9208069ac184e5686c2b8fdcf97a446a8357112f3ea2bc7b3dc",
+        "OrdonezA_Sensors.txt": "3ec41f2b1d15c90aec0753d02a21c9e7add0b6f761ef76f3d8d428fb2dd0fa9d",
+        "OrdonezB_ADLs.txt": "d2c59c9ada5da5dbebe26c6f02f02e331fc61a5d4ec425e19ef5a9de98852d58",
+        "OrdonezB_Description.txt": "727f35c52afca460dee311eff8f3897065dfd75bc755b3dbb9de6b616df4d43d",
+        "OrdonezB_Sensors.txt": "b0c77812b48f3b7d81afa446c80faba35b33bd99075350e929fa34a463c49a00",
+        "README.txt": "c80e86f00bbc279d09a7154ae2d0a1f7d3d72a84ec20d4d694ed4641a3341014"
+      },
+      "licence": "CC BY 4.0 (UCI Machine Learning Repository); the README also asks for the citation below and prohibits commercial use",
+      "name": "UCI Activities of Daily Living (ADLs) Recognition Using Binary Sensors",
+      "notes": [
+        "archive sha256 a03060857f2e9f9de2d0c7489e63bfd89b83c7d092e56e414b31f00c209964f5",
+        "two single-resident homes in Spain; no timezone is given, and Europe/Madrid is declared",
+        "OrdonezB_Description.txt lists door PIR sensors in the kitchen, bathroom and bedroom; the recorded sensors place them in the kitchen, living room and bedroom, and the recorded rooms are used"
+      ],
+      "retrieved": "2026-09-30",
+      "source": "https://doi.org/10.24432/C5J02M; archive https://archive.ics.uci.edu/static/public/271/activities+of+daily+living+adls+recognition+using+binary+sensors.zip",
+      "version": "1.0 (README, November 2013); UCI dataset 271, donated 2013-10-27"
+    },
+    "redistribution": "none: the scoring run downloads the archive and verifies every file's digest"
+  },
+  "estimands": {
+    "A": "adaptation: adapted minus zero-shot, per home",
+    "C": "above chance: zero-shot balanced accuracy minus chance, per home",
+    "S": "Phase 4 direction: confidence's error AURC minus the structural signal's, per home, zero-shot",
+    "T": "transfer: zero-shot minus declared, per home"
+  },
+  "households": {
+    "candidates": [
+      "OrdonezA",
+      "OrdonezB"
+    ],
+    "eligibility": "at least 7 labelled days after the adaptation period, a declared timezone, and at least two channels the model can use",
+    "exclusion": "a home whose validation under the frozen mapping has an error other than impossible_interval, undeclared_label, undeclared_sensor, unknown_sensor; tolerated errors leave their items unscored and reported",
+    "inclusion": "every candidate home, single-resident by the dataset's documentation",
+    "labelled_days": {
+      "OrdonezA": 14,
+      "OrdonezB": 21
+    }
+  },
+  "mapping": {
+    "file": "artifacts/phase5/ordonez_mapping.json",
+    "labels": {
+      "Breakfast": {
+        "outcome": "ambiguous",
+        "targets": [
+          "kitchen_activity",
+          "home_active"
+        ]
+      },
+      "Dinner": {
+        "outcome": "ambiguous",
+        "targets": [
+          "kitchen_activity",
+          "home_active"
+        ]
+      },
+      "Grooming": {
+        "outcome": "approximate",
+        "targets": [
+          "bathroom_activity"
+        ]
+      },
+      "Leaving": {
+        "outcome": "approximate",
+        "targets": [
+          "away"
+        ]
+      },
+      "Lunch": {
+        "outcome": "ambiguous",
+        "targets": [
+          "kitchen_activity",
+          "home_active"
+        ]
+      },
+      "Showering": {
+        "outcome": "approximate",
+        "targets": [
+          "bathroom_activity"
+        ]
+      },
+      "Sleeping": {
+        "outcome": "exact",
+        "targets": [
+          "sleeping"
+        ]
+      },
+      "Snack": {
+        "outcome": "ambiguous",
+        "targets": [
+          "kitchen_activity",
+          "home_active",
+          "home_inactive"
+        ]
+      },
+      "Spare_Time/TV": {
+        "outcome": "approximate",
+        "targets": [
+          "home_inactive"
+        ]
+      },
+      "Toileting": {
+        "outcome": "approximate",
+        "targets": [
+          "bathroom_activity"
+        ]
+      }
+    },
+    "new_values": "a label, sensor type or room first seen in the scored period is left unscored and reported; the frozen mapping is never edited",
+    "sha256": "ac82ba9a9d6bf70392b14e67eea8e22ca3dd00081b7b0b372ccbc5dd2728fbb5",
+    "written_from": "Written from the README and the two description files, which list every label and sensor; the rooms and the meaning of Leaving were checked on the first seven days of each home only. Frozen before any scoring."
+  },
+  "metrics": {
+    "chance": "one over the number of scored states present in the home's scored windows",
+    "primary": [
+      "balanced_accuracy",
+      "log_loss",
+      "calibration_error"
+    ],
+    "scoring": "per home, over the scored windows; predictions over every latent state; a prediction of an unsupported state is an error",
+    "secondary": [
+      "brier",
+      "macro_f1",
+      "per_class_recall"
+    ],
+    "selective": "error AURC of confidence and of the structural ensemble's normalised discordance over the default coverage grid, within the home"
+  },
+  "minimal_differences": {
+    "aurc": 0.01,
+    "balanced_accuracy": 0.02,
+    "brier": 0.01,
+    "calibration_error": 0.02,
+    "chance": 0.05,
+    "log_loss": 0.05
+  },
+  "models": {
+    "adapted": {
+      "adaptation": "pool_channels of the home's own statistics toward the population, with household_statistics(until=the end of the adaptation period)",
+      "from": "zero_shot",
+      "pooling": {
+        "strength": 288.0
+      },
+      "strength_source": "the Phase 3.4 declared strength: 288 five-minute windows, 24 labelled hours"
+    },
+    "code": "the scoring run's code must check this frozen file and reproduce every population digest before it scores",
+    "declared": {
+      "configuration": {
+        "attribution": 1.0,
+        "emissions": "default_emissions of the household registry, pooled per channel",
+        "fitted": "nothing: every parameter is the declared default",
+        "model": "restricted generative filter",
+        "prediction": "most probable state of the posterior; no abstention",
+        "prior": "stationary distribution of the default ontology, one step before the first declared window",
+        "reliability": 1.0,
+        "transition": "default StateOntology, time-homogeneous, one step per window",
+        "windows": "the set's current window, plus its lagged windows with recent history"
+      },
+      "description": "the filter's declared Poisson channel rates, from the external registry's default emissions, in the same recursion; nothing fitted",
+      "specification": "declared",
+      "use": "the reference for the transfer estimand"
+    },
+    "structural_ensemble": {
+      "halves": {
+        "half_a": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "half_b": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      "population_sha256": {
+        "all": "50e00c3da80c2ae814575b69b0423b75584c0278307cdd54554c8b3ca91da7a4",
+        "half_a": "dd9381bb3388e2b9ee3f2584c59f70d56f1eac12b37cbde2bdfbfba45121b0a6",
+        "half_b": "f6f3b9f1e1271edf6c698e88ef8afb4aca8a542bbd6547746231e7043a6de611"
+      },
+      "source": "the Phase 4 population-only ensemble, fitted on the 20 development homes and their fixed halves",
+      "specifications": [
+        "hurdle/population/all",
+        "hurdle_nb/population/all",
+        "hurdle/population/half_a",
+        "hurdle/population/half_b"
+      ]
+    },
+    "zero_shot": {
+      "development_homes": [
+        "hh101",
+        "hh102",
+        "hh103",
+        "hh105",
+        "hh106",
+        "hh108",
+        "hh110",
+        "hh111",
+        "hh114",
+        "hh118",
+        "hh119",
+        "hh120",
+        "hh122",
+        "hh123",
+        "hh124",
+        "hh125",
+        "hh126",
+        "hh127",
+        "hh129",
+        "hh130"
+      ],
+      "family": "hurdle",
+      "inference": "filter_recursion over every step of the external recording from the stationary distribution, with the ontology's default transition",
+      "population": "fit_samples(...)['all'] of every development home's labelled windows",
+      "population_sha256": "50e00c3da80c2ae814575b69b0423b75584c0278307cdd54554c8b3ca91da7a4",
+      "pseudo_windows": 12.0,
+      "specification": "hurdle/population/all",
+      "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21"
+    }
+  },
+  "name": "phase5-external-ordonez",
+  "periods": {
+    "adaptation": "local midnight of the home's first annotated day, for 7 days",
+    "scored": "from the end of the adaptation period to the end of the recording",
+    "scored_days": {
+      "OrdonezA": 7,
+      "OrdonezB": 14
+    },
+    "timezone": "Europe/Madrid",
+    "use": "the adaptation period may inform the mapping and the adapted condition; the scored period informs nothing"
+  },
+  "preprocessing": {
+    "adapter": "sensor_modeling.external.ordonez.read_household: each activation row an ON event at its start and an OFF event at its end; each annotation row an interval",
+    "channels": [
+      "bathroom_motion",
+      "bedroom_motion",
+      "hall_door",
+      "hall_motion",
+      "kitchen_motion",
+      "living_motion"
+    ],
+    "conversion": "sensor_modeling.external.to_canonical with strict=False: events sorted, exact duplicates kept once, naive times placed in Europe/Madrid, overlapping annotations split, conflicting spans unscored, everything left out counted",
+    "labels": "truth_series of the canonical segments at each step; unlabelled, unmappable, ambiguous and conflicting steps are not scored",
+    "scored_windows": "labelled steps in the scored period whose state is one of the scored states",
+    "windows": "the evidence resolution's 5-minute steps from each recording's first observation to its last"
+  },
+  "protocol_sha256": "620f3fdc55e0fe9da6ebcc0737ccf3c2be584f9573c490ce30388e02a218b334",
+  "question": "do the fitted channel models, and the Phase 4 structural signal, keep their direction and practical value on an independently collected dataset with a different sensing layout",
+  "reporting": "every home's results, every estimand and every negative result; household-level first, pooled only as description; no threshold, no retuning, no added model or metric",
+  "schema": "external-protocol/1",
+  "scored_states": [
+    "away",
+    "home_inactive",
+    "sleeping",
+    "bathroom_activity"
+  ],
+  "sensor_mapping": {
+    "OrdonezA": [
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "bathroom_motion",
+        "native_type": "PIR/Basin",
+        "place": "Bathroom",
+        "room": "bathroom",
+        "room_status": "exact",
+        "sensor": "Basin.PIR.Bathroom",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": "state",
+        "modality": "bed_pressure",
+        "model_channel": null,
+        "native_type": "Pressure/Bed",
+        "place": "Bedroom",
+        "room": "bedroom",
+        "room_status": "exact",
+        "sensor": "Bed.Pressure.Bedroom",
+        "type_status": "exact",
+        "unsupported_because": "a state sensor; the channels count events"
+      },
+      {
+        "kind": "event",
+        "modality": "contact",
+        "model_channel": null,
+        "native_type": "Magnetic/Cabinet",
+        "place": "Bathroom",
+        "room": "bathroom",
+        "room_status": "exact",
+        "sensor": "Cabinet.Magnetic.Bathroom",
+        "type_status": "exact",
+        "unsupported_because": "no bathroom_contact channel in the CASAS-trained model"
+      },
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "kitchen_motion",
+        "native_type": "PIR/Cooktop",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Cooktop.PIR.Kitchen",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": "event",
+        "modality": "contact",
+        "model_channel": null,
+        "native_type": "Magnetic/Cupboard",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Cupboard.Magnetic.Kitchen",
+        "type_status": "exact",
+        "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+      },
+      {
+        "kind": "event",
+        "modality": "contact",
+        "model_channel": null,
+        "native_type": "Magnetic/Fridge",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Fridge.Magnetic.Kitchen",
+        "type_status": "exact",
+        "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+      },
+      {
+        "kind": "event",
+        "modality": "door",
+        "model_channel": "hall_door",
+        "native_type": "Magnetic/Maindoor",
+        "place": "Entrance",
+        "room": "hall",
+        "room_status": "approximate",
+        "sensor": "Maindoor.Magnetic.Entrance",
+        "type_status": "exact",
+        "unsupported_because": null
+      },
+      {
+        "kind": null,
+        "modality": null,
+        "model_channel": null,
+        "native_type": "Electric/Microwave",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Microwave.Electric.Kitchen",
+        "type_status": "unmappable",
+        "unsupported_because": "its type is unmappable: appliance power use has no modality in the observation model"
+      },
+      {
+        "kind": "state",
+        "modality": "bed_pressure",
+        "model_channel": null,
+        "native_type": "Pressure/Seat",
+        "place": "Living",
+        "room": "living",
+        "room_status": "exact",
+        "sensor": "Seat.Pressure.Living",
+        "type_status": "exact",
+        "unsupported_because": "a state sensor; the channels count events"
+      },
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "bathroom_motion",
+        "native_type": "PIR/Shower",
+        "place": "Bathroom",
+        "room": "bathroom",
+        "room_status": "exact",
+        "sensor": "Shower.PIR.Bathroom",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": null,
+        "modality": null,
+        "model_channel": null,
+        "native_type": "Electric/Toaster",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Toaster.Electric.Kitchen",
+        "type_status": "unmappable",
+        "unsupported_because": "its type is unmappable: appliance power use has no modality in the observation model"
+      },
+      {
+        "kind": "event",
+        "modality": "contact",
+        "model_channel": null,
+        "native_type": "Flush/Toilet",
+        "place": "Bathroom",
+        "room": "bathroom",
+        "room_status": "exact",
+        "sensor": "Toilet.Flush.Bathroom",
+        "type_status": "approximate",
+        "unsupported_because": "no bathroom_contact channel in the CASAS-trained model"
+      }
+    ],
+    "OrdonezB": [
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "bathroom_motion",
+        "native_type": "PIR/Basin",
+        "place": "Bathroom",
+        "room": "bathroom",
+        "room_status": "exact",
+        "sensor": "Basin.PIR.Bathroom",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": "state",
+        "modality": "bed_pressure",
+        "model_channel": null,
+        "native_type": "Pressure/Bed",
+        "place": "Bedroom",
+        "room": "bedroom",
+        "room_status": "exact",
+        "sensor": "Bed.Pressure.Bedroom",
+        "type_status": "exact",
+        "unsupported_because": "a state sensor; the channels count events"
+      },
+      {
+        "kind": "event",
+        "modality": "contact",
+        "model_channel": null,
+        "native_type": "Magnetic/Cupboard",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Cupboard.Magnetic.Kitchen",
+        "type_status": "exact",
+        "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+      },
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "bedroom_motion",
+        "native_type": "PIR/Door",
+        "place": "Bedroom",
+        "room": "bedroom",
+        "room_status": "exact",
+        "sensor": "Door.PIR.Bedroom",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "kitchen_motion",
+        "native_type": "PIR/Door",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Door.PIR.Kitchen",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "living_motion",
+        "native_type": "PIR/Door",
+        "place": "Living",
+        "room": "living",
+        "room_status": "exact",
+        "sensor": "Door.PIR.Living",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": "event",
+        "modality": "contact",
+        "model_channel": null,
+        "native_type": "Magnetic/Fridge",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Fridge.Magnetic.Kitchen",
+        "type_status": "exact",
+        "unsupported_because": "no kitchen_contact channel in the CASAS-trained model"
+      },
+      {
+        "kind": "event",
+        "modality": "door",
+        "model_channel": "hall_door",
+        "native_type": "Magnetic/Maindoor",
+        "place": "Entrance",
+        "room": "hall",
+        "room_status": "approximate",
+        "sensor": "Maindoor.Magnetic.Entrance",
+        "type_status": "exact",
+        "unsupported_because": null
+      },
+      {
+        "kind": null,
+        "modality": null,
+        "model_channel": null,
+        "native_type": "Electric/Microwave",
+        "place": "Kitchen",
+        "room": "kitchen",
+        "room_status": "exact",
+        "sensor": "Microwave.Electric.Kitchen",
+        "type_status": "unmappable",
+        "unsupported_because": "its type is unmappable: appliance power use has no modality in the observation model"
+      },
+      {
+        "kind": "state",
+        "modality": "bed_pressure",
+        "model_channel": null,
+        "native_type": "Pressure/Seat",
+        "place": "Living",
+        "room": "living",
+        "room_status": "exact",
+        "sensor": "Seat.Pressure.Living",
+        "type_status": "exact",
+        "unsupported_because": "a state sensor; the channels count events"
+      },
+      {
+        "kind": "event",
+        "modality": "motion",
+        "model_channel": "bathroom_motion",
+        "native_type": "PIR/Shower",
+        "place": "Bathroom",
+        "room": "bathroom",
+        "room_status": "exact",
+        "sensor": "Shower.PIR.Bathroom",
+        "type_status": "approximate",
+        "unsupported_because": null
+      },
+      {
+        "kind": "event",
+        "modality": "contact",
+        "model_channel": null,
+        "native_type": "Flush/Toilet",
+        "place": "Bathroom",
+        "room": "bathroom",
+        "room_status": "exact",
+        "sensor": "Toilet.Flush.Bathroom",
+        "type_status": "approximate",
+        "unsupported_because": "no bathroom_contact channel in the CASAS-trained model"
+      }
+    ]
+  },
+  "status": "frozen before any external scoring; no model performance on the external dataset was computed or viewed",
+  "uninstrumented_channels": {
+    "OrdonezA": [
+      "bedroom_motion",
+      "hall_motion",
+      "living_motion"
+    ],
+    "OrdonezB": [
+      "hall_motion"
+    ]
+  },
+  "unsupported_sensors": {
+    "OrdonezA": {
+      "Bed.Pressure.Bedroom": "a state sensor; the channels count events",
+      "Cabinet.Magnetic.Bathroom": "no bathroom_contact channel in the CASAS-trained model",
+      "Cupboard.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+      "Fridge.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+      "Microwave.Electric.Kitchen": "its type is unmappable: appliance power use has no modality in the observation model",
+      "Seat.Pressure.Living": "a state sensor; the channels count events",
+      "Toaster.Electric.Kitchen": "its type is unmappable: appliance power use has no modality in the observation model",
+      "Toilet.Flush.Bathroom": "no bathroom_contact channel in the CASAS-trained model"
+    },
+    "OrdonezB": {
+      "Bed.Pressure.Bedroom": "a state sensor; the channels count events",
+      "Cupboard.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+      "Fridge.Magnetic.Kitchen": "no kitchen_contact channel in the CASAS-trained model",
+      "Microwave.Electric.Kitchen": "its type is unmappable: appliance power use has no modality in the observation model",
+      "Seat.Pressure.Living": "a state sensor; the channels count events",
+      "Toilet.Flush.Bathroom": "no bathroom_contact channel in the CASAS-trained model"
+    }
+  },
+  "unsupported_states": {
+    "bed_awake": "no label names it",
+    "home_active": "a candidate of the ambiguous labels Breakfast, Dinner, Lunch, Snack, which are not scored",
+    "kitchen_activity": "a candidate of the ambiguous labels Breakfast, Dinner, Lunch, Snack, which are not scored"
+  },
+  "verdicts": "per home and metric, oriented so that positive favours the first model: favours it when the mean is at least the minimal difference and the day-bootstrap interval lies above 0; favours the second when at most minus it with the interval below 0; negligible when the interval lies within plus or minus it; uncertain otherwise"
+}

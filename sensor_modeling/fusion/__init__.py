@@ -24,6 +24,8 @@ from .filter import (
     FusionConfig,
     MultimodalBayesFilter,
     NonMonotonicUpdateError,
+    UpdateObserver,
+    WindowTerms,
 )
 from .history import (
     ChannelHistory,
@@ -35,24 +37,38 @@ from .history import (
 from .regime import (
     ONLINE,
     EvidenceLeakageError,
+    EvidenceSummary,
     InferenceMode,
     InferenceRegime,
+    NotEnumerated,
+    ReportedEstimate,
     assert_respects_horizon,
+    check_evidence,
     check_evidence_access,
+    evidence_from_dict,
     regime_beliefs,
+    regime_estimates,
     require_online,
     require_same_regime,
 )
 from .smoothing import smooth_beliefs, smooth_estimates
 
 __all__ = [
+    "UpdateObserver",
+    "WindowTerms",
     "ONLINE",
     "EvidenceLeakageError",
+    "EvidenceSummary",
     "InferenceMode",
     "InferenceRegime",
+    "NotEnumerated",
+    "ReportedEstimate",
     "assert_respects_horizon",
+    "check_evidence",
     "check_evidence_access",
+    "evidence_from_dict",
     "regime_beliefs",
+    "regime_estimates",
     "require_online",
     "require_same_regime",
     "smooth_beliefs",

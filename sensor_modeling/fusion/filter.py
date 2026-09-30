@@ -30,9 +30,9 @@ explicitly recorded contradicting evidence, rather than being averaged away.
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 from scipy.special import logsumexp
@@ -55,6 +55,54 @@ class NonMonotonicUpdateError(ValueError):
     how much lateness to tolerate; silently folding a stale record into the
     current belief would corrupt it without any trace.
     """
+
+
+@dataclass(frozen=True)
+class WindowTerms:
+    """Everything one filter update combines, before it combines it.
+
+    :meth:`MultimodalBayesFilter.evidence_terms` computes them without changing
+    the filter, and :meth:`MultimodalBayesFilter.update` folds them in.
+    Diagnostics read them to see what each sensor contributed.
+
+    Attributes
+    ----------
+    at
+        The moment the update advances to.
+    elapsed
+        Time since the previous update.
+    predicted
+        The belief after the transition and before any of the window's
+        evidence: what the dynamics and the time of day alone expect.
+    likelihoods
+        Each sensor's tempered, centred log-likelihood per state, in the
+        filter's sensor order. A sensor tempered to zero contributes zeros.
+    reliability, attribution
+        The weights each sensor's likelihood was tempered with.
+    observations
+        How many records each sensor supplied in the window.
+    """
+
+    at: datetime
+    elapsed: timedelta
+    predicted: np.ndarray
+    likelihoods: Mapping[str, np.ndarray]
+    reliability: Mapping[str, float]
+    attribution: Mapping[str, float]
+    observations: Mapping[str, int]
+
+    @property
+    def posterior(self) -> np.ndarray:
+        """The belief after the window's evidence, as the filter computes it."""
+        log_belief = np.log(np.maximum(self.predicted, 1e-300))
+        for loglik in self.likelihoods.values():
+            log_belief = log_belief + loglik
+        values: np.ndarray = np.exp(log_belief - logsumexp(log_belief))
+        return values
+
+
+#: Called after each update with its terms and the estimate it produced.
+UpdateObserver = Callable[[WindowTerms, StateEstimate], None]
 
 
 @dataclass
@@ -126,6 +174,9 @@ class MultimodalBayesFilter:
         self._prior: np.ndarray = self._validated_prior(prior)
         self._belief: np.ndarray = self._prior.copy()
         self._at: datetime | None = None
+        #: Called after every update with its terms and estimate. Observers
+        #: read; they change nothing the filter does.
+        self.observers: list[UpdateObserver] = []
 
     def _validated_prior(self, prior: np.ndarray | None) -> np.ndarray:
         """Return a normalised prior belief vector."""
@@ -206,6 +257,69 @@ class MultimodalBayesFilter:
         StateEstimate
             The posterior with its supporting and contradicting evidence.
         """
+        terms = self.evidence_terms(
+            now, observations, reliabilities=reliabilities, attribution=attribution
+        )
+        moment = terms.at
+        predicted = terms.predicted
+        likelihoods = terms.likelihoods
+        self._belief = terms.posterior
+        information_gain = _kl_divergence(self._belief, predicted)
+        self._at = moment
+        # A plain running total, as before: sum() compensates floating-point
+        # error since Python 3.12, which would change completeness in its last bit.
+        reliability_total = 0.0
+        for sensor_id in self.emissions:
+            reliability_total += min(max(terms.reliability[sensor_id], 0.0), 1.0)
+
+        # Support is measured against the state the posterior actually
+        # settled on, so a sensor pointing somewhere else is recorded as
+        # contradicting the conclusion rather than as backing its own guess.
+        winner = int(np.argmax(self._belief))
+        contributions = tuple(
+            EvidenceContribution(
+                sensor_id=sensor_id,
+                modality=self._modality_of(sensor_id),
+                support=_support_for(likelihoods[sensor_id], winner),
+                reliability=(
+                    terms.reliability[sensor_id]
+                    if terms.reliability[sensor_id] >= self.config.evidence_floor
+                    else 0.0
+                ),
+                attribution=terms.attribution[sensor_id],
+                observations=terms.observations[sensor_id],
+            )
+            for sensor_id in self.emissions
+        )
+
+        estimate = StateEstimate(
+            at=moment,
+            ontology=self.ontology,
+            belief=self._belief.copy(),
+            evidence=contributions,
+            completeness=reliability_total / len(self.emissions),
+            min_confidence=self.config.min_confidence,
+            min_completeness=self.config.min_completeness,
+            information_gain=information_gain,
+        )
+        for observer in self.observers:
+            observer(terms, estimate)
+        return estimate
+
+    def evidence_terms(
+        self,
+        now: datetime,
+        observations: Sequence[Observation] = (),
+        *,
+        reliabilities: Mapping[str, float] | float | None = None,
+        attribution: Mapping[str, float] | float | None = None,
+    ) -> WindowTerms:
+        """What an update to *now* would combine, without changing the filter.
+
+        The parameters are :meth:`update`'s. The result's
+        :attr:`WindowTerms.posterior` is exactly the belief the update would
+        reach.
+        """
         moment = require_aware(now, "now")
         if self._at is not None and moment < self._at:
             raise NonMonotonicUpdateError(
@@ -228,58 +342,27 @@ class MultimodalBayesFilter:
                     observation.sensor_id,
                 )
 
-        log_belief = np.log(np.maximum(predicted, 1e-300))
         likelihoods: dict[str, np.ndarray] = {}
-        weights: dict[str, tuple[float, float]] = {}
-        reliability_total = 0.0
-
+        reliability: dict[str, float] = {}
+        shares: dict[str, float] = {}
         for sensor_id, emission in self.emissions.items():
-            reliability = self._weight_for(reliabilities, sensor_id, 1.0)
-            share = self._weight_for(attribution, sensor_id, 1.0)
-            reliability_total += min(max(reliability, 0.0), 1.0)
-            weights[sensor_id] = (reliability, share)
+            reliability[sensor_id] = self._weight_for(reliabilities, sensor_id, 1.0)
+            shares[sensor_id] = self._weight_for(attribution, sensor_id, 1.0)
             likelihoods[sensor_id] = emission.log_likelihood(
                 self.ontology,
                 grouped.get(sensor_id, []),
                 elapsed,
-                reliability=reliability,
-                attribution=share,
+                reliability=reliability[sensor_id],
+                attribution=shares[sensor_id],
             )
-            log_belief = log_belief + likelihoods[sensor_id]
-
-        self._belief = np.exp(log_belief - logsumexp(log_belief))
-        information_gain = _kl_divergence(self._belief, predicted)
-        self._at = moment
-
-        # Support is measured against the state the posterior actually
-        # settled on, so a sensor pointing somewhere else is recorded as
-        # contradicting the conclusion rather than as backing its own guess.
-        winner = int(np.argmax(self._belief))
-        contributions = tuple(
-            EvidenceContribution(
-                sensor_id=sensor_id,
-                modality=self._modality_of(sensor_id),
-                support=_support_for(likelihoods[sensor_id], winner),
-                reliability=(
-                    weights[sensor_id][0]
-                    if weights[sensor_id][0] >= self.config.evidence_floor
-                    else 0.0
-                ),
-                attribution=weights[sensor_id][1],
-                observations=len(grouped.get(sensor_id, [])),
-            )
-            for sensor_id in self.emissions
-        )
-
-        return StateEstimate(
+        return WindowTerms(
             at=moment,
-            ontology=self.ontology,
-            belief=self._belief.copy(),
-            evidence=contributions,
-            completeness=reliability_total / len(self.emissions),
-            min_confidence=self.config.min_confidence,
-            min_completeness=self.config.min_completeness,
-            information_gain=information_gain,
+            elapsed=elapsed,
+            predicted=predicted,
+            likelihoods=likelihoods,
+            reliability=reliability,
+            attribution=shares,
+            observations={s: len(grouped.get(s, [])) for s in self.emissions},
         )
 
     # ------------------------------------------------------------------

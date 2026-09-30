@@ -1,0 +1,356 @@
+{
+  "arm_days": {
+    "day": 1.0,
+    "week": 7.0
+  },
+  "arms": {
+    "day": {
+      "adaptation": "the household's labelled windows closing within 1 days of its first observation",
+      "models": [
+        "declared",
+        "population",
+        "pooled",
+        "unconstrained"
+      ],
+      "scored": "its labelled windows closing after that"
+    },
+    "week": {
+      "adaptation": "the household's labelled windows closing within 7 days of its first observation",
+      "models": [
+        "declared",
+        "population",
+        "pooled",
+        "pooled_selected",
+        "unconstrained"
+      ],
+      "scored": "its labelled windows closing after that"
+    }
+  },
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "statistics": "mean and median paired differences",
+    "unit": "household"
+  },
+  "calibration": "expected calibration error over 10 confidence bins",
+  "criteria": {
+    "does not overfit": "log loss is negligible or favours the unconstrained model",
+    "overfits": "log loss favours the pooled model over the unconstrained one",
+    "overfitting_inconclusive": "anything else",
+    "pooling_failure": "log loss is negligible or favours the reference",
+    "pooling_inconclusive": "anything else",
+    "pooling_success": "log loss favours the adapted model, and neither balanced accuracy nor calibration error favours the reference",
+    "pooling_trade-off": "log loss favours the adapted model and balanced accuracy favours the reference",
+    "primary": "P1 and P2 answer whether pooling helps; O1 whether unconstrained fitting overfits small homes; the others are read by the same rules",
+    "verdicts": "favours model: mean >= delta and lower bound > 0; favours reference: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else",
+    "why_log_loss": "adaptation changes each household's probability model, so a proper scoring rule is the target; balanced accuracy and calibration error are guards"
+  },
+  "eligibility": {
+    "cells": "a channel and state with no household windows takes the population value in every adapted model",
+    "min_adaptation_windows": 12,
+    "min_scored_windows": 288,
+    "rule": "a household enters an arm's comparisons with at least min_adaptation_windows labelled windows in its adaptation window and min_scored_windows labelled windows after it; otherwise it is reported and left out of every model in that arm"
+  },
+  "estimands": [
+    {
+      "key": "P1",
+      "model": "pooled@I0/week",
+      "question": "does partial pooling improve on the population, current windows",
+      "reference": "population@I0/week",
+      "role": "primary",
+      "rule": "pooling"
+    },
+    {
+      "key": "P2",
+      "model": "pooled@R/week",
+      "question": "does partial pooling improve on the population, the recursion",
+      "reference": "population@R/week",
+      "role": "primary",
+      "rule": "pooling"
+    },
+    {
+      "key": "O1",
+      "model": "pooled@I0/day",
+      "question": "does unconstrained per-home fitting overfit small homes: pooled against unconstrained after one day",
+      "reference": "unconstrained@I0/day",
+      "role": "primary",
+      "rule": "overfitting"
+    },
+    {
+      "key": "O2",
+      "model": "pooled@I0/week",
+      "question": "the same after one week",
+      "reference": "unconstrained@I0/week",
+      "role": "secondary",
+      "rule": "overfitting"
+    },
+    {
+      "key": "O3",
+      "model": "pooled@R/day",
+      "question": "the same after one day, the recursion",
+      "reference": "unconstrained@R/day",
+      "role": "secondary",
+      "rule": "overfitting"
+    },
+    {
+      "key": "S1",
+      "model": "pooled_selected@I0/week",
+      "question": "does a strength selected on training households improve on the population, current windows",
+      "reference": "population@I0/week",
+      "role": "secondary",
+      "rule": "pooling"
+    },
+    {
+      "key": "S2",
+      "model": "pooled_selected@R/week",
+      "question": "the same, the recursion",
+      "reference": "population@R/week",
+      "role": "secondary",
+      "rule": "pooling"
+    },
+    {
+      "key": "S3",
+      "model": "pooled@I0/day",
+      "question": "does partial pooling improve on the population after one day",
+      "reference": "population@I0/day",
+      "role": "secondary",
+      "rule": "pooling"
+    },
+    {
+      "key": "S4",
+      "model": "unconstrained@I0/week",
+      "question": "does unconstrained per-home fitting improve on the population after one week",
+      "reference": "population@I0/week",
+      "role": "secondary",
+      "rule": "pooling"
+    },
+    {
+      "key": "S5",
+      "model": "unconstrained@I0/day",
+      "question": "the same after one day",
+      "reference": "population@I0/day",
+      "role": "secondary",
+      "rule": "pooling"
+    },
+    {
+      "key": "C1",
+      "model": "population@I0/week",
+      "question": "the population fit against the declared rates, current windows",
+      "reference": "declared@I0/week",
+      "role": "context",
+      "rule": "pooling"
+    },
+    {
+      "key": "C2",
+      "model": "population@R/week",
+      "question": "the same, the recursion",
+      "reference": "declared@R/week",
+      "role": "context",
+      "rule": "pooling"
+    }
+  ],
+  "households": {
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+    "use": "each household is held out once; its fold's training households fit the population and select the pooling strength"
+  },
+  "inference": "online filter: I0 and R read no window after the scored one",
+  "metrics": [
+    "balanced_accuracy",
+    "log_loss",
+    "brier",
+    "calibration_error"
+  ],
+  "minimal_differences": {
+    "balanced_accuracy": 0.02,
+    "brier": 0.01,
+    "calibration_error": 0.02,
+    "log_loss": 0.05,
+    "recall": 0.05
+  },
+  "models": {
+    "declared": {
+      "attribution": 1.0,
+      "channels": "declared",
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "nothing: every parameter is the declared default",
+      "model": "restricted generative filter",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "pooled": {
+      "channels": "hurdle, the household pooled toward the population",
+      "strength": 288.0
+    },
+    "pooled_selected": {
+      "channels": "hurdle, the household pooled toward the population with the strength selected on the fold's training households",
+      "grid": [
+        24.0,
+        72.0,
+        288.0,
+        1152.0,
+        4608.0
+      ]
+    },
+    "population": {
+      "attribution": 1.0,
+      "channels": "hurdle, fitted per fold on the training households as in the Phase 3.3 follow-up",
+      "emissions": "default_emissions of the household registry, pooled per channel",
+      "fitted": "nothing: every parameter is the declared default",
+      "model": "restricted generative filter",
+      "prediction": "most probable state of the posterior; no abstention",
+      "prior": "stationary distribution of the default ontology, one step before the first declared window",
+      "pseudo_windows": 12.0,
+      "reliability": 1.0,
+      "transition": "default StateOntology, time-homogeneous, one step per window",
+      "windows": "the set's current window, plus its lagged windows with recent history"
+    },
+    "unconstrained": {
+      "channels": "hurdle, the household's own estimates",
+      "strength": 0.5,
+      "why": "half a window keeps a probability off 0 and 1; with a few windows the household's own data dominate, and a cell without any takes the population value"
+    }
+  },
+  "name": "phase3-partial-pooling",
+  "per_state_recall": {
+    "estimands": [
+      "P1",
+      "O1"
+    ],
+    "rare_rule": "share of labelled time below 0.05 in either fold's training households"
+  },
+  "pooling": {
+    "estimator": "theta_pop + w (theta_raw - theta_pop), w = n / (n + kappa), for the silence probability and the active-window mean of every channel and state",
+    "strength": 288.0,
+    "why": "288 windows is 24 labelled hours, the framework's default and the Phase 3.1 household pooling strength"
+  },
+  "protocol_sha256": "ac77fa9716ec39834103e01418e95f08c37640aec2665703afee796b61e1eaa2",
+  "schema": "pooling-protocol/1",
+  "seeds": {
+    "bootstrap": 0
+  },
+  "selection": {
+    "choice": "the smallest mean log loss; a tie goes to the larger strength",
+    "grid": [
+      24.0,
+      72.0,
+      288.0,
+      1152.0,
+      4608.0
+    ],
+    "held_out": "the fold's held-out households are never used",
+    "procedure": "for each fold, leave one training household out at a time: fit the population on the other training households, pool the left-out household with its week-arm window, score its labelled windows after the window in I0, and take the mean log loss over the eligible training households"
+  },
+  "settings": {
+    "I0": {
+      "channels": [
+        {
+          "modality": "motion",
+          "room": "bathroom"
+        },
+        {
+          "modality": "motion",
+          "room": "bedroom"
+        },
+        {
+          "modality": "door",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "hall"
+        },
+        {
+          "modality": "motion",
+          "room": "kitchen"
+        },
+        {
+          "modality": "motion",
+          "room": "living"
+        }
+      ],
+      "columns": [
+        "events_bathroom_motion_lag0",
+        "events_bedroom_motion_lag0",
+        "events_hall_door_lag0",
+        "events_hall_motion_lag0",
+        "events_kitchen_motion_lag0",
+        "events_living_motion_lag0"
+      ],
+      "components": [
+        "current_evidence"
+      ],
+      "history_steps": 3,
+      "name": "current",
+      "sha256": "c4ef81951d5c35bca43ed458926c4a14dbb48c1af3e7496721f2a139c0649bdb",
+      "step_seconds": 300.0
+    },
+    "R": "the filter's recursion fed every window of the recording from the stationary distribution"
+  },
+  "stratification": "within each arm, eligible households are sorted by labelled adaptation windows (ties by name); the first half is 'less data', the rest 'more data'; every estimand is also reported within each stratum",
+  "tuning": "none on held-out households: the strength is declared, or selected on training households only"
+}

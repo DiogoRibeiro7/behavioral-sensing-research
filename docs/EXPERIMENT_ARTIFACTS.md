@@ -16,10 +16,13 @@ regenerated from their seeds.
 from pathlib import Path
 
 from sensor_modeling.evaluation import ExperimentRecord, InputArtifact, load_record
+from sensor_modeling.fusion import ONLINE, EvidenceSummary
 
 record = ExperimentRecord(
     experiment="phase1-current-fold-a",
     configuration={"metrics": ["balanced_accuracy"]},
+    inference=ONLINE,
+    evidence=EvidenceSummary.online(scored_moments),
     seeds=[0],
     data_source="casas-hh",
     inputs=[InputArtifact("hh101.csv", "3f4d...", "recording", "zenodo:15708568")],
@@ -41,12 +44,12 @@ again = ExperimentRecord.load(path)  # the typed record
 
 | Field | Contents | Required |
 | --- | --- | --- |
-| `schema_version` | `MAJOR.MINOR`; currently `1.2` | yes |
+| `schema_version` | `MAJOR.MINOR`; currently `1.6` | yes |
 | `experiment` | experiment identifier | yes |
 | `recorded_at` | execution timestamp, ISO 8601 with time zone, fixed when the record is created | yes |
 | `environment` | `git_commit`, `git_dirty`, `sensor_modeling` (the package version), `python`, and library versions including NumPy, SciPy, pandas and scikit-learn | yes |
 | `data_source` | dataset identifier, such as `casas-hh` or `simulator` | yes |
-| `inference` | the inference regime every estimate comes from: `mode` (`online_filter` or `fixed_lag_smoother`), `lag_steps`, `step_seconds`, `label` and `provenance`; see below | 1.2 |
+| `inference` | the inference regime every estimate comes from: `mode` (`online_filter` or `fixed_lag_smoother`), `lag_steps`, `step_seconds`, `label` and `provenance` (1.2); `causal`, `delay_seconds` and `evidence`, the prediction and latest-evidence timestamps (1.3); see below | 1.2 |
 | `inputs` | input files, each with `name`, `sha256`, `role` and `source` | 1.1 |
 | `split` | household split, with its SHA-256 | 1.1 |
 | `information_set` | information-set declaration, with its SHA-256 | 1.1 |
@@ -61,6 +64,9 @@ again = ExperimentRecord.load(path)  # the typed record
 | `household_metrics` | metrics per model, then per household | 1.1 |
 | `intervals` | estimates ready to quote: `label`, `estimate`, `low`, `high`, `confidence`, `method`, `unit`, `n` | 1.1 |
 | `mcse` | Monte Carlo standard errors of simulation summaries, by name | 1.1 |
+| `structural_disagreement` | how much the experiment's model specifications disagree, window by window: the specifications with their assumptions and published support, the reference, and each household's summary and trace file; `null` if the experiment has none. See [structural disagreement](STRUCTURAL_DISAGREEMENT.md) | 1.4 |
+| `observation_mismatch` | how surprising each window's evidence is under every state of the observation model: the model's family and training households, the tail levels reported, and each household's summary and trace file; `null` if the experiment has none. See [observation mismatch](OBSERVATION_MISMATCH.md) | 1.5 |
+| `selective_prediction` | how well candidate risk signals order predictions for rejection over a grid of coverage levels: each signal's direction, pooled curve with household-bootstrap intervals, curve summaries and household curves, with the random and oracle references; `null` if the experiment has none. See [selective prediction](SELECTIVE_PREDICTION.md) | 1.6 |
 | `notes` | anything a reader needs in order not to over-read the result | yes |
 | `migrated_from` | the version the record was read from, when it was migrated | only after migration |
 
@@ -72,6 +78,13 @@ their empty defaults when it is loaded.
 `inference` says which [inference regime](INFERENCE_REGIMES.md) every estimate
 in the record comes from.
 
+A record that compares regimes, such as the
+[Phase 3.5 smoothing evaluation](PHASE3_SMOOTHING.md), states the one with the
+longest lag instead. That regime bounds every estimate in the record: none
+reads further ahead. Its results then label every cell and comparison with its
+own regime and evidence summary. Every comparison between regimes is a
+labelled smoothing gain.
+
 - **Mode and lag.** The mode is the online filter or a fixed-lag smoother. A
   smoother also records its lag in windows and the window width, so its
   reporting delay is stated in time.
@@ -81,6 +94,22 @@ in the record comes from.
   no experiment can leave it to a default.
 - **Provenance.** It says how the regime is known: declared by the writer, or
   attested when an older record was migrated.
+- **Causality and delay.** `causal` says whether any estimate reads evidence
+  after its moment. `delay_seconds` says how long after its moment an estimate
+  can first be reported. Both follow from the regime, and a record in which
+  either disagrees with it is refused.
+- **Evidence timestamps.** `evidence` summarises the scored estimates. It gives
+  `predictions`, `first_prediction`, `last_prediction`, `latest_evidence` and
+  `max_lead_seconds`, the most future information any of them used.
+  - **Beyond the regime.** A record whose largest lead exceeds its regime's
+    delay is refused, so smoothed estimates cannot be recorded as online.
+  - **Not listed.** A causal record that cannot list its timestamps gives
+    `{"enumerated": false, "reason": ...}` instead. A smoother cannot: it
+    must record the future information it used.
+  - **Required.** `ExperimentRecord` takes `evidence` as a required keyword.
+
+The [inference regimes](INFERENCE_REGIMES.md#what-each-record-states) page has
+an example.
 
 An interval's `unit` says what was resampled: `household` for real homes, or
 `seed` for simulated trajectories. It is never timestamps; see
@@ -113,12 +142,16 @@ The version is `MAJOR.MINOR`.
 - **Newer files.** A reader refuses a newer minor, and any other major, rather
   than guessing at fields it does not know.
 
-| File version | This reader (1.2) |
+| File version | This reader (1.6) |
 | --- | --- |
 | `1.0` | migrated on load: new fields given defaults, non-finite numbers made `null`, then as `1.1` with `migrated_from: "1.0"`, content otherwise unchanged |
-| `1.1` | migrated on load: `inference` added as the online filter, attested on migration, and `migrated_from: "1.1"`, content otherwise unchanged |
-| `1.2` | read as written |
-| `1.3` or later | refused: written by a newer version of the package |
+| `1.1` | migrated on load: `inference` added as the online filter, attested on migration, with its causality, its delay and its evidence marked not listed, and `migrated_from: "1.1"`, content otherwise unchanged |
+| `1.2` | migrated on load: causality and delay derived from the regime, evidence marked not listed, and `migrated_from: "1.2"`, content otherwise unchanged. A smoothed 1.2 record is refused |
+| `1.3` | migrated on load: `structural_disagreement`, `observation_mismatch` and `selective_prediction` added as `null`, and `migrated_from: "1.3"`, content otherwise unchanged |
+| `1.4` | migrated on load: `observation_mismatch` and `selective_prediction` added as `null`, and `migrated_from: "1.4"`, content otherwise unchanged |
+| `1.5` | migrated on load: `selective_prediction` added as `null`, and `migrated_from: "1.5"`, content otherwise unchanged |
+| `1.6` | read as written |
+| `1.7` or later | refused: written by a newer version of the package |
 | `0.x`, `2.x` | refused: another major version |
 
 Files written at 1.0 before `data_source` existed are migrated to `simulator`
@@ -130,9 +163,21 @@ online inference: the online pipeline, or matched information sets whose
 windows close at or before each prediction moment. The repository's history
 shows that no experiment code ever called the fixed-lag smoother. A migrated
 record therefore says `online_filter`. Its provenance states that this was
-attested on migration, not declared by the writer. The published Phase 1 and
-Phase 3 records are 1.1 files and are migrated this way when read. The files
-themselves are not changed.
+attested on migration, not declared by the writer.
+
+1.0 to 1.2 did not record prediction or evidence timestamps. A migrated record
+marks its evidence as not listed, with the reason:
+
+> written at schema 1.1, before prediction and evidence timestamps were
+> recorded; its estimates read no evidence after their prediction moments
+
+This is allowed only for a causal regime. A 1.2 record of a smoother would be
+refused rather than migrated, since a smoother must list the future
+information it used. None was published.
+
+The published Phase 1 and Phase 3.1 to 3.3 records are 1.1 files, and the Phase
+3.4 record is a 1.2 file. Each is migrated this way when read, and its
+generated summary is unchanged. The files themselves are not changed.
 
 The writer always writes the current version. The migration was checked on
 real 1.0 files: the n=100 ablation and attribution studies, and all nine
@@ -148,6 +193,8 @@ rewrote byte-identically after migration.
 - `household_metrics`, with every held-out household's metrics per model;
 - `intervals`, with every paired household comparison flattened to its mean and
   median estimates, `unit: "household"`;
+- `inference.evidence`, with the held-out households' labelled moments, each
+  reading evidence up to itself;
 - `inputs`, when the caller passes the digests of the files it read.
 
 Its `results` hold the household summaries and the full comparisons, in the

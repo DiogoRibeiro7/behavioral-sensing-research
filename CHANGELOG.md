@@ -7,6 +7,200 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-09-30
+
+Completes the pre-specified Phase 3 inference-redesign evaluations, and records the first Phase 4 comparison of uncertainty diagnostics and the first Phase 5 evaluation on an independently collected dataset. Every experiment was pre-specified, with its protocol frozen before any household was scored. The Phase 3 and 4 experiments ran on the 20 development homes, so none of them is a held-out claim.
+
+- **Research results.**
+  - **Partial pooling.** Pooling household channel parameters improves log loss with current windows by 0.080, a pre-specified success.
+    - In the filter's recursion it is inconclusive.
+    - The declared pooling strength is stronger than a week of data needs.
+  - **Fixed-lag smoothing.** Five minutes of lag raises balanced accuracy by 0.031, a pre-specified smoothing gain; thirty and sixty minutes are trade-offs. Every figure is available only after the smoother's delay, and none is an online gain.
+  - **Posterior predictive checks.** The fitted hurdle model's active count is under-dispersed in every household, and long quiet runs are in excess. The checks route the next model family to within-state temporal dependence, which is not built.
+  - **The hurdle negative binomial.** It improves log loss by 0.48 with current windows and 0.78 in the recursion, and balanced accuracy by 0.044. It does not recover `home_active` recall, so its declared rule does not adopt it.
+  - **Uncertainty diagnostics.**
+    - Model-structure disagreement ranks errors better than confidence by the declared rule: household error AURC is 0.059 lower.
+    - Its gain is at low coverage, and it retains less of the activity states.
+    - Evidence-channel disagreement and predictive mismatch are worse than confidence.
+    - No abstention threshold is selected.
+  - **External evaluation.** The CASAS-trained model was tested, under a protocol frozen before scoring, on the two homes of the independently collected UCI ADL Binary dataset.
+    - It does not transfer: zero-shot balanced accuracy is 0.246 and 0.244, against chance 0.25.
+    - Limited adaptation leaves balanced accuracy unchanged.
+    - The Phase 4 direction is inconclusive there.
+- **Observation modelling.** A hurdle negative-binomial channel family, beside the unchanged hurdle-Poisson.
+- **Uncertainty.** Model-structure disagreement, evidence-group disagreement and observation-model mismatch diagnostics. None changes a decision.
+- **Evaluation.** A selective-prediction framework in which a signal's direction is always stated and households, not timestamps, are resampled.
+- **External generalisation.** The external-dataset contract, an adapter for the UCI ADL Binary dataset, the frozen Phase 5 protocol and its published run.
+- **Inference and reproducibility.** The inference-regime contract is enforced: estimates carry their evidence timestamps, and a record whose estimates read past its regime is refused. The experiment-record schema moves from 1.2 to 1.6, and older records are migrated when read.
+- **Documentation.** The roadmap is rewritten around what has been tested. The README and documentation no longer claim that every result is simulator-only, or that the pipeline is at the ceiling for the evidence it uses.
+
+It does not change the online pipeline's defaults, abstention thresholds, transition dynamics, the declared emissions, the behavioural ontology, or the frozen v0.3 external-validation result. `MultimodalBayesFilter.update` is refactored with every output unchanged to the last bit.
+
+### Added
+- Ran the frozen Phase 5 external-generalisation protocol on the UCI ADL Binary dataset, `sensor_modeling.datasets.external_experiment`, without changing preprocessing, mapping, hyperparameters or eligibility.
+  - **Run.** `scripts/run_phase5_external.py` refuses to run unless:
+    - the code's protocol equals the frozen file;
+    - the mapping and every external and CASAS recording match their frozen digests;
+    - the CASAS populations reproduce their pinned fit digests.
+
+    The record, `artifacts/phase5/phase5-external-ordonez-results.json`, was made from a clean commit.
+  - **Reported per home.**
+    - Balanced accuracy, per-state recall, log loss, Brier score, calibration error, macro F1 and accuracy for the declared rates, zero-shot and adapted conditions, with day-block bootstrap intervals.
+    - The unsupported-observation fraction and the ontology-mapping coverage.
+  - **Per estimand.** Paired differences, intervals and verdicts, and homes improved and worsened.
+  - **Descriptive diagnostics.** Missing sensor semantics, ontology mismatch, room structure, event rates, calibration shift and state-prior shift. An in-sample oracle separates dataset incompatibility, the sensing-information limitation and model failure.
+  - **Output.** `external_summary.render_page` and `external_figures.draw_figures` generate `docs/PHASE5_EXTERNAL_RESULTS.md` and its figures from the record alone. An ineligible home would be reported, not dropped.
+  - **Result.**
+    - The CASAS-trained model does not transfer to either home.
+    - Zero-shot balanced accuracy is at chance: 0.246 and 0.244 against 0.25. It predicts `sleeping` or the unscorable `bed_awake` for every window.
+    - Limited adaptation improves log loss in both homes but leaves balanced accuracy unchanged.
+    - Structural disagreement beats confidence in one home and is uncertain in the other: inconclusive.
+    - The in-sample oracle reaches 0.437 and 0.559.
+- Froze the first Phase 5 external-generalisation protocol, `artifacts/phase5/external_protocol.json`, before any external scoring. `docs/PHASE5_EXTERNAL_PROTOCOL.md` is generated from it. No model performance on external data is computed or reported.
+  - **Dataset.** The UCI ADL Binary dataset of Ordóñez et al. (DOI 10.24432/C5J02M, CC BY 4.0): two single-resident homes, independent of CASAS, with every file's SHA-256 and the archive's. `sensor_modeling.external.ordonez` reads it into the external-dataset contract.
+  - **Mapping.** `artifacts/phase5/ordonez_mapping.json`, written from the dataset's documentation, with its SHA-256. Meal labels are ambiguous and unscored, `Leaving` maps approximately to `away`, and each sensor's type, room and model channel, or why it is unsupported, is recorded per home.
+  - **Protocol.** `sensor_modeling.datasets.external_protocol` declares every item:
+    - households, eligibility and a seven-day adaptation period per home;
+    - preprocessing, and the unsupported states and sensors;
+    - model versions pinned by the CASAS population's fit digests;
+    - zero-shot and limited-adaptation conditions, with their adaptation rules;
+    - metrics, a day-block bootstrap within each home, and minimal differences;
+    - the success and failure criteria.
+  - **Checks.** `scripts/check_phase5_inputs.py` verifies a downloaded archive against the frozen digests, and validates each home's adaptation period only.
+- Added the Phase 5 external-dataset contract, `sensor_modeling.external`, described in `docs/EXTERNAL_DATASET_CONTRACT.md`. It is infrastructure: no model is scored on external data.
+  - **Contract.** `HouseholdData`, `SensorDescription`, `RawEvent`, `Annotation` with interval or point semantics, `OccupancyPeriod`, and `DatasetProvenance`, in the dataset's own terms, behind a `DatasetAdapter` protocol. `InMemoryAdapter` and a column-declared long-format `CsvAdapter` are the reference adapters.
+  - **Mapping.** `OntologyMapping` declares every native label, sensor type and location as exact, approximate, unmappable or ambiguous, with a rationale for all but exact. Undeclared values are reported, never dropped. A mapping is written and read with its SHA-256, so it can be frozen before external results.
+  - **Validation.** `validate_household` and `validate_dataset` report missing or invalid timezones, daylight-saving gaps and folds, timestamp order, duplicate events, unknown and unused sensors, impossible intervals, overlapping labels, unsupported multi-resident periods, undeclared labels and sensors, and sensor-semantic mismatches, with label coverage by mapping outcome.
+  - **Conversion.** `to_canonical` produces the repository's recording type: sensor registry, ordered observations, and non-overlapping labelled segments. Conflicting, multi-resident and unmappable spans are unscored. Every event, sensor and annotated second it does not carry is counted by reason.
+- Added the pre-specified Phase 4 comparison of richer uncertainty diagnostics, `sensor_modeling.datasets.uncertainty_experiment`, with its frozen protocol, `artifacts/phase4/uncertainty_protocol.json`, committed before any household was scored.
+  - **Signals.** Posterior confidence, entropy, model-structure disagreement over a population-only ensemble, evidence-channel disagreement, and predictive mismatch. Each ranks the same predictions: the Phase 3.3 follow-up's hurdle recursion on the 20 development homes, cross-fitted on the frozen folds.
+  - **Evaluation.** Selective-prediction curves of error, balanced accuracy, calibration and per-state retained coverage, pooled and per household. Each signal is compared with confidence by paired household differences with household bootstrap intervals.
+  - **Rule.** Declared in advance: a structural diagnostic is materially better when its error AURC beats confidence's by at least 0.01, with the interval above 0, and no difficult minority state is retained less than under confidence. No threshold is selected.
+  - **Output.** `uncertainty_summary.render_page` and `uncertainty_figures.draw_figures` generate the documentation page and its figures entirely from the record. `scripts/run_phase4_uncertainty.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Result.** The run is published in `artifacts/phase4/phase4-uncertainty-diagnostics.json`, made from the protocol commit on a clean tree. The page, `docs/PHASE4_UNCERTAINTY_DIAGNOSTICS.md`, and its figures are generated from it. It is on the 20 development homes, so it is not a held-out claim. Its predictions reproduce the Phase 3.3 follow-up's hurdle recursion to 3e-15.
+    - Model-structure disagreement is materially better than confidence by the declared rule. Household error AURC is 0.059 [0.031, 0.087] lower, and the guard holds.
+    - Its gain is at low coverage: at 50% to 90% coverage its error and balanced-accuracy differences are uncertain or negligible.
+    - It retains less of kitchen and bathroom activity than confidence does at 50% and 70%, and the guard did not cover these states. The frozen rule admitted only `bed_awake`, with 68 windows.
+    - Confidence barely orders the predictions (pooled gain 0.04), and entropy is indistinguishable from it.
+    - Evidence-channel disagreement and predictive mismatch are worse than confidence, and reject activity states and `bed_awake` heavily.
+- Added a selective-prediction evaluation framework for ROADMAP Phase 4, `sensor_modeling.evaluation.selective`, described in `docs/SELECTIVE_PREDICTION.md`. It evaluates any candidate risk signal without selecting a threshold or an abstention rule.
+  - **Signals.** A `Signal` states its direction, `higher_is_riskier` or `higher_is_safer`, which is never assumed. A missing value is refused unless a policy ranks it for rejection or retention.
+  - **Curves.** Over a grid of coverage levels, pooled over the panel and per household:
+    - selective risk under 0-1 or a stated loss, and the error rate;
+    - selective balanced accuracy and the states still scored;
+    - per-state retained coverage;
+    - calibration among retained predictions;
+    - the rejected windows' state composition and error rate;
+    - each household's coverage under a pooled selection.
+  - **Ties.** Ties at the boundary are retained in part, the expectation of random tie-breaking, so a constant signal is exactly random rejection.
+  - **References and summaries.** Random rejection, whose ratio metrics stay at their full-coverage values, and the oracle, which rejects the costliest predictions first. They give the AURC, the excess AURC over the oracle, and the gain over random: 1 for the oracle, 0 for random.
+  - **Uncertainty.** Timestamps are selected and aggregated. Households, not timestamps, are resampled, with selection repeated in every resample. Household curves are summarised with each household counted once.
+- Added observation-model mismatch diagnostics for ROADMAP Phase 4, described in `docs/OBSERVATION_MISMATCH.md`. They ask how surprising a window's evidence is under every state, which confidence cannot show. They are diagnostic infrastructure: no threshold, no abstention, no evaluation, and no decision changed.
+  - **Count laws.** `sensor_modeling.datasets.observation_mismatch.CountLaw` gives the hurdle, hurdle negative-binomial and Poisson channel models normalised laws, keeping the `log k!` their likelihoods drop. The laws have exact log-space upper and lower tails, a direct sum near underflow, and the entropy and varentropy of each state.
+  - **Measures.** `sensor_modeling.evaluation.MismatchTrace` keeps each window's per-channel, per-state log-probabilities and tails. From them it derives:
+    - the best achievable state;
+    - two-sided tails, which are valid p-values, and each channel's tail under its most lenient state;
+    - the standardised surprise per state, with its exact mean and variance;
+    - each channel's excess surprise, which sums to the window's;
+    - the posterior predictive and its gap below the best state;
+    - the activity pattern's exact tail and training support;
+    - counts beyond the training support.
+  - **Missing evidence.** Channels are available, missing or failed, a known sensor failure given as intervals. Only available channels are scored, so a failure is never read as novelty, and a window with none has no evidence.
+  - **Summaries.** Distributions, and shares at the tail levels 10⁻² to 10⁻⁹, with no single threshold.
+  - **Traces and households.** Traces are canonical gzip JSON with a SHA-256. `household_mismatch` scores a CASAS household against its channel models, with the recursion's prediction, the population's training support and the training households' activity patterns.
+- Added evidence-group disagreement diagnostics for ROADMAP Phase 4, `sensor_modeling.evaluation.evidence_groups`, described in `docs/EVIDENCE_GROUP_DISAGREEMENT.md`. They are diagnostic infrastructure: no abstention rule, no evaluation, and every filter output unchanged.
+  - **Groups.** From each sensor's modality in the registry: `motion` (motion, radar), `contact` (door, contact, vibration), `bed`, `wearable` (wearable motion and physiology, proximity) and `other`. The `context` group is the filter's prediction before the window's evidence.
+  - **Per window.** Each identifiable group's posterior from its own tempered evidence, the full posterior, whether the groups favour disjoint states, the vote disagreement, pairwise and generalised Jensen-Shannon divergence, each group's divergence from the full posterior, descriptive conflicts at a stated likelihood ratio, and each group's exact term in the decision's log odds, with the group that dominates it.
+  - **Missing evidence.** Sensor statuses keep the estimate's semantics: `unavailable` is its `missing`, and `silent` and `no data` together its `silent`. Absent, unavailable and uninformative groups are never compared, so missing evidence is never disagreement.
+  - **Results.** `GroupDisagreementRecorder` observes a filter and returns a JSON-safe results block, layout `evidence-group-disagreement/1`, with a canonical gzip trace referenced by SHA-256.
+- Added model-structure disagreement diagnostics for ROADMAP Phase 4, described in `docs/STRUCTURAL_DISAGREEMENT.md`. They are diagnostic infrastructure: no threshold, no abstention, and the deployed decision rule unchanged.
+  - **Measures.** `sensor_modeling.evaluation.disagreement` compares the posteriors of several fitted specifications over the same windows. For every window it gives each specification's posterior and most probable state, the pairwise Jensen-Shannon divergence in bits, the vote disagreement, each state's probability spread, the mean posterior, and the generalised Jensen-Shannon divergence. Each measure is symmetric, bounded and zero for identical specifications.
+  - **Traces.** `DisagreementTrace` holds one household's windows. It writes them as canonical gzip-compressed JSON with a SHA-256, and summarises them.
+  - **Specifications.** `sensor_modeling.datasets.structural_models` allows only variants the published evidence supports: the hurdle or hurdle negative-binomial observation model, population or partially pooled parameters, and the population fitted on all training households or on either half of them. Each cites its supporting record and finding. The time prior as a transition, fixed-lag smoothing and the declared rates are refused with reasons, and an ensemble holds at most six specifications.
+  - **Decision.** The reference, the Phase 3.3 follow-up's recursion, keeps the decision, bit for bit.
+- Added the pre-specified evaluation of the hurdle negative binomial, `sensor_modeling.datasets.dispersion_experiment`, with its frozen protocol, `artifacts/phase3/dispersion_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_NEGATIVE_BINOMIAL.md`.
+  - **Models.** The declared rates, the fitted hurdle-Poisson and the fitted hurdle negative binomial, with the same prior, transition, channels, windows and inference, scored with current windows and in the filter's recursion.
+  - **Questions.** Against the hurdle-Poisson, whether the negative binomial recovers `home_active` recall, preserves the calibration improvement, improves log loss and avoids degrading balanced accuracy. A rule fixed in advance adopts it only with a log-loss gain and every guard met, so extra complexity is never accepted for one improving metric.
+  - **Also reported.** Per-state recall, Brier score, the quiet-run overconfidence slope, and every fold's dispersion estimate per channel and state, classed by whether an extreme estimate rests on little data or a flat likelihood.
+  - **Output.** `dispersion_summary.render_summary` generates the Markdown summary from the record. `scripts/run_phase3_negative_binomial.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Result.** The run is published in `artifacts/phase3/phase3-hurdle-negative-binomial.json`, made from the protocol commit on a clean tree. It is on the 20 development homes, so it is not a held-out claim. Its declared and hurdle cells reproduce the Phase 3.3 follow-up exactly.
+    - Against the hurdle-Poisson, log loss improves by 0.484 with current windows and 0.784 in the recursion, in all 20 homes. Calibration error improves by 0.048 and 0.104, and balanced accuracy by 0.044 in both.
+    - `home_active` recall is not recovered: it falls a further 0.055 with current windows, and the change in the recursion is uncertain.
+    - By the rule declared in advance, the model is adopted in the recursion and a trade-off with current windows, so it is not adopted.
+    - Of 9 extreme dispersion estimates, 2 rest on little data; 6 are in `sleeping`, where motion counts approach the logarithmic-series limit.
+- Added a hurdle model with a zero-truncated negative-binomial active count, the `hurdle_nb` family in `sensor_modeling.datasets.channel_models`, described in `docs/HURDLE_NEGATIVE_BINOMIAL.md`. The posterior predictive checks found the zero-truncated Poisson active count systematically under-dispersed, with a variance growing with the square of the mean. No comparison with the hurdle-Poisson model is run here.
+  - **Model.** `HurdleNBChannel` keeps the hurdle's silence probability and replaces the active count with a negative binomial of mean `mu` and dispersion `alpha`, truncated at zero. `alpha = 0` is exactly the hurdle-Poisson model, which remains available and unchanged.
+  - **Fitting.** On training households only. Silence and the active mean are the hurdle's shrunk estimates. The dispersion maximises the profile likelihood of the active-count table plus 12 Poisson-shaped pseudo-windows at the same mean, which shrink it toward the Poisson. It is bounded at 100, where the family approaches the logarithmic series, and a fit at the bound is flagged.
+  - **Pooling.** `HouseholdChannels.models(dispersion=...)` builds a household's models from its pooled silence and active mean and the population's dispersion.
+  - **Numerics.** The coefficients use `log B(k, r)`, the truncation term a stable `log(1 - exp(x))`, and the Poisson limit its own branch; counts of a million stay finite.
+- Added pre-specified posterior predictive checks of the fitted hurdle channel model, `sensor_modeling.datasets.predictive_checks`, with its frozen protocol, `artifacts/phase3/predictive_protocol.json`, committed before any household was examined. The design is described in `docs/PHASE3_PREDICTIVE_CHECKS.md`. It is diagnostic only: no model is changed and no inference is run.
+  - **Cells.** Each household's labelled windows of one state on one channel, with at least 50 windows, are checked against two references: the hurdle fitted to the cell alone, which tests the family, and the fold's population hurdle, which inference uses.
+  - **Statistics.** Silence, mean, variance, the active mean and dispersion, the 90th and 99th percentiles, the tail above the 99th, windows in long quiet runs, and windows in bursts. Each is compared with 200 replicates of the cell's own windows, refitted for the cell's own fit.
+  - **Households.** Households are the unit. Every summary by state, channel, room and channel type is a household bootstrap of household means, and every household's values stay in the record.
+  - **Rules.** Declared in advance, they judge whether the zero-truncated Poisson active count is under-dispersed and whether quiet runs or bursts are in excess, and route the result to a next model family, if any.
+  - **Output.** `predictive_summary.render_summary` and `predictive_figures.draw_figures` generate the Markdown summary and the figures from the record. `scripts/run_phase3_predictive_checks.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Tests.** Synthetic tests check that the checks accept a correctly specified Poisson model and detect a negative-binomial-like process and clustering in time.
+  - **Result.** The run is published in `artifacts/phase3/phase3-hurdle-predictive-checks.json`, made from the protocol commit on a clean tree, with its figures in `docs/figures/phase3-predictive-*.svg`. It is on the 20 development homes. Its population fit is the Phase 3.3 follow-up's, by digest.
+    - The zero-truncated Poisson active count is systematically under-dispersed: the observed active variance is 4.3 to 7.4 times the predicted in the common states, in every household, and 472 of 493 cells are flagged. The excess grows with the square of the mean.
+    - Long quiet runs are in systematic excess, 1.3 to 5.2 times in `away`, `home_active` and `home_inactive`. Bursts are in excess only in `sleeping` and `home_inactive`.
+    - The declared routing names within-state temporal dependence, activity sub-states or a Markov-modulated emission, as the next model family, and the roadmap records it.
+- Added the pre-specified Phase 3.5 evaluation of fixed-lag smoothing, `sensor_modeling.datasets.smoothing_experiment`, with its frozen protocol, `artifacts/phase3/smoothing_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_SMOOTHING.md`.
+  - **Formulation.** The Phase 3.3 follow-up's fitted-hurdle recursion, the recursion over every window with a pre-specified success.
+  - **Regimes.** The online filter, and fixed-lag smoothers with lags of 1, 6 and 12 windows (5, 30 and 60 minutes), each with a declared operational use. Every regime is scored on the same labelled windows, and every smoothed estimate reads its full lag.
+  - **Measures.** Balanced accuracy, per-state recall, log loss, Brier score and calibration error. Also the share of states changed, corrected and made wrong relative to the online filter, accuracy near transitions, and each regime's decision delay after a transition, including its reporting delay.
+  - **Estimands.** Each smoother against the online filter, as a labelled smoothing gain, judged by a rule fixed in advance: gain, trade-off, probability gain, no gain or inconclusive.
+  - **Output.** `smoothing_summary.render_summary` generates the Markdown summary from the record. `scripts/run_phase3_smoothing.py` refuses to run unless the code's protocol equals the frozen file.
+  - **The record.** It is the first to compare regimes. Its `inference` field states the longest lag, which bounds every estimate in it, and its results label every cell and comparison with its own regime.
+  - **Result.** The run is published in `artifacts/phase3/phase3-fixed-lag-smoothing.json`, made from the protocol commit on a clean tree. It is on the 20 development homes, so it is not a held-out claim. Its online filter reproduces the Phase 3.3 follow-up's `filter_hurdle@R` exactly. Every figure is a smoothing gain, available only after the smoother's delay.
+    - Five minutes of lag is a pre-specified gain. Balanced accuracy rises by 0.031 [0.021, 0.043], in all 20 homes. No probability metric favours the online filter: log loss worsens by 0.044, short of its minimal difference, an uncertain verdict.
+    - Thirty and sixty minutes are pre-specified trade-offs. Balanced accuracy rises by 0.043 and 0.049, and log loss worsens by 0.101 and 0.119.
+    - Only 37% of the states smoothing changes at five minutes are corrections. `home_active` recall is unchanged at every lag, and `away` recall gains 0.060 and 0.083 at the longer lags.
+    - No smoother reports a new state sooner than the online filter.
+- Added the pre-specified Phase 3.4 evaluation of partial pooling, `sensor_modeling.datasets.pooling_experiment`, with its frozen protocol, `artifacts/phase3/pooling_protocol.json`, committed before any household was scored. The design is described in `docs/PHASE3_PARTIAL_POOLING.md`.
+  - **Models.** The hurdle channel parameters come from one of: the population, fitted per fold on training homes; each held-out home pooled toward it with the declared strength, 288 windows; the same with a strength selected by leave-one-household-out on training homes only; or unconstrained per-home estimates. The declared rates give context.
+  - **Arms and settings.** A 7-day and a 1-day adaptation arm, with every model in an arm scored on the same windows after the cut-off. Each model is scored with current windows and in the filter's recursion.
+  - **Estimands.** Pooled against population is the primary pooling question. Pooled against unconstrained after one day is the primary overfitting question. Log loss is the primary metric, and balanced accuracy and calibration error are guards. Results are also stratified by each home's amount of adaptation data.
+  - **Output.** `pooling_summary.render_summary` generates the Markdown summary from the record. `scripts/run_phase3_pooling.py` refuses to run unless the code's protocol equals the frozen file.
+  - **Result.** The run is published in `artifacts/phase3/phase3-partial-pooling.json`, made from the protocol commit on a clean tree. It is on the 20 development homes, so it is not a held-out claim. The population is identical to the Phase 3.3 follow-up's.
+    - Pooling a week of household data improves log loss with current windows by 0.080 [0.039, 0.118], in 17 of 20 homes, a pre-specified success. In the recursion it is inconclusive: one home carries the mean, and four worsen by more than 0.4.
+    - Unconstrained per-home fitting overfits small homes. After one day it is worse than pooling by 0.175 [0.055, 0.302], and worse than the population alone by 0.161.
+    - The strength selected on training homes was the grid's smallest, 24 windows, in both folds. With it, pooling improves log loss by 0.132. The declared 288 pools more than a week of data needs.
+
+- Added the inference-regime contract of ROADMAP 3.5, so that a smoothing gain cannot be reported as an online one. It is described in `docs/INFERENCE_REGIMES.md`. No inference algorithm changes.
+  - **Regimes.** `InferenceRegime` gains `is_causal` and `delay`, the effective reporting delay.
+  - **Estimates.** `ReportedEstimate` records an estimate's prediction timestamp, the latest evidence it read, and when it can first be reported. It refuses evidence beyond its regime and an availability the regime cannot have. `regime_estimates` builds them from filtered beliefs.
+  - **Records.** `EvidenceSummary` summarises the scored estimates' timestamps and their largest lead of evidence over prediction. `NotEnumerated` gives the reason a causal result does not list them; a smoother may not use it.
+  - **Evaluation.** `sensor_modeling.evaluation.RegimeResult` keeps one value per household with its regime and evidence.
+    - `compare_results` refuses unlabelled results, and results of different regimes unless a smoothing gain is requested. A smoothing gain is then labelled with its delay.
+    - `RegimeComparison.online_gain` refuses anything but two online results.
+    - `pool_results` refuses to mix regimes or count a household twice.
+  - **Tests.** The strict leakage tests stream a synthetic sequence whose later evidence changes an earlier posterior, and a simulated day through the online pipeline.
+
+### Changed
+- The experiment-record schema is 1.6. It adds an optional, validated `selective_prediction` section with each signal's direction, curves, intervals and summaries, the random and oracle references, and the coverage grid and bootstrap settings. Records written at 1.0 to 1.5 are migrated with the section `null`, and are otherwise unchanged.
+- The experiment-record schema is 1.5. It adds an optional, validated `observation_mismatch` section with the model's family and training households, the tail levels, and each household's summary and trace file with its digest. Records written at 1.0 to 1.4 are migrated with the section `null`, and are otherwise unchanged.
+- `MultimodalBayesFilter.update` is split into `evidence_terms`, which computes an update's prediction and each sensor's tempered log-likelihood without changing the filter, and the fold of those terms. Observers appended to the new `observers` list are called after every update with its `WindowTerms` and estimate. Every belief, information gain, completeness and contribution is unchanged to the last bit.
+- The experiment-record schema is 1.4. It adds an optional, validated `structural_disagreement` section with the specifications and their support, the reference, and each household's summary and trace file with its digest. Records written at 1.0 to 1.3 are migrated with the section `null`, and are otherwise unchanged.
+- `ChannelStatistics` gains an optional `active_counts` table of active-window counts, built by `home_statistics` and merged by `combine_statistics`. It is excluded from `FittedChannels.to_dict`, so every fit's SHA-256, including the published populations', is unchanged.
+- `sensor_modeling.datasets.channel_models` gains `home_statistics`, `combine_statistics` and `pool_channels`, so that one household's statistics can be combined or pooled at several strengths without being counted again. `fit_channel_models` and `adapt_channels` now use them, and give identical results.
+- The experiment-record schema is 1.3. The `inference` block adds `causal`, `delay_seconds` and `evidence`, and `ExperimentRecord` requires `evidence`.
+  - A record is refused if its causality or delay disagrees with its regime, or if its estimates read past it.
+  - Every experiment in `sensor_modeling.datasets` lists its scored moments. The CLI's simulation studies give a reason instead.
+  - 1.1 and 1.2 records are migrated on load, with their evidence marked not listed and the reason given. A smoothed 1.2 record is refused, and none was published.
+  - The published records and their generated summaries are unchanged.
+- A `StateEstimate`'s belief is read-only, so a reported estimate cannot be revised in place. `smooth_estimates` already returned new estimates.
+- `compare_households` refuses a `RegimeResult` and points to `compare_results`.
+- `ROADMAP.md` is rewritten for 0.9.0. Every phase states its status and the kind of evidence behind it, the measured results are kept, negative ones included, and the order of work lists only open questions.
+- Claims the evidence has overtaken are corrected:
+  - "every quantitative result comes from the bundled simulator" in `docs/index.md`;
+  - "the pipeline is close to the ceiling for the evidence it actually uses" in `README.md` and `docs/limitations.md`, which the Phase 1 matched comparison refutes;
+  - lists of future credibility gates in `docs/RESEARCH_QUESTIONS.md` and `docs/limitations.md` that have since been met;
+  - the stale version in the `ZENODO.md` citation;
+  - planned deep-learning change-point detection and HL7 work in the README, which the roadmap does not contain.
+
+  Frozen experiment reports are unchanged.
+- The version-bump configuration also covers the README badge and BibTeX entry, which the Release workflow checks, and the `ZENODO.md` citation.
+
 ## [0.8.0] - 2026-09-27
 
 Records the first Phase 3 inference-redesign results. Each experiment was pre-specified, with its protocol frozen before any household was scored, and run on the 20 development homes, so none is a held-out claim. It provides:

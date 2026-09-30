@@ -541,7 +541,7 @@ class TestRecord:
         assert payload["data_source"] == "synthetic-test"
         assert payload["recorded_at"]
         assert {"git_commit", "sensor_modeling"} <= set(payload["environment"])
-        assert payload["schema_version"] == "1.2"
+        assert payload["schema_version"] == "1.6"
         configuration = payload["configuration"]
         assert configuration["result_schema"] == "matched-evaluation/3"
         assert configuration["bootstrap"]["unit"] == "household"

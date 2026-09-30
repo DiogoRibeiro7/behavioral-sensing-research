@@ -1,0 +1,178 @@
+{
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "statistics": "mean and median household value",
+    "unit": "household"
+  },
+  "common_states": [
+    "away",
+    "home_active",
+    "home_inactive",
+    "sleeping"
+  ],
+  "criteria": {
+    "absent": "negligible or negative in every common state, own reference",
+    "across": "positive: the household mean log ratio is at least log of the minimal ratio and its lower bound above 0; negative: at most minus that, upper bound below 0; negligible: the whole interval within plus or minus it; uncertain: anything else; insufficient: fewer than min_households households",
+    "cell": "consistent: the observed log ratio lies within the central band of the replicates' log ratios; above or below: outside it, by at least the minimal ratio in that direction; small: outside it by less",
+    "inconclusive": "anything else",
+    "partial": "positive in one or two common states, own reference",
+    "roadmap": "the roadmap names a next model family only if the routing indicates one",
+    "routing": "a systematic excess of quiet runs or bursts points to within-state temporal dependence, which would also over-disperse the counts; otherwise systematic active dispersion points to an over-dispersed zero-truncated count model; otherwise no new family is indicated",
+    "systematic": "positive in at least three of the four common states and negative in none, own reference"
+  },
+  "data": {
+    "counts": "each instrumented channel's activations in each 5-minute window, as the fitted channel models read them",
+    "external": "the frozen external cohort is not touched",
+    "labels": "truth_series of each recording's annotations; unlabelled windows are not used"
+  },
+  "distribution": {
+    "bin_edges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      11,
+      16,
+      23,
+      32,
+      45,
+      64
+    ],
+    "rule": "observed windows in each count bin against the reference's expected windows; the last bin is open"
+  },
+  "groups": {
+    "channel": "each channel",
+    "household": "every household's cells, listed",
+    "modality": "motion or door",
+    "room": "each room, pooling a room's channels within a household",
+    "state": "each state",
+    "state_channel": "each state and channel: descriptive, no interval"
+  },
+  "households": {
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ],
+    "splits_file": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+    "use": "the development panel only; each household is examined once, against its own hurdle fit and against the population fitted on its fold's training households"
+  },
+  "min_households": 5,
+  "minimal_ratio": 1.25,
+  "model": {
+    "family": "hurdle: silence with probability pi, otherwise a zero-truncated Poisson count with rate mu, per channel and state",
+    "inference": "unchanged: no model is refitted for inference and no state is estimated"
+  },
+  "name": "phase3-hurdle-predictive-checks",
+  "protocol_sha256": "7fe466e19e6a263dea2aec25abb2a0232b2b6bbd374b7a8af93e355686c03860",
+  "pseudo_windows": 12.0,
+  "quantiles": {
+    "q90": 0.9,
+    "q99": 0.99
+  },
+  "references": {
+    "own": "the hurdle fitted to the cell alone: pi its share of silent windows, mu solved from its active windows' mean; it reproduces the cell's silence, mean and active mean exactly, so those are not judged against it",
+    "population": "the fold's population hurdle fitted on its training households with 12 pseudo-windows, as in the Phase 3.3 follow-up, applied unchanged"
+  },
+  "replicates": {
+    "band": 0.95,
+    "count": 200,
+    "own": "each replicate drawn from the cell's own fit and refitted before its statistics are computed: a parametric bootstrap",
+    "population": "each replicate drawn from the population hurdle, not refitted: the predictive distribution for a new household",
+    "seed": "numpy default_rng of (seed, household, state, channel, reference) indices"
+  },
+  "routes": {
+    "dispersion": "an over-dispersed zero-truncated count model for the active part, such as the zero-truncated negative binomial, keeping the hurdle's silence parameter",
+    "temporal": "within-state temporal dependence: activity sub-states or a Markov-modulated emission within each state; no marginal count family produces runs beyond independence given the state, and a latent intensity that varies over time also over-disperses the counts"
+  },
+  "runs": {
+    "burst_windows": 3,
+    "quiet_run_windows": 12,
+    "within": "A maximal run of consecutive labelled windows of the cell's state; runs are counted within stretches."
+  },
+  "schema": "predictive-checks-protocol/1",
+  "seeds": {
+    "replicates_and_bootstrap": 0
+  },
+  "statistics": {
+    "active_dispersion": "Variance of the active windows' counts over the zero-truncated Poisson's, m (1 + mu - m); a value above one means the model is under-dispersed.",
+    "active_mean": "Mean count of the cell's active windows; the model's is mu / (1 - exp(-mu)).",
+    "bursts": "Windows in maximal runs of at least burst_windows active windows within stretches, observed over the replicates' mean, with half a window added to each.",
+    "mean": "Mean count over the cell's windows.",
+    "q90": "The 90th percentile of the active windows' counts, the smallest count whose empirical share at or below it reaches 0.9, over the model's.",
+    "q99": "The same at the 99th percentile.",
+    "quiet_runs": "Windows in maximal runs of at least quiet_run_windows silent windows within stretches, observed over the replicates' mean, with half a window added to each.",
+    "silence": "Share of the cell's windows with no activation; compared as a log odds ratio with half a window added to each side.",
+    "tail_excess": "Active windows above the model's 99th percentile, observed over expected, with half a window added to each.",
+    "variance": "Variance of the count over the cell's windows, with one degree of freedom removed; the hurdle's is (1 - pi) (v + m^2) - ((1 - pi) m)^2 for the zero-truncated Poisson's mean m and variance v."
+  },
+  "sufficiency": {
+    "min_active": 30,
+    "min_runs": 5.0,
+    "min_windows": 50,
+    "rule": "a cell enters with at least min_windows labelled windows; active-window statistics need min_active active windows; a run statistic needs its observed or predicted windows in runs to reach min_runs times the run length; the own reference needs a silent and an active window"
+  },
+  "tuning": "none: every threshold is declared; nothing is fitted on the statistics it is judged by",
+  "variance_mean": "Least-squares slope of log active variance on log active mean across one household's cells with enough active windows: about 1 for Poisson-like counts, approaching 2 when the excess variance grows with the square of the mean."
+}

@@ -171,16 +171,34 @@ them.
 
 ## What would make these answers trustworthy
 
-The project has completed annotated CASAS evaluation, so the remaining
-credibility gates are no longer simulator-only. In priority order:
+The project has completed annotated CASAS evaluation, so the credibility
+gates are no longer simulator-only. Their status:
 
-1. External validation on an independently collected annotated smart-home
-   dataset with materially different sensing semantics or layout.
-2. Matched-information comparisons that separate sensing limitations from
+1. **External validation on an independently collected annotated smart-home
+   dataset** with materially different sensing semantics or layout.
+   - **Done once.** The two homes of the UCI ADL Binary dataset were evaluated
+     under a protocol frozen before scoring.
+   - **Result.** The CASAS-trained model does not transfer: zero-shot balanced
+     accuracy is at chance; see
+     [Phase 5 external results](PHASE5_EXTERNAL_RESULTS.md).
+   - **Still needed.** Two homes are two case studies, so a dataset with more
+     homes is still needed.
+2. **Matched-information comparisons** that separate sensing limitations from
    formulation limitations on frozen household splits.
-3. Population-level and household-level parameter estimation with explicit
-   partial pooling where the data support it.
-4. Calibration and uncertainty assessment across households and across
-   datasets, not only within one ecosystem.
-5. Prospective assessment of alert burden with people who would act on the
-   alerts.
+   - **Done on the 20 development homes.** Part of the gap is the formulation;
+     see [the recoverable-information gap](PHASE1_RECOVERABLE_GAP.md).
+   - **Not yet confirmed** on held-out homes.
+3. **Population-level and household-level parameter estimation** with explicit
+   partial pooling.
+   - **Done on the development homes.** Pooling a week of household data
+     improves log loss with current windows, and is inconclusive in the
+     filter's recursion; see [partial pooling](PHASE3_PARTIAL_POOLING.md).
+4. **Calibration and uncertainty assessment** across households and across
+   datasets.
+   - **Development homes.** Reported per household. Model-structure
+     disagreement ranks errors better than confidence; see
+     [the Phase 4 comparison](PHASE4_UNCERTAINTY_DIAGNOSTICS.md).
+   - **External homes.** The calibration gap widens, and that direction is
+     inconclusive.
+5. **Prospective assessment of alert burden** with people who would act on the
+   alerts. Not started.
