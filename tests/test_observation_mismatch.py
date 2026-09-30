@@ -569,7 +569,7 @@ class TestRecord:
     def test_the_section_round_trips(self, tmp_path: Path) -> None:
         path = self.record().write(tmp_path / "record.json")
         payload = load_record(path)
-        assert payload["schema_version"] == "1.5"
+        assert payload["schema_version"] == "1.6"
         section = payload["observation_mismatch"]
         assert section["levels"] == list(LEVELS)
         assert section["households"]["h"]["summary"]["windows"] == 20

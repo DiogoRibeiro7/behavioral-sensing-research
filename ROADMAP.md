@@ -527,6 +527,18 @@ threshold and no evaluation yet.
   never scored as novelty.
 - **The record.** Experiment records carry them from schema 1.5.
 
+The selective-prediction evaluation framework is implemented; see
+`docs/SELECTIVE_PREDICTION.md`. It evaluates any candidate signal, with its
+direction stated, and selects no threshold.
+
+- **The curves.** Over a coverage grid: selective risk, error and balanced
+  accuracy, per-state coverage, calibration among retained predictions, and
+  the composition of the rejected windows. Pooled and per household.
+- **The references.** Random rejection and the oracle, summarised by the AURC,
+  its excess over the oracle, and the gain over random.
+- **Uncertainty.** Households, never timestamps, are resampled.
+- **The record.** Experiment records carry it from schema 1.6.
+
 ### Required evaluation
 
 Selective prediction must be presented as a risk--coverage curve, not a single
