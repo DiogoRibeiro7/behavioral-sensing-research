@@ -80,7 +80,7 @@ partial bump fails the build rather than reaching Zenodo.
   author    = {Ribeiro, Diogo},
   title     = {Sensor Modeling Research Toolkit},
   year      = {2026},
-  version   = {0.6.0},
+  version   = {0.9.0},
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.21337272},
   url       = {https://doi.org/10.5281/zenodo.21337272}
@@ -99,5 +99,8 @@ Releases up to `0.2.0` report results from the bundled simulator only. From
 `0.3.0`, the documentation also reports results on public CASAS recordings,
 in `docs/real_data.md` and, from `0.6.0`, in
 `docs/PHASE1_MATCHED_BASELINES.md`. Those are development results from one
-research group's instrumentation, not clinical validation. Figures from the
+research group's instrumentation, not clinical validation. From `0.9.0`,
+`docs/PHASE5_EXTERNAL_RESULTS.md` reports the first evaluation on an
+independently collected dataset, two homes, to which the CASAS-trained model
+does not transfer. Figures from the
 simulator remain simulator figures and are not field-performance estimates.
