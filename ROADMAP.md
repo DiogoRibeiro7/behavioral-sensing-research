@@ -22,7 +22,7 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Where the Programme Stands
 
-Four kinds of evidence appear below, and they are never merged:
+Five kinds of evidence appear below, and they are never merged:
 
 - **Development panel.** The 20 single-resident CASAS homes, cross-fitted on
   two frozen household folds. Every Phase 1 to 4 result uses them. They have
@@ -37,6 +37,10 @@ Four kinds of evidence appear below, and they are never merged:
   Its labels are alerts a clinical team verified, not behavioural states, so
   it scores no state and describes only what the pipeline raises. The labels
   had been analysed before the protocol was written.
+- **Simulated homes, pre-specified.** The silent-home rule on 100 paired
+  homes from this repository's simulator, under a protocol frozen before any
+  of them had been run with the rule on. A result on them is a statement
+  about the simulator.
 
 | Phase | Status | Evidence | Headline |
 | --- | --- | --- | --- |
@@ -46,7 +50,7 @@ Four kinds of evidence appear below, and they are never merged:
 | 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
 | 5. External generalisation | First evaluation complete | Independent external, 2 homes | The CASAS-trained model does not transfer |
 | 6. Sensor-information frontier | Not started | — | — |
-| 7. Reliability and failure robustness | Not started | — | — |
+| 7. Reliability and failure robustness | One rule evaluated | Simulated homes, pre-specified; clinical cohort, described | An opt-in rule treats a home silent past a declared horizon as not observed; the TIHM homes are silent that long often |
 | 8. Real-time system hardening | Deferred by its own gate | — | — |
 
 In one sentence: on the development panel the generative model has improved
@@ -652,7 +656,8 @@ model scored, so it follows a confirmed reference formulation.
 
 ## Phase 7 — Reliability and Failure Robustness
 
-**Status: not started as statistical modelling.** Related infrastructure exists:
+**Status: one rule evaluated; not started as statistical modelling.** Related
+infrastructure exists:
 
 - online sensor health tempers each sensor's likelihood;
 - the observation-mismatch diagnostics exclude known failures rather than
@@ -674,6 +679,96 @@ a day on which no home reports among them. See the Phase 5 section. Priorities:
 3. test informative missingness explicitly;
 4. evaluate recovery after transient failures;
 5. propagate reliability uncertainty into state uncertainty where feasible.
+
+### Measured: a home that reports nothing
+
+`HealthConfig.home_silence_horizon` is an opt-in rule for a deployment with no
+sensor that promises to report. When no sensor of a home has reported for the
+horizon, the home is treated as not observed from its last observation on, the
+days that lost any time are refused by the baseline, and an alert about the
+silence is raised and repeated once per cooldown, which does not say why.
+`sensor_modeling.health.fleet` recognises a silence that most homes share. The
+rule is off by default, so by default a silent home is read as before.
+
+It was designed from the TIHM run, so that run cannot be its evidence.
+
+- **The protocol.** `docs/SILENT_HOME_PROTOCOL.md`, frozen and pushed before
+  any simulated home had been run with the rule on. It fixes eleven estimands
+  and eight criteria on 100 paired simulated homes reduced to their event
+  sensors, and declares the run on TIHM a description.
+- **The run.** `docs/SILENT_HOME_RESULTS.md`, from a clean commit. **The
+  evidence is simulated.**
+- **An outage raises alerts, and the rule removes them.** With the rule off a
+  60-hour outage raises 2.76 behavioural alerts per home more than the same
+  home without it, [2.36, 3.15], Monte Carlo standard error 0.20. At 12 hours
+  the excess is −0.28 [−0.44, −0.13], standard error 0.08, and the rule
+  removes 3.04 [2.68, 3.39], standard error 0.18.
+- **With the rule on, the outage arm raises fewer alerts than the home left
+  alone.** 30 against 58 in the window, in 30 homes fewer and in 9 more. The
+  criterion asks only that the excess lie below its margin and counts this as
+  success. One alert against 16 is raised up to a day after the outage ends,
+  when most of those days are refused and a refused day raises nothing; 29
+  against 42 in the rest of the window. Whether the second is a loss of
+  sensitivity after an outage is not settled. The nearest evidence is the two
+  detection arms set side by side after the run: with the rule on, 76 of 100
+  homes are detected after an outage and 75 with none, at a median 11.0
+  against 10.0 days.
+- **Nothing changes where no home is silent.** In 8,400 person-days of stable
+  homes the rule changes no alert and raises none. A real change is detected
+  in 75 of 100 homes with and without it; in that arm no home was silent for
+  the horizon, so the rule never acted and the two are one finding.
+- **After an outage, fewer homes meet the detection definition with the rule
+  on.** 76 of 100 against 91: −0.15 [−0.23, −0.07], standard error 0.04. The
+  interval
+  excludes zero and lies on both sides of the −0.10 margin, so the
+  pre-specified verdict is inconclusive: the loss is shown neither to be
+  within the margin nor to exceed it. Beside it, and not as a criterion: with
+  the rule off 38 of 100 homes with an outage and no change also meet the
+  definition, 8 with it on, and with no outage 75 of the 100 homes are
+  detected. A reading, not tested, is that part of the 91 are alerts the
+  outage itself raises; one home outside the protocol had suggested it before
+  the run, which the record says. The 76 are not the 75: with the rule on, 67
+  homes are detected both with and without an outage, 8 only without and 9
+  only after.
+- **The silence is reported.** Every outage, a median 12.0 hours after it
+  began, in three alerts, with three or four days refused. A shared outage is
+  one stretch for the fleet check, 12.0 hours after it began, and outages each
+  home has on its own are none.
+- **The rule saw more than its stated limits in three places.** A silence is
+  dated from the home's last observation, which precedes an outage by minutes
+  to hours, and a day is closed by the first step after midnight. So the day
+  an outage began on was refused in 4 of the 43 homes whose outage began at
+  noon or later; at 24 hours it was refused in 8 of 100, where the protocol
+  expected none; and an 8-hour outage was reported in one home in 100. The
+  homes whose outage began at noon or later show no excess, −0.19
+  [−0.47, 0.07].
+
+On TIHM, as a description and not a test:
+
+- **Fewer behavioural alerts, some of them new.** At 12 hours 147 of the 183
+  alerts are no longer raised and 13 are raised that were not, leaving 49;
+  the day that held 33 has none. The record does not say which of the 147
+  were on days with no report; the alert-burden description counted 44 alerts
+  on such days.
+- **The TIHM homes are silent often.** The rule refuses 322 of the 2,850
+  monitored days, in 48 of the 56 homes, and raises 324 alerts about silence,
+  which repeat while a silence lasts. 145 of them fall inside the two
+  stretches the fleet check calls common: the first days of the dataset, when
+  three homes were monitored, and 15 to 17 June, in which all 47 monitored
+  homes were silent at once. At 24 hours it refuses 205 days and raises 205.
+
+Consequence: in simulation the rule removes the alerts it was built to
+remove; whether that costs detection after an outage the test left undecided.
+On a real cohort it exchanges alerts about behaviour for more alerts about
+silence: 373 alerts of both kinds where there were 183. A simulated home is
+not silent for twelve hours unless a fault makes it so, so the simulator could
+not have shown that. Which horizon a real home needs, and what an alert about
+silence is worth to the person who receives it, are open. Priorities 1 and 2
+above are what would answer them.
+
+TIHM is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0;
+Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged,
+as the dataset asks.
 
 ## Phase 8 — Real-Time System Hardening
 
@@ -777,5 +872,7 @@ lets each answer inform the next.
    selected before confirmatory scoring.
 6. **Reliability modelling (Phase 7).** Separate failure processes from
    behavioural state, and quantify robustness under realistic missingness.
+   The silent-home rule is a declared rule with a declared horizon. How long
+   a real home is silent when nothing is wrong is the measurement it lacks.
 7. **System hardening (Phase 8).** Only after an improvement survives held-out
    and external evaluation.

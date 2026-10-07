@@ -138,6 +138,41 @@ whole run. A likely reading, not a tested one, is that this is the mechanism
 behind the saturated confidence above: with no evidence the belief goes to the
 quietest state, and the pipeline abstained on 0.06% of usable time.
 
+**An opt-in rule now treats a silent home as not observed, and it has a cost
+the simulator cannot show.** `HealthConfig.home_silence_horizon` is off by
+default, so by default a silent home is still read as above. On 100 paired
+simulated homes the rule removes, on average, the alerts an outage raises, and
+changes nothing in a stable home; see
+[the silent-home results](SILENT_HOME_RESULTS.md). That evidence is simulated,
+and a simulated home is not silent for twelve hours unless a fault makes it
+so. The TIHM homes often are. Run on them as a description and not as a test,
+at twelve hours the rule refuses 322 of the 2,850 monitored days in 48 of the
+56 homes and raises 324 alerts about silence, 145 of them in the two stretches
+in which most monitored homes were silent together. Of the 183 behavioural
+alerts of the run without it, 147 are no longer raised and 13 new ones are. It
+does not say why a home is silent: a resident who is away, a resident who
+needs help and a gateway that has stopped are reported in the same words. Four
+things remain open:
+
+- which horizon a real home needs, which depends on its sensors and its
+  resident and was declared here, not estimated;
+- what a person receiving an alert about silence does with it, and whether
+  one about a home is worth more than one about a behaviour;
+- whether the rule costs detection of a real change after an outage. In
+  simulation 76 of 100 homes met the detection definition with the rule on
+  against 91 with it off, −0.15 [−0.23, −0.07], Monte Carlo standard error
+  0.04: fewer, and inconclusive against the −0.10 margin. Whether changes
+  were missed or alerts the outage itself raised were gone was not tested;
+- whether the baseline is less sensitive for a while after the days the rule
+  refuses. In simulation the outage arm raised fewer alerts in its window
+  than the same homes with nothing injected, 30 against 58, an excess of
+  −0.28 [−0.44, −0.13] with a standard error of 0.08, and no arm of the
+  protocol can say why.
+
+The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
+under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz
+are acknowledged, as the dataset asks. It is not redistributed here.
+
 **The deviation threshold does not mean three standard deviations.** The
 baseline compares a day with the same weekday's earlier days once four exist.
 A median and MAD of four values put a Gaussian value past the threshold about 17.5%

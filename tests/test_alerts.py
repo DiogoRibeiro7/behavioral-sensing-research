@@ -286,6 +286,55 @@ class TestSystemHealthAlerts:
         assert engine.consider_health(report, at=T0 + timedelta(hours=1)) is None
 
 
+class TestHomeSilenceAlerts:
+    """No sensor of the home has reported: neither behaviour nor a fault."""
+
+    SINCE = T0 - timedelta(hours=14)
+
+    def silent(self, at: datetime = T0) -> SystemHealthReport:
+        report = health({"a": 0.05, "b": 0.05}, at=at)
+        return SystemHealthReport(
+            at=report.at, sensors=report.sensors, silent_since=self.SINCE
+        )
+
+    def test_a_silent_home_raises_a_data_quality_alert(self) -> None:
+        alert = AlertEngine().consider_health(self.silent())
+        assert alert is not None
+        assert alert.kind is AlertKind.DATA_QUALITY
+        assert alert.subject == "home_silence"
+        assert alert.severity is AlertSeverity.ATTENTION
+        assert alert.evidence["silent_since"] == self.SINCE.isoformat()
+        assert alert.evidence["silence_hours"] == pytest.approx(14.0)
+        assert "14 hours" in alert.summary
+
+    def test_it_claims_neither_a_fault_nor_a_behaviour(self) -> None:
+        alert = AlertEngine().consider_health(self.silent())
+        assert alert is not None
+        caveats = " ".join(alert.caveats)
+        assert "cannot say which" in caveats
+        assert "not the resident" not in caveats
+        assert "baseline" in caveats
+
+    def test_it_replaces_the_apparatus_alert_for_the_same_silence(self) -> None:
+        engine = AlertEngine()
+        first = engine.consider_health(self.silent())
+        assert first is not None and first.kind is AlertKind.DATA_QUALITY
+        assert engine.consider_health(self.silent(T0 + timedelta(minutes=5))) is None
+
+    def test_it_is_repeated_once_per_cooldown_while_the_silence_lasts(self) -> None:
+        engine = AlertEngine()
+        assert engine.consider_health(self.silent(T0)) is not None
+        assert engine.consider_health(self.silent(T0 + timedelta(hours=19))) is None
+        later = engine.consider_health(self.silent(T0 + timedelta(hours=20)))
+        assert later is not None
+        assert later.evidence["silence_hours"] == pytest.approx(34.0)
+
+    def test_a_home_heard_from_again_falls_back_to_the_apparatus_rule(self) -> None:
+        engine = AlertEngine()
+        assert engine.consider_health(self.silent()) is not None
+        assert engine.consider_health(health({"a": 1.0, "b": 0.9})) is None
+
+
 class TestEngineMechanics:
     def test_alerts_serialise_with_a_stable_identifier(self) -> None:
         engine = AlertEngine()

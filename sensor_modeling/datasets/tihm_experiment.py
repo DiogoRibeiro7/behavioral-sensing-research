@@ -33,7 +33,7 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
-from ..alerts.alert import AlertKind
+from ..alerts.alert import HOME_SILENCE, AlertKind
 from ..baseline.adaptive import BaselineConfig, ChangeKind
 from ..evaluation import ExperimentRecord, InputArtifact, ModelRecord, ReportedInterval
 from ..evaluation.resampling import percentile_interval, resample_indices
@@ -41,6 +41,7 @@ from ..external.canonical import to_canonical
 from ..external.contract import DatasetAdapter, HouseholdData
 from ..external.validation import localise, validate_household
 from ..fusion import ONLINE, EvidenceSummary
+from ..health.monitor import HealthConfig
 from ..online.pipeline import BehaviouralSensingPipeline, PipelineConfig
 from .tihm_protocol import (
     BLOCKS,
@@ -100,6 +101,9 @@ class DayRecord:
         the run do.
     hours
         The expected hours the day's summary gives each behavioural state.
+    silent
+        The fraction of the day left out because no sensor of the home
+        reported. Zero unless the run declares how long a home may be silent.
     """
 
     day: date
@@ -115,6 +119,7 @@ class DayRecord:
     values: Mapping[str, float] = field(default_factory=dict)
     references: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
     hours: Mapping[str, float] = field(default_factory=dict)
+    silent: float = 0.0
 
     @property
     def evaluable(self) -> bool:
@@ -158,6 +163,11 @@ class HouseholdRun:
         What the conversion did not carry, and the validation issue counts.
     closes
         The moments the pipeline closed a day at.
+    silence_alerts
+        The moments an alert about the whole home's silence was raised at.
+        They are among the data-quality alerts.
+    observed
+        The moment of every canonical observation, in order.
     """
 
     household: str
@@ -169,10 +179,21 @@ class HouseholdRun:
     dispositions: Mapping[str, Any]
     issues: Mapping[str, int]
     closes: tuple[datetime, ...]
+    silence_alerts: tuple[datetime, ...] = ()
+    observed: tuple[datetime, ...] = ()
 
 
-def run_household(data: HouseholdData, protocol: TihmProtocol) -> HouseholdRun:
-    """Run one household through the contract and the pipeline at its defaults."""
+def run_household(
+    data: HouseholdData,
+    protocol: TihmProtocol,
+    health_config: HealthConfig | None = None,
+) -> HouseholdRun:
+    """Run one household through the contract and the pipeline at its defaults.
+
+    *health_config* is the one setting a caller may change, and the protocol's
+    own run leaves it alone. The silent-home description passes it to run the
+    same homes with the rule that treats a silent home as not observed.
+    """
     report = validate_household(data, protocol.mapping)
     canonical = to_canonical(data, protocol.mapping, source="tihm")
     recording = canonical.recording
@@ -197,17 +218,21 @@ def run_household(data: HouseholdData, protocol: TihmProtocol) -> HouseholdRun:
     pipeline = BehaviouralSensingPipeline(
         recording.registry,
         config=PipelineConfig(tz=zone, step=timedelta(minutes=protocol.step_minutes)),
+        health_config=health_config,
     )
     steps = pipeline.run(recording.observations)
     steps.extend(pipeline.close(recording.observations[-1].timestamp))
 
     days: list[DayRecord] = []
     closes: list[datetime] = []
+    silences: list[datetime] = []
     other: Counter[str] = Counter()
     for step in steps:
         for alert in step.alerts:
             if alert.kind is not AlertKind.BEHAVIOURAL_CHANGE:
                 other[alert.kind.value] += 1
+            if alert.kind is AlertKind.DATA_QUALITY and alert.subject == HOME_SILENCE:
+                silences.append(alert.at)
         summary = step.day_closed
         if summary is None:
             continue
@@ -235,6 +260,7 @@ def run_household(data: HouseholdData, protocol: TihmProtocol) -> HouseholdRun:
                 hours={
                     state.value: float(hours) for state, hours in summary.hours.items()
                 },
+                silent=float(summary.silent),
             )
         )
     return HouseholdRun(
@@ -247,6 +273,8 @@ def run_household(data: HouseholdData, protocol: TihmProtocol) -> HouseholdRun:
         dispositions=canonical.dispositions,
         issues={issue.code: issue.count for issue in report.issues},
         closes=tuple(closes),
+        silence_alerts=tuple(silences),
+        observed=tuple(o.timestamp for o in recording.observations),
     )
 
 

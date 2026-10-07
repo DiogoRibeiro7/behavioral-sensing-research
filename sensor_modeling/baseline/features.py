@@ -53,6 +53,10 @@ class DailySummary:
         state.
     observed
         Fraction of the day's 24 hours covered by estimates at all.
+    silent
+        Fraction of the day's 24 hours in which no sensor of the home
+        reported, and which was left out of the summary for that reason. It is
+        zero unless the deployment declares how long a home may be silent.
     """
 
     day: date
@@ -61,6 +65,7 @@ class DailySummary:
     coverage: float
     abstention: float
     observed: float
+    silent: float = 0.0
 
     def hours_in(self, state: BehaviouralState) -> float:
         """Return expected hours spent in *state*."""
@@ -72,8 +77,16 @@ class DailySummary:
         A day that fails this test is not a quiet day. It is a day the
         apparatus did not watch, and it must be excluded rather than
         recorded as low activity.
+
+        A day part of which fell in a silence of the whole home fails it
+        whatever was left. Its hours are sums over the part that was watched,
+        and a day with its night missing is not a day of little sleep.
         """
-        return self.coverage >= min_coverage and self.observed >= min_observed
+        return (
+            self.silent == 0.0
+            and self.coverage >= min_coverage
+            and self.observed >= min_observed
+        )
 
     def to_dict(self) -> dict[str, object]:
         """Return a serialisable form of the summary."""
@@ -84,6 +97,7 @@ class DailySummary:
             "coverage": self.coverage,
             "abstention": self.abstention,
             "observed": self.observed,
+            "silent": self.silent,
         }
 
 

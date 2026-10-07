@@ -77,6 +77,47 @@ other days. Looked at afterwards, a quarter of the alert days are days on which
 no sensor in the home reported anything, which the pipeline reads as sleep. See
 [TIHM alert-burden results](docs/TIHM_ALERT_BURDEN_RESULTS.md).
 
+An opt-in rule, off by default, now treats a home in which no sensor has
+reported for a declared time as not observed, and says so in an alert of its
+own. It was built from the TIHM finding, so it was tested elsewhere: on 100
+paired simulated homes reduced to their event sensors, under a protocol frozen
+before any of them had been run with the rule on. **The evidence is
+simulated.**
+
+- **An outage raises alerts, and the rule removes them.** A 60-hour outage
+  raises 2.76 behavioural alerts per home more than the same home without it,
+  with a 95% interval over homes of [2.36, 3.15] and a Monte Carlo standard
+  error of 0.20. With the rule on at 12 hours the excess is −0.28
+  [−0.44, −0.13], standard error 0.08. That is below zero: the outage arm
+  raises fewer alerts than the same homes left alone, 30 against 58. Whether
+  that is a loss of sensitivity after an outage is not settled.
+- **Every outage is reported**, a median 12.0 hours after it began.
+- **Nothing changes where no home is silent.** No alert of a stable home
+  changes, and the rule raises none of its own there.
+- **After an outage, fewer homes meet the detection definition with the rule
+  on.** 76 of 100 against 91: −0.15 [−0.23, −0.07], standard error 0.04,
+  against a margin of −0.10. The interval excludes zero and lies on both sides
+  of the margin, so the pre-specified verdict is inconclusive. With the rule
+  off, 38 of 100 homes with an outage and no change meet the same definition,
+  and with no outage at all 75 are detected, so whether changes are missed or
+  alerts the outage raised are gone was not tested.
+- **The eight criteria.** The problem was reproduced, four criteria came out
+  as success, detection with no outage was non-inferior, detection after an
+  outage was inconclusive, and a stated limit of the rule was not confirmed in
+  one home in 100.
+
+Run on the TIHM homes as a description and not as a test, the rule shows a
+cost the simulator could not: those homes are silent for twelve hours often.
+At 12 hours 147 of the 183 behavioural alerts are no longer raised and 13 new
+ones are, 322 of the 2,850 monitored days are refused, and 324 alerts about
+silence are raised, 145 of them in the two stretches in which most monitored
+homes were silent together. See
+[the silent-home results](docs/SILENT_HOME_RESULTS.md).
+
+The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
+under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz
+are acknowledged, as the dataset asks. It is not redistributed here.
+
 See [Real-data validation](docs/real_data.md) and
 [Known limitations](docs/limitations.md).
 
