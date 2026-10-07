@@ -36,6 +36,17 @@ still delivering and says nothing about whether other records are arriving.
 
 Regression: `test_adversarial.py::test_a_total_outage_produces_abstention_not_confident_inactivity`
 
+**The fix needs a canary, and a deployment of event sensors has none.** The
+TIHM run showed the same failure where no sensor declares a cadence: 128 days
+on which a home reported nothing were counted as usable and read as sleep. See
+[the TIHM results](TIHM_ALERT_BURDEN_RESULTS.md). An opt-in rule,
+`HealthConfig.home_silence_horizon`, now treats a home in which no sensor has
+reported for a declared time as not observed, and
+`sensor_modeling.health.fleet` recognises a silence that most homes share. The
+rule is off by default.
+
+Regression: `test_online_pipeline.py::TestSilentHome`
+
 ### B2. A sleeping resident made the bed sensor look broken — *fixed*
 
 Stuck detection counted consecutive identical readings for every sensor kind.

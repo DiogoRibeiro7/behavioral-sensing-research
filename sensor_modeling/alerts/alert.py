@@ -374,8 +374,13 @@ class AlertEngine:
         This is deliberately a different kind of alert. A failing sensor is a
         maintenance problem; presenting it as a behavioural finding would be
         exactly the confusion the platform exists to prevent.
+
+        A home in which no sensor has reported at all is a third thing, and
+        gets its own alert: see :meth:`_silence_alert`.
         """
         moment = at if at is not None else report.at
+        if report.silent_since is not None:
+            return self._silence_alert(report, moment)
         if report.coverage >= self.policy.health_coverage_floor:
             return None
 
@@ -402,6 +407,48 @@ class AlertEngine:
                 caveats=(
                     "This concerns the sensing apparatus, not the resident. "
                     "Behavioural conclusions over this period are unreliable.",
+                ),
+            )
+        )
+
+    def _silence_alert(self, report: SystemHealthReport, at: datetime) -> Alert | None:
+        """Report that no sensor of the home has been heard from.
+
+        This is neither a behavioural alert nor a claim about the apparatus.
+        A stream of events cannot say whether the home is empty, its resident
+        needs help, or nothing is being delivered, so the alert says only
+        what is known: that nothing was observed, and since when. It is
+        repeated once per cooldown for as long as the silence lasts.
+        """
+        key = f"{AlertKind.DATA_QUALITY.value}:home_silence"
+        if self._suppressed(key, at, AlertSeverity.ATTENTION):
+            return None
+        since = report.silent_since
+        silence = report.silence
+        if since is None or silence is None:  # pragma: no cover - guarded by caller
+            return None
+        hours = silence.total_seconds() / 3600.0
+        return self._record(
+            Alert(
+                at=at,
+                kind=AlertKind.DATA_QUALITY,
+                severity=AlertSeverity.ATTENTION,
+                subject="home_silence",
+                summary=(
+                    f"No sensor of the home has reported for {hours:.0f} hours, "
+                    f"since {since.isoformat()}"
+                ),
+                score=1.0,
+                confidence=1.0,
+                evidence={
+                    "silent_since": since.isoformat(),
+                    "silence_hours": hours,
+                },
+                caveats=(
+                    "The home may be empty, its resident may need help, or the "
+                    "apparatus may not be reporting. The data cannot say which.",
+                    "Nothing in this period is treated as observed behaviour, "
+                    "and none of it enters the personal baseline.",
                 ),
             )
         )

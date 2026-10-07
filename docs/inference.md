@@ -74,6 +74,44 @@ event sensors silent over the same period are downgraded too, so their silence
 stops being read as observed inactivity. Only silence counts as a canary
 signal, since a stuck sensor is still delivering records.
 
+**A home with no canary can still stop reporting.** A deployment of event
+sensors alone has no sensor that promised anything, so the rule above can never
+fire, and a home that reports nothing is read as a home in which nothing
+happened. `HealthConfig.home_silence_horizon` covers that case and is off by
+default. When it is set and *no* sensor of the home has reported for that
+long:
+
+- every sensor that has ever reported is downgraded to `DROPOUT`, and the
+  report carries `silent_since`, the last observation of any sensor;
+- the pipeline leaves the silent time out of the day's summary, from the
+  moment the silence began, and records the fraction of the day it took as
+  `DailySummary.silent`;
+- a day that lost any time this way is refused by the baseline, however much
+  of it was left. The hours of a state are sums over the time that was
+  watched, so a day whose night was silent would otherwise arrive as a day of
+  little sleep;
+- one `data_quality` alert about `home_silence` is raised, and repeated once
+  per cooldown while the silence lasts. It replaces the apparatus alert for the
+  same period, because it makes no claim about the apparatus.
+
+The rule says what is known and no more. The home may be empty, its resident
+may need help, or nothing may be being delivered, and a stream of activations
+cannot tell these apart. Two limits follow from its being causal. A silence is
+recognised only once it has lasted the horizon, so the day on which it begins
+is closed normally if it has not yet lasted that long, with its silent
+evening read as it would be without the rule. And a silence shorter than the
+horizon is never seen at all. The horizon has to be longer than the
+longest stretch a resident at home can pass without tripping any sensor, which
+is a property of the home and its sensors, not of this code.
+
+**Silence across homes has a different cause.** `sensor_modeling.health.fleet`
+applies the canary argument one level up. A home's own monitor cannot tell a
+silent home from a service that has stopped collecting; from above, most of
+the monitored homes silent together points at what they share.
+`assess_fleet` makes that call at one moment from each home's last
+observation, and `common_silences` finds such stretches in a recorded fleet.
+It reports a common cause without naming one.
+
 **Drift is reported, never corrected.** Without redundant sensing the monitor
 cannot separate sensor drift from genuine environmental change, so it flags
 the shift and leaves the judgement to the analyst.

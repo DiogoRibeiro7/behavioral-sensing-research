@@ -12,7 +12,9 @@
             v
     update latent behavioural state
             v
-    close the day, update the personal baseline
+    close the day, leaving out what was not observed
+            v
+    update the personal baseline
             v
     evaluate behavioural change
             v
@@ -38,13 +40,13 @@ from __future__ import annotations
 import bisect
 import logging
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, time, timedelta, tzinfo
 from typing import Any
 
 from ..alerts.alert import Alert, AlertEngine, AlertPolicy
 from ..baseline.adaptive import AdaptiveBaseline, BaselineConfig, BehaviouralChange
-from ..baseline.features import DailySummary, summarise_days
+from ..baseline.features import SECONDS_PER_DAY, DailySummary, summarise_days
 from ..context.occupancy import ContextConfig, ContextEstimate, ResidentContextEstimator
 from ..fusion.defaults import default_emissions
 from ..fusion.emissions import EmissionModel
@@ -201,6 +203,8 @@ class BehaviouralSensingPipeline:
         self._buffer: list[Observation] = []
         self._pending: list[Observation] = []
         self._day_estimates: list[StateEstimate] = []
+        self._silence_open: datetime | None = None
+        self._silences: list[tuple[datetime, datetime]] = []
         self._last_context: ContextEstimate | None = None
         self._current_day: date | None = None
         self._next_step: datetime | None = None
@@ -284,6 +288,7 @@ class BehaviouralSensingPipeline:
         """Run one pipeline step over the observations of a single interval."""
         self.health.observe_many(batch)
         health = self.health.report(moment)
+        self._track_silence(health.silent_since, moment)
         reliabilities = health.reliabilities()
 
         context = self.context.update(moment, batch, reliabilities=reliabilities)
@@ -328,33 +333,98 @@ class BehaviouralSensingPipeline:
             day_closed=closed,
         )
 
+    def _track_silence(self, since: datetime | None, moment: datetime) -> None:
+        """Keep the spans during which no sensor of the home reported.
+
+        The health monitor says a home is silent only once the silence has
+        lasted its horizon, and dates it from the last observation. So a span
+        opens, in hindsight, at that observation, and closes at the step in
+        which something is heard again.
+        """
+        if since is not None:
+            self._silence_open = since
+        elif self._silence_open is not None:
+            self._silences.append((self._silence_open, moment))
+            self._silence_open = None
+
+    def _observed(self, estimates: Sequence[StateEstimate]) -> list[StateEstimate]:
+        """Drop the estimates that describe time inside a home-wide silence.
+
+        An estimate describes the step that ends at it. It is dropped when
+        that whole step lies after the silence began and before anything was
+        heard again, so the step holding the last observation and the step
+        holding the next one are both kept.
+        """
+        spans: list[tuple[datetime, datetime | None]] = list(self._silences)
+        if self._silence_open is not None:
+            spans.append((self._silence_open, None))
+        if not spans:
+            return list(estimates)
+        step = self.config.step
+
+        def silent(at: datetime) -> bool:
+            return any(
+                at - step >= start and (end is None or at < end) for start, end in spans
+            )
+
+        return [estimate for estimate in estimates if not silent(estimate.at)]
+
     def _close_day(
         self, day: date, moment: datetime, context: ContextEstimate
     ) -> tuple[DailySummary | None, tuple[BehaviouralChange, ...], tuple[Alert, ...]]:
-        """Summarise a completed day and update the baselines from it."""
+        """Summarise a completed day and update the baselines from it.
+
+        Time inside a home-wide silence is left out of the summary, the way a
+        gap between estimates is: it was not observed, so it is not counted as
+        hours in any state. A day that lost any time that way is not offered to
+        the baseline, however much of it was left. The hours of a state are
+        sums over the time that was watched, so a day whose night was silent
+        would otherwise arrive as a day of little sleep.
+        """
+        observed = self._observed(self._day_estimates)
+        dropped = len(self._day_estimates) - len(observed)
+        silent = min(1.0, dropped * self.config.step.total_seconds() / SECONDS_PER_DAY)
         summaries = summarise_days(
-            self._day_estimates, tz=self.config.tz, max_interval=self.config.step * 3
+            observed, tz=self.config.tz, max_interval=self.config.step * 3
         )
         summary = next((item for item in summaries if item.day == day), None)
+        if summary is not None and dropped:
+            summary = replace(summary, silent=silent)
+        elif dropped:
+            # Nothing of the day was observed. It is still a day that passed,
+            # and it is reported as one that was not watched.
+            summary = DailySummary(
+                day=day,
+                hours=dict.fromkeys(self.ontology.states, 0.0),
+                transitions=0.0,
+                coverage=0.0,
+                abstention=0.0,
+                observed=0.0,
+                silent=silent,
+            )
+        self._silences = [(start, end) for start, end in self._silences if end > moment]
         if summary is None:
             return None, (), ()
 
         usable = summary.is_usable(
             self.config.min_day_coverage, self.config.min_day_observed
         )
+        if summary.silent > 0.0:
+            refused = (
+                f"no sensor of the home reported for {summary.silent:.0%} of the day"
+            )
+        else:
+            refused = (
+                f"day observed at {summary.observed:.0%} with "
+                f"{summary.coverage:.0%} sensor coverage"
+            )
         changes = []
         for state in self.config.features:
             baseline = self.baselines[state.value]
             if usable:
                 changes.append(baseline.observe(day, summary.hours_in(state)))
             else:
-                changes.append(
-                    baseline.skip(
-                        day,
-                        f"day observed at {summary.observed:.0%} with "
-                        f"{summary.coverage:.0%} sensor coverage",
-                    )
-                )
+                changes.append(baseline.skip(day, refused))
 
         alerts = self.alerts.review(
             changes,
@@ -444,6 +514,9 @@ class BehaviouralSensingPipeline:
             },
             "current_day": self._current_day.isoformat() if self._current_day else None,
             "next_step": self._next_step.isoformat() if self._next_step else None,
+            "silence_open": (
+                self._silence_open.isoformat() if self._silence_open else None
+            ),
         }
 
     def restore(self, state: Mapping[str, Any]) -> None:
@@ -461,6 +534,11 @@ class BehaviouralSensingPipeline:
         self._current_day = date.fromisoformat(current_day) if current_day else None
         next_step = state.get("next_step")
         self._next_step = datetime.fromisoformat(next_step) if next_step else None
+        silence_open = state.get("silence_open")
+        self._silence_open = (
+            datetime.fromisoformat(silence_open) if silence_open else None
+        )
+        self._silences = []
         self._day_estimates = []
 
 

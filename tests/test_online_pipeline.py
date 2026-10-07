@@ -2,17 +2,26 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
 from sensor_modeling.alerts import AlertKind
+from sensor_modeling.baseline import BaselineConfig, ChangeKind, DailySummary
 from sensor_modeling.fusion import EmissionDefaults, default_emissions
-from sensor_modeling.observations import Modality, Observation, ObservationKind
+from sensor_modeling.health import HealthConfig
+from sensor_modeling.observations import (
+    Modality,
+    Observation,
+    ObservationKind,
+    SensorRegistry,
+    SensorSpec,
+)
 from sensor_modeling.online import (
     BehaviouralSensingPipeline,
     PipelineConfig,
     collect_alerts,
+    collect_changes,
     daily_summaries,
 )
 from sensor_modeling.simulation import (
@@ -340,3 +349,197 @@ class TestPipelineMechanics:
     def test_invalid_configuration_is_rejected(self, kwargs: dict) -> None:
         with pytest.raises(ValueError):
             PipelineConfig(**kwargs)
+
+
+# ----------------------------------------------------------------------------
+# A home of event sensors that stops reporting
+# ----------------------------------------------------------------------------
+QUIET_START = datetime(2024, 3, 4, tzinfo=timezone.utc)
+QUIET_DAYS = 20
+HORIZON = timedelta(hours=12)
+# Nothing is heard from the evening of day 11 until 14:00 on day 14.
+LAST_HEARD = QUIET_START + timedelta(days=11, hours=22, minutes=40)
+HEARD_AGAIN = QUIET_START + timedelta(days=14, hours=14)
+
+
+def quiet_home() -> SensorRegistry:
+    """Three event sensors and nothing that reports on a cadence."""
+    return SensorRegistry.from_specs(
+        [
+            SensorSpec("front_door", Modality.DOOR, room="hall"),
+            SensorSpec("living_motion", Modality.MOTION, room="living"),
+            SensorSpec("kitchen_motion", Modality.MOTION, room="kitchen"),
+        ]
+    )
+
+
+def quiet_record(
+    gap: bool = True, heard_again: datetime = HEARD_AGAIN
+) -> list[Observation]:
+    """Motion every twenty minutes from 07:00 to 23:00, with one long gap."""
+    records = []
+    for day in range(QUIET_DAYS):
+        for minute in range(7 * 60, 23 * 60, 20):
+            moment = QUIET_START + timedelta(days=day, minutes=minute)
+            if gap and LAST_HEARD < moment < heard_again:
+                continue
+            records.append(
+                Observation(
+                    timestamp=moment,
+                    sensor_id=(
+                        "kitchen_motion" if minute % 240 == 0 else "living_motion"
+                    ),
+                    modality=Modality.MOTION,
+                    kind=ObservationKind.EVENT,
+                    value=1.0,
+                )
+            )
+    return records
+
+
+def run_quiet(
+    horizon: timedelta | None, gap: bool = True, heard_again: datetime = HEARD_AGAIN
+) -> tuple[BehaviouralSensingPipeline, list]:
+    """Run the quiet home with the silent-home rule on or off."""
+    pipeline = BehaviouralSensingPipeline(
+        quiet_home(),
+        config=PipelineConfig(tz=timezone.utc, step=timedelta(minutes=30)),
+        health_config=HealthConfig(home_silence_horizon=horizon),
+        baseline_config=BaselineConfig(min_samples=5),
+    )
+    steps = pipeline.run(quiet_record(gap, heard_again))
+    steps.extend(pipeline.close(QUIET_START + timedelta(days=QUIET_DAYS)))
+    return pipeline, steps
+
+
+def day_of(steps: list, index: int) -> DailySummary:
+    """The summary closed for the day *index* days after the start."""
+    wanted = (QUIET_START + timedelta(days=index)).date()
+    return next(s for s in daily_summaries(steps) if s.day == wanted)
+
+
+class TestSilentHome:
+    """'Nobody tripped a sensor all day, so the resident slept all day.'"""
+
+    def test_without_the_rule_a_silent_day_is_a_fully_observed_day(self) -> None:
+        _, steps = run_quiet(None)
+        silent = day_of(steps, 13)
+        assert silent.is_usable()
+        assert silent.observed > 0.95
+        assert sum(silent.hours.values()) > 22.0
+        assert not [
+            a for a in collect_alerts(steps) if a.kind is AlertKind.DATA_QUALITY
+        ]
+
+    def test_with_the_rule_a_silent_day_is_a_day_nobody_watched(self) -> None:
+        _, steps = run_quiet(HORIZON)
+        for index in (12, 13):
+            silent = day_of(steps, index)
+            assert silent.observed == 0.0
+            assert not silent.is_usable()
+            assert sum(silent.hours.values()) == 0.0
+
+    def test_the_silent_part_of_a_day_is_left_out_of_its_hours(self) -> None:
+        _, steps = run_quiet(HORIZON)
+        returning = day_of(steps, 14)
+        # Heard again at 14:00, so ten hours of the day were observed.
+        assert returning.observed == pytest.approx(10.0 / 24.0, abs=0.03)
+        assert returning.silent == pytest.approx(14.0 / 24.0, abs=0.03)
+        assert sum(returning.hours.values()) == pytest.approx(10.0, abs=0.7)
+        assert not returning.is_usable()
+
+    def test_a_day_that_lost_its_night_is_not_a_day_of_little_sleep(self) -> None:
+        # Heard again at 07:00: seventeen hours of the day were watched, which
+        # is enough to pass the observed-fraction test, and the night was not.
+        early = QUIET_START + timedelta(days=14, hours=7)
+        _, steps = run_quiet(HORIZON, heard_again=early)
+        returning = day_of(steps, 14)
+        assert returning.observed == pytest.approx(17.0 / 24.0, abs=0.03)
+        assert returning.observed >= PipelineConfig().min_day_observed
+        assert returning.silent == pytest.approx(7.0 / 24.0, abs=0.03)
+        assert not returning.is_usable()
+        refused = [c for c in collect_changes(steps) if c.day == early.date()]
+        assert refused
+        assert {c.kind for c in refused} == {ChangeKind.INSUFFICIENT_DATA}
+        assert all("no sensor of the home reported" in c.detail for c in refused)
+        # The day after is whole again.
+        assert day_of(steps, 15).silent == 0.0
+        assert day_of(steps, 15).is_usable()
+
+    def test_the_days_around_the_silence_are_untouched(self) -> None:
+        _, off = run_quiet(None)
+        _, on = run_quiet(HORIZON)
+        for index in range(1, 12):
+            assert day_of(on, index).to_dict() == day_of(off, index).to_dict()
+        # After the silence the belief has a different past, so the hours agree
+        # closely and not exactly.
+        for index in range(15, QUIET_DAYS - 1):
+            after, before = day_of(on, index), day_of(off, index)
+            assert after.is_usable()
+            assert after.observed == before.observed
+            for state, hours in before.hours.items():
+                assert after.hours[state] == pytest.approx(hours, abs=1e-3)
+
+    def test_a_silent_day_never_reaches_the_baseline(self) -> None:
+        _, off = run_quiet(None)
+        _, on = run_quiet(HORIZON)
+
+        def verdicts(steps: list, index: int) -> set[ChangeKind]:
+            wanted = (QUIET_START + timedelta(days=index)).date()
+            return {c.kind for c in collect_changes(steps) if c.day == wanted}
+
+        for index in (12, 13, 14):
+            assert verdicts(on, index) == {ChangeKind.INSUFFICIENT_DATA}
+            assert ChangeKind.INSUFFICIENT_DATA not in verdicts(off, index)
+
+    def test_the_silence_is_reported_once_it_has_lasted_the_horizon(self) -> None:
+        _, steps = run_quiet(HORIZON)
+        raised = [a for a in collect_alerts(steps) if a.kind is AlertKind.DATA_QUALITY]
+        assert [a.subject for a in raised] == ["home_silence"] * 3
+        first = raised[0]
+        assert (
+            LAST_HEARD + HORIZON
+            <= first.at
+            < LAST_HEARD + HORIZON + timedelta(minutes=30)
+        )
+        assert first.evidence["silent_since"] == LAST_HEARD.isoformat()
+        # Repeated once per cooldown for as long as it lasts, and not after.
+        assert raised[1].at - first.at == timedelta(hours=20)
+        assert raised[2].at - raised[1].at == timedelta(hours=20)
+        assert all(a.at < HEARD_AGAIN for a in raised)
+        assert not [
+            a for a in collect_alerts(steps) if a.kind is AlertKind.SYSTEM_HEALTH
+        ]
+
+    def test_a_night_is_not_a_silence(self) -> None:
+        _, off = run_quiet(None, gap=False)
+        pipeline, on = run_quiet(HORIZON, gap=False)
+        assert [s.to_dict() for s in daily_summaries(on)] == [
+            s.to_dict() for s in daily_summaries(off)
+        ]
+        assert [a.to_dict() for a in collect_alerts(on)] == [
+            a.to_dict() for a in collect_alerts(off)
+        ]
+        assert pipeline.snapshot()["silence_open"] is None
+
+    def test_an_open_silence_survives_a_restart(self) -> None:
+        pipeline = BehaviouralSensingPipeline(
+            quiet_home(),
+            config=PipelineConfig(tz=timezone.utc, step=timedelta(minutes=30)),
+            health_config=HealthConfig(home_silence_horizon=HORIZON),
+        )
+        for observation in quiet_record():
+            if observation.timestamp > LAST_HEARD:
+                break
+            pipeline.push(observation)
+        pipeline.advance(LAST_HEARD + timedelta(hours=30))
+        state = pipeline.snapshot()
+        assert state["silence_open"] == LAST_HEARD.isoformat()
+
+        restarted = BehaviouralSensingPipeline(
+            quiet_home(),
+            config=PipelineConfig(tz=timezone.utc, step=timedelta(minutes=30)),
+            health_config=HealthConfig(home_silence_horizon=HORIZON),
+        )
+        restarted.restore(state)
+        assert restarted.snapshot()["silence_open"] == LAST_HEARD.isoformat()

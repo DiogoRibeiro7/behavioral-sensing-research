@@ -19,6 +19,10 @@ Runs the online pipeline on a clinical cohort for the first time, with its decla
     - Days on which no sensor reported are counted as usable and read as sleep. On 16 June 2019 none of the 47 monitored homes reports, two days after the date the dataset paper gives for a failure of its data collection server. Leaving such days out of the baseline's history gives 78 change verdicts where the run gave 188.
     - A same-weekday reference of four days puts a Gaussian value past the three-SD threshold about 17.5% of the time.
     - The pipeline flags quiet days; the verified labels mark busy ones.
+- **Sensor health.** An opt-in rule for deployments with no sensor that reports on a cadence, `HealthConfig.home_silence_horizon`. Off by default.
+  - A home in which no sensor has reported for the horizon is treated as not observed: its sensors are downgraded, the silent time is left out of the day's summary from the moment it began and recorded as `DailySummary.silent`, and a day that lost any time this way is refused by the baseline.
+  - One `data_quality` alert about `home_silence` is raised and repeated once per cooldown. It says the home may be empty, its resident may need help, or nothing may be arriving, and does not choose.
+  - `sensor_modeling.health.fleet` recognises a silence that most monitored homes share, which a single home's monitor cannot.
 - **External datasets.** A TIHM adapter, `sensor_modeling.external.tihm`, with its frozen ontology mapping. The dataset is read from a local download and is not redistributed.
 - **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the roadmap and the external-dataset contract name the new evidence.
 
