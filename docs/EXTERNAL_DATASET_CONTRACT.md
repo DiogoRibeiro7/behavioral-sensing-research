@@ -55,7 +55,17 @@ CASAS readers.
   the provenance.
 
 A new dataset needs its own adapter only when it cannot be exported to that
-layout.
+layout. Two datasets have one:
+
+- **`OrdonezAdapter`**, in `sensor_modeling.external.ordonez`. The UCI ADL
+  Binary dataset, used by the [Phase 5 external
+  evaluation](PHASE5_EXTERNAL_PROTOCOL.md).
+- **`TihmAdapter`**, in `sensor_modeling.external.tihm`. The TIHM dataset of
+  56 homes of people living with dementia. Its labels are alerts a clinical
+  team verified, stamped at a moment, so they are point annotations and every
+  one is declared unmappable: the contract converts the sensor events and
+  scores nothing against a state. It is used by the [TIHM alert-burden
+  protocol](TIHM_ALERT_BURDEN_PROTOCOL.md).
 
 ## The mapping layer
 

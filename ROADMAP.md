@@ -22,7 +22,7 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Where the Programme Stands
 
-Three kinds of evidence appear below, and they are never merged:
+Four kinds of evidence appear below, and they are never merged:
 
 - **Development panel.** The 20 single-resident CASAS homes, cross-fitted on
   two frozen household folds. Every Phase 1 to 4 result uses them. They have
@@ -32,6 +32,11 @@ Three kinds of evidence appear below, and they are never merged:
 - **Independent external.** The Phase 5 evaluation on the two homes of the UCI
   ADL Binary dataset, collected independently of CASAS with a different
   sensing layout.
+- **Clinical cohort, exploratory.** The online pipeline, with its declared
+  emissions, baseline and alert policy, on the 56 homes of the TIHM dataset.
+  Its labels are alerts a clinical team verified, not behavioural states, so
+  it scores no state and describes only what the pipeline raises. The labels
+  had been analysed before the protocol was written.
 
 | Phase | Status | Evidence | Headline |
 | --- | --- | --- | --- |
@@ -558,6 +563,65 @@ Consequence: no Phase 3 or Phase 4 result is supported beyond CASAS. The
 CASAS-fitted observation model is not portable to this sensing layout, and a
 week of adaptation at the declared strength does not change a decision.
 
+### Measured: the alert layer on a clinical cohort
+
+**Status: exploratory. The result is negative.**
+
+The TIHM dataset (DOI 10.5281/zenodo.7622128, CC BY 4.0) holds 56 homes of
+people living with dementia, with alerts a clinical monitoring team verified.
+Through the contract every label is unmappable, so no state is scored. The
+online pipeline was run with its declared emissions, baseline and alert
+policy, and with nothing fitted. Its step is the protocol's ten minutes, the
+one the CASAS evaluation used; the configuration's own default is five.
+
+- **The protocol.** `docs/TIHM_ALERT_BURDEN_PROTOCOL.md`, committed in
+  `b15126f` before any pipeline output was compared with a label. The labels
+  had been analysed before it was written, and it says so.
+- **The run.** `docs/TIHM_ALERT_BURDEN_RESULTS.md`, made from that clean
+  commit. Every household is reported.
+- **Alert burden.** 0.064 [0.046, 0.084] behavioural alerts per monitored
+  person-day; for `sleeping_hours` alone 0.055 [0.038, 0.073], against the
+  simulator's 0.010 in its stable arm and 0.033 in its changed arm.
+- **No positive relation to the verified labels.** Alert days are 5.3% of
+  agitation label days and 8.5% of other evaluable days, a difference of −3.2
+  points [−7.9, +1.9]. The deviation score's within-household concordance with
+  label days is 0.466 [0.410, 0.530]. Both intervals include no relation; for
+  labels of any type the differences are below zero.
+- **Two rules without a model do better.** At the pipeline's 507 flagged days
+  it catches 18 of 94 label days, where 23 are expected at random. The
+  household's own label history catches 63, and its sensor event count against
+  earlier days 53.
+
+Descriptions made after the run was read, in a record of their own made from
+the clean commit `bc2ea4e`. They change no result:
+
+- **Silent days are read as sleep.** On 128 of 2,850 monitored days no sensor
+  of the home reported an event. The pipeline counts all 128 as usable and
+  infers a median 23.8 hours of sleep on them. On 16 June 2019 all 47
+  monitored homes are silent. The dataset paper reports a failure of the data
+  collection server and dates the drop to 14 June; in the released file the
+  drop is on 15 to 17 June. That they are one event is an inference. The next
+  day holds 33 of the 183 alerts.
+- **Leaving them out.** Replaying the baseline with silent days left out of
+  the history gives 78 change verdicts, where the run gave 188. 44 of the 188
+  are on silent days themselves.
+- **The deviation threshold is not three standard deviations.** A
+  same-weekday reference is used from four days. Against a median and MAD of
+  four others, a Gaussian value reaches the threshold about 17.5% of the time,
+  where a known mean and standard deviation give 0.27%. Stationary Gaussian
+  values with each household's own centre and spread make 14.9% of days
+  deviate; the run has 24.4%.
+- **Opposite directions.** The pipeline's deviating days are quiet days, with
+  a mean event-count score of −1.17. Label days are busy ones, at +0.86.
+
+Consequence: the simulator's alert burden is not an estimate for a real
+cohort. On this one, more than half of the change verdicts go when days
+without data are left out, the share of deviating days is mostly what the
+reference's estimation gives on values with no change over time, and nothing
+the pipeline raises is more frequent on the days a clinical team confirmed.
+The dataset carries no signal that a sensor or its gateway was working, which
+is the case Phase 7 exists for.
+
 ### What remains in Phase 5
 
 - **More independent evidence.** Two homes are two case studies. A
@@ -597,7 +661,12 @@ model scored, so it follows a confirmed reference formulation.
 
 The failure-aware weighting result showed that improving one metric can harm
 others, so sensor reliability should be treated as a statistical modelling
-problem rather than a heuristic multiplier. Priorities:
+problem rather than a heuristic multiplier.
+
+The TIHM run is a measured case. Its event-only streams give the health layer
+nothing to judge: it raised no system-health alert in 2,850 monitored days,
+and counted as usable every one of the 128 days on which no sensor reported,
+a day on which no home reports among them. See the Phase 5 section. Priorities:
 
 1. estimate failure/missingness processes separately from behavioural state;
 2. distinguish sensor absence, communication failure and genuine zero-event

@@ -110,6 +110,58 @@ not 22 independent studies, and 0.607 is a ceiling for this
 instrumentation rather than for ambient sensing generally. The gap between 0.420
 and what is recoverable is real nonetheless.
 
+### On a clinical cohort
+
+The online pipeline was run on the 56 homes of the TIHM dataset of people
+living with dementia, with its declared emissions, baseline and alert policy
+and the ten-minute step its protocol declares. The run is exploratory, and the
+dataset's labels are alerts a clinical team verified, so no state is scored.
+See [the results](TIHM_ALERT_BURDEN_RESULTS.md).
+
+**Its alerts are not more frequent on the days the clinical team confirmed.**
+Alert days are 5.3% of agitation label days and 8.5% of other evaluable days;
+the interval of the difference includes zero. At the same number of flagged
+days, the household's own label history catches 63 of 94 label days and its
+sensor event count against earlier days 53, where the pipeline's deviating
+days catch 18 and chance expects 23.
+
+**A home that reports nothing is read as a home asleep.** On 128 of 2,850
+monitored days no sensor reported an event. Every one passed the pipeline's
+test of a usable day, and the filter inferred a median 23.8 hours of sleep on
+them. On 16 June 2019 all 47 monitored homes are silent, and the next day
+holds 33 of the run's 183 behavioural alerts. The dataset paper reports a
+failure of the data collection server and dates the drop to 14 June; in the
+released file the drop is on 15 to 17 June, so treating them as one event is
+an inference. The dataset holds activations only, so nothing in it says a
+sensor or its gateway was working, and the health layer raised no alert in the
+whole run. A likely reading, not a tested one, is that this is the mechanism
+behind the saturated confidence above: with no evidence the belief goes to the
+quietest state, and the pipeline abstained on 0.06% of usable time.
+
+**The deviation threshold does not mean three standard deviations.** The
+baseline compares a day with the same weekday's earlier days once four exist.
+A median and MAD of four values put a Gaussian value past the threshold about 17.5%
+of the time, where a known mean and standard deviation give 0.27%. On
+stationary Gaussian values with each household's own centre and spread, 14.9%
+of days deviate, and the run has 24.4%. Most of what the threshold flags is
+therefore present with no change over time at all.
+
+**Two of the four baseline features are close to inert.** The filter infers a
+median 0.06 hours of kitchen activity and 0.00 hours of bathroom activity a
+day, so the reference sits at the scale floor for 87% of kitchen feature-days
+and for every bathroom one. Why the declared emissions read so little from
+these homes has not been examined. What the room sensors are is declared, not
+known: the activity table names a location and no sensor type, and the dataset
+paper is not of one voice. Its methods place passive infrared sensors in the
+hallway and living room and movement sensors on the kitchen, bedroom and
+bathroom doors; its first figure's caption says passive infrared and door
+sensors are included in each room. The frozen mapping takes the five room
+locations as motion in that room, with the sensor type declared approximate.
+
+Each of the last three was found after the run had been read. They are
+diagnoses, kept apart from the protocol's results, and no default has been
+changed because of them.
+
 ## The single most important limitation
 
 **Every quantitative result in this repository comes from a simulator.**
