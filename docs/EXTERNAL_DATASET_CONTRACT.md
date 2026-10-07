@@ -65,7 +65,9 @@ layout. Two datasets have one:
   team verified, stamped at a moment, so they are point annotations and every
   one is declared unmappable: the contract converts the sensor events and
   scores nothing against a state. It is used by the [TIHM alert-burden
-  protocol](TIHM_ALERT_BURDEN_PROTOCOL.md).
+  protocol](TIHM_ALERT_BURDEN_PROTOCOL.md), and by the description of the
+  silent-home rule on the same homes in the [silent-home
+  results](SILENT_HOME_RESULTS.md).
 
 ## The mapping layer
 

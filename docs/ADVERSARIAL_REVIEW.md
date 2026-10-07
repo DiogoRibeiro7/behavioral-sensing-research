@@ -19,9 +19,10 @@ Findings marked *fixed* have a regression test named alongside them.
 
 **None outstanding.**
 
-Two findings were blocking when discovered during development and are fixed:
+Two findings were blocking when discovered during development. One is fixed,
+and the other is fixed where a sensor reports on a cadence:
 
-### B1. A silent deployment was read as observed inactivity — *fixed*
+### B1. A silent deployment was read as observed inactivity — *fixed where a sensor reports on a cadence*
 
 Event sensors make no promise to report, so the health monitor rightly refused
 to call their silence a failure. But when a gateway died and *every* sensor
@@ -44,6 +45,18 @@ on which a home reported nothing were counted as usable and read as sleep. See
 reported for a declared time as not observed, and
 `sensor_modeling.health.fleet` recognises a silence that most homes share. The
 rule is off by default.
+
+It was tested on 100 paired simulated homes under a protocol frozen before the
+test: see [the silent-home results](SILENT_HOME_RESULTS.md). On average the
+alerts an outage raises go, and nothing changes in a simulated stable home.
+After an outage fewer homes meet the detection definition with the rule on, by
+an amount inconclusive against the margin; whether changes are missed, or
+alerts the outage raised are gone, was not tested. On the TIHM homes, where
+the rule is described and not tested, it raises more alerts about silence than
+it removes about behaviour: those homes are silent for twelve hours often.
+TIHM is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0;
+Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged,
+as the dataset asks.
 
 Regression: `test_online_pipeline.py::TestSilentHome`
 

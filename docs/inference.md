@@ -111,6 +111,11 @@ of the day in progress, as it always has, and with them a silence that had
 already ended that day: the day is then judged on what was observed after the
 restart. A silence that is still open at the restart is kept.
 
+What the rule does was measured on simulated homes under
+[a protocol frozen before the test](SILENT_HOME_PROTOCOL.md), and described on
+the TIHM homes it was designed from: see
+[the silent-home results](SILENT_HOME_RESULTS.md).
+
 **Silence across homes has a different cause.** `sensor_modeling.health.fleet`
 applies the canary argument one level up. A home's own monitor cannot tell a
 silent home from a service that has stopped collecting; from above, most of

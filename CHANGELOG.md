@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Runs the online pipeline on a clinical cohort for the first time, with its declared emissions, baseline and alert policy and the ten-minute step its protocol declares. The run is exploratory: the dataset's labels had been analysed before its protocol was written, and the protocol was committed before any pipeline output was compared with a label.
 
+Adds an opt-in rule for the failure that run showed, a home that reports nothing being read as a home asleep, and tests it on simulated homes under a protocol frozen before the test.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.
@@ -19,12 +21,20 @@ Runs the online pipeline on a clinical cohort for the first time, with its decla
     - Days on which no sensor reported are counted as usable and read as sleep. On 16 June 2019 none of the 47 monitored homes reports, two days after the date the dataset paper gives for a failure of its data collection server. Leaving such days out of the baseline's history gives 78 change verdicts where the run gave 188.
     - A same-weekday reference of four days puts a Gaussian value past the three-SD threshold about 17.5% of the time.
     - The pipeline flags quiet days; the verified labels mark busy ones.
+  - **The silent-home rule, on simulated homes.** The rule below was built from the TIHM finding, so it was tested on 100 paired simulated homes reduced to their event sensors, under a protocol frozen and pushed before any of them had been run with the rule on. The evidence is simulated.
+    - A 60-hour outage of a whole home raises 2.76 behavioural alerts per home more than the same home without it, [2.36, 3.15], Monte Carlo standard error 0.20. With the rule on at 12 hours the excess is −0.28 [−0.44, −0.13], standard error 0.08, and the rule removes 3.04 alerts per home, [2.68, 3.39], standard error 0.18.
+    - The excess with the rule on is below zero: the outage arm raises fewer alerts than the same homes with nothing injected, 30 against 58. The criterion counts that as success. Whether it is a loss of sensitivity after an outage is not settled: set side by side after the run, 76 of 100 homes are detected after an outage with the rule on and 75 with no outage, at a median 11.0 against 10.0 days.
+    - In 8,400 person-days of stable homes the rule changes no alert and raises none of its own. A real change is detected in 75 of 100 homes with and without it; in that arm no home was silent for the horizon, so the rule never acted.
+    - After an outage, fewer homes meet the detection definition with the rule on: 76 of 100 against 91, −0.15 [−0.23, −0.07], standard error 0.04. The interval excludes zero and lies on both sides of the −0.10 margin, so the pre-specified verdict is inconclusive. With the rule off, 38 of 100 homes with an outage and no change meet the same definition; with it on, 8.
+    - Every outage is reported, a median 12.0 hours after it began. The fleet check finds an outage that every home shares, and none among outages each home has on its own.
+    - An 8-hour outage is not seen, apart from one home in 100 in which the home's last observation before it and its first after it were more than the horizon apart.
+  - **The same rule on TIHM, as a description.** Nothing here is a test: the rule was designed from these homes. At 12 hours 147 of the 183 behavioural alerts are no longer raised and 13 are raised that were not, leaving 49; the day that held 33 has none. The rule refuses 322 of the 2,850 monitored days, in 48 of the 56 homes, and raises 324 alerts about silence, 145 of them inside the two stretches the fleet check calls common. A simulated home is not silent for twelve hours unless a fault makes it so; the TIHM homes often are. TIHM is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0; Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged, as the dataset asks.
 - **Sensor health.** An opt-in rule for deployments with no sensor that reports on a cadence, `HealthConfig.home_silence_horizon`. Off by default.
   - A home in which no sensor has reported for the horizon is treated as not observed: its sensors are downgraded, the silent time is left out of the day's summary from the moment it began and recorded as `DailySummary.silent`, and a day that lost any time this way is refused by the baseline.
   - One `data_quality` alert about `home_silence` is raised and repeated once per cooldown. It says the home may be empty, its resident may need help, or nothing may be arriving, and does not choose.
-  - `sensor_modeling.health.fleet` recognises a silence that most monitored homes share, which a single home's monitor cannot.
+  - `sensor_modeling.health.fleet` recognises a silence that most monitored homes share, which a single home's monitor cannot. `replay_fleet` gives each assessment of a recorded fleet, and `common_silences` the stretches among them.
 - **External datasets.** A TIHM adapter, `sensor_modeling.external.tihm`, with its frozen ontology mapping. The dataset is read from a local download and is not redistributed.
-- **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the roadmap and the external-dataset contract name the new evidence.
+- **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the silent-home protocol and results pages, generated the same way; the roadmap and the external-dataset contract name the new evidence.
 
 The online pipeline's defaults, the baseline and the alert policy are unchanged.
 
