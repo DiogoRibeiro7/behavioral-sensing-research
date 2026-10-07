@@ -94,6 +94,7 @@ nav:
       - "Phase 5: external results": PHASE5_EXTERNAL_RESULTS.md
       - "TIHM: alert-burden protocol": TIHM_ALERT_BURDEN_PROTOCOL.md
       - "TIHM: alert-burden results": TIHM_ALERT_BURDEN_RESULTS.md
+      - "Silent homes: protocol": SILENT_HOME_PROTOCOL.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:
