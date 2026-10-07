@@ -44,17 +44,17 @@ In the contract's terms:
   does not say how many people live in a home, so ``residents`` is ``None``.
 - **Sensors.** The table names a location and nothing else. A household's
   sensors are the locations that appear in its rows, and a sensor's identifier
-  is its ``location_name``. The table names no sensor type. The dataset paper
-  describes passive infrared sensors in the hallway and the living room,
-  movement sensors on the kitchen, bedroom and bathroom doors, and a door
-  sensor on the main entrance. The native types :data:`PIR`, :data:`DOOR` and
+  is its ``location_name``. The table names no sensor type, and the dataset
+  paper is not of one voice about it. Its methods place passive infrared
+  sensors in the hallway and living room, movement sensors on the kitchen,
+  bedroom and bathroom doors, and a door sensor on the main entrance; its
+  first figure's caption says passive infrared and door sensors are included
+  in each room. The native types :data:`PIR`, :data:`DOOR` and
   :data:`FRIDGE_DOOR` are named from that description, and the frozen mapping
-  takes all five room locations as motion in the room, approximately: its own
-  note says "passive infrared sensors in rooms", which is looser than the
-  paper. A movement sensor on a room's door may report passages and not
-  presence, so activity inside the kitchen, bedroom and bathroom may be
-  under-reported. A room sensor's location is its room. The dataset does not
-  say which room a door or the fridge is in, so their location is ``None``.
+  takes the five room locations as motion in that room, with the sensor type
+  declared approximate. A room sensor's location is its room. The dataset
+  does not say which room a door or the fridge is in, so their location is
+  ``None``.
 - **Events.** Each row is one activation. The table records no value, so every
   event carries the token :data:`ACTIVE`.
 - **Annotations.** Each label row is a point annotation at its timestamp. The

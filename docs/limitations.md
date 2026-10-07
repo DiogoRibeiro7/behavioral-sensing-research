@@ -146,14 +146,17 @@ stationary Gaussian values with each household's own centre and spread, 14.9%
 of days deviate, and the run has 24.4%. Most of what the threshold flags is
 therefore present with no change over time at all.
 
-**What the room sensors are is declared, not known.** The activity table
-names a location and no sensor type. The dataset paper describes passive
-infrared sensors in the hallway and the living room, and movement sensors on
-the kitchen, bedroom and bathroom doors. The frozen mapping treats all five as
-motion in the room, approximately. If a door-mounted sensor reports passages
-and not presence, activity inside those rooms is under-reported, which would
-help explain why the filter infers a median 0.06 hours of kitchen activity and
-none of bathroom activity. That is a conjecture: the run does not test it.
+**Two of the four baseline features are close to inert.** The filter infers a
+median 0.06 hours of kitchen activity and 0.00 hours of bathroom activity a
+day, so the reference sits at the scale floor for 87% of kitchen feature-days
+and for every bathroom one. Why the declared emissions read so little from
+these homes has not been examined. What the room sensors are is declared, not
+known: the activity table names a location and no sensor type, and the dataset
+paper is not of one voice. Its methods place passive infrared sensors in the
+hallway and living room and movement sensors on the kitchen, bedroom and
+bathroom doors; its first figure's caption says passive infrared and door
+sensors are included in each room. The frozen mapping takes the five room
+locations as motion in that room, with the sensor type declared approximate.
 
 Each of the last three was found after the run had been read. They are
 diagnoses, kept apart from the protocol's results, and no default has been

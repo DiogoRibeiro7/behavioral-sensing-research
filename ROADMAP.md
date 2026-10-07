@@ -32,11 +32,11 @@ Four kinds of evidence appear below, and they are never merged:
 - **Independent external.** The Phase 5 evaluation on the two homes of the UCI
   ADL Binary dataset, collected independently of CASAS with a different
   sensing layout.
-- **Clinical cohort, exploratory.** The online pipeline at its declared
-  defaults on the 56 homes of the TIHM dataset. Its labels are alerts a
-  clinical team verified, not behavioural states, so it scores no state and
-  describes only what the pipeline raises. The labels had been analysed before
-  the protocol was written.
+- **Clinical cohort, exploratory.** The online pipeline, with its declared
+  emissions, baseline and alert policy, on the 56 homes of the TIHM dataset.
+  Its labels are alerts a clinical team verified, not behavioural states, so
+  it scores no state and describes only what the pipeline raises. The labels
+  had been analysed before the protocol was written.
 
 | Phase | Status | Evidence | Headline |
 | --- | --- | --- | --- |
