@@ -1,0 +1,2968 @@
+{
+  "configuration": {
+    "bootstrap": {
+      "confidence": 0.95,
+      "interval": "percentile",
+      "reason": "days within a home are dependent; see docs/EVALUATION_DESIGN.md",
+      "resamples": 5000,
+      "seed": 0,
+      "statistic": "every estimand is a ratio, or a difference of ratios, of sums over households, recomputed on each resample",
+      "unit": "households"
+    },
+    "dataset": {
+      "archive": "https://zenodo.org/records/7622128/files/TIHM_Dataset.zip",
+      "archive_sha256": "368d642b4cdc680d0706abfd3c8b2e5387824d9737ad33f50531bafa6a4bf5a1",
+      "citation": "Palermo, F.; Chen, Y.; Capstick, A.; Fletcher-Lloyd, N.; Walsh, C.; Kouchaki, S.; True, J.; Balazikova, O.; Soreq, E.; Scott, G.; Rostill, H.; Nilforooshan, R.; Barnaghi, P. TIHM: An open dataset for remote healthcare monitoring in dementia. Scientific Data 10, 606 (2023). https://doi.org/10.1038/s41597-023-02519-y",
+      "files": {
+        "Activity.csv": "ead7b1e3c2a91fbd679a909bff3a309a6465ae1ad18528dae57a4cf8599cafca",
+        "Demographics.csv": "15b13a680da6ee3790dfadc25d3a6102070f6e8fe1a47ea6da8f64b6c4b757d4",
+        "Labels.csv": "39495a08fdf1ff8f9b9b88bc98483a565c4433f58713ba3e4d0846e4449b846b",
+        "Physiology.csv": "377b3170b4b650795648e18258f30f9b985c214937823e9c9ea405c66b4ba696",
+        "Sleep.csv": "f1d5a6980263a55a8b69841e13bb349ce6e79152c15bdde0beffeea15293b9fe"
+      },
+      "licence": "CC BY 4.0; the dataset's repository asks that Surrey and Borders Partnership NHS Foundation Trust and Howz be acknowledged in any publication or use",
+      "name": "TIHM: An Open Dataset for Remote Healthcare Monitoring in Dementia",
+      "read_outside_the_contract": {
+        "Physiology.csv": "only to describe the labels: which days have a reading, and whether a day's readings meet the limits the dataset paper states. No pipeline input"
+      },
+      "read_through_the_contract": [
+        "Activity.csv",
+        "Demographics.csv",
+        "Labels.csv"
+      ],
+      "source": "https://doi.org/10.5281/zenodo.7622128; archive https://zenodo.org/records/7622128/files/TIHM_Dataset.zip",
+      "timezone": "Europe/London",
+      "version": "1.0 (Zenodo record 7622128, published 2023-02-10)"
+    },
+    "definitions": {
+      "alert_day": "a monitored day with at least one behavioural alert",
+      "any_label_day": "the same for a label of any type",
+      "behavioural_alert": "an alert of kind behavioural_change, attributed to the day its verdict is about",
+      "deviating_day": "an evaluable day on which at least one feature's robust deviation reached the baseline's deviation threshold",
+      "deviation_score": "the largest absolute robust deviation among the day's features with a verdict; zero where there is none",
+      "evaluable_day": "a monitored day on which at least one baseline feature received a verdict other than insufficient_data",
+      "label_day": "a local calendar day with at least one Agitation label; a label's day is the date of its timestamp",
+      "monitored_day": "a local calendar day the pipeline closed with a daily summary",
+      "usable_day": "a monitored day whose summary passes the pipeline's coverage and observed-fraction tests"
+    },
+    "estimands": {
+      "A1": "on evaluable days: the share of label days that are alert days, minus the share of other days that are",
+      "A2": "the same for deviating days",
+      "A3": "the probability that a label day has a higher deviation score than another evaluable day of the same household, ties counted as half",
+      "B1": "behavioural alerts per monitored person-day, all features",
+      "B2": "the same for sleeping_hours alone, beside the simulator's figures, which are a reference and not a test",
+      "B3": "behavioural alerts per evaluable person-day",
+      "H1": "system-health and data-quality alerts per monitored person-day, and the share of monitored days that are usable and evaluable",
+      "P1": "label days caught by each reference on the published protocol's five test weeks, with the published model's alert count in each week, beside the published count",
+      "R1": "label days caught by each reference when it flags as many evaluable days as the pipeline has deviating days"
+    },
+    "households": "every participant in Demographics.csv; a household that fails the contract is reported and not run",
+    "inspected_before": [
+      "Labels.csv, Activity.csv and Physiology.csv had been analysed outside this repository: label counts by type and participant, label timestamps, hourly activity around agitation labels, the stated limits against the readings, and a rebuild of the published baseline. The label and reference definitions below were written with that knowledge",
+      "one household, c55f8, had been run through the pipeline to measure run time; its step count and its days' usability were read, and none of its verdicts or alerts",
+      "no pipeline alert, verdict or deviation had been compared with any label"
+    ],
+    "label_description": {
+      "blocks": [
+        "00-06",
+        "06-12",
+        "12-18",
+        "18-24"
+      ],
+      "full_day": "a monitored day that is neither the household's first nor its last",
+      "hourly_profile": "sensor events per hour as a z-score against the same household and hour over its full monitored days, averaged over label days grouped by the slot of the day's first label",
+      "slot_tolerance_seconds": 180,
+      "slots": [
+        8,
+        12,
+        18
+      ],
+      "stated_limits": {
+        "Blood pressure": [
+          [
+            "Systolic blood pressure",
+            80.0,
+            190.0
+          ],
+          [
+            "Diastolic blood pressure",
+            50.0,
+            110.0
+          ]
+        ],
+        "Body temperature": [
+          [
+            "Body Temperature",
+            35.0,
+            37.6
+          ]
+        ],
+        "Body water": [
+          [
+            "Total body water",
+            40.0,
+            70.0
+          ]
+        ],
+        "Pulse": [
+          [
+            "Heart rate",
+            55.0,
+            100.0
+          ]
+        ]
+      }
+    },
+    "mapping": {
+      "consequence": "no annotated time maps to a behavioural state, so state inference is not scored on this dataset",
+      "labels": {
+        "Agitation": "unmappable",
+        "Blood pressure": "unmappable",
+        "Body temperature": "unmappable",
+        "Body water": "unmappable",
+        "Pulse": "unmappable",
+        "Weight": "unmappable"
+      },
+      "scored_states": [],
+      "sensors": {
+        "Back Door": "door",
+        "Bathroom": "pir",
+        "Bedroom": "pir",
+        "Fridge Door": "fridge_door",
+        "Front Door": "door",
+        "Hallway": "pir",
+        "Kitchen": "pir",
+        "Lounge": "pir"
+      },
+      "sha256": "0a6e393e354e1053d70d308ba53f88ad32aec67bd25a476e7112312f40beccfb"
+    },
+    "name": "tihm-alert-burden",
+    "pipeline": {
+      "alert_policy": {
+        "cooldown_hours": 20.0,
+        "health_coverage_floor": 0.5,
+        "max_per_window": 6,
+        "min_confidence": 0.4,
+        "min_score": 0.25
+      },
+      "attribute_activity": true,
+      "baseline": {
+        "deviation_threshold": 3.0,
+        "min_samples": 14,
+        "persistence_days": 3,
+        "trend_threshold": 3.5,
+        "trend_window": 28
+      },
+      "features": [
+        "sleeping_hours",
+        "kitchen_activity_hours",
+        "bathroom_activity_hours",
+        "away_hours"
+      ],
+      "fitted_on_tihm": "nothing",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step_minutes": 10,
+      "what": "BehaviouralSensingPipeline with the registry the canonical conversion builds, default emissions derived from that registry, and default configuration throughout"
+    },
+    "protocol_file_sha256": "ed04c9885f427f055e099e066d518188dd665cfbaaa012c459136e98378d8a2e",
+    "protocol_sha256": "7f6c0eff69ab91dbbe51aeef432b941cc512c096298f3d7294c96b3eb2fc304a",
+    "published_baseline": {
+      "check": "the run refuses to report this section unless each test period reproduces the published number of person-days and label days",
+      "confusion_matrices_newest_first": [
+        [
+          [
+            271,
+            76
+          ],
+          [
+            0,
+            10
+          ]
+        ],
+        [
+          [
+            268,
+            38
+          ],
+          [
+            1,
+            7
+          ]
+        ],
+        [
+          [
+            248,
+            49
+          ],
+          [
+            4,
+            9
+          ]
+        ],
+        [
+          [
+            233,
+            57
+          ],
+          [
+            6,
+            11
+          ]
+        ],
+        [
+          [
+            215,
+            66
+          ],
+          [
+            5,
+            18
+          ]
+        ]
+      ],
+      "label_history_here": "the household's share of label days in the training period, shrunk the same way towards the training period's overall share; a household with no training day gets that overall share",
+      "model": "logistic regression",
+      "not_done": "the published model is not retrained here; its counts are quoted from the notebook's printed output",
+      "notebook": "example_code/example_baseline_classfication.ipynb",
+      "notebook_sha256": "49d22859216685014bc0000877a56c4d010be75cad335f5a6b69f5582380d735",
+      "protocol": "5 test periods of 7 days stepping back from the last Agitation day; training on every earlier day; a person-day is a day with any activity row or non-zero physiology reading"
+    },
+    "question": "at its declared defaults, how many alerts does the online pipeline raise per person-day on a clinical cohort, how much of the record will it not use, and does what it flags relate to the alerts a clinical monitoring team verified",
+    "references": {
+      "event_count": "the day's sensor event count as a z-score against the household's previous monitored days, zero until 5 exist",
+      "label_history": "the share of the household's earlier monitored days that were label days, shrunk by 7 pseudo-days towards the cohort's overall share on evaluable days; it uses no sensor",
+      "random": "the expected catch of flagging the same number of days at random",
+      "ties": "days tied at the cut share the remaining flags equally"
+    },
+    "reporting": "every estimand and every household, whatever it shows; no threshold, no retuning and no added reference after scoring",
+    "result_schema": "tihm-alert-burden/1",
+    "schema": "tihm-alert-burden-protocol/1",
+    "simulator_reference": {
+      "changed_arm": 0.033,
+      "feature": "sleeping_hours",
+      "source": "docs/ADVERSARIAL_REVIEW.md, item i4; docs/RESEARCH_QUESTIONS.md, RQ4",
+      "stable_arm": 0.01
+    },
+    "status": "exploratory: descriptive of these homes; no threshold, mapping or model setting is chosen from them, and nothing here is a held-out or confirmatory claim"
+  },
+  "data_source": "tihm",
+  "environment": {
+    "git_commit": "b15126fb5b7a21436e418aa0c3192ee2370f31b4",
+    "git_dirty": "false",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "platform": "Linux-6.18.44-fc-v77-x86_64-with-glibc2.39",
+    "python": "3.13.16",
+    "scipy": "1.18.1",
+    "sensor_modeling": "0.9.0",
+    "sklearn": "1.9.1"
+  },
+  "experiment": "tihm-alert-burden",
+  "household_metrics": {
+    "online_pipeline_defaults": {
+      "0697d": {
+        "alert_days": 0,
+        "any_label_days": 3,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1044,
+        "label_days": 0,
+        "monitored_days": 3,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 2
+      },
+      "099bc": {
+        "alert_days": 1,
+        "any_label_days": 8,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 9,
+        "evaluable_days": 32,
+        "events": 11938,
+        "label_days": 1,
+        "monitored_days": 47,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 46
+      },
+      "0cda9": {
+        "alert_days": 1,
+        "any_label_days": 49,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 62,
+        "events": 30947,
+        "label_days": 1,
+        "monitored_days": 77,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 76
+      },
+      "0d5ef": {
+        "alert_days": 4,
+        "any_label_days": 17,
+        "behavioural_alerts": 5,
+        "data_quality_alerts": 0,
+        "deviating_days": 12,
+        "evaluable_days": 34,
+        "events": 19500,
+        "label_days": 10,
+        "monitored_days": 49,
+        "simulator_feature_alerts": 4,
+        "system_health_alerts": 0,
+        "usable_days": 48
+      },
+      "0efe8": {
+        "alert_days": 5,
+        "any_label_days": 4,
+        "behavioural_alerts": 5,
+        "data_quality_alerts": 0,
+        "deviating_days": 14,
+        "evaluable_days": 33,
+        "events": 14367,
+        "label_days": 0,
+        "monitored_days": 48,
+        "simulator_feature_alerts": 4,
+        "system_health_alerts": 0,
+        "usable_days": 47
+      },
+      "0f352": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 2468,
+        "label_days": 0,
+        "monitored_days": 6,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 5
+      },
+      "16f4b": {
+        "alert_days": 7,
+        "any_label_days": 13,
+        "behavioural_alerts": 7,
+        "data_quality_alerts": 0,
+        "deviating_days": 19,
+        "evaluable_days": 77,
+        "events": 33066,
+        "label_days": 11,
+        "monitored_days": 91,
+        "simulator_feature_alerts": 2,
+        "system_health_alerts": 0,
+        "usable_days": 91
+      },
+      "1fbe4": {
+        "alert_days": 8,
+        "any_label_days": 9,
+        "behavioural_alerts": 11,
+        "data_quality_alerts": 0,
+        "deviating_days": 19,
+        "evaluable_days": 53,
+        "events": 29804,
+        "label_days": 0,
+        "monitored_days": 68,
+        "simulator_feature_alerts": 8,
+        "system_health_alerts": 0,
+        "usable_days": 67
+      },
+      "201d8": {
+        "alert_days": 12,
+        "any_label_days": 7,
+        "behavioural_alerts": 12,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 59,
+        "events": 26416,
+        "label_days": 1,
+        "monitored_days": 74,
+        "simulator_feature_alerts": 12,
+        "system_health_alerts": 0,
+        "usable_days": 73
+      },
+      "28710": {
+        "alert_days": 3,
+        "any_label_days": 21,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 9,
+        "evaluable_days": 31,
+        "events": 23063,
+        "label_days": 0,
+        "monitored_days": 46,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 45
+      },
+      "2b131": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 2801,
+        "label_days": 0,
+        "monitored_days": 5,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 4
+      },
+      "2f54b": {
+        "alert_days": 2,
+        "any_label_days": 6,
+        "behavioural_alerts": 2,
+        "data_quality_alerts": 0,
+        "deviating_days": 10,
+        "evaluable_days": 45,
+        "events": 20476,
+        "label_days": 0,
+        "monitored_days": 60,
+        "simulator_feature_alerts": 2,
+        "system_health_alerts": 0,
+        "usable_days": 59
+      },
+      "30a32": {
+        "alert_days": 0,
+        "any_label_days": 19,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 17,
+        "evaluable_days": 51,
+        "events": 20265,
+        "label_days": 0,
+        "monitored_days": 66,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 65
+      },
+      "385de": {
+        "alert_days": 0,
+        "any_label_days": 3,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 2,
+        "evaluable_days": 6,
+        "events": 6520,
+        "label_days": 0,
+        "monitored_days": 21,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 20
+      },
+      "393cb": {
+        "alert_days": 3,
+        "any_label_days": 34,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 7,
+        "evaluable_days": 53,
+        "events": 21197,
+        "label_days": 1,
+        "monitored_days": 68,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 67
+      },
+      "3fb61": {
+        "alert_days": 7,
+        "any_label_days": 6,
+        "behavioural_alerts": 7,
+        "data_quality_alerts": 0,
+        "deviating_days": 22,
+        "evaluable_days": 57,
+        "events": 17971,
+        "label_days": 2,
+        "monitored_days": 72,
+        "simulator_feature_alerts": 7,
+        "system_health_alerts": 0,
+        "usable_days": 71
+      },
+      "46286": {
+        "alert_days": 6,
+        "any_label_days": 20,
+        "behavioural_alerts": 6,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 23,
+        "events": 11075,
+        "label_days": 1,
+        "monitored_days": 38,
+        "simulator_feature_alerts": 6,
+        "system_health_alerts": 0,
+        "usable_days": 37
+      },
+      "55cd4": {
+        "alert_days": 9,
+        "any_label_days": 2,
+        "behavioural_alerts": 10,
+        "data_quality_alerts": 0,
+        "deviating_days": 23,
+        "evaluable_days": 62,
+        "events": 18187,
+        "label_days": 0,
+        "monitored_days": 77,
+        "simulator_feature_alerts": 8,
+        "system_health_alerts": 0,
+        "usable_days": 76
+      },
+      "561af": {
+        "alert_days": 0,
+        "any_label_days": 5,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 2,
+        "evaluable_days": 17,
+        "events": 5490,
+        "label_days": 0,
+        "monitored_days": 32,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 31
+      },
+      "56b6b": {
+        "alert_days": 11,
+        "any_label_days": 5,
+        "behavioural_alerts": 11,
+        "data_quality_alerts": 0,
+        "deviating_days": 14,
+        "evaluable_days": 45,
+        "events": 18825,
+        "label_days": 0,
+        "monitored_days": 60,
+        "simulator_feature_alerts": 9,
+        "system_health_alerts": 0,
+        "usable_days": 59
+      },
+      "65db4": {
+        "alert_days": 2,
+        "any_label_days": 7,
+        "behavioural_alerts": 2,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 37,
+        "events": 14165,
+        "label_days": 0,
+        "monitored_days": 52,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 51
+      },
+      "6b29b": {
+        "alert_days": 10,
+        "any_label_days": 24,
+        "behavioural_alerts": 10,
+        "data_quality_alerts": 0,
+        "deviating_days": 18,
+        "evaluable_days": 59,
+        "events": 28943,
+        "label_days": 2,
+        "monitored_days": 74,
+        "simulator_feature_alerts": 10,
+        "system_health_alerts": 0,
+        "usable_days": 73
+      },
+      "714d7": {
+        "alert_days": 5,
+        "any_label_days": 1,
+        "behavioural_alerts": 5,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 24,
+        "events": 8433,
+        "label_days": 0,
+        "monitored_days": 40,
+        "simulator_feature_alerts": 5,
+        "system_health_alerts": 0,
+        "usable_days": 38
+      },
+      "73f7c": {
+        "alert_days": 2,
+        "any_label_days": 24,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 34,
+        "events": 34114,
+        "label_days": 22,
+        "monitored_days": 49,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 48
+      },
+      "76230": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1610,
+        "label_days": 0,
+        "monitored_days": 5,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 3
+      },
+      "7db78": {
+        "alert_days": 2,
+        "any_label_days": 9,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 15,
+        "evaluable_days": 54,
+        "events": 32560,
+        "label_days": 7,
+        "monitored_days": 69,
+        "simulator_feature_alerts": 2,
+        "system_health_alerts": 0,
+        "usable_days": 68
+      },
+      "8a835": {
+        "alert_days": 1,
+        "any_label_days": 6,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 14,
+        "evaluable_days": 60,
+        "events": 28230,
+        "label_days": 2,
+        "monitored_days": 75,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 74
+      },
+      "8d0d4": {
+        "alert_days": 1,
+        "any_label_days": 3,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 54,
+        "events": 24898,
+        "label_days": 1,
+        "monitored_days": 69,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 68
+      },
+      "93c14": {
+        "alert_days": 0,
+        "any_label_days": 14,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 6,
+        "evaluable_days": 34,
+        "events": 19568,
+        "label_days": 11,
+        "monitored_days": 49,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 48
+      },
+      "95899": {
+        "alert_days": 1,
+        "any_label_days": 1,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 3,
+        "evaluable_days": 30,
+        "events": 17614,
+        "label_days": 1,
+        "monitored_days": 45,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 44
+      },
+      "96adf": {
+        "alert_days": 1,
+        "any_label_days": 1,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 9,
+        "evaluable_days": 40,
+        "events": 21457,
+        "label_days": 1,
+        "monitored_days": 55,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 54
+      },
+      "a2849": {
+        "alert_days": 1,
+        "any_label_days": 6,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 10,
+        "evaluable_days": 46,
+        "events": 23760,
+        "label_days": 6,
+        "monitored_days": 61,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 60
+      },
+      "a380e": {
+        "alert_days": 0,
+        "any_label_days": 5,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 3,
+        "evaluable_days": 10,
+        "events": 9403,
+        "label_days": 0,
+        "monitored_days": 26,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 24
+      },
+      "a539e": {
+        "alert_days": 4,
+        "any_label_days": 1,
+        "behavioural_alerts": 4,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 44,
+        "events": 12706,
+        "label_days": 0,
+        "monitored_days": 59,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 58
+      },
+      "ab47a": {
+        "alert_days": 1,
+        "any_label_days": 6,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 5,
+        "evaluable_days": 26,
+        "events": 11243,
+        "label_days": 0,
+        "monitored_days": 42,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 40
+      },
+      "b0455": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 3776,
+        "label_days": 0,
+        "monitored_days": 10,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 9
+      },
+      "b45c2": {
+        "alert_days": 7,
+        "any_label_days": 5,
+        "behavioural_alerts": 7,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 61,
+        "events": 25964,
+        "label_days": 0,
+        "monitored_days": 76,
+        "simulator_feature_alerts": 7,
+        "system_health_alerts": 0,
+        "usable_days": 75
+      },
+      "b9d58": {
+        "alert_days": 6,
+        "any_label_days": 4,
+        "behavioural_alerts": 6,
+        "data_quality_alerts": 0,
+        "deviating_days": 12,
+        "evaluable_days": 77,
+        "events": 46654,
+        "label_days": 4,
+        "monitored_days": 91,
+        "simulator_feature_alerts": 6,
+        "system_health_alerts": 0,
+        "usable_days": 91
+      },
+      "c5031": {
+        "alert_days": 3,
+        "any_label_days": 9,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 1,
+        "evaluable_days": 32,
+        "events": 20892,
+        "label_days": 9,
+        "monitored_days": 47,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 46
+      },
+      "c55f8": {
+        "alert_days": 1,
+        "any_label_days": 11,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 77,
+        "events": 36197,
+        "label_days": 0,
+        "monitored_days": 91,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 91
+      },
+      "c5785": {
+        "alert_days": 1,
+        "any_label_days": 9,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 10,
+        "evaluable_days": 53,
+        "events": 22778,
+        "label_days": 0,
+        "monitored_days": 68,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 67
+      },
+      "c8574": {
+        "alert_days": 1,
+        "any_label_days": 0,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 6,
+        "evaluable_days": 39,
+        "events": 22329,
+        "label_days": 0,
+        "monitored_days": 54,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 53
+      },
+      "ca44d": {
+        "alert_days": 0,
+        "any_label_days": 33,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 26,
+        "events": 11652,
+        "label_days": 0,
+        "monitored_days": 41,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 40
+      },
+      "d263a": {
+        "alert_days": 1,
+        "any_label_days": 3,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 54,
+        "events": 27842,
+        "label_days": 1,
+        "monitored_days": 69,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 68
+      },
+      "d44d2": {
+        "alert_days": 0,
+        "any_label_days": 4,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 3,
+        "events": 3344,
+        "label_days": 0,
+        "monitored_days": 18,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 17
+      },
+      "d7a46": {
+        "alert_days": 0,
+        "any_label_days": 4,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 2,
+        "evaluable_days": 9,
+        "events": 9324,
+        "label_days": 1,
+        "monitored_days": 24,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 23
+      },
+      "d8d97": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1600,
+        "label_days": 0,
+        "monitored_days": 7,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 6
+      },
+      "d93d8": {
+        "alert_days": 1,
+        "any_label_days": 23,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 39,
+        "events": 29660,
+        "label_days": 6,
+        "monitored_days": 54,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 53
+      },
+      "e2472": {
+        "alert_days": 0,
+        "any_label_days": 4,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 18,
+        "events": 12923,
+        "label_days": 0,
+        "monitored_days": 33,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 32
+      },
+      "e4959": {
+        "alert_days": 3,
+        "any_label_days": 6,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 52,
+        "events": 26335,
+        "label_days": 4,
+        "monitored_days": 67,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 66
+      },
+      "e87bd": {
+        "alert_days": 1,
+        "any_label_days": 4,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 4,
+        "evaluable_days": 27,
+        "events": 14375,
+        "label_days": 1,
+        "monitored_days": 42,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 41
+      },
+      "e8a78": {
+        "alert_days": 19,
+        "any_label_days": 4,
+        "behavioural_alerts": 20,
+        "data_quality_alerts": 0,
+        "deviating_days": 23,
+        "evaluable_days": 61,
+        "events": 30702,
+        "label_days": 3,
+        "monitored_days": 76,
+        "simulator_feature_alerts": 19,
+        "system_health_alerts": 0,
+        "usable_days": 75
+      },
+      "ec812": {
+        "alert_days": 12,
+        "any_label_days": 6,
+        "behavioural_alerts": 12,
+        "data_quality_alerts": 0,
+        "deviating_days": 19,
+        "evaluable_days": 64,
+        "events": 24486,
+        "label_days": 4,
+        "monitored_days": 79,
+        "simulator_feature_alerts": 12,
+        "system_health_alerts": 0,
+        "usable_days": 78
+      },
+      "eca1f": {
+        "alert_days": 8,
+        "any_label_days": 4,
+        "behavioural_alerts": 9,
+        "data_quality_alerts": 0,
+        "deviating_days": 5,
+        "evaluable_days": 40,
+        "events": 26821,
+        "label_days": 1,
+        "monitored_days": 55,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 54
+      },
+      "f220c": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 51,
+        "events": 7129,
+        "label_days": 0,
+        "monitored_days": 66,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 65
+      },
+      "fd100": {
+        "alert_days": 0,
+        "any_label_days": 1,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1652,
+        "label_days": 0,
+        "monitored_days": 4,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 3
+      }
+    }
+  },
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": true,
+      "first_prediction": "2019-04-02T00:01:16+01:00",
+      "last_prediction": "2019-07-01T00:06:25+01:00",
+      "latest_evidence": "2019-07-01T00:06:25+01:00",
+      "max_lead_seconds": 0.0,
+      "predictions": 2850
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [
+    {
+      "name": "alert_burden_protocol.json",
+      "role": "frozen protocol",
+      "sha256": "ed04c9885f427f055e099e066d518188dd665cfbaaa012c459136e98378d8a2e",
+      "source": "artifacts/tihm/alert_burden_protocol.json"
+    },
+    {
+      "name": "tihm_mapping.json",
+      "role": "frozen mapping",
+      "sha256": "b851fee6c2662881d14ea656267f868bf8d3000b2bbdbdd2aa0c31e73157733b",
+      "source": "artifacts/tihm/tihm_mapping.json"
+    },
+    {
+      "name": "Activity.csv",
+      "role": "recording, read through the contract",
+      "sha256": "ead7b1e3c2a91fbd679a909bff3a309a6465ae1ad18528dae57a4cf8599cafca",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Demographics.csv",
+      "role": "recording, read through the contract",
+      "sha256": "15b13a680da6ee3790dfadc25d3a6102070f6e8fe1a47ea6da8f64b6c4b757d4",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Labels.csv",
+      "role": "recording, read through the contract",
+      "sha256": "39495a08fdf1ff8f9b9b88bc98483a565c4433f58713ba3e4d0846e4449b846b",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Physiology.csv",
+      "role": "readings, read only to describe the labels",
+      "sha256": "377b3170b4b650795648e18258f30f9b985c214937823e9c9ea405c66b4ba696",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Sleep.csv",
+      "role": "pinned, not read",
+      "sha256": "f1d5a6980263a55a8b69841e13bb349ce6e79152c15bdde0beffeea15293b9fe",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    }
+  ],
+  "intervals": [
+    {
+      "confidence": 0.95,
+      "estimate": 0.06421052631578947,
+      "high": 0.08397715764799193,
+      "label": "B1: behavioural alerts per monitored person-day",
+      "low": 0.0461130632008922,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": 0.05473684210526316,
+      "high": 0.07298096938242578,
+      "label": "B2: sleeping_hours alerts per monitored person-day",
+      "low": 0.03767239419271107,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": 0.08819277108433735,
+      "high": 0.11512532105399206,
+      "label": "B3: behavioural alerts per evaluable person-day",
+      "low": 0.06408053492602384,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": 0.98,
+      "high": 0.9833385752940124,
+      "label": "H1: usable share of monitored days",
+      "low": 0.9757318516478536,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": 0.7280701754385965,
+      "high": 0.7515589960866096,
+      "label": "H1: evaluable share of monitored days",
+      "low": 0.6987572448386293,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": -0.032118959906344315,
+      "high": 0.018651796777194658,
+      "label": "A1: label days that are alert days, minus other days",
+      "low": -0.07875763730119446,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": -0.055355666061628034,
+      "high": 0.024593908007502156,
+      "label": "A2: label days that are deviating days, minus other days",
+      "low": -0.13006379627653886,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": 0.46573571243858286,
+      "high": 0.5303577716297787,
+      "label": "A3: within-household concordance of the deviation score",
+      "low": 0.4103157092755904,
+      "method": "percentile",
+      "n": 56,
+      "unit": "household"
+    }
+  ],
+  "mcse": {},
+  "metric_definitions": {
+    "alert_day": "a monitored day with at least one behavioural alert",
+    "any_label_day": "the same for a label of any type",
+    "behavioural_alert": "an alert of kind behavioural_change, attributed to the day its verdict is about",
+    "deviating_day": "an evaluable day on which at least one feature's robust deviation reached the baseline's deviation threshold",
+    "deviation_score": "the largest absolute robust deviation among the day's features with a verdict; zero where there is none",
+    "evaluable_day": "a monitored day on which at least one baseline feature received a verdict other than insufficient_data",
+    "label_day": "a local calendar day with at least one Agitation label; a label's day is the date of its timestamp",
+    "monitored_day": "a local calendar day the pipeline closed with a daily summary",
+    "usable_day": "a monitored day whose summary passes the pipeline's coverage and observed-fraction tests"
+  },
+  "models": [
+    {
+      "build": "BehaviouralSensingPipeline",
+      "configuration": {
+        "baseline_min_samples": 14,
+        "deviation_threshold": 3.0,
+        "features": [
+          "sleeping_hours",
+          "kitchen_activity_hours",
+          "bathroom_activity_hours",
+          "away_hours"
+        ],
+        "persistence_days": 3
+      },
+      "name": "online_pipeline_defaults"
+    }
+  ],
+  "notes": [
+    "Exploratory. The dataset's labels had been analysed before the protocol was written; the protocol was committed before any pipeline output was compared with a label.",
+    "Nothing was fitted on TIHM. The pipeline's emissions, baseline and alert policy are the declared defaults.",
+    "The labels are alerts a monitoring team verified after an earlier model raised them. A day without a label is not a day without an episode.",
+    "Intervals resample households. Every figure describes these homes and is not an estimate for other homes."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {
+    "contract": "external-dataset contract, strict conversion",
+    "mapping_sha256": "0a6e393e354e1053d70d308ba53f88ad32aec67bd25a476e7112312f40beccfb",
+    "step_minutes": 10
+  },
+  "recorded_at": "2026-10-07T09:44:32.946023+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "association": {
+      "A1_alert_days": {
+        "days": 2075,
+        "difference": {
+          "estimate": -0.032118959906344315,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.018651796777194658,
+            "low": -0.07875763730119446,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "flagged_days": 174.0,
+        "households_with_a_label_day": 26,
+        "label_day_share": {
+          "estimate": 0.04530120481927711,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.06511192494171751,
+            "low": 0.028086358936592767,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "label_days": 94,
+        "label_days_flagged": 5.0,
+        "share_of_flagged_days_labelled": {
+          "estimate": 0.028735632183908046,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.056125637755101994,
+            "low": 0.006802721088435374,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "share_of_label_days_flagged": {
+          "estimate": 0.05319148936170213,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.10144927536231885,
+            "low": 0.013884132420091344,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "share_of_other_days_flagged": {
+          "estimate": 0.08531044926804644,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.11171759080377879,
+            "low": 0.06135263389798137,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        }
+      },
+      "A2_deviating_days": {
+        "days": 2075,
+        "difference": {
+          "estimate": -0.055355666061628034,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.024593908007502156,
+            "low": -0.13006379627653886,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "flagged_days": 507.0,
+        "households_with_a_label_day": 26,
+        "label_day_share": {
+          "estimate": 0.04530120481927711,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.06511192494171751,
+            "low": 0.028086358936592767,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "label_days": 94,
+        "label_days_flagged": 18.0,
+        "share_of_flagged_days_labelled": {
+          "estimate": 0.03550295857988166,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.054991218072086526,
+            "low": 0.018835535820240952,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "share_of_label_days_flagged": {
+          "estimate": 0.19148936170212766,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.2676056338028169,
+            "low": 0.12048192771084337,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "share_of_other_days_flagged": {
+          "estimate": 0.2468450277637557,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.27486350971772255,
+            "low": 0.22099078784449938,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        }
+      },
+      "A3_deviation_score": {
+        "estimate": 0.46573571243858286,
+        "households": 56,
+        "households_with_pairs": 26,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.5303577716297787,
+          "low": 0.4103157092755904,
+          "method": "percentile"
+        },
+        "pairs": 3867.0,
+        "resamples_defined": 5000
+      },
+      "any_label": {
+        "alert_days": {
+          "days": 2075,
+          "difference": {
+            "estimate": -0.040688726758600635,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": -0.011537092145021879,
+              "low": -0.06910821158686593,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "flagged_days": 174.0,
+          "households_with_a_label_day": 45,
+          "label_day_share": {
+            "estimate": 0.16433734939759037,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.21877148489827342,
+              "low": 0.11853993534444894,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "label_days": 341,
+          "label_days_flagged": 17.0,
+          "share_of_flagged_days_labelled": {
+            "estimate": 0.09770114942528736,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.1437908496732026,
+              "low": 0.058823529411764705,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "share_of_label_days_flagged": {
+            "estimate": 0.04985337243401759,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.07742049068605178,
+              "low": 0.027491227305420543,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "share_of_other_days_flagged": {
+            "estimate": 0.09054209919261823,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.11840743746993745,
+              "low": 0.06510369145377129,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          }
+        },
+        "deviating_days": {
+          "days": 2075,
+          "difference": {
+            "estimate": -0.07130463018396938,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": -0.027407058377233475,
+              "low": -0.11270044760202891,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "flagged_days": 507.0,
+          "households_with_a_label_day": 45,
+          "label_day_share": {
+            "estimate": 0.16433734939759037,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.21877148489827342,
+              "low": 0.11853993534444894,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "label_days": 341,
+          "label_days_flagged": 63.0,
+          "share_of_flagged_days_labelled": {
+            "estimate": 0.1242603550295858,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.16952580239144113,
+              "low": 0.08503205707061587,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "share_of_label_days_flagged": {
+            "estimate": 0.18475073313782991,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.225,
+              "low": 0.14749194567921373,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          },
+          "share_of_other_days_flagged": {
+            "estimate": 0.2560553633217993,
+            "households": 56,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.2856261848710702,
+              "low": 0.22814111724384614,
+              "method": "percentile"
+            },
+            "resamples_defined": 5000
+          }
+        },
+        "deviation_score": {
+          "estimate": 0.4523457702253417,
+          "households": 56,
+          "households_with_pairs": 45,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.4904540471603529,
+            "low": 0.41718223103713503,
+            "method": "percentile"
+          },
+          "pairs": 10828.0,
+          "resamples_defined": 5000
+        }
+      }
+    },
+    "burden": {
+      "B1_per_monitored_day": {
+        "estimate": 0.06421052631578947,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.08397715764799193,
+          "low": 0.0461130632008922,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "B2_simulator_feature_per_monitored_day": {
+        "estimate": 0.05473684210526316,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.07298096938242578,
+          "low": 0.03767239419271107,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "B3_per_evaluable_day": {
+        "estimate": 0.08819277108433735,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.11512532105399206,
+          "low": 0.06408053492602384,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "alert_day_share_of_evaluable_days": {
+        "estimate": 0.08385542168674699,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.10932741382195446,
+          "low": 0.06079139380883019,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "alert_days": 174,
+      "behavioural_alerts": 183,
+      "by_feature": {
+        "away_hours": 20,
+        "kitchen_activity_hours": 7,
+        "sleeping_hours": 156
+      },
+      "by_severity": {
+        "attention": 56,
+        "information": 127
+      },
+      "deviating_day_share_of_evaluable_days": {
+        "estimate": 0.24433734939759036,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.2713846042405235,
+          "low": 0.21906043520160154,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "deviating_days": 507,
+      "households_with_an_alert": 39,
+      "largest_household_count": 20,
+      "simulator_reference": {
+        "changed_arm": 0.033,
+        "feature": "sleeping_hours",
+        "source": "docs/ADVERSARIAL_REVIEW.md, item i4; docs/RESEARCH_QUESTIONS.md, RQ4",
+        "stable_arm": 0.01
+      }
+    },
+    "contract": {
+      "converted": 56,
+      "events": {
+        "emitted": 1030559
+      },
+      "households": 56,
+      "issues": {
+        "point_annotations": 608,
+        "sensor_semantics": 432
+      },
+      "point_annotations": 608,
+      "refused": {},
+      "scorable_annotated_seconds": 0.0
+    },
+    "households": {
+      "0697d": {
+        "alert_days": 0,
+        "any_label_days": 3,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1044,
+        "label_days": 0,
+        "monitored_days": 3,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 2
+      },
+      "099bc": {
+        "alert_days": 1,
+        "any_label_days": 8,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 9,
+        "evaluable_days": 32,
+        "events": 11938,
+        "label_days": 1,
+        "monitored_days": 47,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 46
+      },
+      "0cda9": {
+        "alert_days": 1,
+        "any_label_days": 49,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 62,
+        "events": 30947,
+        "label_days": 1,
+        "monitored_days": 77,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 76
+      },
+      "0d5ef": {
+        "alert_days": 4,
+        "any_label_days": 17,
+        "behavioural_alerts": 5,
+        "data_quality_alerts": 0,
+        "deviating_days": 12,
+        "evaluable_days": 34,
+        "events": 19500,
+        "label_days": 10,
+        "monitored_days": 49,
+        "simulator_feature_alerts": 4,
+        "system_health_alerts": 0,
+        "usable_days": 48
+      },
+      "0efe8": {
+        "alert_days": 5,
+        "any_label_days": 4,
+        "behavioural_alerts": 5,
+        "data_quality_alerts": 0,
+        "deviating_days": 14,
+        "evaluable_days": 33,
+        "events": 14367,
+        "label_days": 0,
+        "monitored_days": 48,
+        "simulator_feature_alerts": 4,
+        "system_health_alerts": 0,
+        "usable_days": 47
+      },
+      "0f352": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 2468,
+        "label_days": 0,
+        "monitored_days": 6,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 5
+      },
+      "16f4b": {
+        "alert_days": 7,
+        "any_label_days": 13,
+        "behavioural_alerts": 7,
+        "data_quality_alerts": 0,
+        "deviating_days": 19,
+        "evaluable_days": 77,
+        "events": 33066,
+        "label_days": 11,
+        "monitored_days": 91,
+        "simulator_feature_alerts": 2,
+        "system_health_alerts": 0,
+        "usable_days": 91
+      },
+      "1fbe4": {
+        "alert_days": 8,
+        "any_label_days": 9,
+        "behavioural_alerts": 11,
+        "data_quality_alerts": 0,
+        "deviating_days": 19,
+        "evaluable_days": 53,
+        "events": 29804,
+        "label_days": 0,
+        "monitored_days": 68,
+        "simulator_feature_alerts": 8,
+        "system_health_alerts": 0,
+        "usable_days": 67
+      },
+      "201d8": {
+        "alert_days": 12,
+        "any_label_days": 7,
+        "behavioural_alerts": 12,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 59,
+        "events": 26416,
+        "label_days": 1,
+        "monitored_days": 74,
+        "simulator_feature_alerts": 12,
+        "system_health_alerts": 0,
+        "usable_days": 73
+      },
+      "28710": {
+        "alert_days": 3,
+        "any_label_days": 21,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 9,
+        "evaluable_days": 31,
+        "events": 23063,
+        "label_days": 0,
+        "monitored_days": 46,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 45
+      },
+      "2b131": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 2801,
+        "label_days": 0,
+        "monitored_days": 5,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 4
+      },
+      "2f54b": {
+        "alert_days": 2,
+        "any_label_days": 6,
+        "behavioural_alerts": 2,
+        "data_quality_alerts": 0,
+        "deviating_days": 10,
+        "evaluable_days": 45,
+        "events": 20476,
+        "label_days": 0,
+        "monitored_days": 60,
+        "simulator_feature_alerts": 2,
+        "system_health_alerts": 0,
+        "usable_days": 59
+      },
+      "30a32": {
+        "alert_days": 0,
+        "any_label_days": 19,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 17,
+        "evaluable_days": 51,
+        "events": 20265,
+        "label_days": 0,
+        "monitored_days": 66,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 65
+      },
+      "385de": {
+        "alert_days": 0,
+        "any_label_days": 3,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 2,
+        "evaluable_days": 6,
+        "events": 6520,
+        "label_days": 0,
+        "monitored_days": 21,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 20
+      },
+      "393cb": {
+        "alert_days": 3,
+        "any_label_days": 34,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 7,
+        "evaluable_days": 53,
+        "events": 21197,
+        "label_days": 1,
+        "monitored_days": 68,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 67
+      },
+      "3fb61": {
+        "alert_days": 7,
+        "any_label_days": 6,
+        "behavioural_alerts": 7,
+        "data_quality_alerts": 0,
+        "deviating_days": 22,
+        "evaluable_days": 57,
+        "events": 17971,
+        "label_days": 2,
+        "monitored_days": 72,
+        "simulator_feature_alerts": 7,
+        "system_health_alerts": 0,
+        "usable_days": 71
+      },
+      "46286": {
+        "alert_days": 6,
+        "any_label_days": 20,
+        "behavioural_alerts": 6,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 23,
+        "events": 11075,
+        "label_days": 1,
+        "monitored_days": 38,
+        "simulator_feature_alerts": 6,
+        "system_health_alerts": 0,
+        "usable_days": 37
+      },
+      "55cd4": {
+        "alert_days": 9,
+        "any_label_days": 2,
+        "behavioural_alerts": 10,
+        "data_quality_alerts": 0,
+        "deviating_days": 23,
+        "evaluable_days": 62,
+        "events": 18187,
+        "label_days": 0,
+        "monitored_days": 77,
+        "simulator_feature_alerts": 8,
+        "system_health_alerts": 0,
+        "usable_days": 76
+      },
+      "561af": {
+        "alert_days": 0,
+        "any_label_days": 5,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 2,
+        "evaluable_days": 17,
+        "events": 5490,
+        "label_days": 0,
+        "monitored_days": 32,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 31
+      },
+      "56b6b": {
+        "alert_days": 11,
+        "any_label_days": 5,
+        "behavioural_alerts": 11,
+        "data_quality_alerts": 0,
+        "deviating_days": 14,
+        "evaluable_days": 45,
+        "events": 18825,
+        "label_days": 0,
+        "monitored_days": 60,
+        "simulator_feature_alerts": 9,
+        "system_health_alerts": 0,
+        "usable_days": 59
+      },
+      "65db4": {
+        "alert_days": 2,
+        "any_label_days": 7,
+        "behavioural_alerts": 2,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 37,
+        "events": 14165,
+        "label_days": 0,
+        "monitored_days": 52,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 51
+      },
+      "6b29b": {
+        "alert_days": 10,
+        "any_label_days": 24,
+        "behavioural_alerts": 10,
+        "data_quality_alerts": 0,
+        "deviating_days": 18,
+        "evaluable_days": 59,
+        "events": 28943,
+        "label_days": 2,
+        "monitored_days": 74,
+        "simulator_feature_alerts": 10,
+        "system_health_alerts": 0,
+        "usable_days": 73
+      },
+      "714d7": {
+        "alert_days": 5,
+        "any_label_days": 1,
+        "behavioural_alerts": 5,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 24,
+        "events": 8433,
+        "label_days": 0,
+        "monitored_days": 40,
+        "simulator_feature_alerts": 5,
+        "system_health_alerts": 0,
+        "usable_days": 38
+      },
+      "73f7c": {
+        "alert_days": 2,
+        "any_label_days": 24,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 34,
+        "events": 34114,
+        "label_days": 22,
+        "monitored_days": 49,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 48
+      },
+      "76230": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1610,
+        "label_days": 0,
+        "monitored_days": 5,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 3
+      },
+      "7db78": {
+        "alert_days": 2,
+        "any_label_days": 9,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 15,
+        "evaluable_days": 54,
+        "events": 32560,
+        "label_days": 7,
+        "monitored_days": 69,
+        "simulator_feature_alerts": 2,
+        "system_health_alerts": 0,
+        "usable_days": 68
+      },
+      "8a835": {
+        "alert_days": 1,
+        "any_label_days": 6,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 14,
+        "evaluable_days": 60,
+        "events": 28230,
+        "label_days": 2,
+        "monitored_days": 75,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 74
+      },
+      "8d0d4": {
+        "alert_days": 1,
+        "any_label_days": 3,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 54,
+        "events": 24898,
+        "label_days": 1,
+        "monitored_days": 69,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 68
+      },
+      "93c14": {
+        "alert_days": 0,
+        "any_label_days": 14,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 6,
+        "evaluable_days": 34,
+        "events": 19568,
+        "label_days": 11,
+        "monitored_days": 49,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 48
+      },
+      "95899": {
+        "alert_days": 1,
+        "any_label_days": 1,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 3,
+        "evaluable_days": 30,
+        "events": 17614,
+        "label_days": 1,
+        "monitored_days": 45,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 44
+      },
+      "96adf": {
+        "alert_days": 1,
+        "any_label_days": 1,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 9,
+        "evaluable_days": 40,
+        "events": 21457,
+        "label_days": 1,
+        "monitored_days": 55,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 54
+      },
+      "a2849": {
+        "alert_days": 1,
+        "any_label_days": 6,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 10,
+        "evaluable_days": 46,
+        "events": 23760,
+        "label_days": 6,
+        "monitored_days": 61,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 60
+      },
+      "a380e": {
+        "alert_days": 0,
+        "any_label_days": 5,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 3,
+        "evaluable_days": 10,
+        "events": 9403,
+        "label_days": 0,
+        "monitored_days": 26,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 24
+      },
+      "a539e": {
+        "alert_days": 4,
+        "any_label_days": 1,
+        "behavioural_alerts": 4,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 44,
+        "events": 12706,
+        "label_days": 0,
+        "monitored_days": 59,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 58
+      },
+      "ab47a": {
+        "alert_days": 1,
+        "any_label_days": 6,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 5,
+        "evaluable_days": 26,
+        "events": 11243,
+        "label_days": 0,
+        "monitored_days": 42,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 40
+      },
+      "b0455": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 3776,
+        "label_days": 0,
+        "monitored_days": 10,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 9
+      },
+      "b45c2": {
+        "alert_days": 7,
+        "any_label_days": 5,
+        "behavioural_alerts": 7,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 61,
+        "events": 25964,
+        "label_days": 0,
+        "monitored_days": 76,
+        "simulator_feature_alerts": 7,
+        "system_health_alerts": 0,
+        "usable_days": 75
+      },
+      "b9d58": {
+        "alert_days": 6,
+        "any_label_days": 4,
+        "behavioural_alerts": 6,
+        "data_quality_alerts": 0,
+        "deviating_days": 12,
+        "evaluable_days": 77,
+        "events": 46654,
+        "label_days": 4,
+        "monitored_days": 91,
+        "simulator_feature_alerts": 6,
+        "system_health_alerts": 0,
+        "usable_days": 91
+      },
+      "c5031": {
+        "alert_days": 3,
+        "any_label_days": 9,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 1,
+        "evaluable_days": 32,
+        "events": 20892,
+        "label_days": 9,
+        "monitored_days": 47,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 46
+      },
+      "c55f8": {
+        "alert_days": 1,
+        "any_label_days": 11,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 13,
+        "evaluable_days": 77,
+        "events": 36197,
+        "label_days": 0,
+        "monitored_days": 91,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 91
+      },
+      "c5785": {
+        "alert_days": 1,
+        "any_label_days": 9,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 10,
+        "evaluable_days": 53,
+        "events": 22778,
+        "label_days": 0,
+        "monitored_days": 68,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 67
+      },
+      "c8574": {
+        "alert_days": 1,
+        "any_label_days": 0,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 6,
+        "evaluable_days": 39,
+        "events": 22329,
+        "label_days": 0,
+        "monitored_days": 54,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 53
+      },
+      "ca44d": {
+        "alert_days": 0,
+        "any_label_days": 33,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 26,
+        "events": 11652,
+        "label_days": 0,
+        "monitored_days": 41,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 40
+      },
+      "d263a": {
+        "alert_days": 1,
+        "any_label_days": 3,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 54,
+        "events": 27842,
+        "label_days": 1,
+        "monitored_days": 69,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 68
+      },
+      "d44d2": {
+        "alert_days": 0,
+        "any_label_days": 4,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 3,
+        "events": 3344,
+        "label_days": 0,
+        "monitored_days": 18,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 17
+      },
+      "d7a46": {
+        "alert_days": 0,
+        "any_label_days": 4,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 2,
+        "evaluable_days": 9,
+        "events": 9324,
+        "label_days": 1,
+        "monitored_days": 24,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 23
+      },
+      "d8d97": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1600,
+        "label_days": 0,
+        "monitored_days": 7,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 6
+      },
+      "d93d8": {
+        "alert_days": 1,
+        "any_label_days": 23,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 39,
+        "events": 29660,
+        "label_days": 6,
+        "monitored_days": 54,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 53
+      },
+      "e2472": {
+        "alert_days": 0,
+        "any_label_days": 4,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 18,
+        "events": 12923,
+        "label_days": 0,
+        "monitored_days": 33,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 32
+      },
+      "e4959": {
+        "alert_days": 3,
+        "any_label_days": 6,
+        "behavioural_alerts": 3,
+        "data_quality_alerts": 0,
+        "deviating_days": 11,
+        "evaluable_days": 52,
+        "events": 26335,
+        "label_days": 4,
+        "monitored_days": 67,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 66
+      },
+      "e87bd": {
+        "alert_days": 1,
+        "any_label_days": 4,
+        "behavioural_alerts": 1,
+        "data_quality_alerts": 0,
+        "deviating_days": 4,
+        "evaluable_days": 27,
+        "events": 14375,
+        "label_days": 1,
+        "monitored_days": 42,
+        "simulator_feature_alerts": 1,
+        "system_health_alerts": 0,
+        "usable_days": 41
+      },
+      "e8a78": {
+        "alert_days": 19,
+        "any_label_days": 4,
+        "behavioural_alerts": 20,
+        "data_quality_alerts": 0,
+        "deviating_days": 23,
+        "evaluable_days": 61,
+        "events": 30702,
+        "label_days": 3,
+        "monitored_days": 76,
+        "simulator_feature_alerts": 19,
+        "system_health_alerts": 0,
+        "usable_days": 75
+      },
+      "ec812": {
+        "alert_days": 12,
+        "any_label_days": 6,
+        "behavioural_alerts": 12,
+        "data_quality_alerts": 0,
+        "deviating_days": 19,
+        "evaluable_days": 64,
+        "events": 24486,
+        "label_days": 4,
+        "monitored_days": 79,
+        "simulator_feature_alerts": 12,
+        "system_health_alerts": 0,
+        "usable_days": 78
+      },
+      "eca1f": {
+        "alert_days": 8,
+        "any_label_days": 4,
+        "behavioural_alerts": 9,
+        "data_quality_alerts": 0,
+        "deviating_days": 5,
+        "evaluable_days": 40,
+        "events": 26821,
+        "label_days": 1,
+        "monitored_days": 55,
+        "simulator_feature_alerts": 3,
+        "system_health_alerts": 0,
+        "usable_days": 54
+      },
+      "f220c": {
+        "alert_days": 0,
+        "any_label_days": 0,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 8,
+        "evaluable_days": 51,
+        "events": 7129,
+        "label_days": 0,
+        "monitored_days": 66,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 65
+      },
+      "fd100": {
+        "alert_days": 0,
+        "any_label_days": 1,
+        "behavioural_alerts": 0,
+        "data_quality_alerts": 0,
+        "deviating_days": 0,
+        "evaluable_days": 0,
+        "events": 1652,
+        "label_days": 0,
+        "monitored_days": 4,
+        "simulator_feature_alerts": 0,
+        "system_health_alerts": 0,
+        "usable_days": 3
+      }
+    },
+    "labels": {
+      "hourly_profile": {
+        "08:00": {
+          "block_mean_z": {
+            "00-06": 0.358445594219644,
+            "06-12": 0.09829170260059793,
+            "12-18": 0.2622310075348458,
+            "18-24": 0.039150471908120724
+          },
+          "days": 10,
+          "hourly_mean_z": [
+            0.30256508113079805,
+            0.3525795213955922,
+            0.5585447765182848,
+            -0.11615268133722267,
+            -0.358299142400315,
+            -0.02021692233067125,
+            0.36310376798510485,
+            0.13929965088898139,
+            -0.2603743199919085,
+            0.2675958593772493,
+            -0.34084932951215274,
+            0.36422208925699706,
+            0.5024634027430698,
+            0.056817681316675764,
+            0.17186117694792966,
+            -0.012499213669699739,
+            0.02340271665546505,
+            -0.1161004448604976,
+            -0.1306726159808255,
+            0.5276607003354418,
+            -0.07185130085799837,
+            0.10354163165848021,
+            -0.2799383867555744,
+            -0.18532355236806902
+          ]
+        },
+        "12:00": {
+          "block_mean_z": {
+            "00-06": 0.13103342243213775,
+            "06-12": 1.0061860813962837,
+            "12-18": 0.5335264973112032,
+            "18-24": 0.27772223935829216
+          },
+          "days": 76,
+          "hourly_mean_z": [
+            0.2727385515277268,
+            -0.12064529523348788,
+            0.020923651827089093,
+            0.06115705604607934,
+            0.29105419626182905,
+            -0.13771309998619574,
+            0.22900350903845626,
+            0.4127658075906835,
+            0.5229558045349871,
+            0.7492247487232607,
+            0.7099501454147674,
+            0.6322313608491242,
+            0.9245361847577634,
+            0.2309168221129123,
+            0.10428848662840721,
+            0.13472345522212192,
+            0.24371528170245912,
+            0.08836371527930709,
+            0.23081647631980465,
+            0.29198602912112104,
+            -0.00787993393122736,
+            0.06564262907789951,
+            0.1321687535048954,
+            0.03433348271671203
+          ]
+        },
+        "18:00": {
+          "block_mean_z": {
+            "00-06": 0.02104034804991401,
+            "06-12": 0.08894092793247117,
+            "12-18": 1.1289801235221895,
+            "18-24": 0.514928239573906
+          },
+          "days": 28,
+          "hourly_mean_z": [
+            -0.2108191648611302,
+            0.1350637204457641,
+            0.1717459105677853,
+            -0.03320187956583317,
+            0.055092106927380924,
+            -0.1378538729225717,
+            0.10362343824278207,
+            -0.09802231822497835,
+            0.13412671115228256,
+            0.01482569277128959,
+            0.025964577017199047,
+            0.24252404744411385,
+            0.3400772100368036,
+            0.5079435312292169,
+            0.679891907001129,
+            1.0161556204372346,
+            1.0108657427211303,
+            0.7640010515115091,
+            0.8383418982052065,
+            0.15477173075266776,
+            -0.0949152050532495,
+            0.40783376267203975,
+            0.2745448517432748,
+            -0.08051904913349703
+          ]
+        },
+        "none": {
+          "block_mean_z": {
+            "00-06": -0.005668722740648409,
+            "06-12": -0.032041444967628355,
+            "12-18": -0.029972652236321118,
+            "18-24": -0.01439534493722678
+          },
+          "days": 2495,
+          "hourly_mean_z": [
+            -0.007183438274166438,
+            0.000751802524760787,
+            -0.004807272683489633,
+            -0.0010268099671833129,
+            -0.008054435012379698,
+            0.005827626660284628,
+            -0.009601588703398074,
+            -0.012055651797382452,
+            -0.016391361064931397,
+            -0.024060985528792152,
+            -0.02055099234985264,
+            -0.023439870799815115,
+            -0.03399260358719487,
+            -0.012962033734735963,
+            -0.01149559525020831,
+            -0.015457454041052783,
+            -0.018861975700253757,
+            -0.010800267476931719,
+            -0.015915390457011125,
+            -0.012745953377809344,
+            0.0015931918752882985,
+            -0.006991423439407805,
+            -0.0060188219458395765,
+            0.0006005708268330807
+          ]
+        }
+      },
+      "households_by_type": {
+        "Agitation": 27,
+        "Blood pressure": 42,
+        "Body temperature": 1,
+        "Body water": 6,
+        "Pulse": 16,
+        "Weight": 3
+      },
+      "households_without_any_label": 7,
+      "label_days_by_type": {
+        "Agitation": 115,
+        "Blood pressure": 251,
+        "Body temperature": 1,
+        "Body water": 63,
+        "Pulse": 76,
+        "Weight": 4
+      },
+      "primary": {
+        "days_after_a_label_day": 115,
+        "five_largest_households_share": 0.5478260869565217,
+        "households": 27,
+        "households_never_labelled": 29,
+        "label": "Agitation",
+        "label_days": 115,
+        "largest_household_share": 0.19130434782608696,
+        "latest_seconds_past_a_slot": 154,
+        "rows": 135,
+        "rows_by_slot": {
+          "08:00": 10,
+          "12:00": 79,
+          "18:00": 45,
+          "other": 1
+        },
+        "share_labelled_after_a_label_day": 0.25217391304347825,
+        "share_labelled_after_another_day": 0.03210153042179918
+      },
+      "rows_by_type": {
+        "Agitation": 135,
+        "Blood pressure": 305,
+        "Body temperature": 1,
+        "Body water": 68,
+        "Pulse": 95,
+        "Weight": 4
+      },
+      "stated_limits": {
+        "Blood pressure": {
+          "days_meeting_the_limits": 63,
+          "days_meeting_the_limits_without_a_label": 5,
+          "days_with_a_reading": 1733,
+          "households_with_a_label": 42,
+          "label_days": 251,
+          "label_days_meeting_the_limits": 58,
+          "label_days_without_a_reading": 3,
+          "largest_household_label_days": 33,
+          "largest_household_readings": 326,
+          "reading_range": {
+            "Diastolic blood pressure": [
+              40.0,
+              194.0
+            ],
+            "Systolic blood pressure": [
+              70.0,
+              211.0
+            ]
+          }
+        },
+        "Body temperature": {
+          "days_meeting_the_limits": 39,
+          "days_meeting_the_limits_without_a_label": 38,
+          "days_with_a_reading": 2082,
+          "households_with_a_label": 1,
+          "label_days": 1,
+          "label_days_meeting_the_limits": 1,
+          "label_days_without_a_reading": 0,
+          "largest_household_label_days": 1,
+          "largest_household_readings": 84,
+          "reading_range": {
+            "Body Temperature": [
+              32.147,
+              42.96
+            ]
+          }
+        },
+        "Body water": {
+          "days_meeting_the_limits": 15,
+          "days_meeting_the_limits_without_a_label": 2,
+          "days_with_a_reading": 1143,
+          "households_with_a_label": 6,
+          "label_days": 63,
+          "label_days_meeting_the_limits": 13,
+          "label_days_without_a_reading": 50,
+          "largest_household_label_days": 49,
+          "largest_household_readings": 0,
+          "reading_range": {
+            "Total body water": [
+              36.0,
+              78.0
+            ]
+          }
+        },
+        "Pulse": {
+          "days_meeting_the_limits": 142,
+          "days_meeting_the_limits_without_a_label": 72,
+          "days_with_a_reading": 1733,
+          "households_with_a_label": 16,
+          "label_days": 76,
+          "label_days_meeting_the_limits": 70,
+          "label_days_without_a_reading": 0,
+          "largest_household_label_days": 33,
+          "largest_household_readings": 47,
+          "reading_range": {
+            "Heart rate": [
+              42.0,
+              132.0
+            ]
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "data_quality_alerts": 0,
+      "data_quality_per_monitored_day": {
+        "estimate": 0.0,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.0,
+          "low": 0.0,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "evaluable_days": 2075,
+      "evaluable_share": {
+        "estimate": 0.7280701754385965,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.7515589960866096,
+          "low": 0.6987572448386293,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "households_with_an_evaluable_day": 49,
+      "mean_abstention": 0.000588473729858959,
+      "mean_coverage": 0.9888911462294221,
+      "mean_observed": 0.9819688109161793,
+      "monitored_days": 2850,
+      "system_health_alerts": 0,
+      "system_health_per_monitored_day": {
+        "estimate": 0.0,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.0,
+          "low": 0.0,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "usable_days": 2793,
+      "usable_share": {
+        "estimate": 0.98,
+        "households": 56,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.9833385752940124,
+          "low": 0.9757318516478536,
+          "method": "percentile"
+        },
+        "resamples_defined": 5000
+      },
+      "verdicts": {
+        "abrupt_change": 79,
+        "gradual_drift": 94,
+        "insufficient_data": 3100,
+        "ordinary": 7648,
+        "persistent_change": 15,
+        "temporary_disturbance": 464
+      }
+    },
+    "published_baseline": {
+      "event_count": {
+        "label_days_caught": 36.0,
+        "share_of_label_days": {
+          "estimate": 0.5070422535211268,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.6744186046511628,
+            "low": 0.3974264705882353,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        }
+      },
+      "households_in_test": 55,
+      "households_with_a_label_day": 23,
+      "label_history": {
+        "label_days_caught": 51.42857142857143,
+        "share_of_label_days": {
+          "estimate": 0.7243460764587526,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.8586325698757764,
+            "low": 0.46542649317791635,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        }
+      },
+      "published": {
+        "alerts": 341,
+        "alerts_on_other_days": 286,
+        "alerts_on_other_days_per_person_month": 5.468043341708543,
+        "alerts_per_person_month": 6.519590138190955,
+        "label_days": 71,
+        "label_days_caught": 55,
+        "mean_weekly_sensitivity": 0.7993950422978556,
+        "mean_weekly_specificity": 0.8120772973184872,
+        "random_expected_caught": 15.207914572864322,
+        "share_of_alerts_on_label_days": 0.16129032258064516,
+        "share_of_label_days_caught": 0.7746478873239436,
+        "test_person_days": 1592
+      },
+      "reproduced_test_periods": true,
+      "test_periods": [
+        {
+          "label_days": 10,
+          "person_days": 357
+        },
+        {
+          "label_days": 8,
+          "person_days": 314
+        },
+        {
+          "label_days": 13,
+          "person_days": 310
+        },
+        {
+          "label_days": 17,
+          "person_days": 307
+        },
+        {
+          "label_days": 23,
+          "person_days": 304
+        }
+      ],
+      "top_five_households_share_of_label_days": 0.6056338028169014
+    },
+    "references": {
+      "days": 2075,
+      "event_count": {
+        "concordance": {
+          "estimate": 0.7933798810447376,
+          "households": 56,
+          "households_with_pairs": 26,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.8553649007998828,
+            "low": 0.7220466024332258,
+            "method": "percentile"
+          },
+          "pairs": 3867.0,
+          "resamples_defined": 5000
+        },
+        "label_days_caught": 53.0,
+        "minus_pipeline": {
+          "estimate": 0.3723404255319149,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.5,
+            "low": 0.2647058823529412,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "share_of_label_days": {
+          "estimate": 0.5638297872340425,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.7000287356321835,
+            "low": 0.4512135341941655,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        }
+      },
+      "flags": 507,
+      "label_days": 94,
+      "label_history": {
+        "label_days_caught": 63.0,
+        "minus_pipeline": {
+          "estimate": 0.4787234042553192,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.6454599141016464,
+            "low": 0.234375,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        },
+        "share_of_label_days": {
+          "estimate": 0.6702127659574468,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.8071477719528177,
+            "low": 0.46247596153846166,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        }
+      },
+      "pipeline_deviating_days": {
+        "label_days_caught": 18.0,
+        "share_of_label_days": {
+          "estimate": 0.19148936170212766,
+          "households": 56,
+          "interval": {
+            "confidence": 0.95,
+            "high": 0.2676056338028169,
+            "low": 0.12048192771084337,
+            "method": "percentile"
+          },
+          "resamples_defined": 5000
+        }
+      },
+      "random_expected_caught": 22.967710843373492
+    },
+    "result_schema": "tihm-alert-burden/1"
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    0
+  ],
+  "selective_prediction": null,
+  "sensor_subset": null,
+  "split": null,
+  "structural_disagreement": null
+}

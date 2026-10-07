@@ -173,10 +173,12 @@ The limits the dataset paper states for the daily measurements:
 
 Beside B2, as a reference and not a test.
 
-- **Changed arm.** 0.033.
-- **Feature.** Sleeping_hours.
-- **Source.** Docs/ADVERSARIAL_REVIEW.md, item i4; docs/RESEARCH_QUESTIONS.md, RQ4.
-- **Stable arm.** 0.01.
+| Field | Value |
+| --- | --- |
+| changed arm | `0.033` |
+| feature | `sleeping_hours` |
+| source | `docs/ADVERSARIAL_REVIEW.md, item i4; docs/RESEARCH_QUESTIONS.md, RQ4` |
+| stable arm | `0.01` |
 
 ## Reporting
 

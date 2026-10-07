@@ -25,7 +25,7 @@ from __future__ import annotations
 import csv
 from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -93,6 +93,13 @@ class DayRecord:
         Canonical observations on the day.
     labels
         The label types stamped on the day.
+    values, references
+        Each baseline feature's value on the day, not a number where the day
+        was not used, and the personal reference it was compared against.
+        No estimand of the protocol reads them; the descriptions made after
+        the run do.
+    hours
+        The expected hours the day's summary gives each behavioural state.
     """
 
     day: date
@@ -105,6 +112,9 @@ class DayRecord:
     alerts: tuple[tuple[str, str], ...]
     events: int
     labels: frozenset[str]
+    values: Mapping[str, float] = field(default_factory=dict)
+    references: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
+    hours: Mapping[str, float] = field(default_factory=dict)
 
     @property
     def evaluable(self) -> bool:
@@ -220,6 +230,11 @@ def run_household(data: HouseholdData, protocol: TihmProtocol) -> HouseholdRun:
                 ),
                 events=int(events.get(summary.day, 0)),
                 labels=frozenset(labels.get(summary.day, ())),
+                values={c.feature: float(c.value) for c in step.changes},
+                references={c.feature: c.reference.to_dict() for c in step.changes},
+                hours={
+                    state.value: float(hours) for state, hours in summary.hours.items()
+                },
             )
         )
     return HouseholdRun(
@@ -810,7 +825,8 @@ def _hourly_profile(runs: Sequence[HouseholdRun]) -> dict[str, Any]:
             dtype=float,
         )
         spread = counts.std(axis=0, ddof=1)
-        z = np.where(spread > 0, (counts - counts.mean(axis=0)) / spread, np.nan)
+        z = np.full_like(counts, np.nan)
+        np.divide(counts - counts.mean(axis=0), spread, out=z, where=spread > 0)
         first: dict[date, datetime] = {}
         for moment in run.label_times.get(PRIMARY_LABEL, ()):
             first.setdefault(moment.date(), moment)
