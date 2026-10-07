@@ -281,8 +281,11 @@ class SilentHomeProtocol:
 
         The rule sees a silence once it has lasted the horizon, counted from
         the last observation, which is at or before the outage's beginning. So
-        an outage that begins at least a horizon before midnight is seen
+        an outage that begins more than a horizon before midnight is seen
         before its first day is closed, and one that begins later may not be.
+        The split is by the hour the outage begins at, as declared, and not by
+        what the pipeline did: a home's last observation can come early enough
+        for a later outage to be seen in time.
         """
         _, hour = self.outage_starts()[seed]
         return IN_TIME if hour + self.primary_hours < 24.0 else LATE
