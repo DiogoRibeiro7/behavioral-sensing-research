@@ -20,6 +20,7 @@ import numpy as np
 import pytest
 
 from sensor_modeling.alerts import HOME_SILENCE
+from sensor_modeling.datasets.external_figures import data_sha256
 from sensor_modeling.datasets.silent_home_experiment import (
     BETWEEN_THE_FREEZE_AND_THE_RUN,
     EPOCH,
@@ -41,6 +42,13 @@ from sensor_modeling.datasets.silent_home_experiment import (
     share_estimate,
     wilson,
 )
+from sensor_modeling.datasets.silent_home_figures import (
+    FIGURES,
+    TIHM_FIGURES,
+    draw_figures,
+    figure_data,
+    tihm_figure_data,
+)
 from sensor_modeling.datasets.silent_home_protocol import (
     CHANGE,
     CHANGE_AFTER_OUTAGE,
@@ -59,6 +67,7 @@ from sensor_modeling.datasets.silent_home_protocol import (
     SilentHomeProtocol,
     declared_protocol,
 )
+from sensor_modeling.datasets.silent_home_summary import render_page
 from sensor_modeling.datasets.tihm_experiment import DayRecord, HouseholdRun
 from sensor_modeling.datasets.tihm_protocol import TihmProtocol
 from sensor_modeling.evaluation import load_record
@@ -1342,6 +1351,187 @@ class TestCheckpoint:
         kept = sorted(path.name for path in (tmp_path / "homes").iterdir())
         assert kept == sorted(
             f"home-{seed}.pickle" for seed in protocol.study_seeds()[:-1]
+        )
+
+
+# ----------------------------------------------------------------------------
+# The page and its figures
+# ----------------------------------------------------------------------------
+@pytest.fixture(scope="module")
+def rendered(
+    simulated: dict, tihm: dict, tmp_path_factory: pytest.TempPathFactory
+) -> dict[str, object]:
+    directory = tmp_path_factory.mktemp("records")
+    protocol: SilentHomeProtocol = simulated["protocol"]
+    record = record_of(simulated["homes"], protocol, protocol_sha256="0" * 64)
+    path = record.write(directory / f"{EXPERIMENT}.json")
+    described = describe_tihm(
+        TihmAdapter(tihm["data"]),
+        tihm["protocol"],
+        tihm["alert_burden"],
+        protocol_sha256="0" * 64,
+        output_dir=directory,
+        published=tihm["published"],
+    )
+    assert described.path is not None
+    return {
+        "protocol": protocol,
+        "payload": load_record(path),
+        "tihm": load_record(described.path),
+        "directory": directory,
+    }
+
+
+class TestPage:
+    def test_the_page_comes_from_the_records_alone(self, rendered: dict) -> None:
+        protocol, payload, tihm = (
+            rendered["protocol"],
+            rendered["payload"],
+            rendered["tihm"],
+        )
+        page = render_page(payload, tihm, protocol)
+        again = render_page(
+            json.loads(json.dumps(payload)), json.loads(json.dumps(tihm)), protocol
+        )
+        assert page == again
+        assert page.startswith("# The silent-home rule: results")
+        assert "**The evidence is simulated.** 3 paired simulated homes" in page
+        assert "Commit `" in page
+        for seed in protocol.study_seeds():
+            assert f"| `{seed}` | day " in page
+        for name in ("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"):
+            assert f"| {name} | " in page
+
+    def test_the_rule_off_comes_first_and_the_primary_horizon_next(
+        self, rendered: dict
+    ) -> None:
+        page = render_page(rendered["payload"], rendered["tihm"], rendered["protocol"])
+        table = page.split("## What an outage raises")[1].split("E1 is the first")[0]
+        rows = [line for line in table.splitlines() if line.startswith("| `")]
+        assert [row.split("`")[1] for row in rows] == ["off", "h12", "h24"]
+        described = page.split("## TIHM")[1]
+        rows = [line for line in described.splitlines() if line.startswith("| `")]
+        assert [row.split("`")[1] for row in rows[:3]] == ["off", "h12", "h24"]
+        homes = page.split("## Every simulated home")[1]
+        seeds = [
+            int(line.split("`")[1])
+            for line in homes.splitlines()
+            if line.startswith("| `")
+        ]
+        assert seeds == sorted(seeds) == list(rendered["protocol"].study_seeds())
+
+    def test_the_parts_say_what_they_are(self, rendered: dict) -> None:
+        page = render_page(rendered["payload"], rendered["tihm"], rendered["protocol"])
+        before, described = page.split("## TIHM: what the rule does")
+        assert "**A description, not a test" in described.split("\n\n")[1]
+        assert "**Not reported.** Any relation to the dataset's labels" in described
+        assert "Surrey and Borders Partnership NHS Foundation Trust" in described
+        assert "The dataset is not redistributed here." in described
+        assert "## Between the freeze and the run" in before
+        assert "807611" in before
+        assert "**Not an estimand of the protocol.**" in before
+        assert "**Put together after the run.**" in before
+        # The home the record's own list left out is named on the page.
+        assert "One more simulated home is not in the record's list" in before
+        assert "seed 2024" in before
+        assert "**C1 and C8 are not successes or failures of the rule.**" in before
+        assert "### Every TIHM home" in described
+        for home in TIHM_HOMES:
+            assert f"| `{home}` | " in described
+        assert "## What this does not show" in before
+        # Without the second record the page has no part on TIHM.
+        alone = render_page(rendered["payload"], None, rendered["protocol"])
+        assert "## TIHM" not in alone
+        assert "## Every simulated home" in alone
+
+    def test_the_alerts_are_described_in_the_windows_of_the_protocol(
+        self, rendered: dict
+    ) -> None:
+        payload, protocol = rendered["payload"], rendered["protocol"]
+        page = render_page(payload, None, protocol)
+        part = page.split("## What the alerts were")[1].split("## Between")[0]
+        rows = [
+            [cell.strip() for cell in line.strip("|").split("|")]
+            for line in part.splitlines()
+            if line.startswith("| `")
+        ]
+        counted = {(row[0], row[1], row[2]): int(row[3]) for row in rows}
+        outage = payload["results"]["outage"]
+        assert counted[("`outage`", "`off`", "its outage window")] == (
+            outage["off"]["alerts_in_the_window"]
+        )
+        assert counted[("`outage`", "`h12`", "its outage window")] == (
+            outage["h12"]["alerts_in_the_window"]
+        )
+        assert counted[("`stable`", "`off`", "its outage window")] == (
+            outage["off"]["stable_alerts_in_the_window"]
+        )
+        first = next(row for row in rows if row[:2] == ["`outage`", "`off`"])
+        assert "sleeping_hours, persistent change" in first[4]
+
+    def test_a_record_of_something_else_is_refused(self, rendered: dict) -> None:
+        payload, tihm, protocol = (
+            rendered["payload"],
+            rendered["tihm"],
+            rendered["protocol"],
+        )
+        other = json.loads(json.dumps(payload))
+        other["results"]["result_schema"] = "other/1"
+        with pytest.raises(ValueError, match="not a silent-home/1 record"):
+            render_page(other, None, protocol)
+        with pytest.raises(ValueError, match="not a silent-home/1 record"):
+            figure_data(other)
+        with pytest.raises(ValueError, match="not a silent-home-tihm/1 record"):
+            render_page(payload, payload, protocol)
+        with pytest.raises(ValueError, match="not a silent-home-tihm/1 record"):
+            tihm_figure_data(payload)
+        # The windows are the protocol's: the declared one did not make this
+        # record.
+        with pytest.raises(ValueError, match="not made under this protocol"):
+            render_page(payload, tihm)
+
+    def test_the_figures_are_reproducible_and_carry_their_data(
+        self, rendered: dict, tmp_path: Path
+    ) -> None:
+        payload, tihm = rendered["payload"], rendered["tihm"]
+        first = draw_figures(payload, tmp_path / "a", tihm)
+        second = draw_figures(payload, tmp_path / "b", tihm)
+        data = {**figure_data(payload), **tihm_figure_data(tihm)}
+        assert set(first) == set(data) == {*FIGURES, *TIHM_FIGURES}
+        for name, plotted in data.items():
+            assert first[name].read_bytes() == second[name].read_bytes()
+            assert first[name].name == f"silent-home-{name}.svg"
+            svg = first[name].read_text(encoding="utf-8")
+            assert f"data sha256 {data_sha256(plotted)}" in svg
+        assert set(draw_figures(payload, tmp_path / "c")) == set(FIGURES)
+
+    def test_the_figures_plot_the_estimands_own_counts(self, rendered: dict) -> None:
+        payload = rendered["payload"]
+        results = payload["results"]
+        data = figure_data(payload)
+        timeline = data["timeline"]
+        assert timeline["conditions"] == ["off", "h12", "h24"]
+        for condition in timeline["conditions"]:
+            assert sum(timeline["outage"][condition]) == (
+                results["outage"][condition]["alerts_in_the_window"]
+            )
+        hours = data["start-hour"]["hours"]
+        assert sum(entry["homes"] for entry in hours.values()) == results["homes"]
+        for condition in ("off", "h12"):
+            total = sum(entry[condition] for entry in hours.values())
+            assert total / results["homes"] == pytest.approx(
+                results["outage"][condition]["excess"]["estimate"]
+            )
+        for arm, entry in data["fleet"]["arms"].items():
+            assert max(entry["share_silent"]) == pytest.approx(
+                results["fleet"][arm]["largest_share_silent"], abs=1e-4
+            )
+        described = tihm_figure_data(rendered["tihm"])["tihm"]
+        assert described["conditions"] == ["off", "h12"]
+        assert sum(described["alerts_by_day"]["off"].values()) == (
+            rendered["tihm"]["results"]["conditions"]["off"]["behavioural_alerts"][
+                "all"
+            ]
         )
 
 

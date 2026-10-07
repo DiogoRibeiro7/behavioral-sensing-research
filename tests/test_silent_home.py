@@ -1,20 +1,39 @@
-"""Tests for the silent-home protocol's declaration.
+"""Tests for the silent-home protocol's declaration and its published records.
 
-The protocol is frozen before any simulated home is run with the rule on, so
-these tests check the declaration alone: that the frozen file is what the code
-declares, that its page is generated from it, and that the homes, the outages
-and the windows it fixes are reproducible and fit the record.
+The protocol was frozen before any simulated home had been run with the rule
+on, and the first tests check the declaration alone: that the frozen file is
+what the code declares, that its page is generated from it, and that the
+homes, the outages and the windows it fixes are reproducible and fit the
+record.
+
+The last tests read the published records. They check that the run was the
+frozen protocol's, from a clean commit, that its criteria are what its
+estimands decide and its estimands what its homes' own values give, and that
+the results page and its figures are generated from the records. None of them
+runs a home.
 """
 
 from __future__ import annotations
 
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import pytest
 
+from sensor_modeling.datasets.external_figures import data_sha256
+from sensor_modeling.datasets.silent_home_experiment import (
+    BETWEEN_THE_FREEZE_AND_THE_RUN,
+    criteria,
+)
+from sensor_modeling.datasets.silent_home_figures import (
+    FIGURES,
+    TIHM_FIGURES,
+    figure_data,
+    tihm_figure_data,
+)
 from sensor_modeling.datasets.silent_home_protocol import (
     CHANGE,
     CHANGE_AFTER_OUTAGE,
@@ -25,8 +44,11 @@ from sensor_modeling.datasets.silent_home_protocol import (
     OFF,
     OUTAGE,
     PIPELINE_ARMS,
+    RESULT_SCHEMA,
     SHORT_OUTAGE,
     STABLE,
+    TIHM_PUBLISHED,
+    TIHM_SCHEMA,
     SilentHomeProtocol,
     check_frozen_protocol,
     condition_name,
@@ -35,10 +57,17 @@ from sensor_modeling.datasets.silent_home_protocol import (
     write_protocol,
 )
 from sensor_modeling.datasets.silent_home_summary import (
+    FIGURE_DIR,
     PROTOCOL_FILE,
     PROTOCOL_PAGE,
+    RECORD_FILE,
+    RESULTS_PAGE,
+    TIHM_RECORD_FILE,
+    render_page,
     render_protocol,
 )
+from sensor_modeling.evaluation import load_record
+from sensor_modeling.external.tihm import FILES
 from sensor_modeling.simulation.household import build_registry
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -277,3 +306,230 @@ class TestValidation:
     def test_a_declaration_that_cannot_be_run_is_rejected(self, kwargs: dict) -> None:
         with pytest.raises(ValueError):
             SilentHomeProtocol(**kwargs)
+
+
+# ----------------------------------------------------------------------------
+# The published records
+# ----------------------------------------------------------------------------
+RECORD = ROOT / RECORD_FILE
+TIHM_RECORD = ROOT / TIHM_RECORD_FILE
+ALERT_BURDEN = ROOT / "artifacts" / "tihm" / "tihm-alert-burden.json"
+PAGE = ROOT / "docs" / RESULTS_PAGE
+FIGURES_AT = ROOT / "docs" / FIGURE_DIR
+RUN_COMMIT = "18b1e42"
+ON = "h12"
+
+
+@pytest.fixture(scope="module")
+def published() -> dict[str, Any]:
+    return load_record(RECORD)
+
+
+@pytest.fixture(scope="module")
+def described() -> dict[str, Any]:
+    return load_record(TIHM_RECORD)
+
+
+class TestPublishedRun:
+    """The record of the protocol's test, as published."""
+
+    def test_it_ran_the_frozen_protocol_from_a_clean_commit(
+        self, published: dict[str, Any]
+    ) -> None:
+        protocol = declared_protocol()
+        configuration = published["configuration"]
+        assert configuration["protocol_sha256"] == protocol.sha256()
+        assert configuration["protocol_file_sha256"] == check_frozen_protocol(
+            protocol, FROZEN
+        )
+        assert published["inputs"][0]["sha256"] == configuration["protocol_file_sha256"]
+        assert published["environment"]["git_dirty"] == "false"
+        assert published["environment"]["git_commit"].startswith(RUN_COMMIT)
+        assert published["data_source"] == "simulator"
+        assert configuration["result_schema"] == RESULT_SCHEMA
+        assert configuration["between_the_freeze_and_the_run"] == list(
+            BETWEEN_THE_FREEZE_AND_THE_RUN
+        )
+
+    def test_every_home_and_every_run_of_the_protocol_is_in_it(
+        self, published: dict[str, Any]
+    ) -> None:
+        protocol = declared_protocol()
+        results = published["results"]
+        seeds = protocol.study_seeds()
+        assert results["homes"] == protocol.homes == 100
+        assert published["seeds"] == [protocol.seed_root, protocol.seed, *seeds]
+        assert set(results["per_home"]) == {str(seed) for seed in seeds}
+        assert set(results["raw"]["homes"]) == {str(seed) for seed in seeds}
+        assert set(results["runs"]) == {f"{a}/{c}" for a, c in protocol.runs()}
+        for totals in results["runs"].values():
+            assert totals["days_closed"] == protocol.homes * protocol.days
+        for seed in seeds:
+            day, hour = protocol.outage_starts()[seed]
+            row = results["per_home"][str(seed)]
+            assert (row["outage_day"], row["outage_hour"]) == (day, hour)
+            assert row["group"] == protocol.group(seed)
+
+    def test_the_criteria_are_what_the_estimands_decide(
+        self, published: dict[str, Any]
+    ) -> None:
+        results = published["results"]
+        assert criteria(results, declared_protocol()) == results["criteria"]
+        assert sorted(results["criteria"]) == [f"C{k}" for k in range(1, 9)]
+
+    def test_the_estimands_are_the_homes_own_values(
+        self, published: dict[str, Any]
+    ) -> None:
+        results = published["results"]
+        rows = list(results["per_home"].values())
+        for condition, entry in results["outage"].items():
+            excess = [
+                row[f"{OUTAGE}/{condition}/alerts_in_the_outage_window"]
+                - row[f"{STABLE}/{condition}/alerts_in_the_outage_window"]
+                for row in rows
+            ]
+            assert entry["excess"]["estimate"] == pytest.approx(sum(excess) / len(rows))
+            assert entry["homes_with_an_excess"] == sum(1 for e in excess if e > 0)
+        for arm in (CHANGE, CHANGE_AFTER_OUTAGE):
+            for condition in (OFF, ON):
+                detected = results["detection"][arm][condition]["detected"]
+                assert detected["count"] == sum(
+                    1
+                    for row in rows
+                    if row[f"{arm}/{condition}/meets_the_detection_definition"]
+                )
+        reported = results["reporting"][ON]["reported"]
+        assert reported["count"] == sum(
+            1 for row in rows if row[f"{OUTAGE}/{ON}/reported"]
+        )
+        stable = results["stable"]
+        for condition in (OFF, ON, "h24"):
+            assert stable[condition]["behavioural_alerts"] == sum(
+                row[f"{STABLE}/{condition}/behavioural_alerts"] for row in rows
+            )
+
+    def test_the_alerts_it_kept_give_the_counts_it_reports(
+        self, published: dict[str, Any]
+    ) -> None:
+        protocol = declared_protocol()
+        results = published["results"]
+        for condition, entry in results["outage"].items():
+            for arm, key in (
+                (OUTAGE, "alerts_in_the_window"),
+                (STABLE, "stable_alerts_in_the_window"),
+            ):
+                count = 0
+                for seed, runs in results["raw"]["homes"].items():
+                    begin, end = protocol.window(int(seed), OUTAGE)
+                    count += sum(
+                        1
+                        for alert in runs[f"{arm}/{condition}"]["behavioural_alerts"]
+                        if begin <= datetime.fromisoformat(alert[0]) < end
+                    )
+                assert count == entry[key]
+        kept = sum(
+            len(run["silence_alerts"])
+            for runs in results["raw"]["homes"].values()
+            for run in runs.values()
+        )
+        assert kept == sum(t["silence_alerts"] for t in results["runs"].values())
+
+    def test_the_page_is_exactly_the_rendering_of_the_records(
+        self, published: dict[str, Any], described: dict[str, Any]
+    ) -> None:
+        committed = PAGE.read_text(encoding="utf-8").replace("\r\n", "\n")
+        assert committed == render_page(published, described)
+        for seed in declared_protocol().study_seeds():
+            assert f"| `{seed}` | day " in committed
+        assert "**The evidence is simulated.** 100 paired simulated homes" in committed
+
+    def test_the_page_says_what_the_verdicts_do_not(
+        self, published: dict[str, Any]
+    ) -> None:
+        committed = PAGE.read_text(encoding="utf-8")
+        results = published["results"]
+        # An excess below zero and an inconclusive difference that excludes
+        # zero are each said in words, beside the verdict.
+        assert results["outage"][ON]["excess"]["interval"]["high"] < 0.0
+        assert "**E2 lies below zero.**" in committed
+        difference = results["detection"][CHANGE_AFTER_OUTAGE]["on_minus_off"]
+        assert results["criteria"]["C5"]["verdict"] == "inconclusive"
+        assert difference["interval"]["high"] < 0.0
+        assert "**C5 is inconclusive, which is not no difference.**" in committed
+        # The change arm never had the rule act, and the page says so.
+        assert results["runs"][f"{CHANGE}/{ON}"]["silence_alerts"] == 0
+        assert "In this arm the rule never acted" in committed
+        # A statement of the protocol that the record does not bear out.
+        rows = results["per_home"].values()
+        refused = sum(
+            1 for row in rows if row[f"{OUTAGE}/h24/first_outage_day_refused"]
+        )
+        assert refused > 0
+        assert (
+            f"Under `h24` the day on which the outage began was refused in "
+            f"{refused} of the 100 homes." in committed
+        )
+        assert "the record does not bear that out" in committed
+
+    def test_the_figures_carry_the_records_data(
+        self, published: dict[str, Any], described: dict[str, Any]
+    ) -> None:
+        data = {**figure_data(published), **tihm_figure_data(described)}
+        assert set(data) == {*FIGURES, *TIHM_FIGURES}
+        for name, plotted in data.items():
+            svg = (FIGURES_AT / f"silent-home-{name}.svg").read_text(encoding="utf-8")
+            assert f"data sha256 {data_sha256(plotted)}" in svg
+
+
+class TestPublishedDescription:
+    """The record of the description on TIHM, as published. Not a test."""
+
+    def test_it_reproduces_the_alert_burden_run_home_by_home(
+        self, described: dict[str, Any]
+    ) -> None:
+        burden = load_record(ALERT_BURDEN)["results"]
+        check = described["results"]["check"]
+        assert check["published"] == TIHM_PUBLISHED
+        assert check["monitored_days"] == burden["monitoring"]["monitored_days"] == 2850
+        assert check["behavioural_alerts"] == burden["burden"]["behavioural_alerts"]
+        assert check["homes_compared_one_by_one"] == len(burden["households"]) == 56
+        off = described["results"]["conditions"][OFF]
+        assert off["usable_days"] == burden["monitoring"]["usable_days"]
+        assert off["evaluable_days"] == burden["monitoring"]["evaluable_days"]
+        assert off["behavioural_alerts"]["by_feature"] == burden["burden"]["by_feature"]
+        assert off["days_refused_because_of_the_rule"]["all"] == 0
+        assert off["silence_alerts"]["all"] == 0
+
+    def test_it_was_made_from_a_clean_commit_on_the_pinned_files(
+        self, described: dict[str, Any]
+    ) -> None:
+        protocol = declared_protocol()
+        configuration = described["configuration"]
+        assert described["environment"]["git_dirty"] == "false"
+        assert described["environment"]["git_commit"].startswith(RUN_COMMIT)
+        assert described["data_source"] == "tihm"
+        assert configuration["protocol_sha256"] == protocol.sha256()
+        assert configuration["result_schema"] == TIHM_SCHEMA
+        digests = {item["name"]: item["sha256"] for item in described["inputs"]}
+        assert {name: digests[name] for name in FILES} == dict(FILES)
+        assert any("A description, not a test" in note for note in described["notes"])
+
+    def test_every_condition_keeps_every_monitored_day(
+        self, described: dict[str, Any]
+    ) -> None:
+        conditions = described["results"]["conditions"]
+        assert list(declared_protocol().conditions) == sorted(
+            conditions, key=[OFF, ON, "h24"].index
+        )
+        for entry in conditions.values():
+            assert entry["monitored_days"] == 2850
+            refused = entry["days_refused_because_of_the_rule"]
+            assert refused["all"] == sum(refused["per_home"].values())
+            assert len(refused["per_home"]) == 56
+            alerts = entry["behavioural_alerts"]
+            assert sum(alerts["by_day_summarised"].values()) == alerts["all"]
+            assert (
+                alerts["also_raised_with_the_rule_off"]
+                + alerts["raised_only_with_the_rule_off"]
+                == 183
+            )
