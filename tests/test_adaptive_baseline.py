@@ -3,18 +3,27 @@
 from __future__ import annotations
 
 import math
+import statistics
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import numpy as np
 import pytest
+from scipy import stats
 
 from sensor_modeling.baseline import (
+    MAD_TO_SIGMA,
     AdaptiveBaseline,
     BaselineConfig,
     ChangeKind,
     feature_series,
     summarise_days,
+)
+from sensor_modeling.baseline.adaptive import (
+    DOF_PER_RESIDUAL,
+    MAX_EQUIVALENT_DEVIATION,
+    medians_without_each,
+    normal_equivalent,
 )
 from sensor_modeling.fusion.estimate import StateEstimate
 from sensor_modeling.states import BehaviouralState, StateOntology
@@ -398,3 +407,271 @@ class TestAdaptiveBaseline:
     def test_invalid_configuration_is_rejected(self, kwargs: dict) -> None:
         with pytest.raises(ValueError):
             BaselineConfig(**kwargs)
+
+
+CALIBRATED = BaselineConfig(calibrated=True)
+
+#: Four weeks in which the Mondays happen to agree to within a few minutes and
+#: the other days do not. Day one is a Monday.
+TIGHT_MONDAYS = [
+    8.0 + (0.02 * (k // 7) if k % 7 == 0 else ((k * 5) % 14 - 6.5) / 7.0)
+    for k in range(28)
+]
+
+
+class TestNormalEquivalent:
+    def test_it_is_the_gaussian_value_with_the_same_tail(self) -> None:
+        for dof in (1.5, 5.2, 44.0):
+            for score in (-12.0, -3.0, -0.2, 0.4, 2.0, 3.0, 8.0):
+                tail = stats.t.sf(abs(score), dof)
+                expected = math.copysign(stats.norm.isf(tail), score)
+                assert normal_equivalent(score, dof) == pytest.approx(expected)
+
+    def test_a_scale_from_a_few_days_makes_a_score_less_unusual(self) -> None:
+        assert normal_equivalent(3.0, 5.0) < normal_equivalent(3.0, 20.0) < 3.0
+        assert normal_equivalent(3.0, 5.0) == pytest.approx(2.169, abs=1e-3)
+
+    def test_a_well_determined_scale_changes_nothing(self) -> None:
+        assert normal_equivalent(3.0, 1e7) == pytest.approx(3.0, abs=1e-5)
+
+    def test_it_keeps_the_sign_and_the_order(self) -> None:
+        scores = [-6.0, -2.5, -0.1, 0.0, 0.1, 2.5, 6.0]
+        mapped = [normal_equivalent(score, 4.0) for score in scores]
+        assert mapped == sorted(mapped)
+        assert mapped[3] == 0.0 and math.copysign(1.0, mapped[3]) == 1.0
+        assert mapped[0] == pytest.approx(-mapped[-1])
+
+    def test_a_score_beyond_what_a_double_holds_is_capped(self) -> None:
+        assert normal_equivalent(1e6, 200.0) == MAX_EQUIVALENT_DEVIATION
+        assert normal_equivalent(float("inf"), 5.0) == MAX_EQUIVALENT_DEVIATION
+        assert normal_equivalent(float("-inf"), 5.0) == -MAX_EQUIVALENT_DEVIATION
+
+    def test_it_refuses_what_is_not_a_score(self) -> None:
+        with pytest.raises(ValueError, match="dof"):
+            normal_equivalent(1.0, 0.0)
+        with pytest.raises(ValueError, match="number"):
+            normal_equivalent(float("nan"), 5.0)
+
+
+class TestMediansWithoutEach:
+    @pytest.mark.parametrize("size", [2, 3, 4, 5, 8, 9, 17])
+    def test_it_is_the_median_of_the_others(self, size: int) -> None:
+        rng = np.random.default_rng(size)
+        for tied in (False, True):
+            values = (
+                [float(v) for v in rng.integers(0, 4, size=size)]
+                if tied
+                else [float(v) for v in rng.standard_normal(size)]
+            )
+            expected = [
+                statistics.median(values[:k] + values[k + 1 :]) for k in range(size)
+            ]
+            assert medians_without_each(values) == pytest.approx(expected)
+
+    def test_one_value_has_no_others(self) -> None:
+        assert medians_without_each([]) == []
+        assert medians_without_each([3.5]) == [3.5]
+
+
+class TestCalibratedReference:
+    def test_it_is_off_unless_asked_for(self) -> None:
+        assert BaselineConfig().calibrated is False
+        baseline = AdaptiveBaseline("sleep_hours")
+        feed(baseline, TIGHT_MONDAYS)
+        reference = baseline.reference(DAY_ONE + timedelta(days=28))
+        assert reference.calibrated is False
+        assert reference.dof is None and reference.scale_samples == 0
+        assert reference.deviation(8.9) == pytest.approx(
+            (8.9 - reference.centre) / reference.scale
+        )
+
+    def test_the_centre_stays_weekday_aware_and_the_scale_is_pooled(self) -> None:
+        plain, calibrated = AdaptiveBaseline("x"), AdaptiveBaseline("x", CALIBRATED)
+        feed(plain, TIGHT_MONDAYS)
+        feed(calibrated, TIGHT_MONDAYS)
+        monday = DAY_ONE + timedelta(days=28)
+        before, after = plain.reference(monday), calibrated.reference(monday)
+        assert after.weekday_aware and after.weekday_samples == 4
+        assert after.centre == before.centre
+        assert after.scale_samples == after.samples == 28
+        assert after.dof == pytest.approx(DOF_PER_RESIDUAL * 28)
+        assert after.calibrated
+
+    def test_four_days_that_agree_no_longer_make_the_fifth_a_deviation(self) -> None:
+        """The case the option exists for.
+
+        Against four Mondays that agree to within a few minutes, a Monday 52
+        minutes longer is 3.5 of their robust standard deviations out. The
+        other days of the month say that an hour either way is ordinary.
+        """
+        plain, calibrated = AdaptiveBaseline("x"), AdaptiveBaseline("x", CALIBRATED)
+        feed(plain, TIGHT_MONDAYS)
+        feed(calibrated, TIGHT_MONDAYS)
+        monday = DAY_ONE + timedelta(days=28)
+        assert plain.observe(monday, 8.9).kind is ChangeKind.TEMPORARY_DISTURBANCE
+        verdict = calibrated.observe(monday, 8.9)
+        assert verdict.kind is ChangeKind.ORDINARY
+        assert abs(verdict.deviation) < 1.0
+
+    def test_the_scale_is_the_spread_of_the_left_out_residuals(self) -> None:
+        """Worked by hand, with a weekday reference from two days.
+
+        Each of the fourteen days is compared with the other day of its
+        weekday, so its residual is their difference, and the two days of a
+        weekday share it up to sign.
+        """
+        config = BaselineConfig(calibrated=True, weekday_min_samples=2, min_scale=0.01)
+        first = [8.0, 7.0, 9.0, 8.5, 6.0, 7.5, 8.0]
+        gaps = [0.1, 0.4, -0.2, 0.6, -0.3, 0.5, 0.0]
+        baseline = AdaptiveBaseline("x", config)
+        feed(baseline, first + [a + g for a, g in zip(first, gaps)])
+        reference = baseline.reference(DAY_ONE + timedelta(days=14))
+        assert reference.scale == pytest.approx(
+            MAD_TO_SIGMA * statistics.median(abs(g) for g in gaps + gaps)
+        )
+        assert reference.centre == pytest.approx(8.05)
+
+    def test_a_weekday_with_too_few_days_is_compared_with_all_the_others(self) -> None:
+        config = BaselineConfig(calibrated=True, min_scale=0.01)
+        values = [8.0, 7.0, 9.0, 8.5, 6.0, 7.5, 8.2, 7.9, 7.1]
+        baseline = AdaptiveBaseline("x", config)
+        feed(baseline, values)
+        residuals = [
+            value - statistics.median(values[:k] + values[k + 1 :])
+            for k, value in enumerate(values)
+        ]
+        reference = baseline.reference(DAY_ONE + timedelta(days=9))
+        assert not reference.weekday_aware
+        assert reference.scale == pytest.approx(
+            MAD_TO_SIGMA * statistics.median(abs(r) for r in residuals)
+        )
+
+    def test_a_weekly_rhythm_does_not_widen_the_scale(self) -> None:
+        rng = np.random.default_rng(4)
+        noise = [float(v) for v in rng.normal(0.0, 0.5, size=56)]
+        rhythm = [0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 3.0]
+        flat, weekly = AdaptiveBaseline("x", CALIBRATED), AdaptiveBaseline(
+            "x", CALIBRATED
+        )
+        feed(flat, [8.0 + n for n in noise])
+        feed(weekly, [8.0 + n + rhythm[k % 7] for k, n in enumerate(noise)])
+        sunday = DAY_ONE + timedelta(days=62)
+        assert weekly.reference(sunday).scale == pytest.approx(
+            flat.reference(sunday).scale
+        )
+        assert weekly.reference(sunday).centre == pytest.approx(
+            flat.reference(sunday).centre + 3.0
+        )
+
+    def test_a_perfectly_regular_routine_keeps_the_floor(self) -> None:
+        baseline = AdaptiveBaseline("x", CALIBRATED)
+        feed(baseline, [8.0] * 30)
+        reference = baseline.reference(DAY_ONE + timedelta(days=30))
+        assert reference.scale == CALIBRATED.min_scale
+
+    def test_one_retained_day_gives_a_reference(self) -> None:
+        baseline = AdaptiveBaseline("x", CALIBRATED)
+        feed(baseline, [8.0])
+        reference = baseline.reference(DAY_ONE + timedelta(days=1))
+        assert reference.scale == CALIBRATED.min_scale
+        assert reference.scale_samples == 1
+        assert math.isfinite(reference.deviation(9.0))
+
+    def test_a_stationary_day_passes_the_threshold_about_as_often_as_stated(
+        self,
+    ) -> None:
+        """A threshold of two states 4.6% of days. Seeded Gaussian days, 8,400."""
+
+        def share(config: BaselineConfig) -> float:
+            rng = np.random.default_rng(11)
+            beyond = judged = 0
+            for _ in range(150):
+                baseline = AdaptiveBaseline("x", config)
+                for verdict in feed(baseline, list(8.0 + rng.standard_normal(70))):
+                    if verdict.kind is not ChangeKind.INSUFFICIENT_DATA:
+                        judged += 1
+                        beyond += abs(verdict.deviation) >= config.deviation_threshold
+            return beyond / judged
+
+        assert share(BaselineConfig(deviation_threshold=2.0)) > 0.15
+        calibrated = share(BaselineConfig(deviation_threshold=2.0, calibrated=True))
+        assert 0.03 < calibrated < 0.06
+
+    def test_a_sustained_shift_is_still_a_change(self) -> None:
+        rng = np.random.default_rng(8)
+        baseline = AdaptiveBaseline("x", CALIBRATED)
+        feed(baseline, list(8.0 + rng.normal(0.0, 0.4, size=42)))
+        shifted = feed(
+            baseline,
+            list(4.0 + rng.normal(0.0, 0.4, size=5)),
+            DAY_ONE + timedelta(days=42),
+        )
+        assert shifted[2].kind in {
+            ChangeKind.PERSISTENT_CHANGE,
+            ChangeKind.ABRUPT_CHANGE,
+        }
+        assert shifted[2].direction == "decrease"
+        assert "normal-equivalent SD" in shifted[2].detail
+
+    def test_a_trend_is_measured_against_the_pooled_scale(self) -> None:
+        config = BaselineConfig(
+            calibrated=True,
+            min_samples=10,
+            weekday_min_samples=99,
+            trend_threshold=1.5,
+            deviation_threshold=6.0,
+            min_scale=0.1,
+        )
+        baseline = AdaptiveBaseline("x", config)
+        verdicts = feed(baseline, [8.0 - 0.06 * day for day in range(40)])
+        drift = next(v for v in verdicts if v.kind is ChangeKind.GRADUAL_DRIFT)
+        assert drift.reference.calibrated
+        assert drift.trend_strength == pytest.approx(
+            abs(drift.slope_per_day) * config.trend_window / drift.reference.scale
+        )
+        assert drift.direction == "decrease"
+
+    def test_a_weekly_rhythm_is_no_part_of_the_trend(self) -> None:
+        """The trend is fitted to each day's distance from its own weekday.
+
+        Past the fifth week every weekday has its own centre, and from then
+        on a calibrated baseline gives the same verdicts on days with a
+        weekly rhythm as on the same days without one. The default does not:
+        its trend is fitted to the days as they are.
+        """
+        rng = np.random.default_rng(21)
+        noise = [float(v) for v in rng.normal(0.0, 0.5, size=84)]
+        rhythm = [0.0, 0.0, 0.0, 0.0, 0.0, 1.5, 2.0]
+
+        def verdicts(config: BaselineConfig, weekly: bool) -> list:
+            values = [
+                8.0 + n + (rhythm[k % 7] if weekly else 0.0)
+                for k, n in enumerate(noise)
+            ]
+            return feed(AdaptiveBaseline("x", config), values)[35:]
+
+        flat, weekly = verdicts(CALIBRATED, False), verdicts(CALIBRATED, True)
+        assert [v.kind for v in weekly] == [v.kind for v in flat]
+        for with_rhythm, without in zip(weekly, flat):
+            assert with_rhythm.slope_per_day == pytest.approx(without.slope_per_day)
+            assert with_rhythm.trend_strength == pytest.approx(without.trend_strength)
+            assert with_rhythm.deviation == pytest.approx(without.deviation)
+        plain = BaselineConfig()
+        slopes = [v.slope_per_day for v in verdicts(plain, True)]
+        assert slopes != pytest.approx([v.slope_per_day for v in verdicts(plain, False)])
+
+    def test_the_verdict_says_what_scale_it_is_on(self) -> None:
+        baseline = AdaptiveBaseline("x", CALIBRATED)
+        payload = feed(baseline, TIGHT_MONDAYS)[-1].to_dict()["reference"]
+        assert payload["scale_samples"] == 27
+        assert payload["dof"] == pytest.approx(DOF_PER_RESIDUAL * 27)
+        plain = feed(AdaptiveBaseline("x"), TIGHT_MONDAYS)[-1].to_dict()["reference"]
+        assert plain["scale_samples"] == 0 and plain["dof"] is None
+
+    def test_snapshot_and_restore_preserve_the_calibrated_reference(self) -> None:
+        baseline = AdaptiveBaseline("x", CALIBRATED)
+        feed(baseline, TIGHT_MONDAYS)
+        restarted = AdaptiveBaseline("x", CALIBRATED)
+        restarted.restore(baseline.snapshot())
+        monday = DAY_ONE + timedelta(days=28)
+        assert restarted.reference(monday) == baseline.reference(monday)

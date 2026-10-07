@@ -23,6 +23,17 @@ Two properties keep it defensible. The reference is *robust*: medians and MAD,
 so a single extraordinary day cannot redefine normal. And the reference is
 *weekday-aware*: a quiet Sunday is compared against other Sundays, not against
 the working week, because otherwise ordinary weekly rhythm reads as change.
+
+A third is opt-in. A weekday-aware reference is built from a handful of days:
+four Sundays, then five. The spread of four values is so uncertain that a
+stationary Gaussian day lies three of its robust standard deviations out about
+one time in six, where a three-sigma band states one in 370. With
+``BaselineConfig.calibrated`` the centre stays weekday-aware and the scale is
+pooled: it is the spread of how far each retained day fell from the centre the
+other days of its weekday would have given it. The deviation is then put on
+the scale where the threshold means what it says, by the Student t that scale
+has, and the trend is fitted to those same distances, so that a weekly rhythm
+is not read as a drift. Nothing changes unless it is set.
 """
 
 from __future__ import annotations
@@ -37,6 +48,7 @@ from enum import Enum
 from typing import Any
 
 import numpy as np
+from scipy import special
 
 from ..models.change_point_detection.pelt import PELTChangePointDetector
 
@@ -45,6 +57,63 @@ logger = logging.getLogger(__name__)
 #: Scale factor making the median absolute deviation a consistent estimator
 #: of the standard deviation for normally distributed data.
 MAD_TO_SIGMA = 1.4826
+
+#: Degrees of freedom a calibrated scale has for each residual behind it. The
+#: median absolute deviation is 37% as efficient as the standard deviation for
+#: Gaussian data, so N residuals fix the scale about as well as a standard
+#: deviation on 0.368 N degrees of freedom. The constant was set on stationary
+#: Gaussian days, and docs/THRESHOLD_CALIBRATION_NULL.md measures what it
+#: gives on series it was not set on.
+DOF_PER_RESIDUAL = 0.368
+
+#: The largest normal-equivalent deviation reported. Beyond it the tail
+#: probability is below what a double can hold.
+MAX_EQUIVALENT_DEVIATION = 37.0
+
+
+def normal_equivalent(score: float, dof: float) -> float:
+    """Return the Gaussian value with the tail probability *score* has under a t.
+
+    A deviation divided by an estimated scale follows a Student t, not a
+    Gaussian, and the fewer the days behind the scale the heavier its tails.
+    Reading it against a Gaussian threshold then overstates how unusual the
+    day is. This maps it to the Gaussian value that is exactly as unusual, so
+    that a threshold of three means one day in 370 whatever the sample.
+    """
+    if dof <= 0:
+        raise ValueError("dof must be positive")
+    if np.isnan(score):
+        raise ValueError("score must be a number")
+    if score == 0.0:
+        return 0.0
+    tail = float(special.stdtr(dof, -abs(score)))
+    if tail <= 0.0:
+        return float(np.sign(score)) * MAX_EQUIVALENT_DEVIATION
+    equivalent = min(-float(special.ndtri(tail)), MAX_EQUIVALENT_DEVIATION)
+    return float(np.sign(score)) * equivalent
+
+
+def medians_without_each(values: Sequence[float]) -> list[float]:
+    """Return, for each value, the median of the others.
+
+    The values are sorted once, and the median of the rest is read from the
+    sorted list with one place skipped, so a history is not sorted again for
+    every day in it. A single value has no others, and its entry is itself.
+    """
+    if len(values) < 2:
+        return [float(value) for value in values]
+    order = sorted(range(len(values)), key=values.__getitem__)
+    ranked = [values[index] for index in order]
+    others = len(ranked) - 1
+    low, high = (others - 1) // 2, others // 2
+    medians = [0.0] * len(values)
+    for rank, index in enumerate(order):
+        # Place p of the list without this value is place p of the whole list
+        # before the value's own rank, and place p + 1 from there on.
+        below = ranked[low if low < rank else low + 1]
+        above = ranked[high if high < rank else high + 1]
+        medians[index] = (below + above) / 2.0
+    return medians
 
 
 class ChangeKind(str, Enum):
@@ -71,23 +140,52 @@ class ChangeKind(str, Enum):
 
 @dataclass(frozen=True)
 class BaselineReference:
-    """The personal reference a day is compared against."""
+    """The personal reference a day is compared against.
+
+    Attributes
+    ----------
+    centre, scale
+        The reference's location and its robust spread.
+    samples, weekday_samples
+        Well-observed days retained, and those of the day's own weekday.
+    weekday_aware
+        Whether the centre is that of the day's own weekday.
+    scale_samples
+        Residuals behind a calibrated scale. Zero when the reference is not
+        calibrated: its scale is then the spread of the days behind its
+        centre.
+    dof
+        Degrees of freedom of a calibrated scale, or ``None``.
+    """
 
     centre: float
     scale: float
     samples: int
     weekday_samples: int
     weekday_aware: bool
+    scale_samples: int = 0
+    dof: float | None = None
+
+    @property
+    def calibrated(self) -> bool:
+        """Whether the deviation is on the scale the threshold is stated on."""
+        return self.dof is not None
 
     def deviation(self, value: float) -> float:
-        """Return the robust z-score of *value* against this reference."""
+        """Return the robust z-score of *value* against this reference.
+
+        For a calibrated reference it is the normal-equivalent score: the
+        Gaussian value as far into its tail as the day is into the tail of
+        the Student t its scale gives.
+        """
         if self.scale <= 0.0:
             return (
                 0.0
                 if value == self.centre
                 else float(np.sign(value - self.centre)) * np.inf
             )
-        return (value - self.centre) / self.scale
+        score = (value - self.centre) / self.scale
+        return score if self.dof is None else normal_equivalent(score, self.dof)
 
     def to_dict(self) -> dict[str, object]:
         """Return a serialisable form of the reference."""
@@ -97,6 +195,8 @@ class BaselineReference:
             "samples": self.samples,
             "weekday_samples": self.weekday_samples,
             "weekday_aware": self.weekday_aware,
+            "scale_samples": self.scale_samples,
+            "dof": self.dof,
         }
 
 
@@ -228,6 +328,20 @@ class BaselineConfig:
         Floor on the reference scale, in feature units. Without it a person
         with an extremely regular routine would have every ordinary hour of
         variation reported as an enormous deviation.
+    calibrated
+        Whether the reference's scale is pooled over every retained day and
+        the deviation reported on the scale the threshold is stated on. Off
+        by default. The centre is weekday-aware either way. With it on, the
+        scale is the spread of each retained day's distance from the centre
+        the other days of its weekday would have given it, so it rests on all
+        the days and not on the four or five of one weekday, and it already
+        holds the uncertainty of a centre drawn from a few days. The
+        deviation is then the Gaussian value as unusual as the day is under
+        the Student t that scale has, and ``deviation_threshold`` keeps its
+        Gaussian meaning. The trend is fitted to the same distances, each
+        day's from the centre the others of its weekday give it, so a weekly
+        rhythm is not read as a trend, and its movement is measured against
+        the same scale.
     """
 
     history_days: int = 120
@@ -239,6 +353,7 @@ class BaselineConfig:
     trend_threshold: float = 3.5
     change_point_penalty: float = 8.0
     min_scale: float = 0.25
+    calibrated: bool = False
 
     def __post_init__(self) -> None:
         """Validate the configuration."""
@@ -316,6 +431,20 @@ class AdaptiveBaseline:
         selected = weekday_values if weekday_aware else values
 
         centre = statistics.median(selected)
+        if self.config.calibrated:
+            residuals = self._left_out_residuals()
+            return BaselineReference(
+                centre=centre,
+                scale=max(
+                    MAD_TO_SIGMA * statistics.median(abs(r) for r in residuals),
+                    self.config.min_scale,
+                ),
+                samples=len(values),
+                weekday_samples=len(weekday_values),
+                weekday_aware=weekday_aware,
+                scale_samples=len(residuals),
+                dof=DOF_PER_RESIDUAL * len(residuals),
+            )
         deviations = [abs(value - centre) for value in selected]
         scale = max(
             MAD_TO_SIGMA * statistics.median(deviations) if deviations else 0.0,
@@ -329,14 +458,49 @@ class AdaptiveBaseline:
             weekday_aware=weekday_aware,
         )
 
+    def _left_out_residuals(self) -> list[float]:
+        """How far each retained day fell from the centre the others gave it.
+
+        Each day is compared as a new day would be: against the median of the
+        other days of its weekday, or, where its weekday has too few others
+        for the reference to be weekday-aware, against the median of all the
+        other days. The spread of these residuals is the spread a new day's
+        distance from its reference has, the uncertainty of a centre drawn
+        from a few days included. A single retained day has no other, and its
+        residual is zero.
+        """
+        values = list(self._values)
+        if len(values) < 2:
+            return [0.0] * len(values)
+        groups: dict[int, list[int]] = {}
+        for index, day in enumerate(self._days):
+            groups.setdefault(day.weekday(), []).append(index)
+        needed = max(self.config.weekday_min_samples - 1, 1)
+        centres = medians_without_each(values)
+        for members in groups.values():
+            if len(members) - 1 < needed:
+                continue
+            own = medians_without_each([values[index] for index in members])
+            for index, centre in zip(members, own):
+                centres[index] = centre
+        return [value - centre for value, centre in zip(values, centres)]
+
     # ------------------------------------------------------------------
     def _slope(self) -> float:
         """Return a robust trend over the recent window, in units per day.
 
         Uses the Theil-Sen median of pairwise slopes, which tolerates the
         occasional extraordinary day without letting it set the trend.
+
+        A calibrated baseline fits the trend to how far each day fell from
+        the centre the other days of its weekday gave it, and not to the days
+        as they are. A weekly rhythm is then no part of the trend, as it is
+        no part of the scale the trend's movement is measured against.
         """
-        window = list(self._values)[-self.config.trend_window :]
+        values = (
+            self._left_out_residuals() if self.config.calibrated else self._values
+        )
+        window = list(values)[-self.config.trend_window :]
         days = list(self._days)[-self.config.trend_window :]
         if len(window) < 3:
             return 0.0
@@ -410,6 +574,7 @@ class AdaptiveBaseline:
         change_point = None
         kind = ChangeKind.ORDINARY
         detail = "within the personal band"
+        unit = "normal-equivalent SD" if reference.calibrated else "robust SD"
 
         if reference.samples < self.config.min_samples:
             kind = ChangeKind.INSUFFICIENT_DATA
@@ -425,13 +590,12 @@ class AdaptiveBaseline:
                 else ChangeKind.PERSISTENT_CHANGE
             )
             detail = (
-                f"deviation of {deviation:+.1f} robust SD held for "
-                f"{self._streak} days"
+                f"deviation of {deviation:+.1f} {unit} held for " f"{self._streak} days"
             )
         elif deviating:
             kind = ChangeKind.TEMPORARY_DISTURBANCE
             detail = (
-                f"deviation of {deviation:+.1f} robust SD on "
+                f"deviation of {deviation:+.1f} {unit} on "
                 f"{self._streak} day(s), not yet persistent"
             )
         else:
