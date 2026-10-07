@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Runs the online pipeline on a clinical cohort for the first time, with its declared emissions, baseline and alert policy and the ten-minute step its protocol declares. The run is exploratory: the dataset's labels had been analysed before its protocol was written, and the protocol was committed before any pipeline output was compared with a label.
+
+- **Research results.**
+  - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
+    - The contract maps no label to a state, so state inference is not scored.
+    - The pipeline raises 0.064 behavioural alerts per person-day; for `sleeping_hours` alone 0.055, against 0.010 in the simulator's stable arm.
+    - Its alert days and deviating days are not more frequent on verified agitation label days, and its deviation score does not rank them above other days.
+    - At the same number of flagged days, a household's own label history catches 63 of 94 label days and its sensor event count against earlier days 53, where the pipeline's deviating days catch 18.
+  - **Described after the run, in a record of its own.**
+    - Days on which no sensor reported are counted as usable and read as sleep. On 16 June 2019 none of the 47 monitored homes reports, two days after the date the dataset paper gives for a failure of its data collection server. Leaving such days out of the baseline's history gives 78 change verdicts where the run gave 188.
+    - A same-weekday reference of four days puts a Gaussian value past the three-SD threshold about 17.5% of the time.
+    - The pipeline flags quiet days; the verified labels mark busy ones.
+- **External datasets.** A TIHM adapter, `sensor_modeling.external.tihm`, with its frozen ontology mapping. The dataset is read from a local download and is not redistributed.
+- **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the roadmap and the external-dataset contract name the new evidence.
+
+The online pipeline's defaults, the baseline and the alert policy are unchanged.
+
 ## [0.9.0] - 2026-09-30
 
 Completes the pre-specified Phase 3 inference-redesign evaluations, and records the first Phase 4 comparison of uncertainty diagnostics and the first Phase 5 evaluation on an independently collected dataset. Every experiment was pre-specified, with its protocol frozen before any household was scored. The Phase 3 and 4 experiments ran on the 20 development homes, so none of them is a held-out claim.

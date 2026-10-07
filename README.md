@@ -65,6 +65,18 @@ balanced accuracy is 0.246 and 0.244, against chance at 0.25, and a week of
 limited adaptation leaves balanced accuracy unchanged. See
 [Phase 5 external results](docs/PHASE5_EXTERNAL_RESULTS.md).
 
+The online pipeline was also run, with its declared emissions, baseline and
+alert policy, the ten-minute step its protocol declares and nothing fitted, on
+the 56 homes of the TIHM dataset of people living with dementia. Its
+labels are alerts a clinical team verified, not behavioural states, so no state
+is scored; the run is exploratory and describes what the pipeline raises. It
+raises 0.064 behavioural alerts per person-day, with a 95% household bootstrap
+interval of [0.046, 0.084], and **the alerts are not more frequent on the days
+the team confirmed**: alert days are 5.3% of agitation label days and 8.5% of
+other days. Looked at afterwards, a quarter of the alert days are days on which
+no sensor in the home reported anything, which the pipeline reads as sleep. See
+[TIHM alert-burden results](docs/TIHM_ALERT_BURDEN_RESULTS.md).
+
 See [Real-data validation](docs/real_data.md) and
 [Known limitations](docs/limitations.md).
 

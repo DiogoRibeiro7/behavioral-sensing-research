@@ -957,6 +957,9 @@ class TestPostHoc:
 # The published record
 # ----------------------------------------------------------------------------
 PUBLISHED = ROOT / "artifacts" / "tihm" / "tihm-alert-burden.json"
+PUBLISHED_POST_HOC = ROOT / "artifacts" / "tihm" / "tihm-alert-burden-post-hoc.json"
+DOC = ROOT / "docs" / "TIHM_ALERT_BURDEN_RESULTS.md"
+FIGURE_DIR = ROOT / "docs" / "figures"
 
 
 def text_sha256(path: Path) -> str:
@@ -966,6 +969,11 @@ def text_sha256(path: Path) -> str:
 @pytest.fixture(scope="module")
 def published() -> dict[str, Any]:
     return load_record(PUBLISHED)
+
+
+@pytest.fixture(scope="module")
+def described() -> dict[str, Any]:
+    return load_record(PUBLISHED_POST_HOC)
 
 
 class TestPublishedRecord:
@@ -1017,4 +1025,77 @@ class TestPublishedRecord:
         )
         assert sum(row["behavioural_alerts"] for row in table.values()) == (
             results["burden"]["behavioural_alerts"]
+        )
+
+    def test_the_page_is_exactly_the_rendering_of_the_records(
+        self, published: dict[str, Any], described: dict[str, Any]
+    ) -> None:
+        committed = DOC.read_text(encoding="utf-8").replace("\r\n", "\n")
+        assert committed == render_page(published, described)
+        for name in published["results"]["households"]:
+            assert f"| `{name}` |" in committed
+
+    def test_the_figures_carry_the_records_data(
+        self, published: dict[str, Any], described: dict[str, Any]
+    ) -> None:
+        data = {**figure_data(published), **post_hoc_figure_data(described)}
+        assert set(data) == {*FIGURES, *POST_HOC_FIGURES}
+        for name, plotted in data.items():
+            svg = (FIGURE_DIR / f"tihm-alert-burden-{name}.svg").read_text(
+                encoding="utf-8"
+            )
+            assert f"data sha256 {data_sha256(plotted)}" in svg
+
+
+class TestPublishedPostHoc:
+    """The descriptions of that run, as published. None is part of the protocol."""
+
+    def test_it_describes_the_published_run_from_a_clean_commit(
+        self, published: dict[str, Any], described: dict[str, Any]
+    ) -> None:
+        results = described["results"]
+        assert results["status"] == STATUS
+        assert results["describes"] == {
+            "experiment": EXPERIMENT,
+            "recorded_at": published["recorded_at"],
+            "git_commit": published["environment"]["git_commit"],
+            "protocol_sha256": published["configuration"]["protocol_sha256"],
+            "results_reproduced": True,
+        }
+        assert described["environment"]["git_dirty"] == "false"
+        assert described["environment"]["git_commit"].startswith("bc2ea4e")
+        digests = {i["name"]: i["sha256"] for i in described["inputs"]}
+        assert digests[PUBLISHED.name] == text_sha256(PUBLISHED)
+        assert {name: digests[name] for name in FILES} == dict(FILES)
+        assert described["configuration"]["replicates"] == PostHocConfig().replicates
+
+    def test_the_recorded_replay_gives_the_published_verdicts(
+        self, published: dict[str, Any], described: dict[str, Any]
+    ) -> None:
+        recorded = described["results"]["replays"]["recorded"]
+        results = published["results"]
+        assert recorded["reproduces_the_run"] is True
+        assert recorded["deviating_days"] == results["burden"]["deviating_days"]
+        verdicts = dict(results["monitoring"]["verdicts"])
+        verdicts.pop("insufficient_data")
+        assert recorded["verdicts"] == verdicts
+
+    def test_every_silent_day_and_alert_is_accounted_for(
+        self, published: dict[str, Any], described: dict[str, Any]
+    ) -> None:
+        results, later = published["results"], described["results"]
+        silent, daily = later["silent_days"], later["calendar"]["daily"]
+        alerts = results["burden"]["behavioural_alerts"]
+        assert silent["behavioural_alerts"] == alerts
+        assert sum(row["behavioural_alerts"] for row in daily) == alerts
+        assert sum(later["alerts_by_feature_and_verdict"].values()) == alerts
+        assert sum(row["silent_households"] for row in daily) == silent["silent_days"]
+        assert sum(row["monitored_households"] for row in daily) == (
+            results["monitoring"]["monitored_days"]
+        )
+        assert sum(
+            int(length) * count for length, count in silent["runs_by_length"].items()
+        ) == (silent["silent_days"])
+        assert sum(row["events"] for row in daily) == (
+            results["contract"]["events"]["emitted"]
         )

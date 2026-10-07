@@ -1,0 +1,1694 @@
+{
+  "configuration": {
+    "confidence": 0.95,
+    "min_previous_days": 5,
+    "null_draws": 2000000,
+    "protocol_sha256": "7f6c0eff69ab91dbbe51aeef432b941cc512c096298f3d7294c96b3eb2fc304a",
+    "replicates": 200,
+    "result_schema": "tihm-alert-burden-post-hoc/1",
+    "seed": 0,
+    "status": "post hoc: every description here was chosen after the protocol's results had been read; none is part of the protocol, enters an estimand or changes a result",
+    "step_minutes": 10
+  },
+  "data_source": "tihm",
+  "environment": {
+    "git_commit": "bc2ea4ec87b23f924dfb2cb76c89780ae2071e67",
+    "git_dirty": "false",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "platform": "Linux-6.18.44-fc-v77-x86_64-with-glibc2.39",
+    "python": "3.13.16",
+    "scipy": "1.18.1",
+    "sensor_modeling": "0.9.0",
+    "sklearn": "1.9.1"
+  },
+  "experiment": "tihm-alert-burden-post-hoc",
+  "household_metrics": {},
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": true,
+      "first_prediction": "2019-04-02T00:01:16+01:00",
+      "last_prediction": "2019-07-01T00:06:25+01:00",
+      "latest_evidence": "2019-07-01T00:06:25+01:00",
+      "max_lead_seconds": 0.0,
+      "predictions": 2850
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [
+    {
+      "name": "tihm-alert-burden.json",
+      "role": "the record of the protocol's run, which this describes",
+      "sha256": "5a5bb24167c8f089de3138f9c35ec6e07cd902ba385999f172458e40b40a64ff",
+      "source": "artifacts/tihm/tihm-alert-burden.json"
+    },
+    {
+      "name": "alert_burden_protocol.json",
+      "role": "frozen protocol",
+      "sha256": "ed04c9885f427f055e099e066d518188dd665cfbaaa012c459136e98378d8a2e",
+      "source": "artifacts/tihm/alert_burden_protocol.json"
+    },
+    {
+      "name": "tihm_mapping.json",
+      "role": "frozen mapping",
+      "sha256": "b851fee6c2662881d14ea656267f868bf8d3000b2bbdbdd2aa0c31e73157733b",
+      "source": "artifacts/tihm/tihm_mapping.json"
+    },
+    {
+      "name": "Activity.csv",
+      "role": "recording, read through the contract",
+      "sha256": "ead7b1e3c2a91fbd679a909bff3a309a6465ae1ad18528dae57a4cf8599cafca",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Demographics.csv",
+      "role": "recording, read through the contract",
+      "sha256": "15b13a680da6ee3790dfadc25d3a6102070f6e8fe1a47ea6da8f64b6c4b757d4",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Labels.csv",
+      "role": "recording, read through the contract",
+      "sha256": "39495a08fdf1ff8f9b9b88bc98483a565c4433f58713ba3e4d0846e4449b846b",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Physiology.csv",
+      "role": "readings, read only to check the published results",
+      "sha256": "377b3170b4b650795648e18258f30f9b985c214937823e9c9ea405c66b4ba696",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    },
+    {
+      "name": "Sleep.csv",
+      "role": "pinned, not read",
+      "sha256": "f1d5a6980263a55a8b69841e13bb349ce6e79152c15bdde0beffeea15293b9fe",
+      "source": "https://doi.org/10.5281/zenodo.7622128"
+    }
+  ],
+  "intervals": [],
+  "mcse": {
+    "gaussian value at the threshold, reference of 10": 0.0001572718836140141,
+    "gaussian value at the threshold, reference of 11": 0.0001539211376480664,
+    "gaussian value at the threshold, reference of 12": 0.0001403276772945202,
+    "gaussian value at the threshold, reference of 14": 0.0001272804146358543,
+    "gaussian value at the threshold, reference of 15": 0.0001253785118745433,
+    "gaussian value at the threshold, reference of 16": 0.00011761791223916535,
+    "gaussian value at the threshold, reference of 17": 0.00011577259623449324,
+    "gaussian value at the threshold, reference of 18": 0.0001088489554474456,
+    "gaussian value at the threshold, reference of 19": 0.00010766843780560763,
+    "gaussian value at the threshold, reference of 20": 0.00010256040049587852,
+    "gaussian value at the threshold, reference of 21": 0.00010127204846106353,
+    "gaussian value at the threshold, reference of 22": 9.662844215796403e-05,
+    "gaussian value at the threshold, reference of 23": 9.629183064453081e-05,
+    "gaussian value at the threshold, reference of 24": 9.218951619083375e-05,
+    "gaussian value at the threshold, reference of 25": 9.139257071556746e-05,
+    "gaussian value at the threshold, reference of 26": 8.830044160421849e-05,
+    "gaussian value at the threshold, reference of 27": 8.750293257871418e-05,
+    "gaussian value at the threshold, reference of 4": 0.00026889393492393057,
+    "gaussian value at the threshold, reference of 5": 0.0002536503588502784,
+    "gaussian value at the threshold, reference of 6": 0.00021509244820512645,
+    "gaussian value at the threshold, reference of 7": 0.00020688376318569565,
+    "gaussian value at the threshold, reference of 8": 0.00018061088459413234,
+    "gaussian value at the threshold, reference of 9": 0.00017605359865357765,
+    "shuffled: mean change verdicts over replicates": 0.5713648474877708,
+    "shuffled: mean deviating days over replicates": 1.2411696137314396,
+    "stationary_gaussian: mean change verdicts over replicates": 0.45722068388125686,
+    "stationary_gaussian: mean deviating days over replicates": 1.3710154234935823
+  },
+  "metric_definitions": {
+    "change verdict": "a verdict of abrupt change, persistent change or gradual drift, which the pipeline can raise a behavioural alert about",
+    "deviating day": "an evaluable day on which at least one feature's robust deviation reached the baseline's deviation threshold",
+    "replicate range": "the central share of replicates given by the configuration's confidence; not an interval for these homes",
+    "silent day": "a monitored day on which no sensor of the home reported an event"
+  },
+  "models": [
+    {
+      "build": "AdaptiveBaseline",
+      "configuration": {
+        "deviation_threshold": 3.0,
+        "min_samples": 14,
+        "min_scale": 0.25,
+        "persistence_days": 3,
+        "trend_threshold": 3.5,
+        "trend_window": 28,
+        "weekday_min_samples": 4
+      },
+      "name": "adaptive_baseline_defaults"
+    }
+  ],
+  "notes": [
+    "Post hoc. Every description was chosen after the protocol's results had been read. None is part of the protocol.",
+    "A replay that leaves silent days out is a diagnosis of the run, not a corrected result.",
+    "The dataset holds sensor activations and no signal that a sensor or its gateway was working. A silent day may be an empty home or an apparatus that was not reporting; the data cannot say which. The dataset paper attributes a large drop in the activity data in mid-June 2019 to a technical failure in the data collection server.",
+    "The stationary and shuffled replays re-run the baseline alone. They count verdicts, not alerts: the alert policy is not replayed."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {
+    "contract": "external-dataset contract, strict conversion",
+    "mapping_sha256": "0a6e393e354e1053d70d308ba53f88ad32aec67bd25a476e7112312f40beccfb",
+    "step_minutes": 10
+  },
+  "recorded_at": "2026-10-07T11:26:05.778193+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "alerts_by_feature_and_verdict": {
+      "away_hours: gradual_drift": 20,
+      "kitchen_activity_hours: gradual_drift": 5,
+      "kitchen_activity_hours: persistent_change": 2,
+      "sleeping_hours: abrupt_change": 77,
+      "sleeping_hours: gradual_drift": 69,
+      "sleeping_hours: persistent_change": 10
+    },
+    "calendar": {
+      "daily": [
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-01",
+          "events": 357,
+          "monitored_households": 3,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-02",
+          "events": 0,
+          "monitored_households": 3,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-03",
+          "events": 686,
+          "monitored_households": 3,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-04",
+          "events": 1641,
+          "monitored_households": 3,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-05",
+          "events": 1652,
+          "monitored_households": 3,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-06",
+          "events": 1072,
+          "monitored_households": 3,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-07",
+          "events": 879,
+          "monitored_households": 3,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-08",
+          "events": 1347,
+          "monitored_households": 4,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-09",
+          "events": 1413,
+          "monitored_households": 4,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-10",
+          "events": 1028,
+          "monitored_households": 4,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-11",
+          "events": 1295,
+          "monitored_households": 4,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-12",
+          "events": 1427,
+          "monitored_households": 4,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-13",
+          "events": 1561,
+          "monitored_households": 4,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-14",
+          "events": 1951,
+          "monitored_households": 4,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-15",
+          "events": 2279,
+          "monitored_households": 6,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-16",
+          "events": 3330,
+          "monitored_households": 8,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-17",
+          "events": 3596,
+          "monitored_households": 9,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-18",
+          "events": 4694,
+          "monitored_households": 12,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-19",
+          "events": 4674,
+          "monitored_households": 12,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-20",
+          "events": 4638,
+          "monitored_households": 12,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-21",
+          "events": 4957,
+          "monitored_households": 12,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-22",
+          "events": 5120,
+          "monitored_households": 12,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-23",
+          "events": 5919,
+          "monitored_households": 15,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-24",
+          "events": 7478,
+          "monitored_households": 18,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-25",
+          "events": 7545,
+          "monitored_households": 19,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-26",
+          "events": 7916,
+          "monitored_households": 21,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-27",
+          "events": 7572,
+          "monitored_households": 21,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-28",
+          "events": 7653,
+          "monitored_households": 21,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-29",
+          "events": 9106,
+          "monitored_households": 23,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-04-30",
+          "events": 8536,
+          "monitored_households": 23,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-01",
+          "events": 8978,
+          "monitored_households": 24,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-02",
+          "events": 9155,
+          "monitored_households": 26,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-05-03",
+          "events": 8934,
+          "monitored_households": 27,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-04",
+          "events": 9374,
+          "monitored_households": 27,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-05",
+          "events": 8632,
+          "monitored_households": 27,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-06",
+          "events": 9172,
+          "monitored_households": 27,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-07",
+          "events": 10188,
+          "monitored_households": 29,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-08",
+          "events": 10823,
+          "monitored_households": 31,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-09",
+          "events": 11690,
+          "monitored_households": 31,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-10",
+          "events": 12780,
+          "monitored_households": 32,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-11",
+          "events": 11677,
+          "monitored_households": 32,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-12",
+          "events": 11228,
+          "monitored_households": 32,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-13",
+          "events": 14114,
+          "monitored_households": 35,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-05-14",
+          "events": 15298,
+          "monitored_households": 36,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-15",
+          "events": 15138,
+          "monitored_households": 38,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-16",
+          "events": 17243,
+          "monitored_households": 39,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-05-17",
+          "events": 16637,
+          "monitored_households": 41,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-18",
+          "events": 16198,
+          "monitored_households": 41,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-19",
+          "events": 14982,
+          "monitored_households": 41,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-20",
+          "events": 16280,
+          "monitored_households": 42,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 3,
+          "date": "2019-05-21",
+          "events": 17078,
+          "monitored_households": 43,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 3,
+          "date": "2019-05-22",
+          "events": 16167,
+          "monitored_households": 44,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 3,
+          "date": "2019-05-23",
+          "events": 17522,
+          "monitored_households": 44,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 4,
+          "date": "2019-05-24",
+          "events": 17587,
+          "monitored_households": 44,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-05-25",
+          "events": 16504,
+          "monitored_households": 43,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-05-26",
+          "events": 16769,
+          "monitored_households": 43,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-05-27",
+          "events": 16883,
+          "monitored_households": 43,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 4,
+          "date": "2019-05-28",
+          "events": 18009,
+          "monitored_households": 43,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-05-29",
+          "events": 17383,
+          "monitored_households": 44,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 3,
+          "date": "2019-05-30",
+          "events": 17747,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-05-31",
+          "events": 17166,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-06-01",
+          "events": 17340,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-06-02",
+          "events": 15714,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-06-03",
+          "events": 17498,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-06-04",
+          "events": 17078,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-06-05",
+          "events": 17621,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 4,
+          "date": "2019-06-06",
+          "events": 16841,
+          "monitored_households": 45,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-06-07",
+          "events": 16953,
+          "monitored_households": 46,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-06-08",
+          "events": 15780,
+          "monitored_households": 45,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 3,
+          "date": "2019-06-09",
+          "events": 15892,
+          "monitored_households": 45,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 5,
+          "date": "2019-06-10",
+          "events": 18119,
+          "monitored_households": 46,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 6,
+          "date": "2019-06-11",
+          "events": 15947,
+          "monitored_households": 46,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 4,
+          "date": "2019-06-12",
+          "events": 15728,
+          "monitored_households": 46,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 8,
+          "date": "2019-06-13",
+          "events": 17670,
+          "monitored_households": 47,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 7,
+          "date": "2019-06-14",
+          "events": 17227,
+          "monitored_households": 47,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 4,
+          "date": "2019-06-15",
+          "events": 544,
+          "monitored_households": 47,
+          "silent_households": 10
+        },
+        {
+          "behavioural_alerts": 6,
+          "date": "2019-06-16",
+          "events": 0,
+          "monitored_households": 47,
+          "silent_households": 47
+        },
+        {
+          "behavioural_alerts": 33,
+          "date": "2019-06-17",
+          "events": 8906,
+          "monitored_households": 47,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 9,
+          "date": "2019-06-18",
+          "events": 17738,
+          "monitored_households": 47,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 6,
+          "date": "2019-06-19",
+          "events": 18013,
+          "monitored_households": 47,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 5,
+          "date": "2019-06-20",
+          "events": 18678,
+          "monitored_households": 47,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 8,
+          "date": "2019-06-21",
+          "events": 17919,
+          "monitored_households": 48,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 1,
+          "date": "2019-06-22",
+          "events": 15513,
+          "monitored_households": 48,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 0,
+          "date": "2019-06-23",
+          "events": 15976,
+          "monitored_households": 48,
+          "silent_households": 3
+        },
+        {
+          "behavioural_alerts": 3,
+          "date": "2019-06-24",
+          "events": 18202,
+          "monitored_households": 49,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 3,
+          "date": "2019-06-25",
+          "events": 18860,
+          "monitored_households": 51,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 6,
+          "date": "2019-06-26",
+          "events": 19217,
+          "monitored_households": 51,
+          "silent_households": 2
+        },
+        {
+          "behavioural_alerts": 5,
+          "date": "2019-06-27",
+          "events": 19731,
+          "monitored_households": 52,
+          "silent_households": 1
+        },
+        {
+          "behavioural_alerts": 4,
+          "date": "2019-06-28",
+          "events": 20215,
+          "monitored_households": 52,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-06-29",
+          "events": 19621,
+          "monitored_households": 50,
+          "silent_households": 0
+        },
+        {
+          "behavioural_alerts": 2,
+          "date": "2019-06-30",
+          "events": 17360,
+          "monitored_households": 49,
+          "silent_households": 0
+        }
+      ],
+      "day_after_the_most_silent_date": {
+        "behavioural_alerts": 33,
+        "date": "2019-06-17",
+        "events": 8906,
+        "monitored_households": 47,
+        "silent_households": 2
+      },
+      "most_silent_date": {
+        "behavioural_alerts": 6,
+        "date": "2019-06-16",
+        "events": 0,
+        "monitored_households": 47,
+        "silent_households": 47
+      },
+      "share_of_alerts_on_the_day_after": 0.18032786885245902
+    },
+    "describes": {
+      "experiment": "tihm-alert-burden",
+      "git_commit": "b15126fb5b7a21436e418aa0c3192ee2370f31b4",
+      "protocol_sha256": "7f6c0eff69ab91dbbe51aeef432b941cc512c096298f3d7294c96b3eb2fc304a",
+      "recorded_at": "2026-10-07T09:44:32.946023+00:00",
+      "results_reproduced": true
+    },
+    "direction": {
+      "deviating_day_drivers": {
+        "label_days": {
+          "away_hours: above": 4,
+          "away_hours: below": 1,
+          "days": 18,
+          "sleeping_hours: above": 8,
+          "sleeping_hours: below": 5
+        },
+        "other_days": {
+          "away_hours: above": 108,
+          "away_hours: below": 26,
+          "days": 489,
+          "kitchen_activity_hours: above": 19,
+          "kitchen_activity_hours: below": 1,
+          "sleeping_hours: above": 293,
+          "sleeping_hours: below": 42
+        }
+      },
+      "event_count_z": {
+        "alert_days": {
+          "days": 174,
+          "mean": -0.9076473188325144,
+          "median": -0.9302816499448943
+        },
+        "all_evaluable_days": {
+          "days": 2075,
+          "mean": -0.18079366292382987,
+          "median": 0.02530171573694077
+        },
+        "deviating_days": {
+          "days": 507,
+          "mean": -1.1685235998265335,
+          "median": -1.0071633080852145
+        },
+        "label_days": {
+          "days": 94,
+          "mean": 0.8553294136487036,
+          "median": 0.8017314663563837
+        }
+      },
+      "event_count_z_is": "the day's sensor event count against the household's previous monitored days, as the protocol's event-count reference computes it",
+      "feature_deviation": {
+        "away_hours": {
+          "label_days": {
+            "days": 94,
+            "median": -0.2420807204188491,
+            "share_at_threshold": 0.05319148936170213
+          },
+          "other_days": {
+            "days": 1981,
+            "median": -0.02727931900046988,
+            "share_at_threshold": 0.08531044926804644
+          }
+        },
+        "bathroom_activity_hours": {
+          "label_days": {
+            "days": 94,
+            "median": -0.0012275134318064733,
+            "share_at_threshold": 0.0
+          },
+          "other_days": {
+            "days": 1981,
+            "median": -0.0001840280838614444,
+            "share_at_threshold": 0.0
+          }
+        },
+        "kitchen_activity_hours": {
+          "label_days": {
+            "days": 94,
+            "median": 5.399771698912786e-06,
+            "share_at_threshold": 0.0
+          },
+          "other_days": {
+            "days": 1981,
+            "median": -0.008449419826172101,
+            "share_at_threshold": 0.01110550227158001
+          }
+        },
+        "sleeping_hours": {
+          "label_days": {
+            "days": 94,
+            "median": -0.3234898493375796,
+            "share_at_threshold": 0.13829787234042554
+          },
+          "other_days": {
+            "days": 1981,
+            "median": 0.12843695268813066,
+            "share_at_threshold": 0.1761736496718829
+          }
+        }
+      }
+    },
+    "reference_size": {
+      "draws": 2000000,
+      "features": {
+        "away_hours": {
+          "above": 0.05783132530120482,
+          "below": 0.026024096385542168,
+          "days": 2075,
+          "gaussian_expectation": 0.08697325710843375,
+          "largest_reference": 27,
+          "pooled": {
+            "days": 658,
+            "gaussian_expectation": 0.022758052431610942,
+            "largest_reference": 27,
+            "share_at_threshold": 0.031914893617021274,
+            "smallest_reference": 14
+          },
+          "references_at_the_scale_floor": 0.11277108433734939,
+          "share_at_threshold": 0.08385542168674699,
+          "smallest_reference": 4,
+          "weekday_aware": {
+            "days": 1417,
+            "gaussian_expectation": 0.11679231474947072,
+            "largest_reference": 12,
+            "share_at_threshold": 0.10797459421312633,
+            "smallest_reference": 4
+          },
+          "weekday_aware_by_size": {
+            "10": {
+              "days": 61,
+              "gaussian_expectation": 0.05219299999999999,
+              "largest_reference": 10,
+              "share_at_threshold": 0.09836065573770492,
+              "smallest_reference": 10
+            },
+            "11": {
+              "days": 22,
+              "gaussian_expectation": 0.0498705,
+              "largest_reference": 11,
+              "share_at_threshold": 0.09090909090909091,
+              "smallest_reference": 11
+            },
+            "12": {
+              "days": 21,
+              "gaussian_expectation": 0.0410705,
+              "largest_reference": 12,
+              "share_at_threshold": 0.047619047619047616,
+              "smallest_reference": 12
+            },
+            "4": {
+              "days": 308,
+              "gaussian_expectation": 0.17535849999999997,
+              "largest_reference": 4,
+              "share_at_threshold": 0.1590909090909091,
+              "smallest_reference": 4
+            },
+            "5": {
+              "days": 287,
+              "gaussian_expectation": 0.15168549999999997,
+              "largest_reference": 5,
+              "share_at_threshold": 0.11846689895470383,
+              "smallest_reference": 5
+            },
+            "6": {
+              "days": 246,
+              "gaussian_expectation": 0.10317449999999996,
+              "largest_reference": 6,
+              "share_at_threshold": 0.11788617886178862,
+              "smallest_reference": 6
+            },
+            "7": {
+              "days": 195,
+              "gaussian_expectation": 0.0945395,
+              "largest_reference": 7,
+              "share_at_threshold": 0.041025641025641026,
+              "smallest_reference": 7
+            },
+            "8": {
+              "days": 159,
+              "gaussian_expectation": 0.07016349999999999,
+              "largest_reference": 8,
+              "share_at_threshold": 0.11320754716981132,
+              "smallest_reference": 8
+            },
+            "9": {
+              "days": 118,
+              "gaussian_expectation": 0.06639850000000001,
+              "largest_reference": 9,
+              "share_at_threshold": 0.05084745762711865,
+              "smallest_reference": 9
+            }
+          }
+        },
+        "bathroom_activity_hours": {
+          "above": 0.0,
+          "below": 0.0,
+          "days": 2075,
+          "gaussian_expectation": 0.08697325710843375,
+          "largest_reference": 27,
+          "pooled": {
+            "days": 658,
+            "gaussian_expectation": 0.022758052431610942,
+            "largest_reference": 27,
+            "share_at_threshold": 0.0,
+            "smallest_reference": 14
+          },
+          "references_at_the_scale_floor": 1.0,
+          "share_at_threshold": 0.0,
+          "smallest_reference": 4,
+          "weekday_aware": {
+            "days": 1417,
+            "gaussian_expectation": 0.11679231474947072,
+            "largest_reference": 12,
+            "share_at_threshold": 0.0,
+            "smallest_reference": 4
+          },
+          "weekday_aware_by_size": {
+            "10": {
+              "days": 61,
+              "gaussian_expectation": 0.05219299999999999,
+              "largest_reference": 10,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 10
+            },
+            "11": {
+              "days": 22,
+              "gaussian_expectation": 0.0498705,
+              "largest_reference": 11,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 11
+            },
+            "12": {
+              "days": 21,
+              "gaussian_expectation": 0.0410705,
+              "largest_reference": 12,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 12
+            },
+            "4": {
+              "days": 308,
+              "gaussian_expectation": 0.17535849999999997,
+              "largest_reference": 4,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 4
+            },
+            "5": {
+              "days": 287,
+              "gaussian_expectation": 0.15168549999999997,
+              "largest_reference": 5,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 5
+            },
+            "6": {
+              "days": 246,
+              "gaussian_expectation": 0.10317449999999996,
+              "largest_reference": 6,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 6
+            },
+            "7": {
+              "days": 195,
+              "gaussian_expectation": 0.0945395,
+              "largest_reference": 7,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 7
+            },
+            "8": {
+              "days": 159,
+              "gaussian_expectation": 0.07016349999999999,
+              "largest_reference": 8,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 8
+            },
+            "9": {
+              "days": 118,
+              "gaussian_expectation": 0.06639850000000001,
+              "largest_reference": 9,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 9
+            }
+          }
+        },
+        "kitchen_activity_hours": {
+          "above": 0.00963855421686747,
+          "below": 0.0009638554216867469,
+          "days": 2075,
+          "gaussian_expectation": 0.08697325710843375,
+          "largest_reference": 27,
+          "pooled": {
+            "days": 658,
+            "gaussian_expectation": 0.022758052431610942,
+            "largest_reference": 27,
+            "share_at_threshold": 0.007598784194528876,
+            "smallest_reference": 14
+          },
+          "references_at_the_scale_floor": 0.8679518072289156,
+          "share_at_threshold": 0.010602409638554217,
+          "smallest_reference": 4,
+          "weekday_aware": {
+            "days": 1417,
+            "gaussian_expectation": 0.11679231474947072,
+            "largest_reference": 12,
+            "share_at_threshold": 0.011997177134791814,
+            "smallest_reference": 4
+          },
+          "weekday_aware_by_size": {
+            "10": {
+              "days": 61,
+              "gaussian_expectation": 0.05219299999999999,
+              "largest_reference": 10,
+              "share_at_threshold": 0.03278688524590164,
+              "smallest_reference": 10
+            },
+            "11": {
+              "days": 22,
+              "gaussian_expectation": 0.0498705,
+              "largest_reference": 11,
+              "share_at_threshold": 0.13636363636363635,
+              "smallest_reference": 11
+            },
+            "12": {
+              "days": 21,
+              "gaussian_expectation": 0.0410705,
+              "largest_reference": 12,
+              "share_at_threshold": 0.14285714285714285,
+              "smallest_reference": 12
+            },
+            "4": {
+              "days": 308,
+              "gaussian_expectation": 0.17535849999999997,
+              "largest_reference": 4,
+              "share_at_threshold": 0.006493506493506494,
+              "smallest_reference": 4
+            },
+            "5": {
+              "days": 287,
+              "gaussian_expectation": 0.15168549999999997,
+              "largest_reference": 5,
+              "share_at_threshold": 0.003484320557491289,
+              "smallest_reference": 5
+            },
+            "6": {
+              "days": 246,
+              "gaussian_expectation": 0.10317449999999996,
+              "largest_reference": 6,
+              "share_at_threshold": 0.0040650406504065045,
+              "smallest_reference": 6
+            },
+            "7": {
+              "days": 195,
+              "gaussian_expectation": 0.0945395,
+              "largest_reference": 7,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 7
+            },
+            "8": {
+              "days": 159,
+              "gaussian_expectation": 0.07016349999999999,
+              "largest_reference": 8,
+              "share_at_threshold": 0.012578616352201259,
+              "smallest_reference": 8
+            },
+            "9": {
+              "days": 118,
+              "gaussian_expectation": 0.06639850000000001,
+              "largest_reference": 9,
+              "share_at_threshold": 0.025423728813559324,
+              "smallest_reference": 9
+            }
+          }
+        },
+        "sleeping_hours": {
+          "above": 0.1489156626506024,
+          "below": 0.025542168674698794,
+          "days": 2075,
+          "gaussian_expectation": 0.08697325710843375,
+          "largest_reference": 27,
+          "pooled": {
+            "days": 658,
+            "gaussian_expectation": 0.022758052431610942,
+            "largest_reference": 27,
+            "share_at_threshold": 0.08358662613981763,
+            "smallest_reference": 14
+          },
+          "references_at_the_scale_floor": 0.013012048192771084,
+          "share_at_threshold": 0.1744578313253012,
+          "smallest_reference": 4,
+          "weekday_aware": {
+            "days": 1417,
+            "gaussian_expectation": 0.11679231474947072,
+            "largest_reference": 12,
+            "share_at_threshold": 0.21665490472829924,
+            "smallest_reference": 4
+          },
+          "weekday_aware_by_size": {
+            "10": {
+              "days": 61,
+              "gaussian_expectation": 0.05219299999999999,
+              "largest_reference": 10,
+              "share_at_threshold": 0.11475409836065574,
+              "smallest_reference": 10
+            },
+            "11": {
+              "days": 22,
+              "gaussian_expectation": 0.0498705,
+              "largest_reference": 11,
+              "share_at_threshold": 0.09090909090909091,
+              "smallest_reference": 11
+            },
+            "12": {
+              "days": 21,
+              "gaussian_expectation": 0.0410705,
+              "largest_reference": 12,
+              "share_at_threshold": 0.0,
+              "smallest_reference": 12
+            },
+            "4": {
+              "days": 308,
+              "gaussian_expectation": 0.17535849999999997,
+              "largest_reference": 4,
+              "share_at_threshold": 0.24025974025974026,
+              "smallest_reference": 4
+            },
+            "5": {
+              "days": 287,
+              "gaussian_expectation": 0.15168549999999997,
+              "largest_reference": 5,
+              "share_at_threshold": 0.24041811846689895,
+              "smallest_reference": 5
+            },
+            "6": {
+              "days": 246,
+              "gaussian_expectation": 0.10317449999999996,
+              "largest_reference": 6,
+              "share_at_threshold": 0.16260162601626016,
+              "smallest_reference": 6
+            },
+            "7": {
+              "days": 195,
+              "gaussian_expectation": 0.0945395,
+              "largest_reference": 7,
+              "share_at_threshold": 0.26666666666666666,
+              "smallest_reference": 7
+            },
+            "8": {
+              "days": 159,
+              "gaussian_expectation": 0.07016349999999999,
+              "largest_reference": 8,
+              "share_at_threshold": 0.27672955974842767,
+              "smallest_reference": 8
+            },
+            "9": {
+              "days": 118,
+              "gaussian_expectation": 0.06639850000000001,
+              "largest_reference": 9,
+              "share_at_threshold": 0.16101694915254236,
+              "smallest_reference": 9
+            }
+          }
+        }
+      },
+      "gaussian_null": {
+        "10": 0.052193,
+        "11": 0.0498705,
+        "12": 0.0410705,
+        "14": 0.0335245,
+        "15": 0.0324955,
+        "16": 0.028479,
+        "17": 0.0275665,
+        "18": 0.024286,
+        "19": 0.023749,
+        "20": 0.0214995,
+        "21": 0.020951,
+        "22": 0.0190365,
+        "23": 0.0189015,
+        "24": 0.017297,
+        "25": 0.016994,
+        "26": 0.015845,
+        "27": 0.0155555,
+        "4": 0.1753585,
+        "5": 0.1516855,
+        "6": 0.1031745,
+        "7": 0.0945395,
+        "8": 0.0701635,
+        "9": 0.0663985
+      },
+      "gaussian_null_mcse": {
+        "10": 0.0001572718836140141,
+        "11": 0.0001539211376480664,
+        "12": 0.0001403276772945202,
+        "14": 0.0001272804146358543,
+        "15": 0.0001253785118745433,
+        "16": 0.00011761791223916535,
+        "17": 0.00011577259623449324,
+        "18": 0.0001088489554474456,
+        "19": 0.00010766843780560763,
+        "20": 0.00010256040049587852,
+        "21": 0.00010127204846106353,
+        "22": 9.662844215796403e-05,
+        "23": 9.629183064453081e-05,
+        "24": 9.218951619083375e-05,
+        "25": 9.139257071556746e-05,
+        "26": 8.830044160421849e-05,
+        "27": 8.750293257871418e-05,
+        "4": 0.00026889393492393057,
+        "5": 0.0002536503588502784,
+        "6": 0.00021509244820512645,
+        "7": 0.00020688376318569565,
+        "8": 0.00018061088459413234,
+        "9": 0.00017605359865357765
+      },
+      "mean_and_sd_estimated": {
+        "10": 0.018768522060029734,
+        "11": 0.016603696415600746,
+        "12": 0.014909631604257113,
+        "14": 0.012449060163135807,
+        "15": 0.011533561073217633,
+        "16": 0.010764575760743194,
+        "17": 0.010110835359934631,
+        "18": 0.009549162985399928,
+        "19": 0.009062059337256735,
+        "20": 0.008636093415381485,
+        "21": 0.008260804539425676,
+        "22": 0.00792793744337894,
+        "23": 0.007630899332147556,
+        "24": 0.007364367914430086,
+        "25": 0.0071240040494129605,
+        "26": 0.00690623811455587,
+        "27": 0.006708109130820544,
+        "4": 0.0748398806017778,
+        "5": 0.051979694201925934,
+        "6": 0.03901915828494074,
+        "7": 0.03090870345868758,
+        "8": 0.02546356168323925,
+        "9": 0.021609929106014544
+      },
+      "min_samples": 14,
+      "nominal": 0.0026997960632601913,
+      "note": "the Gaussian rate applies no floor to the scale, so it overstates a feature whose references sit at the floor",
+      "scale_floor": 0.25,
+      "threshold": 3.0,
+      "weekday_min_samples": 4
+    },
+    "replays": {
+      "recorded": {
+        "change_verdicts": 188,
+        "change_verdicts_per_evaluable_day": 0.09060240963855422,
+        "deviating_days": 507,
+        "deviating_share": 0.24433734939759036,
+        "evaluable_days": 2075,
+        "feature_days_compared": 11400,
+        "feature_days_differing": 0,
+        "label_days": 94,
+        "label_days_deviating": 18,
+        "reproduces_the_run": true,
+        "share_of_label_days_deviating": 0.19148936170212766,
+        "share_of_other_days_deviating": 0.2468450277637557,
+        "verdicts": {
+          "abrupt_change": 79,
+          "gradual_drift": 94,
+          "ordinary": 7648,
+          "persistent_change": 15,
+          "temporary_disturbance": 464
+        }
+      },
+      "shuffled": {
+        "change_verdicts": {
+          "high": 53.0,
+          "low": 23.975000000000005,
+          "mean": 37.93
+        },
+        "change_verdicts_per_evaluable_day": {
+          "high": 0.025542168674698794,
+          "low": 0.011554216867469881,
+          "mean": 0.01827951807228916
+        },
+        "deviating_share": {
+          "high": 0.24050602409638555,
+          "low": 0.21010843373493976,
+          "mean": 0.22577831325301204
+        },
+        "replicates": 200,
+        "verdicts": {
+          "abrupt_change": {
+            "high": 12.0,
+            "low": 1.0,
+            "mean": 5.245
+          },
+          "gradual_drift": {
+            "high": 43.025000000000006,
+            "low": 19.0,
+            "mean": 30.78
+          },
+          "persistent_change": {
+            "high": 5.025000000000006,
+            "low": 0.0,
+            "mean": 1.905
+          },
+          "temporary_disturbance": {
+            "high": 551.025,
+            "low": 472.975,
+            "mean": 511.77
+          }
+        }
+      },
+      "silent_days_skipped": {
+        "change_verdicts": 78,
+        "change_verdicts_per_evaluable_day": 0.040061633281972264,
+        "deviating_days": 436,
+        "deviating_share": 0.2239342578325629,
+        "evaluable_days": 1947,
+        "label_days": 91,
+        "label_days_deviating": 17,
+        "share_of_label_days_deviating": 0.18681318681318682,
+        "share_of_other_days_deviating": 0.2257543103448276,
+        "verdicts": {
+          "abrupt_change": 17,
+          "gradual_drift": 53,
+          "ordinary": 7261,
+          "persistent_change": 8,
+          "temporary_disturbance": 449
+        }
+      },
+      "stationary_gaussian": {
+        "change_verdicts": {
+          "high": 41.025000000000006,
+          "low": 14.975000000000005,
+          "mean": 26.17
+        },
+        "change_verdicts_per_evaluable_day": {
+          "high": 0.0197710843373494,
+          "low": 0.00721686746987952,
+          "mean": 0.012612048192771085
+        },
+        "deviating_share": {
+          "high": 0.16771084337349398,
+          "low": 0.1310722891566265,
+          "mean": 0.14949156626506024
+        },
+        "replicates": 200,
+        "verdicts": {
+          "abrupt_change": {
+            "high": 3.0,
+            "low": 0.0,
+            "mean": 0.67
+          },
+          "gradual_drift": {
+            "high": 40.0,
+            "low": 14.0,
+            "mean": 25.09
+          },
+          "persistent_change": {
+            "high": 2.0,
+            "low": 0.0,
+            "mean": 0.41
+          },
+          "temporary_disturbance": {
+            "high": 367.025,
+            "low": 285.90000000000003,
+            "mean": 327.07
+          }
+        }
+      },
+      "what_each_is": {
+        "recorded": "the baseline over each household's recorded feature values; it must give the run's own verdicts",
+        "shuffled": "each household's recorded days in a random order, a day's features kept together, which keeps the values and what occurs on the same day and removes their order in time, weekly rhythm included",
+        "silent_days_skipped": "the same, with every silent day left out of the history as an unobserved day is",
+        "stationary_gaussian": "independent Gaussian values with each household's own median and MAD-based spread of each feature, on the same days"
+      }
+    },
+    "result_schema": "tihm-alert-burden-post-hoc/1",
+    "silent_days": {
+      "alerts_on_silent_days": 44,
+      "alerts_on_silent_days_by_feature_and_verdict": {
+        "away_hours: gradual_drift": 1,
+        "sleeping_hours: abrupt_change": 39,
+        "sleeping_hours: persistent_change": 4
+      },
+      "behavioural_alerts": 183,
+      "change_verdicts": 188,
+      "change_verdicts_on_silent_days": 44,
+      "definition": "a monitored day on which no sensor of the home reported an event",
+      "evaluable": 108,
+      "households": 47,
+      "longest_run": 12,
+      "median_sleeping_hours": {
+        "other_days": 10.774940528855574,
+        "silent_days": 23.766190294866078
+      },
+      "monitored_days": 2850,
+      "runs_by_length": {
+        "1": 46,
+        "12": 1,
+        "2": 11,
+        "3": 4,
+        "4": 2,
+        "5": 3,
+        "6": 1,
+        "7": 1
+      },
+      "share_silent": {
+        "alert_days": {
+          "days": 174,
+          "share": 0.2471264367816092,
+          "silent": 43
+        },
+        "all_evaluable_days": {
+          "days": 2075,
+          "share": 0.052048192771084335,
+          "silent": 108
+        },
+        "deviating_days": {
+          "days": 507,
+          "share": 0.1814595660749507,
+          "silent": 92
+        },
+        "label_days": {
+          "days": 94,
+          "share": 0.010638297872340425,
+          "silent": 1
+        }
+      },
+      "silent_days": 128,
+      "usable": 128
+    },
+    "state_hours": {
+      "hours": {
+        "away": {
+          "median": 1.2536210988675631,
+          "ninetieth": 2.8069288671744945,
+          "tenth": 0.19218758489178087
+        },
+        "bathroom_activity": {
+          "median": 0.002085362972549955,
+          "ninetieth": 0.045859484734265286,
+          "tenth": 0.0001996894179213987
+        },
+        "bed_awake": {
+          "median": 0.3756154702125651,
+          "ninetieth": 1.1741042193482867,
+          "tenth": 0.11311572094767466
+        },
+        "home_active": {
+          "median": 2.061900995657477,
+          "ninetieth": 4.725181904062419,
+          "tenth": 0.340046342849412
+        },
+        "home_inactive": {
+          "median": 7.509334494320803,
+          "ninetieth": 11.028723194096703,
+          "tenth": 1.3934347433630832
+        },
+        "kitchen_activity": {
+          "median": 0.05868306062507398,
+          "ninetieth": 0.5226005502067679,
+          "tenth": 0.0009213353122619298
+        },
+        "sleeping": {
+          "median": 10.94304315311403,
+          "ninetieth": 19.719155882762188,
+          "tenth": 7.524375207765996
+        }
+      },
+      "household_median_sleeping_hours": {
+        "households": 56,
+        "largest": 20.24253873824117,
+        "median": 10.838699512402489,
+        "quarter": 10.030296217478229,
+        "smallest": 5.638306582063686,
+        "three_quarters": 12.935620746576625
+      },
+      "usable_days": 2793
+    },
+    "status": "post hoc: every description here was chosen after the protocol's results had been read; none is part of the protocol, enters an estimand or changes a result"
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    0
+  ],
+  "selective_prediction": null,
+  "sensor_subset": null,
+  "split": null,
+  "structural_disagreement": null
+}
