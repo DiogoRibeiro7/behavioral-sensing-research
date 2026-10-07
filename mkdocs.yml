@@ -92,6 +92,7 @@ nav:
       - External dataset contract: EXTERNAL_DATASET_CONTRACT.md
       - "Phase 5: external protocol": PHASE5_EXTERNAL_PROTOCOL.md
       - "Phase 5: external results": PHASE5_EXTERNAL_RESULTS.md
+      - "TIHM: alert-burden protocol": TIHM_ALERT_BURDEN_PROTOCOL.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:

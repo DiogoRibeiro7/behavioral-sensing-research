@@ -1,0 +1,140 @@
+{
+  "dataset": "tihm",
+  "description": "Written from the dataset paper, the repository README and the column values of the release. Sensor types are named from the paper's description, because the Activity table gives a location only. Every label is a verified alert and is unmappable to a behavioural state.",
+  "labels": [
+    {
+      "native": "Agitation",
+      "outcome": "unmappable",
+      "rationale": "an alert the study's monitoring team verified, recorded at a moment: a judgement about a person, not a behavioural state the resident is in",
+      "targets": []
+    },
+    {
+      "native": "Blood pressure",
+      "outcome": "unmappable",
+      "rationale": "an alert the study's monitoring team verified, recorded at a moment: a judgement about a person, not a behavioural state the resident is in",
+      "targets": []
+    },
+    {
+      "native": "Body temperature",
+      "outcome": "unmappable",
+      "rationale": "an alert the study's monitoring team verified, recorded at a moment: a judgement about a person, not a behavioural state the resident is in",
+      "targets": []
+    },
+    {
+      "native": "Body water",
+      "outcome": "unmappable",
+      "rationale": "an alert the study's monitoring team verified, recorded at a moment: a judgement about a person, not a behavioural state the resident is in",
+      "targets": []
+    },
+    {
+      "native": "Pulse",
+      "outcome": "unmappable",
+      "rationale": "an alert the study's monitoring team verified, recorded at a moment: a judgement about a person, not a behavioural state the resident is in",
+      "targets": []
+    },
+    {
+      "native": "Weight",
+      "outcome": "unmappable",
+      "rationale": "an alert the study's monitoring team verified, recorded at a moment: a judgement about a person, not a behavioural state the resident is in",
+      "targets": []
+    }
+  ],
+  "locations": [
+    {
+      "native": "Bathroom",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "bathroom"
+      ]
+    },
+    {
+      "native": "Bedroom",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "bedroom"
+      ]
+    },
+    {
+      "native": "Hallway",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Kitchen",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "kitchen"
+      ]
+    },
+    {
+      "native": "Lounge",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "living"
+      ]
+    }
+  ],
+  "mapping_sha256": "0a6e393e354e1053d70d308ba53f88ad32aec67bd25a476e7112312f40beccfb",
+  "schema": "external-ontology-mapping/1",
+  "sensor_types": [
+    {
+      "native": "door",
+      "outcome": "approximate",
+      "rationale": "the Activity table names a location and no sensor type; the dataset paper describes door sensors on the front and back doors, and each row is taken as one activation, with no open or closed value",
+      "targets": [
+        {
+          "activation": [
+            "ACTIVE"
+          ],
+          "deactivation": [],
+          "kind": "event",
+          "modality": "door",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "fridge_door",
+      "outcome": "approximate",
+      "rationale": "the Activity table names a location and no sensor type; the dataset paper describes a door sensor on the fridge, and each row is taken as one activation, with no open or closed value",
+      "targets": [
+        {
+          "activation": [
+            "ACTIVE"
+          ],
+          "deactivation": [],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "pir",
+      "outcome": "approximate",
+      "rationale": "the Activity table names a location and no sensor type; the dataset paper describes passive infrared sensors in rooms, and each row is taken as one activation",
+      "targets": [
+        {
+          "activation": [
+            "ACTIVE"
+          ],
+          "deactivation": [],
+          "kind": "event",
+          "modality": "motion",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    }
+  ],
+  "version": "1.0"
+}
