@@ -18,6 +18,7 @@ from sensor_modeling.health import (
     FleetConfig,
     assess_fleet,
     common_silences,
+    replay_fleet,
 )
 
 T0 = datetime(2024, 5, 1, tzinfo=timezone.utc)
@@ -184,3 +185,43 @@ class TestRecordedFleet:
     def test_an_empty_fleet_has_nothing_to_find(self) -> None:
         assert common_silences({}, CONFIG) == []
         assert common_silences({"a": []}, CONFIG) == []
+
+
+class TestReplay:
+    def test_it_assesses_the_fleet_at_every_spacing_from_first_to_last(self) -> None:
+        fleet = {name: hourly(0, 48) for name in "abc"}
+        verdicts = list(replay_fleet(fleet, CONFIG))
+        assert [v.at for v in verdicts] == [T0 + timedelta(hours=h) for h in range(49)]
+        assert all(v.monitored == ("a", "b", "c") for v in verdicts)
+        assert all(v.share == 0.0 and not v.common_cause for v in verdicts)
+
+    def test_it_gives_the_share_of_homes_silent_at_each_assessment(self) -> None:
+        fleet = {
+            "a": hourly(0, 100, gap=(20, 60)),
+            "b": hourly(0, 100),
+            "c": hourly(0, 100),
+            "d": hourly(0, 100),
+        }
+        shares = {v.at: v.share for v in replay_fleet(fleet, CONFIG)}
+        # One home in four is silent from twelve hours after it was last heard.
+        assert shares[T0 + timedelta(hours=31)] == 0.0
+        assert shares[T0 + timedelta(hours=32)] == 0.25
+        assert shares[T0 + timedelta(hours=59)] == 0.25
+        assert shares[T0 + timedelta(hours=60)] == 0.0
+        assert max(shares.values()) == 0.25
+        # A quarter of the homes is not a common cause.
+        assert common_silences(fleet, CONFIG) == []
+
+    def test_the_stretches_are_the_assessments_that_call_a_common_cause(self) -> None:
+        fleet = {name: hourly(0, 200, gap=(60, 100)) for name in "abc"}
+        called = [v.at for v in replay_fleet(fleet, CONFIG) if v.common_cause]
+        (silence,) = common_silences(fleet, CONFIG)
+        assert silence.detected == called[0]
+        assert silence.until == called[-1]
+
+    def test_it_refuses_what_the_stretches_refuse(self) -> None:
+        with pytest.raises(ValueError, match="not in time order"):
+            list(replay_fleet({"a": hours(3, 1, 2)}, CONFIG))
+        with pytest.raises(ValueError, match="every must be positive"):
+            list(replay_fleet({"a": hours(1, 2)}, CONFIG, every=timedelta(0)))
+        assert list(replay_fleet({}, CONFIG)) == []

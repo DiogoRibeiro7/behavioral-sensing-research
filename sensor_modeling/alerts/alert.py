@@ -40,6 +40,10 @@ from ..health.monitor import SystemHealthReport
 
 logger = logging.getLogger(__name__)
 
+#: The subject of the data-quality alert raised when no sensor of a home has
+#: reported for the declared horizon.
+HOME_SILENCE = "home_silence"
+
 
 class AlertKind(str, Enum):
     """What an alert is about."""
@@ -420,7 +424,7 @@ class AlertEngine:
         what is known: that nothing was observed, and since when. It is
         repeated once per cooldown for as long as the silence lasts.
         """
-        key = f"{AlertKind.DATA_QUALITY.value}:home_silence"
+        key = f"{AlertKind.DATA_QUALITY.value}:{HOME_SILENCE}"
         if self._suppressed(key, at, AlertSeverity.ATTENTION):
             return None
         since = report.silent_since
@@ -433,7 +437,7 @@ class AlertEngine:
                 at=at,
                 kind=AlertKind.DATA_QUALITY,
                 severity=AlertSeverity.ATTENTION,
-                subject="home_silence",
+                subject=HOME_SILENCE,
                 summary=(
                     f"No sensor of the home has reported for {hours:.0f} hours, "
                     f"since {since.isoformat()}"

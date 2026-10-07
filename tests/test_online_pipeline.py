@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 
 import pytest
 
@@ -521,6 +521,74 @@ class TestSilentHome:
             a.to_dict() for a in collect_alerts(off)
         ]
         assert pipeline.snapshot()["silence_open"] is None
+
+    def test_where_there_are_canaries_they_speak_first(self, household: object) -> None:
+        """A full deployment has sensors that promise to report. They say the
+        apparatus is failing within minutes; the silent-home rule says the
+        home is silent once the horizon has passed, and from then on it is the
+        only one speaking."""
+        zone = household.config.tz  # type: ignore[attr-defined]
+        begin = datetime.combine(
+            household.config.start + timedelta(days=6),  # type: ignore[attr-defined]
+            time(10),
+            tzinfo=zone,
+        )
+        end = begin + timedelta(hours=40)
+        kept = [
+            observation
+            for observation in household.observations  # type: ignore[attr-defined]
+            if not begin <= observation.timestamp < end
+        ]
+
+        def run(horizon: timedelta | None) -> list:
+            pipeline = BehaviouralSensingPipeline(
+                household.registry,  # type: ignore[attr-defined]
+                config=PipelineConfig(tz=zone, step=timedelta(minutes=15)),
+                health_config=HealthConfig(home_silence_horizon=horizon),
+            )
+            steps = pipeline.run(kept)
+            steps.extend(pipeline.close(household.end))  # type: ignore[attr-defined]
+            return steps
+
+        off, on = run(None), run(HORIZON)
+        without = [(a.kind, a.subject) for a in collect_alerts(off)]
+        assert without == [(AlertKind.SYSTEM_HEALTH, "deployment")] * 2
+
+        raised = collect_alerts(on)
+        assert [(a.kind, a.subject) for a in raised] == [
+            (AlertKind.SYSTEM_HEALTH, "deployment"),
+            (AlertKind.DATA_QUALITY, "home_silence"),
+            (AlertKind.DATA_QUALITY, "home_silence"),
+        ]
+        first, silence, again = raised
+        assert first.at - begin < timedelta(hours=1)
+        assert HORIZON <= silence.at - begin < HORIZON + timedelta(minutes=30)
+        assert again.at - silence.at == timedelta(hours=20)
+        assert again.at < end
+
+        def day(steps: list, index: int) -> DailySummary:
+            wanted = household.config.start + timedelta(days=index)  # type: ignore[attr-defined]
+            return next(s for s in daily_summaries(steps) if s.day == wanted)
+
+        # The days the outage covers are refused either way: by coverage
+        # without the rule, as silent with it.
+        for index in (6, 7):
+            assert not day(off, index).is_usable()
+            assert day(off, index).silent == 0.0
+            assert not day(on, index).is_usable()
+            assert day(on, index).silent > 0.5
+        # The day it ends on, two hours in, passes the coverage test and is
+        # refused by the rule.
+        assert day(off, 8).is_usable()
+        assert 0.0 < day(on, 8).silent < 0.2
+        assert not day(on, 8).is_usable()
+        # The day before is the same day, and the day after is whole again.
+        assert day(on, 5).to_dict() == day(off, 5).to_dict()
+        after, before = day(on, 9), day(off, 9)
+        assert after.is_usable() and after.silent == 0.0
+        assert after.observed == before.observed
+        for state, hours in before.hours.items():
+            assert after.hours[state] == pytest.approx(hours, abs=0.05)
 
     def test_an_open_silence_survives_a_restart(self) -> None:
         pipeline = BehaviouralSensingPipeline(

@@ -104,6 +104,13 @@ horizon is never seen at all. The horizon has to be longer than the
 longest stretch a resident at home can pass without tripping any sensor, which
 is a property of the home and its sensors, not of this code.
 
+Two more follow from what a day's summary is. The day on which a silence ends
+is refused however early in the day it ends, because the hours before a
+sensor is heard again were not observed. And a restart forgets the estimates
+of the day in progress, as it always has, and with them a silence that had
+already ended that day: the day is then judged on what was observed after the
+restart. A silence that is still open at the restart is kept.
+
 **Silence across homes has a different cause.** `sensor_modeling.health.fleet`
 applies the canary argument one level up. A home's own monitor cannot tell a
 silent home from a service that has stopped collecting; from above, most of

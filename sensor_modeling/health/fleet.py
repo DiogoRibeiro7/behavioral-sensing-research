@@ -21,7 +21,7 @@ away would all look the same.
 from __future__ import annotations
 
 import bisect
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -172,18 +172,18 @@ class CommonSilence:
         }
 
 
-def common_silences(
+def replay_fleet(
     observed: Mapping[str, Sequence[datetime]],
     config: FleetConfig,
     *,
     every: timedelta = timedelta(hours=1),
-) -> list[CommonSilence]:
-    """Find the stretches of common silence in a recorded fleet.
+) -> Iterator[FleetSilence]:
+    """Assess a recorded fleet at regular moments, as it would have been live.
 
-    This replays :func:`assess_fleet` over a record that is already complete.
-    A home counts as monitored between its first and its last observation, so
-    homes that have not joined yet, or have left, are not mistaken for silent
-    ones.
+    This replays :func:`assess_fleet` over a record that is already complete,
+    from the fleet's first observation to its last. A home counts as monitored
+    between its first and its last observation, so homes that have not joined
+    yet, or have left, are not mistaken for silent ones.
 
     Parameters
     ----------
@@ -201,12 +201,10 @@ def common_silences(
         if any(later < earlier for earlier, later in zip(times, times[1:])):
             raise ValueError(f"observations of '{home}' are not in time order")
     if not records:
-        return []
+        return
 
     start = min(times[0] for times in records.values())
     end = max(times[-1] for times in records.values())
-    found: list[CommonSilence] = []
-    current: CommonSilence | None = None
     moment = start
     while moment <= end:
         last_seen: dict[str, datetime | None] = {}
@@ -214,13 +212,39 @@ def common_silences(
             if not times[0] <= moment <= times[-1]:
                 continue
             last_seen[home] = times[bisect.bisect_right(times, moment) - 1]
-        verdict = assess_fleet(last_seen, moment, config)
+        yield assess_fleet(last_seen, moment, config)
+        moment += every
+
+
+def common_silences(
+    observed: Mapping[str, Sequence[datetime]],
+    config: FleetConfig,
+    *,
+    every: timedelta = timedelta(hours=1),
+) -> list[CommonSilence]:
+    """Find the stretches of common silence in a recorded fleet.
+
+    The assessments are those of :func:`replay_fleet`. Consecutive ones that
+    call a common cause are one stretch.
+
+    Parameters
+    ----------
+    observed
+        Each home's observation times, in non-decreasing order.
+    config
+        When simultaneous silence is read as a common cause.
+    every
+        Spacing of the assessments.
+    """
+    found: list[CommonSilence] = []
+    current: CommonSilence | None = None
+    for verdict in replay_fleet(observed, config, every=every):
         if verdict.common_cause and verdict.since is not None:
             if current is None:
                 current = CommonSilence(
                     since=verdict.since,
-                    detected=moment,
-                    until=moment,
+                    detected=verdict.at,
+                    until=verdict.at,
                     homes=len(verdict.silent),
                     monitored=len(verdict.monitored),
                 )
@@ -229,14 +253,13 @@ def common_silences(
                 current = CommonSilence(
                     since=current.since,
                     detected=current.detected,
-                    until=moment,
+                    until=verdict.at,
                     homes=len(verdict.silent) if larger else current.homes,
                     monitored=(len(verdict.monitored) if larger else current.monitored),
                 )
         elif current is not None:
             found.append(current)
             current = None
-        moment += every
     if current is not None:
         found.append(current)
     return found

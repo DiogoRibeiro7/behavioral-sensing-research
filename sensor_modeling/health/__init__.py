@@ -12,6 +12,7 @@ from .fleet import (
     FleetSilence,
     assess_fleet,
     common_silences,
+    replay_fleet,
 )
 from .monitor import (
     HealthConfig,
@@ -39,5 +40,6 @@ __all__ = [
     "SystemHealthReport",
     "assess_fleet",
     "common_silences",
+    "replay_fleet",
     "status_reliability",
 ]
