@@ -500,9 +500,7 @@ class AdaptiveBaseline:
         as they are. A weekly rhythm is then no part of the trend, as it is
         no part of the scale the trend's movement is measured against.
         """
-        values = (
-            self._left_out_residuals() if self.config.calibrated else self._values
-        )
+        values = self._left_out_residuals() if self.config.calibrated else self._values
         window = list(values)[-self.config.trend_window :]
         days = list(self._days)[-self.config.trend_window :]
         if len(window) < 3:

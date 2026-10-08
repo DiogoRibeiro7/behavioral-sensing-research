@@ -658,7 +658,9 @@ class TestCalibratedReference:
             assert with_rhythm.deviation == pytest.approx(without.deviation)
         plain = BaselineConfig()
         slopes = [v.slope_per_day for v in verdicts(plain, True)]
-        assert slopes != pytest.approx([v.slope_per_day for v in verdicts(plain, False)])
+        assert slopes != pytest.approx(
+            [v.slope_per_day for v in verdicts(plain, False)]
+        )
 
     def test_the_verdict_says_what_scale_it_is_on(self) -> None:
         baseline = AdaptiveBaseline("x", CALIBRATED)
