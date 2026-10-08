@@ -35,7 +35,13 @@ from sensor_modeling.datasets.sleep_mat_experiment import (
 from sensor_modeling.datasets.sleep_mat_protocol import (
     MAT_FILE,
     PLANNING_RECORD,
+    PUBLISHED_RECORD,
+    PUBLISHED_RECORD_SHA256,
+    SILENT_HOME_RECORD,
+    SILENT_HOME_RECORD_SHA256,
+    between_the_freeze_and_the_run,
     check_frozen_protocol,
+    code_changes,
     declared_protocol,
 )
 from sensor_modeling.evaluation import InputArtifact, load_record
@@ -46,7 +52,8 @@ from sensor_modeling.external.tihm import FILES, READ_FILES, TihmAdapter, check_
 PROTOCOL_PATH = Path("artifacts/sleep_mat/sleep_mat_protocol.json")
 TIHM_PROTOCOL_PATH = Path("artifacts/tihm/alert_burden_protocol.json")
 MAPPING_PATH = Path("artifacts/tihm/tihm_mapping.json")
-PUBLISHED_PATH = Path("artifacts/tihm/tihm-alert-burden.json")
+PUBLISHED_PATH = Path(PUBLISHED_RECORD)
+SILENT_HOME_PATH = Path(SILENT_HOME_RECORD)
 SOURCE = "https://doi.org/10.5281/zenodo.7622128"
 
 
@@ -71,8 +78,21 @@ def main() -> None:
     protocol = declared_protocol()
     protocol_sha256 = check_frozen_protocol(protocol, PROTOCOL_PATH)
     planning = Path(PLANNING_RECORD)
-    if _text_sha256(planning) != protocol.planning_record_sha256:
-        raise SystemExit(f"{planning} is not the planning record the protocol pins")
+    pinned = {
+        planning: protocol.planning_record_sha256,
+        PUBLISHED_PATH: PUBLISHED_RECORD_SHA256,
+        SILENT_HOME_PATH: SILENT_HOME_RECORD_SHA256,
+    }
+    for path, digest in pinned.items():
+        if _text_sha256(path) != digest:
+            raise SystemExit(f"{path} is not the file the protocol pins")
+    changed = code_changes(PROTOCOL_PATH)
+    if any(changed.values()):
+        print(
+            "the code differs from what the protocol was frozen against: "
+            + "; ".join(f"{k}: {', '.join(v)}" for k, v in changed.items() if v),
+            file=sys.stderr,
+        )
     alert_burden = tihm_protocol.declared_protocol()
     alert_burden_sha256 = tihm_protocol.check_frozen_protocol(
         alert_burden, TIHM_PROTOCOL_PATH
@@ -95,6 +115,7 @@ def main() -> None:
         )
 
     published = load_record(PUBLISHED_PATH)["results"]["households"]
+    silent_home = load_record(SILENT_HOME_PATH)["results"]
     inputs = [
         InputArtifact(
             PROTOCOL_PATH.name, protocol_sha256, "frozen protocol", str(PROTOCOL_PATH)
@@ -119,10 +140,17 @@ def main() -> None:
         ),
         InputArtifact(
             PUBLISHED_PATH.name,
-            _text_sha256(PUBLISHED_PATH),
+            PUBLISHED_RECORD_SHA256,
             "published alert-burden record, which the run with the rule off must "
             "reproduce for every mat home",
             str(PUBLISHED_PATH),
+        ),
+        InputArtifact(
+            SILENT_HOME_PATH.name,
+            SILENT_HOME_RECORD_SHA256,
+            "published silent-home description on TIHM, which the run with the "
+            "rule on must reproduce for every mat home",
+            str(SILENT_HOME_PATH),
         ),
         *(
             InputArtifact(
@@ -167,8 +195,11 @@ def main() -> None:
         protocol,
         alert_burden,
         published,
+        silent_home,
         protocol_sha256=protocol_sha256,
         inputs=inputs,
+        code_changed=changed,
+        between=between_the_freeze_and_the_run(),
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     path = record.write(args.output_dir / "sleep-mat.json")
