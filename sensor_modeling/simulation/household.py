@@ -188,7 +188,8 @@ class BehaviourShift:
     start_day
         Days after the simulation begins at which the change takes effect.
     sleep_delta_hours
-        Change in nightly sleep duration, negative for less sleep.
+        Hours by which the resident wakes earlier: positive for less sleep,
+        negative for more.
     night_bathroom_extra
         Additional expected night-time bathroom trips per night.
     outing_probability_delta

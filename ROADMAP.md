@@ -626,6 +626,63 @@ the pipeline raises is more frequent on the days a clinical team confirmed.
 The dataset carries no signal that a sensor or its gateway was working, which
 is the case Phase 7 exists for.
 
+### Measured: a threshold that means what it says
+
+`BaselineConfig.calibrated` is an opt-in reference for the second failure the
+TIHM run showed, the threshold that a reference of a few days passes far more
+often than it states. Its centre stays weekday-aware; its scale is pooled over
+every retained day, from how far each fell from the centre the other days of
+its weekday gave it; the deviation is mapped through a Student t; and its
+trend is fitted to those same distances, so a weekly rhythm is not read as a
+drift. It is off by default.
+
+It was built from the TIHM run, so that run cannot be its evidence.
+
+- **On synthetic days.** `docs/THRESHOLD_CALIBRATION_NULL.md`, independent
+  Gaussian days given to the baseline directly. The default passes its
+  threshold of 3 on 6.24% of days, 23 times what it states; the calibrated
+  reference on 0.28%.
+- **The protocol.** `docs/THRESHOLD_CALIBRATION_PROTOCOL.md`, frozen and
+  pushed before any simulated home had been run with the calibrated
+  reference, after three reviews. The second found that reading two
+  multiples off a quarter of the homes would call a reference with the
+  default's own curve better, or worse, in about one run in ten; the third
+  found a grid of 13 multiples too coarse to draw a straight line across,
+  and the grid was made three times finer. It fixes one comparison: where the calibrated
+  reference's operating curve, over 42 multiples of the thresholds, has the
+  false alerts of the default as it ships, how much of a step change it
+  finds net of chance. The match is placed again in every resample of homes.
+- **The run.** `docs/THRESHOLD_CALIBRATION_RESULTS.md`, from a clean commit,
+  on 400 paired simulated homes. **The evidence is simulated.**
+- **At the same false alerts it finds more of the step.** 0.72 of homes net
+  of false detections against 0.63, +0.09 [+0.03, +0.16], Monte Carlo
+  standard error 0.03, at the default's 0.855 false alerts a home in 84 days.
+  For the smaller step and the gradual change no difference is shown, −0.02
+  [−0.09, +0.04] and −0.01 [−0.10, +0.09].
+- **Its threshold means what it says for hours of sleep on these homes.**
+  0.35% of stable days of sleep pass 3, 4.79% pass 2 and 12.75% pass 1.5,
+  each within a quarter of a standard deviation of the threshold it states;
+  the default passes 3 on 7.91%. On hours away, where no criterion was
+  stated, it passes 3 on 1.66% of days, as often as a Gaussian value passes
+  2.40.
+- **It is not a drop-in replacement.** At the declared thresholds it raises 3
+  false alerts in the 400 homes against the default's 342, and finds the step
+  net of chance in 0.04 of them against 0.63. Its thresholds have to be set
+  lower, about 0.59 times the declared ones on these homes, and where that is
+  on a real home is not known.
+
+On TIHM, as a description and not a test: with the silent-home rule off the
+calibrated reference passes 3 on 8.1% of evaluable days of sleep, against the
+default's 17.4%, and with the rule on at 12 hours on 1.7%, against 10.9%. A
+real day is far from the independent Gaussian draw its score assumes, so its
+threshold says less there than on the simulated homes.
+
+Consequence: in simulation the calibrated reference keeps its threshold's
+meaning and, at the default's false alerts, finds more of a step change; it
+shows no gain for a smaller or a slower change. The default stays the default.
+A change of default needs evidence from real homes on where to set its
+thresholds, which this run cannot give.
+
 ### What remains in Phase 5
 
 - **More independent evidence.** Two homes are two case studies. A
@@ -874,5 +931,8 @@ lets each answer inform the next.
    behavioural state, and quantify robustness under realistic missingness.
    The silent-home rule is a declared rule with a declared horizon. How long
    a real home is silent when nothing is wrong is the measurement it lacks.
+   The calibrated baseline reference is opt-in for a similar reason: where
+   its thresholds belong on a real home, which the simulated homes put at
+   about 0.59 times the declared ones, is not known.
 7. **System hardening (Phase 8).** Only after an improvement survives held-out
    and external evaluation.

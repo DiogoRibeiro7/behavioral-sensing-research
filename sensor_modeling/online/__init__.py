@@ -18,8 +18,10 @@ from .pipeline import (
     collect_alerts,
     collect_changes,
     daily_summaries,
+    judge_day,
     local_midnight,
 )
+from .replay import ReplayedStep, replay_days, reproduces
 
 __all__ = [
     "BehaviouralSensingPipeline",
@@ -27,10 +29,14 @@ __all__ = [
     "PipelineBenchmark",
     "PipelineConfig",
     "PipelineStep",
+    "ReplayedStep",
     "benchmark_pipeline",
     "collect_alerts",
     "collect_changes",
     "daily_summaries",
+    "judge_day",
     "local_midnight",
     "measure_bounded_state",
+    "replay_days",
+    "reproduces",
 ]

@@ -406,35 +406,16 @@ class BehaviouralSensingPipeline:
         if summary is None:
             return None, (), ()
 
-        usable = summary.is_usable(
-            self.config.min_day_coverage, self.config.min_day_observed
-        )
-        if summary.silent > 0.0:
-            refused = (
-                f"no sensor of the home reported for {summary.silent:.0%} of the day"
-            )
-        else:
-            refused = (
-                f"day observed at {summary.observed:.0%} with "
-                f"{summary.coverage:.0%} sensor coverage"
-            )
-        changes = []
-        for state in self.config.features:
-            baseline = self.baselines[state.value]
-            if usable:
-                changes.append(baseline.observe(day, summary.hours_in(state)))
-            else:
-                changes.append(baseline.skip(day, refused))
-
-        alerts = self.alerts.review(
-            changes,
-            at=moment,
-            coverage=summary.coverage,
+        changes, alerts = judge_day(
+            summary,
+            moment,
             attribution=context.ambient_attribution(),
-            deviation_threshold=self._baseline_config.deviation_threshold,
-            trend_threshold=self._baseline_config.trend_threshold,
+            baselines=self.baselines,
+            engine=self.alerts,
+            config=self.config,
+            baseline_config=self._baseline_config,
         )
-        return summary, tuple(changes), tuple(alerts)
+        return summary, changes, alerts
 
     # ------------------------------------------------------------------
     def run(
@@ -540,6 +521,67 @@ class BehaviouralSensingPipeline:
         )
         self._silences = []
         self._day_estimates = []
+
+
+def judge_day(
+    summary: DailySummary,
+    at: datetime,
+    *,
+    attribution: float,
+    baselines: Mapping[str, AdaptiveBaseline],
+    engine: AlertEngine,
+    config: PipelineConfig,
+    baseline_config: BaselineConfig,
+) -> tuple[tuple[BehaviouralChange, ...], tuple[Alert, ...]]:
+    """Offer a closed day to the baselines and review what they conclude.
+
+    This is everything the pipeline does with a day once it has been
+    summarised. It reads the summary and nothing upstream of it, which is what
+    lets :func:`~sensor_modeling.online.replay.replay_days` ask what another
+    baseline or alert configuration would have concluded from the same days.
+
+    Parameters
+    ----------
+    summary
+        The closed day.
+    at
+        The moment the day was closed at, which dates the alerts.
+    attribution
+        Probability that the home's ambient activity was the resident's.
+    baselines
+        One baseline for each feature of *config*, keyed by the state's value.
+        They are updated.
+    engine
+        The alert engine, which is updated.
+    config, baseline_config
+        The pipeline's configuration and the one its baselines were built
+        with.
+    """
+    usable = summary.is_usable(config.min_day_coverage, config.min_day_observed)
+    if summary.silent > 0.0:
+        refused = f"no sensor of the home reported for {summary.silent:.0%} of the day"
+    else:
+        refused = (
+            f"day observed at {summary.observed:.0%} with "
+            f"{summary.coverage:.0%} sensor coverage"
+        )
+    changes = []
+    for state in config.features:
+        baseline = baselines[state.value]
+        if usable:
+            changes.append(baseline.observe(summary.day, summary.hours_in(state)))
+        else:
+            changes.append(baseline.skip(summary.day, refused))
+
+    alerts = engine.review(
+        changes,
+        at=at,
+        coverage=summary.coverage,
+        attribution=attribution,
+        deviation_threshold=baseline_config.deviation_threshold,
+        trend_threshold=baseline_config.trend_threshold,
+    )
+    return tuple(changes), tuple(alerts)
 
 
 def local_midnight(day: date, zone: tzinfo | None) -> datetime:

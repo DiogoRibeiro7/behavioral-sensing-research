@@ -279,6 +279,36 @@ redefine normal) and **weekday-aware** (Sundays are compared against Sundays,
 so ordinary weekly rhythm is not reported as behavioural change). History is
 bounded, so the definition of normal moves with the person.
 
+A weekday-aware reference rests on few days: four Sundays, then five. The
+spread of four values is so uncertain that a day with nothing unusual in it
+lies three of their robust standard deviations out about one time in six,
+where three standard deviations state one in 370. `BaselineConfig.calibrated`
+is an opt-in answer to that, and it is off by default:
+
+* the centre stays weekday-aware;
+* the scale is pooled over every retained day. It is the robust spread of how
+  far each day fell from the centre the other days of its weekday would have
+  given it, so it rests on all the days and already holds the uncertainty of
+  a centre drawn from a few;
+* the deviation is reported as the Gaussian value that is as unusual as the
+  day is under the Student t that scale has, with 0.368 degrees of freedom
+  for each day behind it, so `deviation_threshold` keeps the meaning a
+  Gaussian threshold has;
+* the trend is fitted to those same distances and not to the days as they
+  are, so a weekly rhythm is no more read as a drift than as a deviation;
+* the trend's movement is measured against the same pooled scale. It is not
+  mapped: `trend_threshold` is a size of movement, not a probability.
+
+A threshold that means what it says is passed far less often, so it is not a
+drop-in replacement: at the declared thresholds the calibrated reference
+reports much less, of what is there as well as of what is not.
+[The baseline's thresholds on days with nothing in them](THRESHOLD_CALIBRATION_NULL.md)
+measures both references on synthetic days, where the answer is known, and
+[the threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md) test the
+calibrated one on simulated homes, under a protocol frozen before the test:
+at the default's false alerts it finds more of a step change, and its
+threshold means what it says there on the hours of sleep.
+
 Poorly observed days go through
 `skip`, which records the
 verdict but deliberately keeps the day **out** of the history. Letting a
@@ -318,6 +348,33 @@ must never surface as a finding about a person.
 
 Alert text is phrased as observation, never diagnosis. The platform is a
 research toolkit and is not a medical device.
+
+### Asking what another threshold would have raised
+
+Nothing upstream of a day's summary depends on how the baseline or the alert
+policy is configured. `sensor_modeling.online.replay_days` uses that: it takes
+the steps a pipeline produced and passes the same days, at the same moments,
+through fresh baselines and a fresh alert engine under another configuration,
+so a threshold can be examined without running the home again.
+
+```python
+from sensor_modeling.baseline import BaselineConfig
+from sensor_modeling.online import replay_days, reproduces
+
+steps = pipeline.run(observations)
+assert reproduces(steps, replay_days(steps, pipeline.config))
+
+stricter = replay_days(
+    steps, pipeline.config, baseline_config=BaselineConfig(deviation_threshold=4.0)
+)
+alerts = [alert for step in stricter for alert in step.alerts]
+```
+
+The replay calls the function the pipeline itself calls when it closes a day,
+and reviews every health report in the pipeline's order, since the alert
+engine counts its recent alerts of every kind. It answers a question about
+thresholds only. A different step, another emission model or the rule for a
+silent home changes the summaries, and the home must be run again.
 
 ## Interoperability
 

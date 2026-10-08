@@ -67,7 +67,8 @@ layout. Two datasets have one:
   scores nothing against a state. It is used by the [TIHM alert-burden
   protocol](TIHM_ALERT_BURDEN_PROTOCOL.md), and by the description of the
   silent-home rule on the same homes in the [silent-home
-  results](SILENT_HOME_RESULTS.md).
+  results](SILENT_HOME_RESULTS.md), and of the calibrated baseline reference
+  in the [threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md).
 
 ## The mapping layer
 

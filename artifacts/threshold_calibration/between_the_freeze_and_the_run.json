@@ -1,0 +1,3 @@
+[
+  "the protocol's code was run end to end with the calibrated reference on four simulated homes that are not the protocol's, from root 32, seeds 202932, 264766, 900254, 995257, with 500 resamples, to see that the run, the record, the page and the figure data work with it. In the two of them checked, the replay under the calibrated reference returned what the pipeline run with it concluded in all 24 runs. Its page was read: on those four homes the match fell at 0.625 times the declared thresholds, and the calibrated reference passed a threshold of 3 on 0.36% of days. Nothing was changed after it"
+]

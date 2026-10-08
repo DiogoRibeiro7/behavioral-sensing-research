@@ -138,6 +138,25 @@ whole run. A likely reading, not a tested one, is that this is the mechanism
 behind the saturated confidence above: with no evidence the belief goes to the
 quietest state, and the pipeline abstained on 0.06% of usable time.
 
+**An opt-in baseline reference now keeps its threshold's meaning, and where
+its thresholds belong on a real home is not known.** On synthetic Gaussian
+days the default reference passes its deviation threshold of 3 on 6.24% of
+days, where 0.27% is stated, because a weekday reference of a few days has
+too small a spread; the calibrated reference, `BaselineConfig.calibrated`,
+passes it on 0.28%. On 400 paired simulated homes it keeps that meaning for
+hours of sleep, the feature the criterion was stated for; on hours away it
+passes 3 on 1.66% of days, as often as a Gaussian value passes 2.40. At the
+default's false alerts it finds more of a step change, +0.09 of homes
+net of chance [+0.03, +0.16]; see
+[the threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md). That
+evidence is simulated, and it shows no gain for a smaller or a slower change.
+At the declared thresholds the reference reports far less of everything, so
+its thresholds must be set lower, and the simulated homes put them at about
+0.59 times the declared ones. On TIHM, described and not tested, it still
+passes 3 on 8.1% of evaluable days of sleep with the silent-home rule off,
+and on 1.7% with it on at 12 hours: real days are far from the independent
+Gaussian draws its score assumes. It is off by default.
+
 **An opt-in rule now treats a silent home as not observed, and it has a cost
 the simulator cannot show.** `HealthConfig.home_silence_horizon` is off by
 default, so by default a silent home is still read as above. On 100 paired

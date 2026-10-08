@@ -114,6 +114,39 @@ silence are raised, 145 of them in the two stretches in which most monitored
 homes were silent together. See
 [the silent-home results](docs/SILENT_HOME_RESULTS.md).
 
+The personal baseline's deviation threshold of three standard deviations is
+passed far more often than it states when a weekday reference rests on a few
+days. On synthetic Gaussian days the default reference passes it on 6.2% of
+days, 23 times the 0.27% it states. An opt-in reference, off by default,
+pools the scale over every retained day and maps the deviation through a
+Student t, and passes it on 0.28%; see
+[the baseline's thresholds on synthetic days](docs/THRESHOLD_CALIBRATION_NULL.md).
+It was built from the TIHM finding, so it was tested on 400 paired simulated
+homes, under a protocol frozen before any of them had been run with it. **The
+evidence is simulated.**
+
+- **At the same false alerts it finds more of a step change.** Where its
+  operating curve has the default's 0.855 false alerts a home in 84 days, it
+  finds the step net of what it raises with nothing injected in 0.72 of homes,
+  against 0.63: +0.09, with a 95% interval over homes of [+0.03, +0.16] and a
+  Monte Carlo standard error of 0.03. The match is placed again in every
+  resample.
+- **Its threshold means what it says for hours of sleep on these homes.**
+  0.35% of stable days of sleep pass 3, the share a Gaussian value passes
+  2.92 [2.85, 2.99]; the default passes 3 on 7.9% of them. On hours away,
+  where no criterion was stated, it passes 3 on 1.66% of days, as often as a
+  Gaussian value passes 2.40.
+- **For a smaller step and a gradual change no difference is shown**: −0.02
+  [−0.09, +0.04] and −0.01 [−0.10, +0.09].
+- **It is not a drop-in replacement.** At the declared thresholds it raises 3
+  false alerts in the 400 homes against 342, and finds the step net of chance
+  in 0.04 of them against 0.63.
+
+On TIHM, as a description: with the silent-home rule off it passes 3 on 8.1%
+of evaluable days of sleep, against the default's 17.4%. Real days are far
+from what its score assumes. See
+[the threshold-calibration results](docs/THRESHOLD_CALIBRATION_RESULTS.md).
+
 The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
 under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz
 are acknowledged, as the dataset asks. It is not redistributed here.
