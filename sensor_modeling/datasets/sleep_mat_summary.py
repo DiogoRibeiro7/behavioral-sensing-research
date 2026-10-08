@@ -545,6 +545,9 @@ def _agreement_part(results: Mapping[str, Any], rule_hours: float) -> list[str]:
             ]
         }
     )
+    repeats = results["analyses"][RULE] == results["analyses"][PRIMARY] and all(
+        row.get(RULE) == row.get(PRIMARY) for row in results["homes"].values()
+    )
     return [
         "## Agreement (E1 to E5, E9)",
         "",
@@ -572,6 +575,17 @@ def _agreement_part(results: Mapping[str, Any], rule_hours: float) -> list[str]:
             + "."
             if constant
             else "No included home had constant values on either source."
+        ),
+        *(
+            [
+                "",
+                "With the rule on, every home has the same matched days and the "
+                "same values on them as in the primary analysis, so its rows "
+                "repeat the primary's: the rule refuses the silenced days, which "
+                "the primary leaves out already.",
+            ]
+            if repeats
+            else []
         ),
         "",
         _figure("homes", "Within-home correlation of each home with the mat"),
@@ -616,38 +630,51 @@ def _alerts_part(results: Mapping[str, Any]) -> list[str]:
         f"{_count(e7['alerts'], 'behavioural alert')} about the hours of sleep "
         f"in the mat homes: {kinds or 'none'}. An alert for a drift is not "
         "judged, since its direction is its slope's, which the run does not "
-        "keep. Of the alerts for an abrupt or a persistent change, "
-        f"{e7['judged']:,} came on a matched day of the primary analysis.",
-        "",
-        *_table(
-            ["Judged against", "Same direction", "Opposite", "Neither"],
-            [
-                [
-                    "the home's median mat sleep",
-                    median["same_side"],
-                    median["opposite"],
-                    f"{median['at_the_median']} at the median",
-                ],
-                [
-                    "the mat baseline's deviation",
-                    baseline["same_sign"],
-                    baseline["opposite"],
-                    f"{baseline['no_verdict']} without a verdict, "
-                    f"{baseline['zero']} at zero",
-                ],
-            ],
+        "keep. "
+        + (
+            "None of the alerts for an abrupt or a persistent change came on a "
+            "matched day of the primary analysis, so none was judged."
+            if not e7["judged"]
+            else "Of the alerts for an abrupt or a persistent change, "
+            f"{e7['judged']:,} came on a matched day of the primary analysis."
+        ),
+        *(
+            []
+            if not e7["judged"]
+            else [
+                "",
+                *_table(
+                    ["Judged against", "Same direction", "Opposite", "Neither"],
+                    [
+                        [
+                            "the home's median mat sleep",
+                            median["same_side"],
+                            median["opposite"],
+                            f"{median['at_the_median']} at the median",
+                        ],
+                        [
+                            "the mat baseline's deviation",
+                            baseline["same_sign"],
+                            baseline["opposite"],
+                            f"{baseline['no_verdict']} without a verdict, "
+                            f"{baseline['zero']} at zero",
+                        ],
+                    ],
+                ),
+            ]
         ),
     ]
 
 
 def _silent_part(results: Mapping[str, Any]) -> list[str]:
     e8 = results["E8_silent_days"]
+    with_one = sum(1 for row in e8["homes"].values() if row["silent_days"])
     return [
         "## Silent days (E8)",
         "",
         f"The mat homes have {_count(e8['silent_days'], 'silent day')} with the "
         f"rule off, {e8['usable']:,} of them usable, in "
-        f"{_count(len(e8['homes']), 'home')}. On the {e8['mat_observed']:,} the "
+        f"{_count(with_one, 'home')}. On the {e8['mat_observed']:,} the "
         "mat observed, the pipeline's median is "
         f"{_n(e8['median_pipeline_hours'], 1)} hours of sleep, and the mat's "
         f"{_n(e8['median_mat_sleep_hours'], 1)} hours asleep and "
@@ -665,10 +692,11 @@ def _clocks_part(results: Mapping[str, Any], shifts: Sequence[float]) -> list[st
             _interval(entry[SLEEP]["spearman"]),
             _interval(entry[SLEEP]["mean_difference"], signed=True),
         ]
-        for shift, entry in e10.items()
+        for shift, entry in sorted(e10.items(), key=lambda item: float(item[0]))
     ]
     lags = [
-        [f"{lag} h", _interval(entry["spearman"])] for lag, entry in e11["lags"].items()
+        [f"{lag} h", _interval(entry["spearman"])]
+        for lag, entry in sorted(e11["lags"].items(), key=lambda item: int(item[0]))
     ]
     return [
         "## The clocks (E10, E11)",
@@ -686,7 +714,7 @@ def _clocks_part(results: Mapping[str, Any], shifts: Sequence[float]) -> list[st
         "with its clock shifted by the lag. A person in bed moves little, so "
         "the correlation should be most negative where the clocks agree. "
         + (
-            f"It is most negative at a lag of {e11['most_negative']} hours. "
+            f"It is most negative at a lag of {e11['most_negative']} h. "
             if e11["most_negative"] is not None
             else "It could not be computed. "
         )

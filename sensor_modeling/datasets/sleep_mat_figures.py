@@ -27,6 +27,7 @@ def figure_data(payload: Mapping[str, Any]) -> dict[str, Any]:
     homes = primary["homes"]
     rows = {home: results["homes"][home][PRIMARY] for home in homes}
     criteria = results["criteria"]
+    lags = sorted(results["E11_clocks"]["lags"].items(), key=lambda item: int(item[0]))
     return {
         "homes": {
             "homes": homes,
@@ -47,10 +48,8 @@ def figure_data(payload: Mapping[str, Any]) -> dict[str, Any]:
             "margin": criteria["C2_the_pipeline_agrees_in_level"]["margin"],
         },
         "clocks": {
-            "lags": [int(lag) for lag in results["E11_clocks"]["lags"]],
-            "estimates": [
-                entry["spearman"] for entry in results["E11_clocks"]["lags"].values()
-            ],
+            "lags": [int(lag) for lag, _ in lags],
+            "estimates": [entry["spearman"] for _, entry in lags],
         },
     }
 

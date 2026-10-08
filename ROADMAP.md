@@ -683,12 +683,55 @@ shows no gain for a smaller or a slower change. The default stays the default.
 A change of default needs evidence from real homes on where to set its
 thresholds, which this run cannot give.
 
+### Measured: the pipeline's hours of sleep beside a sleep mat
+
+`sleeping_hours`, the feature every alerting study counts its detections on,
+had never been set beside a measurement of sleep. In 17 TIHM homes a mat under
+the mattress recorded each minute in bed, with a sleep stage computed by the
+device.
+
+- **The protocol.** `docs/SLEEP_MAT_PROTOCOL.md`, frozen and pushed before any
+  value of the pipeline was set beside any record of the mat, after two
+  reviews, which moved every day touched by a silence of the whole home out
+  of the primary analysis: 16 June, when every monitored home was silent, is a
+  mat-observed day in 11 of the 14 homes, and the partial days around it are
+  too.
+- **The run.** `docs/SLEEP_MAT_RESULTS.md`, from a clean commit, with both runs
+  reproducing the published records home by home. A measurement on a real
+  cohort; nothing was fitted.
+- **Within a home it does not follow the mat.** A mean Spearman correlation of
+  0.11 [0.03, 0.19] over 14 homes, against a margin of 0.5; against the hours
+  in bed, 0.14 [0.01, 0.27]. The deviations the two give a personal baseline
+  correlate at 0.03 [−0.04, 0.11].
+- **In level it does not agree.** It gives 3.95 hours a day more sleep than the
+  mat [+1.54, +6.37], and 1.97 more than its hours in bed.
+- **Neither the mat's odd homes nor its clock explain it.** Without the three
+  homes in which the mat stages less than 60% of the time in bed as asleep,
+  0.07 [−0.01, 0.16]. With the mat's clock an hour either way, 0.10 and 0.13.
+  Hourly activity is most opposed to time in bed with the mat's clock an hour
+  later, which would fit a mat clock in UTC.
+- **In simulation it does follow.** Against the simulator's true hours of
+  sleep, 0.70 [0.68, 0.71], with a bias of −0.23 hours. **That evidence is
+  simulated.**
+
+Consequence: the observation model under which `sleeping_hours` follows sleep
+in the simulator does not make it follow a sleep mat in real homes, on this
+evidence. A detection counted on that feature in simulation is a statement
+about the simulator's sleep. The mat is not validated and these are homes of
+people living with dementia, so what is missing is a sleep reference in homes
+where the pipeline is meant to run, before an alert about sleep is read as
+one about a person's sleep.
+
 ### What remains in Phase 5
 
 - **More independent evidence.** Two homes are two case studies. A
   confirmatory claim needs an independent dataset with more homes.
 - **The Ordóñez homes are now inspected.** Any further analysis of them,
   including another adaptation strength, is exploratory.
+- **A reference for sleep.** `sleeping_hours` does not follow a sleep mat in
+  the TIHM homes that have one. The alerting studies' detections are counted
+  on it, so a real-home sleep reference is needed before they say anything
+  about a person.
 
 ## Phase 6 — Sensor-Information Frontier
 

@@ -1,0 +1,1994 @@
+{
+  "configuration": {
+    "protocol_file_sha256": "3e0f26fc82c4fde7ed241f469bd7c445afbdbe3e39e97169c8e0444ba5279f98",
+    "protocol_sha256": "aceb56b37cc7dfa90650a1ac21b7795e08dfbf00f6be091f8a99f88d9ae72aae",
+    "result_schema": "sleep-mat-simulated/1",
+    "simulated_reference": {
+      "days": 84,
+      "delivery": "`sensor_modeling.simulation.faults.degrade` with its default configuration",
+      "evidence": "simulated: every home comes from this repository's simulator",
+      "homes": 100,
+      "household": "`HouseholdConfig` defaults apart from days and seed; nothing is injected",
+      "matched_day": "a usable day other than the record's first and last, which are partial",
+      "seed_root": 20261008,
+      "seeds": "the first distinct values of `numpy.random.SeedSequence(seed_root).generate_state(4 * homes, uint32)` modulo 1,000,000, sorted",
+      "sensors": [
+        "front_door",
+        "bedroom_motion",
+        "bathroom_motion",
+        "kitchen_motion",
+        "living_motion",
+        "fridge_contact"
+      ],
+      "standing": "a reference, not a test: what the estimands give when the observation model is the one that made the data",
+      "start": "2024-03-04",
+      "step_minutes": 10,
+      "timezone": "Europe/Lisbon",
+      "truth": "the hours of each local day covered by the simulator's episodes of `sleeping`, measured in elapsed time, so the night the clocks change is not given an hour it did not have",
+      "why_these_sensors": "the sensors that report on no cadence, as in TIHM"
+    }
+  },
+  "data_source": "simulator",
+  "environment": {
+    "git_commit": "c42d69ac50309365077504b80cf1db1fa1ceb8eb",
+    "git_dirty": "false",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+    "python": "3.13.16",
+    "scipy": "1.18.1",
+    "sensor_modeling": "0.9.0",
+    "sklearn": "1.9.1"
+  },
+  "experiment": "sleep-mat-simulated",
+  "household_metrics": {},
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": true,
+      "first_prediction": "2024-03-05T00:00:06.042523+00:00",
+      "last_prediction": "2024-05-26T23:09:55.692280+00:00",
+      "latest_evidence": "2024-05-26T23:09:55.692280+00:00",
+      "max_lead_seconds": 0.0,
+      "predictions": 8400
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [
+    {
+      "name": "sleep_mat_protocol.json",
+      "role": "frozen protocol",
+      "sha256": "3e0f26fc82c4fde7ed241f469bd7c445afbdbe3e39e97169c8e0444ba5279f98",
+      "source": "artifacts/sleep_mat/sleep_mat_protocol.json"
+    },
+    {
+      "name": "sleep-mat-planning.json",
+      "role": "planning record the protocol's interval was chosen from",
+      "sha256": "098876fe75003a8fe6af8e0933a0c31f6e16c5a9bf5936cd00d7b3ed7b8565e3",
+      "source": "artifacts/sleep_mat/sleep-mat-planning.json"
+    }
+  ],
+  "intervals": [
+    {
+      "confidence": 0.95,
+      "estimate": 0.6952804170611987,
+      "high": 0.7091199269537007,
+      "label": "S1: spearman",
+      "low": 0.6814409071686967,
+      "method": "student_t",
+      "n": 100,
+      "unit": "seed"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": 0.6992950468928033,
+      "high": 0.7106128918339969,
+      "label": "S1: pearson",
+      "low": 0.6879772019516097,
+      "method": "student_t",
+      "n": 100,
+      "unit": "seed"
+    },
+    {
+      "confidence": 0.95,
+      "estimate": -0.2336303953006068,
+      "high": -0.215083691650775,
+      "label": "S1: mean difference, hours",
+      "low": -0.2521770989504386,
+      "method": "student_t",
+      "n": 100,
+      "unit": "seed"
+    }
+  ],
+  "mcse": {},
+  "metric_definitions": {
+    "abstention_rate": "Fraction of estimates that declined to name a state, because confidence or sensor coverage fell below threshold.",
+    "accuracy": "Fraction of scored estimates whose reported state equals the true state. A reported UNKNOWN is never correct, so abstentions count as errors.",
+    "balanced_accuracy": "Unweighted mean of per-class recall. Used in preference to accuracy because the states are heavily imbalanced and a model that always predicts the majority state scores highly on raw accuracy.",
+    "brier": "Multiclass Brier score over the full posterior, in [0, 2]. A proper scoring rule; lower is better.",
+    "calibration_error": "Expected calibration error: the bin-weighted gap between stated confidence and observed accuracy. Answers whether a confidence of 0.9 means anything.",
+    "ci_low, ci_high": "Bootstrap confidence interval on the mean paired difference. Reported instead of a p-value: with simulations, significance is a statement about how long the computer ran.",
+    "confusion": "Counts of labelled true state (rows) against reported state (columns). The final column is UNKNOWN, so abstentions stay visible.",
+    "contaminated_fraction": "Fraction of simulated time during which someone other than the monitored resident was present.",
+    "detected_changes": "Number of true changes detected across the seeds in an arm, which is the sample size behind median_delay_days.",
+    "effect_size": "Cohen's dz for the paired difference. Note that pairing removes between-household variance, so dz is larger than an unpaired field study of the same size would produce.",
+    "f1": "Harmonic mean of precision and recall.",
+    "false_positives_per_person_day": "Delivered alerts not matched to a true change, divided by monitored person-days. The alert burden a recipient experiences.",
+    "log_loss": "Mean negative log probability assigned to the true state. Punishes confident errors far more than hedged ones.",
+    "macro_f1": "Unweighted mean F1 across the classes present in the truth.",
+    "mean_difference": "Mean paired difference between two configurations evaluated on identical simulated trajectories.",
+    "mean_seed_median_delay_days": "Mean across seeds of each seed's own median delay. Reported alongside median_delay_days because it weights every seed equally regardless of how many changes it detected; it is not a median.",
+    "median_delay_days": "Median days between a true change occurring and an alert being delivered for it. A detection counts only if it falls at or after the change and within max_delay_days. Where an arm aggregates several seeds, the individual delays are pooled before taking the median, so this is a median over detections and not a mean of per-seed medians.",
+    "per_class_recall": "Recall for each state present in the ground truth.",
+    "precision": "True positives divided by predicted positives.",
+    "recall": "True positives divided by actual positives.",
+    "selective_accuracy": "Accuracy among only the estimates that committed to a state. Read together with abstention_rate."
+  },
+  "models": [],
+  "notes": [
+    "A reference, not a test: what the estimands give against the simulator's true hours of sleep, where the observation model is the one that made the data.",
+    "Generated from the bundled simulator. Not validated against real sensor data; see docs/limitations.md."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {},
+  "recorded_at": "2026-10-08T10:39:48.844682+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "calibrated": false,
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "home_silence_horizon": null,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "homes": {
+      "100084": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.24395114370126908,
+          "median_mat": 8.189618691666666,
+          "median_pipeline": 7.841846615548829,
+          "pearson": 0.6940488236155347,
+          "sd_truth": 0.9311191366218037,
+          "spearman": 0.6736430818123443,
+          "variance_of_differences": 0.9807045553257578
+        },
+        "usable_days": 84
+      },
+      "104628": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.31902488129545614,
+          "median_mat": 8.102236047083332,
+          "median_pipeline": 7.537804519996418,
+          "pearson": 0.6862349033149859,
+          "sd_truth": 0.9463103673147082,
+          "spearman": 0.6017239690469195,
+          "variance_of_differences": 1.072143518142134
+        },
+        "usable_days": 84
+      },
+      "118138": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.22085565674423766,
+          "median_mat": 8.13093017763889,
+          "median_pipeline": 7.673033697521008,
+          "pearson": 0.7083553551178322,
+          "sd_truth": 1.0778569795477986,
+          "spearman": 0.7696585801199377,
+          "variance_of_differences": 0.9516850853030043
+        },
+        "usable_days": 84
+      },
+      "121411": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.25714378863268916,
+          "median_mat": 8.219276282500001,
+          "median_pipeline": 7.682727886177424,
+          "pearson": 0.6420414884117959,
+          "sd_truth": 0.894276730055805,
+          "spearman": 0.6188112885144916,
+          "variance_of_differences": 1.09050907142776
+        },
+        "usable_days": 84
+      },
+      "136867": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2564312569128125,
+          "median_mat": 8.443882668472222,
+          "median_pipeline": 7.929132699727827,
+          "pearson": 0.6926355353563611,
+          "sd_truth": 0.8684024825731969,
+          "spearman": 0.7021364591155951,
+          "variance_of_differences": 0.9559296109549372
+        },
+        "usable_days": 84
+      },
+      "149993": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3309839118990302,
+          "median_mat": 8.489433670138888,
+          "median_pipeline": 8.017432038384197,
+          "pearson": 0.7227018750873055,
+          "sd_truth": 1.0145057374444963,
+          "spearman": 0.7281701331069537,
+          "variance_of_differences": 0.8502508522466109
+        },
+        "usable_days": 84
+      },
+      "169855": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.07912150847973241,
+          "median_mat": 8.1628886375,
+          "median_pipeline": 7.948439740693784,
+          "pearson": 0.665610560760309,
+          "sd_truth": 0.9422236193034109,
+          "spearman": 0.6607133139604489,
+          "variance_of_differences": 1.2719474629800458
+        },
+        "usable_days": 84
+      },
+      "174894": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.1740225626763907,
+          "median_mat": 8.399979185833335,
+          "median_pipeline": 7.979844170997675,
+          "pearson": 0.6551197180956303,
+          "sd_truth": 1.0504506802200948,
+          "spearman": 0.630848597642603,
+          "variance_of_differences": 1.0984320833395391
+        },
+        "usable_days": 84
+      },
+      "181543": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.35131756315310864,
+          "median_mat": 8.204331309166667,
+          "median_pipeline": 7.688078640487856,
+          "pearson": 0.8033381500896506,
+          "sd_truth": 1.1585566928853908,
+          "spearman": 0.8289091324648187,
+          "variance_of_differences": 0.6479963121187154
+        },
+        "usable_days": 84
+      },
+      "188540": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2757993639233094,
+          "median_mat": 8.316025848888888,
+          "median_pipeline": 7.882914184712698,
+          "pearson": 0.6977356846524578,
+          "sd_truth": 0.9737662517630481,
+          "spearman": 0.6902515209891056,
+          "variance_of_differences": 0.725084827192959
+        },
+        "usable_days": 84
+      },
+      "214386": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.1927598207257076,
+          "median_mat": 8.179301577777778,
+          "median_pipeline": 7.636837722316871,
+          "pearson": 0.7225886431721432,
+          "sd_truth": 1.053967432770592,
+          "spearman": 0.7610605021712868,
+          "variance_of_differences": 1.3295789090052181
+        },
+        "usable_days": 84
+      },
+      "221133": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2516183234622894,
+          "median_mat": 8.116515364722222,
+          "median_pipeline": 7.840913511423862,
+          "pearson": 0.6993109758696552,
+          "sd_truth": 0.9242431259454507,
+          "spearman": 0.7315440624285761,
+          "variance_of_differences": 0.7850380886507606
+        },
+        "usable_days": 84
+      },
+      "236653": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.09842804769299215,
+          "median_mat": 8.26081149875,
+          "median_pipeline": 8.169779273210043,
+          "pearson": 0.5793228945343959,
+          "sd_truth": 0.9319149116985332,
+          "spearman": 0.5715980452977221,
+          "variance_of_differences": 1.5952058333565593
+        },
+        "usable_days": 84
+      },
+      "27748": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.11286011118272227,
+          "median_mat": 8.000175654027778,
+          "median_pipeline": 7.806410080076516,
+          "pearson": 0.7602020003884639,
+          "sd_truth": 1.0223984886361903,
+          "spearman": 0.794930399103188,
+          "variance_of_differences": 0.953565134821356
+        },
+        "usable_days": 84
+      },
+      "279584": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.16749968192814899,
+          "median_mat": 8.068389049861112,
+          "median_pipeline": 7.895543670807554,
+          "pearson": 0.7874707366921776,
+          "sd_truth": 1.0574334858467982,
+          "spearman": 0.7485660800383105,
+          "variance_of_differences": 0.7675256329919574
+        },
+        "usable_days": 84
+      },
+      "295886": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.15318379039553623,
+          "median_mat": 8.1521739275,
+          "median_pipeline": 7.867066426886028,
+          "pearson": 0.7815248342873109,
+          "sd_truth": 1.0507106869655132,
+          "spearman": 0.7856357680042664,
+          "variance_of_differences": 0.925171786358598
+        },
+        "usable_days": 84
+      },
+      "307587": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3307239972572029,
+          "median_mat": 8.366996777916667,
+          "median_pipeline": 7.860961678491865,
+          "pearson": 0.7513222838693775,
+          "sd_truth": 1.033166984331932,
+          "spearman": 0.7868547360172398,
+          "variance_of_differences": 1.1276264241777352
+        },
+        "usable_days": 84
+      },
+      "314515": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3034664127792959,
+          "median_mat": 8.260563887222222,
+          "median_pipeline": 7.762740098531531,
+          "pearson": 0.6610517006372302,
+          "sd_truth": 0.9273295835847802,
+          "spearman": 0.6066651429566505,
+          "variance_of_differences": 1.1104171057071541
+        },
+        "usable_days": 84
+      },
+      "315485": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3868947843635638,
+          "median_mat": 8.30269454375,
+          "median_pipeline": 7.624787462221022,
+          "pearson": 0.6846023180242137,
+          "sd_truth": 0.9004860766045472,
+          "spearman": 0.6821105560453194,
+          "variance_of_differences": 0.9293652809344751
+        },
+        "usable_days": 84
+      },
+      "324638": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.292961320276025,
+          "median_mat": 8.40452196,
+          "median_pipeline": 7.8570700435574725,
+          "pearson": 0.6533718953028824,
+          "sd_truth": 1.0330160181514083,
+          "spearman": 0.6222069851220601,
+          "variance_of_differences": 1.015682220846719
+        },
+        "usable_days": 84
+      },
+      "341463": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.24885410669813302,
+          "median_mat": 8.344748309583334,
+          "median_pipeline": 7.7780756814098675,
+          "pearson": 0.7019889770963197,
+          "sd_truth": 1.0486378489802695,
+          "spearman": 0.7373994623480371,
+          "variance_of_differences": 1.0877766244862228
+        },
+        "usable_days": 84
+      },
+      "367337": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.06706149390900186,
+          "median_mat": 8.316378778055556,
+          "median_pipeline": 8.014831779741414,
+          "pearson": 0.674107174328768,
+          "sd_truth": 1.028615038551497,
+          "spearman": 0.6990455045112701,
+          "variance_of_differences": 1.2284111544108378
+        },
+        "usable_days": 84
+      },
+      "368874": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2028142552032688,
+          "median_mat": 8.170687950138888,
+          "median_pipeline": 7.842531224994229,
+          "pearson": 0.687375173201242,
+          "sd_truth": 0.9036941813181262,
+          "spearman": 0.7220317584701951,
+          "variance_of_differences": 1.0522671707337958
+        },
+        "usable_days": 84
+      },
+      "370642": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.35819383045161185,
+          "median_mat": 8.391488570833332,
+          "median_pipeline": 7.893469172462069,
+          "pearson": 0.7102750502393231,
+          "sd_truth": 0.9523276942602704,
+          "spearman": 0.7275824163864129,
+          "variance_of_differences": 0.8092581821799623
+        },
+        "usable_days": 84
+      },
+      "372611": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.24599756138273837,
+          "median_mat": 8.221116168888889,
+          "median_pipeline": 7.800166707853949,
+          "pearson": 0.6993372385970489,
+          "sd_truth": 0.9642146307769996,
+          "spearman": 0.6820017196155898,
+          "variance_of_differences": 0.9232351816797935
+        },
+        "usable_days": 84
+      },
+      "37447": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.1310664564391687,
+          "median_mat": 8.296906368888887,
+          "median_pipeline": 8.082960706015895,
+          "pearson": 0.7310080437422595,
+          "sd_truth": 0.9194216208194926,
+          "spearman": 0.7344173441734418,
+          "variance_of_differences": 0.9813477509313223
+        },
+        "usable_days": 84
+      },
+      "382410": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": 0.04742926154350677,
+          "median_mat": 8.128425266250002,
+          "median_pipeline": 8.039752661985574,
+          "pearson": 0.6281403196623097,
+          "sd_truth": 1.0226023556532813,
+          "spearman": 0.6309574340723327,
+          "variance_of_differences": 1.3937132809959136
+        },
+        "usable_days": 84
+      },
+      "389958": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.1576677346066193,
+          "median_mat": 8.226818713888889,
+          "median_pipeline": 7.78732730963327,
+          "pearson": 0.7140023019579529,
+          "sd_truth": 1.0210717648804055,
+          "spearman": 0.762758350475071,
+          "variance_of_differences": 1.0384830651091779
+        },
+        "usable_days": 84
+      },
+      "401263": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.24269773952484017,
+          "median_mat": 8.038180911666668,
+          "median_pipeline": 7.70464050404154,
+          "pearson": 0.6875490041653777,
+          "sd_truth": 0.8497477164333784,
+          "spearman": 0.6718363970788302,
+          "variance_of_differences": 0.7787784637866357
+        },
+        "usable_days": 84
+      },
+      "406218": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2855362665436516,
+          "median_mat": 8.18175743763889,
+          "median_pipeline": 7.992350581964505,
+          "pearson": 0.5668834898584358,
+          "sd_truth": 1.0348285666157955,
+          "spearman": 0.5284335172668996,
+          "variance_of_differences": 1.1859764649430884
+        },
+        "usable_days": 84
+      },
+      "408289": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.39345380423690623,
+          "median_mat": 8.130670953333333,
+          "median_pipeline": 7.561443387509749,
+          "pearson": 0.8001919277472479,
+          "sd_truth": 0.9831016270157552,
+          "spearman": 0.8293227108977917,
+          "variance_of_differences": 0.6444625576077774
+        },
+        "usable_days": 84
+      },
+      "415097": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2500289242840786,
+          "median_mat": 8.505618984444444,
+          "median_pipeline": 8.10540161927435,
+          "pearson": 0.6733195217122286,
+          "sd_truth": 0.9909595813186564,
+          "spearman": 0.700395076239919,
+          "variance_of_differences": 0.940251361374847
+        },
+        "usable_days": 84
+      },
+      "419875": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.198685724553128,
+          "median_mat": 8.176341696666666,
+          "median_pipeline": 7.820926706903622,
+          "pearson": 0.6600358742659173,
+          "sd_truth": 0.9242429704005889,
+          "spearman": 0.6953668331864042,
+          "variance_of_differences": 0.902391450969155
+        },
+        "usable_days": 84
+      },
+      "450464": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": 0.005489013011943172,
+          "median_mat": 8.299675582222221,
+          "median_pipeline": 8.253916798474394,
+          "pearson": 0.6391268044887947,
+          "sd_truth": 0.8996854191652996,
+          "spearman": 0.5956508962679988,
+          "variance_of_differences": 1.115682716849176
+        },
+        "usable_days": 84
+      },
+      "459048": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.16886735025416882,
+          "median_mat": 8.323584706111111,
+          "median_pipeline": 7.914906539473705,
+          "pearson": 0.756407275404356,
+          "sd_truth": 1.1253928649758929,
+          "spearman": 0.7091672924761376,
+          "variance_of_differences": 1.1936272904168108
+        },
+        "usable_days": 84
+      },
+      "462581": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.03418491655960432,
+          "median_mat": 8.254934303333332,
+          "median_pipeline": 7.956097222360695,
+          "pearson": 0.6439436455329713,
+          "sd_truth": 0.9787688959407084,
+          "spearman": 0.6191595650896268,
+          "variance_of_differences": 1.2114401239786166
+        },
+        "usable_days": 84
+      },
+      "476259": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.32570747518277726,
+          "median_mat": 8.373404113611112,
+          "median_pipeline": 7.758142715322737,
+          "pearson": 0.6925900649269313,
+          "sd_truth": 1.001862308234436,
+          "spearman": 0.6745137732501824,
+          "variance_of_differences": 1.1010940592282819
+        },
+        "usable_days": 84
+      },
+      "491676": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.30364589677951015,
+          "median_mat": 8.273036604166666,
+          "median_pipeline": 7.872671697809734,
+          "pearson": 0.7376934369315026,
+          "sd_truth": 0.913220805303318,
+          "spearman": 0.7278000892458725,
+          "variance_of_differences": 0.7780190207352645
+        },
+        "usable_days": 84
+      },
+      "495693": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.219043462275921,
+          "median_mat": 7.918144848888889,
+          "median_pipeline": 7.511952850226047,
+          "pearson": 0.7466315061838618,
+          "sd_truth": 0.9716543292085532,
+          "spearman": 0.6904909611345109,
+          "variance_of_differences": 0.8911231989183506
+        },
+        "usable_days": 84
+      },
+      "503108": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.08597203475736495,
+          "median_mat": 8.001622344027776,
+          "median_pipeline": 7.898952458652838,
+          "pearson": 0.7617858460071417,
+          "sd_truth": 0.9451776489405598,
+          "spearman": 0.7407080898118218,
+          "variance_of_differences": 1.0035407475689837
+        },
+        "usable_days": 84
+      },
+      "510121": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.22273306870221818,
+          "median_mat": 8.226579305833333,
+          "median_pipeline": 7.808246073411691,
+          "pearson": 0.7337460951378821,
+          "sd_truth": 1.0407184168082169,
+          "spearman": 0.691361652572349,
+          "variance_of_differences": 0.8454259438507497
+        },
+        "usable_days": 84
+      },
+      "510775": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3961931800159676,
+          "median_mat": 8.219447460138888,
+          "median_pipeline": 7.6573020236776355,
+          "pearson": 0.7863237911539798,
+          "sd_truth": 0.9959023580162379,
+          "spearman": 0.7951263046767014,
+          "variance_of_differences": 0.721323424473135
+        },
+        "usable_days": 84
+      },
+      "517859": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.21182645142072287,
+          "median_mat": 8.141764833888889,
+          "median_pipeline": 7.959837971070731,
+          "pearson": 0.6919622070867271,
+          "sd_truth": 0.9200491731693868,
+          "spearman": 0.6429294413426063,
+          "variance_of_differences": 0.9172862052120483
+        },
+        "usable_days": 84
+      },
+      "523513": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2714799804464326,
+          "median_mat": 8.359932540555555,
+          "median_pipeline": 7.7549152287731955,
+          "pearson": 0.5700246020424921,
+          "sd_truth": 0.8858121423051571,
+          "spearman": 0.5867916108879964,
+          "variance_of_differences": 1.1416257751622323
+        },
+        "usable_days": 84
+      },
+      "526254": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2628118082884654,
+          "median_mat": 8.251782640416668,
+          "median_pipeline": 7.685517664959731,
+          "pearson": 0.6629541805603871,
+          "sd_truth": 0.9974865927400737,
+          "spearman": 0.652572349016663,
+          "variance_of_differences": 1.4954343035571644
+        },
+        "usable_days": 84
+      },
+      "529420": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.33577515307920114,
+          "median_mat": 8.287921090972223,
+          "median_pipeline": 7.611495779609237,
+          "pearson": 0.7240966302409099,
+          "sd_truth": 0.9267258716104692,
+          "spearman": 0.7765370424788586,
+          "variance_of_differences": 0.7900507756421302
+        },
+        "usable_days": 84
+      },
+      "530800": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.12400286964583394,
+          "median_mat": 8.07906810138889,
+          "median_pipeline": 7.877872299634657,
+          "pearson": 0.7568394973664446,
+          "sd_truth": 1.0611655427423985,
+          "spearman": 0.7162634276945179,
+          "variance_of_differences": 0.9101841501189027
+        },
+        "usable_days": 84
+      },
+      "535820": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.33344549612138985,
+          "median_mat": 8.20852585125,
+          "median_pipeline": 7.705031688120923,
+          "pearson": 0.6949748705670133,
+          "sd_truth": 0.9918513000141894,
+          "spearman": 0.6548361467550419,
+          "variance_of_differences": 1.0525319231475005
+        },
+        "usable_days": 84
+      },
+      "537910": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3908191334417877,
+          "median_mat": 8.06907855,
+          "median_pipeline": 7.474988399294586,
+          "pearson": 0.6492625050172864,
+          "sd_truth": 0.9115893968384096,
+          "spearman": 0.6468910873847694,
+          "variance_of_differences": 0.9834749238424104
+        },
+        "usable_days": 84
+      },
+      "540733": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2639873879197643,
+          "median_mat": 8.311828311805556,
+          "median_pipeline": 7.96053423559648,
+          "pearson": 0.5675181020941641,
+          "sd_truth": 0.9348440609291706,
+          "spearman": 0.5102360662160839,
+          "variance_of_differences": 1.295786090367498
+        },
+        "usable_days": 84
+      },
+      "55096": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.11776642075964623,
+          "median_mat": 8.20037169361111,
+          "median_pipeline": 8.110936584204312,
+          "pearson": 0.6873638771916293,
+          "sd_truth": 0.9563539508020242,
+          "spearman": 0.7044437914258661,
+          "variance_of_differences": 0.7631586407236332
+        },
+        "usable_days": 84
+      },
+      "5651": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.20380787074741497,
+          "median_mat": 8.477269588611112,
+          "median_pipeline": 8.023286424049257,
+          "pearson": 0.6849353638115793,
+          "sd_truth": 0.8405558533588101,
+          "spearman": 0.6996549885177566,
+          "variance_of_differences": 0.8297708904156595
+        },
+        "usable_days": 84
+      },
+      "594021": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.21059899843898477,
+          "median_mat": 8.263892977083334,
+          "median_pipeline": 8.080645255907262,
+          "pearson": 0.6844004287199248,
+          "sd_truth": 0.9764143825613367,
+          "spearman": 0.6727070885166683,
+          "variance_of_differences": 0.9005065299796492
+        },
+        "usable_days": 84
+      },
+      "614080": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.36602511574624674,
+          "median_mat": 8.112203686527778,
+          "median_pipeline": 7.63350036274003,
+          "pearson": 0.8191463428658059,
+          "sd_truth": 0.9679425698504398,
+          "spearman": 0.8450822259226608,
+          "variance_of_differences": 0.9133855930515667
+        },
+        "usable_days": 84
+      },
+      "616592": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.20559633394865953,
+          "median_mat": 8.236882815138888,
+          "median_pipeline": 8.028107086900569,
+          "pearson": 0.7074603905063066,
+          "sd_truth": 0.9073255603356458,
+          "spearman": 0.7143479065312742,
+          "variance_of_differences": 1.1088650045435569
+        },
+        "usable_days": 84
+      },
+      "62107": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.16759880187145568,
+          "median_mat": 8.136386637361111,
+          "median_pipeline": 8.026029806616428,
+          "pearson": 0.7583916104098565,
+          "sd_truth": 0.95808527776063,
+          "spearman": 0.6956498079037016,
+          "variance_of_differences": 0.7826861532668669
+        },
+        "usable_days": 84
+      },
+      "634567": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.22712510477131145,
+          "median_mat": 8.232883071111111,
+          "median_pipeline": 7.623261014045104,
+          "pearson": 0.6525138073937023,
+          "sd_truth": 0.9057193164930537,
+          "spearman": 0.6659374625874773,
+          "variance_of_differences": 0.9936162661937478
+        },
+        "usable_days": 84
+      },
+      "634958": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.23875500761759305,
+          "median_mat": 8.347975814305556,
+          "median_pipeline": 8.021463756506346,
+          "pearson": 0.6638637851351635,
+          "sd_truth": 1.0025036394844655,
+          "spearman": 0.6671564306004506,
+          "variance_of_differences": 1.0812969473411895
+        },
+        "usable_days": 84
+      },
+      "652543": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3225496129472468,
+          "median_mat": 8.23071754,
+          "median_pipeline": 7.663332642098762,
+          "pearson": 0.7210212047086875,
+          "sd_truth": 1.0289949643957663,
+          "spearman": 0.7085578084696509,
+          "variance_of_differences": 1.0404741725377236
+        },
+        "usable_days": 84
+      },
+      "65886": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2960276524518081,
+          "median_mat": 8.140397747916666,
+          "median_pipeline": 7.707506829606892,
+          "pearson": 0.6644055820642644,
+          "sd_truth": 0.8558271572146307,
+          "spearman": 0.6757109739772097,
+          "variance_of_differences": 0.9023606188871907
+        },
+        "usable_days": 84
+      },
+      "659143": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.31094871525127116,
+          "median_mat": 8.098733067777777,
+          "median_pipeline": 7.614226521834035,
+          "pearson": 0.5891842926964134,
+          "sd_truth": 0.9053438321616192,
+          "spearman": 0.593800676962593,
+          "variance_of_differences": 0.998179733005513
+        },
+        "usable_days": 84
+      },
+      "665280": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.18765179865885998,
+          "median_mat": 8.149942227222223,
+          "median_pipeline": 7.901692063264019,
+          "pearson": 0.709060553308801,
+          "sd_truth": 1.0072316710794027,
+          "spearman": 0.7458451692950665,
+          "variance_of_differences": 0.9706433173042582
+        },
+        "usable_days": 84
+      },
+      "667809": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.366473289110248,
+          "median_mat": 8.122060098194444,
+          "median_pipeline": 7.631169412616893,
+          "pearson": 0.6451606730912278,
+          "sd_truth": 0.9335114223330456,
+          "spearman": 0.6381406384344969,
+          "variance_of_differences": 1.0654499449679529
+        },
+        "usable_days": 84
+      },
+      "681227": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.37964440312831615,
+          "median_mat": 8.07886582861111,
+          "median_pipeline": 7.620975864199487,
+          "pearson": 0.6675996120848684,
+          "sd_truth": 0.9646005083924313,
+          "spearman": 0.6508962679988246,
+          "variance_of_differences": 0.7859452234625464
+        },
+        "usable_days": 84
+      },
+      "688129": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.19829370626321496,
+          "median_mat": 8.628314347083332,
+          "median_pipeline": 8.227815938800564,
+          "pearson": 0.6605252713387512,
+          "sd_truth": 0.9174562316217175,
+          "spearman": 0.6871823336707263,
+          "variance_of_differences": 1.005714899128139
+        },
+        "usable_days": 84
+      },
+      "703352": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.39588258267063026,
+          "median_mat": 8.321755955,
+          "median_pipeline": 7.847985691661913,
+          "pearson": 0.743810515450249,
+          "sd_truth": 1.029599187220754,
+          "spearman": 0.7680260336739914,
+          "variance_of_differences": 0.7215237645419221
+        },
+        "usable_days": 84
+      },
+      "715601": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.21283102379189703,
+          "median_mat": 8.257887204583334,
+          "median_pipeline": 7.789814538595062,
+          "pearson": 0.7681517455020375,
+          "sd_truth": 0.9903412167450392,
+          "spearman": 0.801656490460487,
+          "variance_of_differences": 0.7594036214589598
+        },
+        "usable_days": 84
+      },
+      "725162": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.1163039073200426,
+          "median_mat": 8.24137603736111,
+          "median_pipeline": 8.019659348394452,
+          "pearson": 0.7894022524799121,
+          "sd_truth": 1.1073094013417628,
+          "spearman": 0.7904463381983218,
+          "variance_of_differences": 1.1654224919641747
+        },
+        "usable_days": 84
+      },
+      "735536": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3427285186277812,
+          "median_mat": 8.0190248575,
+          "median_pipeline": 7.659541507416257,
+          "pearson": 0.7280365044208884,
+          "sd_truth": 1.0309759629993895,
+          "spearman": 0.7152185979691124,
+          "variance_of_differences": 0.794718329420508
+        },
+        "usable_days": 84
+      },
+      "736869": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.23272027666121506,
+          "median_mat": 8.307496497222221,
+          "median_pipeline": 8.147450050114383,
+          "pearson": 0.7352883882893783,
+          "sd_truth": 1.0289825499488605,
+          "spearman": 0.7170470499885723,
+          "variance_of_differences": 0.8709547361169032
+        },
+        "usable_days": 84
+      },
+      "738771": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.19286326328490622,
+          "median_mat": 8.353144045555556,
+          "median_pipeline": 7.929254046985362,
+          "pearson": 0.729071367990227,
+          "sd_truth": 0.9289241104354605,
+          "spearman": 0.7400768385193892,
+          "variance_of_differences": 0.8497109483699903
+        },
+        "usable_days": 84
+      },
+      "739904": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.21571213860039654,
+          "median_mat": 8.032317331805555,
+          "median_pipeline": 7.803383159678567,
+          "pearson": 0.6885546264470904,
+          "sd_truth": 0.9515567826352659,
+          "spearman": 0.654357266464231,
+          "variance_of_differences": 0.8275028852795396
+        },
+        "usable_days": 84
+      },
+      "750981": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3509360571951943,
+          "median_mat": 7.992004383055555,
+          "median_pipeline": 7.613023547610659,
+          "pearson": 0.7792213544761116,
+          "sd_truth": 0.9751722852320996,
+          "spearman": 0.768657284966424,
+          "variance_of_differences": 0.8783308162021553
+        },
+        "usable_days": 84
+      },
+      "751216": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.13863667508316596,
+          "median_mat": 8.184733541944446,
+          "median_pipeline": 7.9001111578637175,
+          "pearson": 0.6620236753513107,
+          "sd_truth": 0.8395753822561137,
+          "spearman": 0.6244272482885471,
+          "variance_of_differences": 1.0537805942153744
+        },
+        "usable_days": 84
+      },
+      "753215": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.28143440878283243,
+          "median_mat": 8.149759760972223,
+          "median_pipeline": 7.6401423160821,
+          "pearson": 0.6388573047114181,
+          "sd_truth": 0.8070040263592398,
+          "spearman": 0.6243401791447634,
+          "variance_of_differences": 1.0393572532252504
+        },
+        "usable_days": 84
+      },
+      "756070": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.15617584057110834,
+          "median_mat": 8.37579584972222,
+          "median_pipeline": 7.8244701115655175,
+          "pearson": 0.6446235974048633,
+          "sd_truth": 0.9442567775722627,
+          "spearman": 0.669637901198289,
+          "variance_of_differences": 1.283714700127186
+        },
+        "usable_days": 84
+      },
+      "763505": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.23943254672564884,
+          "median_mat": 8.377936935833333,
+          "median_pipeline": 8.113040269972267,
+          "pearson": 0.5858335329269918,
+          "sd_truth": 0.8425948327315315,
+          "spearman": 0.5873140257506992,
+          "variance_of_differences": 0.9075561822351235
+        },
+        "usable_days": 84
+      },
+      "771497": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.10764666460091014,
+          "median_mat": 8.246765841111111,
+          "median_pipeline": 7.8710341631111325,
+          "pearson": 0.7103750481447987,
+          "sd_truth": 0.9869840478998856,
+          "spearman": 0.6946267454642419,
+          "variance_of_differences": 0.9994416377155476
+        },
+        "usable_days": 84
+      },
+      "777285": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.17557817228510214,
+          "median_mat": 8.104686585972223,
+          "median_pipeline": 7.9300302659808555,
+          "pearson": 0.7572431005682735,
+          "sd_truth": 1.1624198266175205,
+          "spearman": 0.7659581415091261,
+          "variance_of_differences": 0.9820974406866398
+        },
+        "usable_days": 84
+      },
+      "784245": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.13018647214413426,
+          "median_mat": 8.273757995277778,
+          "median_pipeline": 7.760559575632545,
+          "pearson": 0.735448734585913,
+          "sd_truth": 1.0780147916013019,
+          "spearman": 0.751025783350203,
+          "variance_of_differences": 1.1819304947572793
+        },
+        "usable_days": 84
+      },
+      "786233": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.21106019880372018,
+          "median_mat": 8.142134797361113,
+          "median_pipeline": 7.852764942068738,
+          "pearson": 0.7402321627230357,
+          "sd_truth": 0.9995372654166343,
+          "spearman": 0.7327194958696576,
+          "variance_of_differences": 0.8289219253453342
+        },
+        "usable_days": 84
+      },
+      "806372": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3237819450426895,
+          "median_mat": 8.229789583472222,
+          "median_pipeline": 7.747208041917017,
+          "pearson": 0.57418769026713,
+          "sd_truth": 0.8856297723025077,
+          "spearman": 0.5386423743755511,
+          "variance_of_differences": 0.9585314102346586
+        },
+        "usable_days": 84
+      },
+      "807699": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.17162362735509612,
+          "median_mat": 8.237355063611112,
+          "median_pipeline": 7.950245782905048,
+          "pearson": 0.6945223780097782,
+          "sd_truth": 0.9390527572803337,
+          "spearman": 0.6404479707447677,
+          "variance_of_differences": 1.1989998937370667
+        },
+        "usable_days": 84
+      },
+      "833822": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.14326455083802528,
+          "median_mat": 8.007492447916666,
+          "median_pipeline": 7.689948533601511,
+          "pearson": 0.7342519710956168,
+          "sd_truth": 0.947486048382198,
+          "spearman": 0.7514611290691221,
+          "variance_of_differences": 0.9797441889287273
+        },
+        "usable_days": 84
+      },
+      "83524": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2821411080290143,
+          "median_mat": 8.232826206111111,
+          "median_pipeline": 7.642620261870933,
+          "pearson": 0.7493417273706096,
+          "sd_truth": 0.9017069385177352,
+          "spearman": 0.7663064180842611,
+          "variance_of_differences": 0.76039710157236
+        },
+        "usable_days": 84
+      },
+      "848994": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.22876479716727077,
+          "median_mat": 8.173009160416667,
+          "median_pipeline": 8.070460229827711,
+          "pearson": 0.7966954540781562,
+          "sd_truth": 1.040051317894019,
+          "spearman": 0.7688096559680457,
+          "variance_of_differences": 0.9619579197239483
+        },
+        "usable_days": 84
+      },
+      "860088": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.1812255764323227,
+          "median_mat": 8.211564841805556,
+          "median_pipeline": 7.826954864643258,
+          "pearson": 0.7312863134831138,
+          "sd_truth": 0.9109213641763799,
+          "spearman": 0.7595803267269621,
+          "variance_of_differences": 0.8348966727608977
+        },
+        "usable_days": 84
+      },
+      "866489": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.26637460538802205,
+          "median_mat": 8.137759989027778,
+          "median_pipeline": 7.709855511516313,
+          "pearson": 0.7132080932547923,
+          "sd_truth": 0.9758632331663148,
+          "spearman": 0.6868993589534289,
+          "variance_of_differences": 0.9944685345289219
+        },
+        "usable_days": 84
+      },
+      "878702": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.17384132399932148,
+          "median_mat": 8.198214614444444,
+          "median_pipeline": 7.873727521198919,
+          "pearson": 0.6972597691768634,
+          "sd_truth": 0.9752319421349365,
+          "spearman": 0.6844831902134284,
+          "variance_of_differences": 1.0618680126534374
+        },
+        "usable_days": 84
+      },
+      "889690": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2022039286031789,
+          "median_mat": 8.14068972736111,
+          "median_pipeline": 7.942571461368016,
+          "pearson": 0.6641649253266185,
+          "sd_truth": 0.9600596780242666,
+          "spearman": 0.6690719517636944,
+          "variance_of_differences": 1.0771998010609485
+        },
+        "usable_days": 84
+      },
+      "911149": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.08619289414106696,
+          "median_mat": 8.352970982777778,
+          "median_pipeline": 8.213503282148778,
+          "pearson": 0.6387789474079234,
+          "sd_truth": 0.8749211218250398,
+          "spearman": 0.6146319696128688,
+          "variance_of_differences": 0.8984858364446837
+        },
+        "usable_days": 84
+      },
+      "91388": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.29094886715223867,
+          "median_mat": 8.096435649166667,
+          "median_pipeline": 7.856272464164618,
+          "pearson": 0.6561862464624725,
+          "sd_truth": 0.9996728263782677,
+          "spearman": 0.5871616547490776,
+          "variance_of_differences": 1.1321295951495305
+        },
+        "usable_days": 84
+      },
+      "914904": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2711712024408436,
+          "median_mat": 8.265862036666668,
+          "median_pipeline": 8.018222401394041,
+          "pearson": 0.7344112297127706,
+          "sd_truth": 0.9048376843409944,
+          "spearman": 0.6997855922334325,
+          "variance_of_differences": 0.9796244360858001
+        },
+        "usable_days": 84
+      },
+      "918997": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.2303506388591298,
+          "median_mat": 8.071371799999998,
+          "median_pipeline": 7.745433363912548,
+          "pearson": 0.6603832347812998,
+          "sd_truth": 1.1164893209188105,
+          "spearman": 0.6486977721182835,
+          "variance_of_differences": 1.1291542223345832
+        },
+        "usable_days": 84
+      },
+      "922196": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.37625282550443456,
+          "median_mat": 8.209291559722223,
+          "median_pipeline": 7.7147767366148425,
+          "pearson": 0.7170405753831268,
+          "sd_truth": 1.0168498875374081,
+          "spearman": 0.7390537760799295,
+          "variance_of_differences": 0.718234990469268
+        },
+        "usable_days": 84
+      },
+      "945003": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.20302435973710584,
+          "median_mat": 8.235535712638889,
+          "median_pipeline": 8.003607778037825,
+          "pearson": 0.7015249611911827,
+          "sd_truth": 0.947390473413598,
+          "spearman": 0.7169164462728964,
+          "variance_of_differences": 1.066403459019817
+        },
+        "usable_days": 84
+      },
+      "94990": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.34260149631386966,
+          "median_mat": 8.419347645277778,
+          "median_pipeline": 7.81132448900689,
+          "pearson": 0.7612520034460221,
+          "sd_truth": 1.087280798237533,
+          "spearman": 0.8020483016075141,
+          "variance_of_differences": 0.8070758269335073
+        },
+        "usable_days": 84
+      },
+      "985185": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.3702890571202042,
+          "median_mat": 8.304408170000002,
+          "median_pipeline": 7.687286533075772,
+          "pearson": 0.775844102389816,
+          "sd_truth": 1.0336743880926702,
+          "spearman": 0.7928407396523764,
+          "variance_of_differences": 0.7113642995331587
+        },
+        "usable_days": 84
+      },
+      "988559": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.22317425634598204,
+          "median_mat": 8.122320003194446,
+          "median_pipeline": 7.733289780349266,
+          "pearson": 0.7790925068030446,
+          "sd_truth": 0.9189551504501354,
+          "spearman": 0.7693320708307485,
+          "variance_of_differences": 0.7430789631343458
+        },
+        "usable_days": 84
+      },
+      "993400": {
+        "closed_days": 84,
+        "included": true,
+        "matched_days": 82,
+        "sleep": {
+          "constant": false,
+          "mean_difference": -0.21813767507955673,
+          "median_mat": 7.987220771944445,
+          "median_pipeline": 7.592573598667919,
+          "pearson": 0.600180318243543,
+          "sd_truth": 0.9244013125856525,
+          "spearman": 0.5725993404512358,
+          "variance_of_differences": 1.1993430209898677
+        },
+        "usable_days": 84
+      }
+    },
+    "included": 100,
+    "sleep": {
+      "homes_with_constant_values": [],
+      "limits_of_agreement": {
+        "between_home_sd": 0.09347114807684405,
+        "bias": -0.2336303953006068,
+        "high": 1.7162586261238162,
+        "low": -2.1835194167250296,
+        "within_home_sd": 0.9904405238070906
+      },
+      "mean_difference": {
+        "estimate": -0.2336303953006068,
+        "homes": 100,
+        "interval": {
+          "confidence": 0.95,
+          "high": -0.215083691650775,
+          "low": -0.2521770989504386,
+          "method": "student_t"
+        },
+        "sd": 0.09347114807684405
+      },
+      "median_within_home_sd_of_truth": 0.9662715391214356,
+      "pearson": {
+        "estimate": 0.6992950468928033,
+        "homes": 100,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.7106128918339969,
+          "low": 0.6879772019516097,
+          "method": "student_t"
+        },
+        "sd": 0.05703935213407381
+      },
+      "spearman": {
+        "estimate": 0.6952804170611987,
+        "homes": 100,
+        "interval": {
+          "confidence": 0.95,
+          "high": 0.7091199269537007,
+          "low": 0.6814409071686967,
+          "method": "student_t"
+        },
+        "sd": 0.06974796723431417
+      }
+    }
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    5651,
+    27748,
+    37447,
+    55096,
+    62107,
+    65886,
+    83524,
+    91388,
+    94990,
+    100084,
+    104628,
+    118138,
+    121411,
+    136867,
+    149993,
+    169855,
+    174894,
+    181543,
+    188540,
+    214386,
+    221133,
+    236653,
+    279584,
+    295886,
+    307587,
+    314515,
+    315485,
+    324638,
+    341463,
+    367337,
+    368874,
+    370642,
+    372611,
+    382410,
+    389958,
+    401263,
+    406218,
+    408289,
+    415097,
+    419875,
+    450464,
+    459048,
+    462581,
+    476259,
+    491676,
+    495693,
+    503108,
+    510121,
+    510775,
+    517859,
+    523513,
+    526254,
+    529420,
+    530800,
+    535820,
+    537910,
+    540733,
+    594021,
+    614080,
+    616592,
+    634567,
+    634958,
+    652543,
+    659143,
+    665280,
+    667809,
+    681227,
+    688129,
+    703352,
+    715601,
+    725162,
+    735536,
+    736869,
+    738771,
+    739904,
+    750981,
+    751216,
+    753215,
+    756070,
+    763505,
+    771497,
+    777285,
+    784245,
+    786233,
+    806372,
+    807699,
+    833822,
+    848994,
+    860088,
+    866489,
+    878702,
+    889690,
+    911149,
+    914904,
+    918997,
+    922196,
+    945003,
+    985185,
+    988559,
+    993400
+  ],
+  "selective_prediction": null,
+  "sensor_subset": [
+    "front_door",
+    "bedroom_motion",
+    "bathroom_motion",
+    "kitchen_motion",
+    "living_motion",
+    "fridge_contact"
+  ],
+  "split": null,
+  "structural_disagreement": null
+}

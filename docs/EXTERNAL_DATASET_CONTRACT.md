@@ -69,6 +69,8 @@ layout. Two datasets have one:
   silent-home rule on the same homes in the [silent-home
   results](SILENT_HOME_RESULTS.md), and of the calibrated baseline reference
   in the [threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md).
+  The [sleep-mat comparison](SLEEP_MAT_RESULTS.md) reads the dataset's
+  `Sleep.csv` itself, beside the adapter, which still does not.
 
 ## The mapping layer
 

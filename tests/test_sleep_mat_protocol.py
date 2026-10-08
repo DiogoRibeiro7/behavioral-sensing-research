@@ -148,3 +148,73 @@ class TestTheFrozenProtocol:
             "distributions",
             "defaults",
         }
+
+
+RECORD = ROOT / "artifacts/sleep_mat/sleep-mat.json"
+SIMULATED = ROOT / "artifacts/sleep_mat/sleep-mat-simulated.json"
+RUN_COMMIT = "c42d69a"
+
+
+@pytest.mark.skipif(not RECORD.exists(), reason="the protocol has not been run yet")
+class TestThePublishedRun:
+    def records(self) -> tuple[dict, dict]:
+        return (
+            json.loads(RECORD.read_text(encoding="utf-8")),
+            json.loads(SIMULATED.read_text(encoding="utf-8")),
+        )
+
+    def test_both_records_come_from_the_frozen_commit_unchanged(self) -> None:
+        frozen = json.loads(FROZEN.read_text(encoding="utf-8"))
+        for record in self.records():
+            assert record["environment"]["git_commit"].startswith(RUN_COMMIT)
+            assert record["environment"]["git_dirty"] == "false"
+            assert (
+                record["configuration"]["protocol_sha256"] == frozen["protocol_sha256"]
+            )
+        tihm, _ = self.records()
+        assert not any(tihm["configuration"]["code_changed_since_the_freeze"].values())
+
+    def test_the_criteria_are_recomputed_from_the_homes(self) -> None:
+        from scipy import stats
+
+        from sensor_modeling.datasets.sleep_mat_experiment import (
+            level_reading,
+            tracking_reading,
+        )
+
+        tihm, _ = self.records()
+        rows = [
+            row for row in tihm["household_metrics"]["off"].values() if row["included"]
+        ]
+        protocol = declared_protocol()
+        for key, criterion, reading, margin in (
+            (
+                "sleep_spearman",
+                "C1_the_pipeline_follows_the_mat",
+                tracking_reading,
+                protocol.tracking_margin,
+            ),
+            (
+                "sleep_mean_difference",
+                "C2_the_pipeline_agrees_in_level",
+                level_reading,
+                protocol.level_margin_hours,
+            ),
+        ):
+            values = [row[key] for row in rows]
+            n = len(values)
+            mean = sum(values) / n
+            sd = (sum((v - mean) ** 2 for v in values) / (n - 1)) ** 0.5
+            half = stats.t.ppf(0.975, n - 1) * sd / n**0.5
+            found = tihm["results"]["criteria"][criterion]
+            assert found["estimate"]["estimate"] == pytest.approx(mean)
+            assert found["estimate"]["interval"]["low"] == pytest.approx(mean - half)
+            assert found["estimate"]["interval"]["high"] == pytest.approx(mean + half)
+            assert found["reading"] == reading(found["estimate"], margin)
+
+    def test_the_page_is_the_records(self) -> None:
+        from sensor_modeling.datasets.sleep_mat_summary import RESULTS_PAGE, render_page
+
+        tihm, simulated = self.records()
+        page = (ROOT / "docs" / RESULTS_PAGE).read_text(encoding="utf-8")
+        assert page == render_page(tihm, simulated)

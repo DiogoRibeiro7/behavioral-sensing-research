@@ -147,6 +147,26 @@ of evaluable days of sleep, against the default's 17.4%. Real days are far
 from what its score assumes. See
 [the threshold-calibration results](docs/THRESHOLD_CALIBRATION_RESULTS.md).
 
+Every alerting study here counts its detections on `sleeping_hours`, the
+hours of a day the pipeline gives to sleep. In 17 TIHM homes a mat under the
+mattress recorded each minute a person was in bed, so the two were set side
+by side, under a protocol frozen before any value of the pipeline was set
+beside any record of the mat. On the days the sensors reported throughout, in
+the 14 homes with enough of them:
+
+- **Within a home, the pipeline's hours of sleep barely follow the mat's.** A
+  mean within-home Spearman correlation of 0.11 [0.03, 0.19], against a
+  declared margin of 0.5. On simulated homes, against the simulator's true
+  hours of sleep, the same correlation is 0.70 [0.68, 0.71].
+- **It counts more sleep than the mat does, and more than the time in bed.**
+  3.95 hours a day more than the mat's sleep [+1.54, +6.37], and 1.97 more
+  than its hours in bed.
+- **A deviation in one is not a deviation in the other.** The deviations a
+  personal baseline gives the two correlate at 0.03 [−0.04, 0.11].
+
+The mat's stages are the device's own and are not validated here. See
+[the sleep-mat results](docs/SLEEP_MAT_RESULTS.md).
+
 The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
 under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz
 are acknowledged, as the dataset asks. It is not redistributed here.
