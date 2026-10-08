@@ -439,7 +439,10 @@ def _curves(plt: Any, data: Mapping[str, Any]) -> Any:
             )
         axis.set_title(_CHANGES[arm], fontsize=9)
         axis.set_xlabel("false alerts per home")
-        axis.set_xlim(left=-0.05)
+        # The comparison is about where the default ships; the most sensitive
+        # multiples raise many times as many false alerts, and the tables
+        # hold them.
+        axis.set_xlim(-0.05, max(4.0 * data["match"]["false_alerts"], 1.0))
         axis.axhline(0.0, color="#BBBBBB", lw=0.6)
     axes[0][0].set_ylabel("excess detection (% of homes)")
     axes[0][0].legend(frameon=False, fontsize=7, loc="lower right")

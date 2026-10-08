@@ -72,6 +72,7 @@ from sensor_modeling.datasets.threshold_calibration_protocol import (
     TIHM_SCHEMA,
     TRACKED_FEATURE,
     ThresholdCalibrationProtocol,
+    between_the_freeze_and_the_run,
     equivalent_threshold,
     nominal,
 )
@@ -2151,7 +2152,9 @@ class TestPages:
         assert "| the step change | 0.25 | 0.75 | +0.50 [" in page
         assert "400 of 400 resamples bracketed" in page
         assert "| C2, at 1.5 | The threshold means what it says | **" in page
-        assert "## Between the freeze and the run" not in page
+        assert ("## Between the freeze and the run" in page) == bool(
+            between_the_freeze_and_the_run()
+        )
         assert "## TIHM" not in page
         assert "tuning" not in page and "tuned" not in page
 
@@ -2492,3 +2495,32 @@ class TestOneArm:
             list(protocol.checked_conditions)
         ] * 4
         assert [entry[2] for entry in replays[4:]] == [[]] * 4
+
+
+class TestRounding:
+    """The page rounds a half as a reader does, away from zero."""
+
+    def test_a_half_is_rounded_up(self) -> None:
+        from sensor_modeling.datasets import threshold_calibration_summary as summary
+
+        assert summary._n(342 / 400) == "0.86"
+        assert summary._n(294 / 400) == "0.74"
+        assert summary._signed(-0.125) == "-0.13"
+        assert summary._signed(0.105) == "+0.11"
+        assert summary._n(12345.675) == "12,345.68"
+
+    def test_a_share_is_rounded_up_in_percent(self) -> None:
+        from sensor_modeling.datasets import threshold_calibration_summary as summary
+
+        assert summary._percent_of(0.00275, 2) == "0.28%"
+        assert summary._percent_of(42 / 400, 0) == "11%"
+        assert summary._percent_of(0.0035, 2) == "0.35%"
+
+    def test_a_threshold_is_three_significant_figures(self) -> None:
+        from sensor_modeling.datasets import threshold_calibration_summary as summary
+
+        assert summary._significant(3 * 0.575) == "1.73"
+        assert summary._significant(3.5) == "3.5"
+        assert summary._significant(3.0) == "3"
+        assert summary._significant(3 * 0.3) == "0.9"
+        assert summary._significant(0.0) == "0"

@@ -11,6 +11,7 @@ from the record of the description on TIHM. Every home is shown.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 PROTOCOL_FILE = "artifacts/threshold_calibration/threshold_calibration_protocol.json"
@@ -157,8 +158,8 @@ def _expected(expected: Mapping[str, Any]) -> list[str]:
         return [
             label,
             multiple,
-            f"{100.0 * values[prefix + '_false']:.1f}%",
-            f"{100.0 * values[prefix + '_found']:.1f}%",
+            _percent_of(values[prefix + "_false"], 1),
+            _percent_of(values[prefix + "_found"], 1),
         ]
 
     lines = [
@@ -464,6 +465,52 @@ _STATUS_TITLES = {
 _REFERENCES = ("default", "calibrated")
 
 
+def _decimal(value: Any, scale: int = 0) -> Decimal:
+    """A number as the decimal it was written as, times ten to ``scale``.
+
+    It is rounded to twelve places first, so that three times 0.575 is 1.725
+    and not the binary fraction just under it.
+    """
+    return Decimal(repr(round(float(value), 12))).scaleb(scale)
+
+
+def _fixed(
+    value: Any,
+    digits: int = 2,
+    *,
+    sign: bool = False,
+    group: bool = False,
+    scale: int = 0,
+) -> str:
+    """A number to ``digits`` places, a half rounded away from zero.
+
+    Python rounds a half to the even digit, and a binary float written as
+    0.855 is just under it, so 342 false alerts in 400 homes would be shown
+    as 0.85. A reader rounds it to 0.86.
+    """
+    number = _decimal(value, scale).quantize(
+        Decimal(1).scaleb(-digits), rounding=ROUND_HALF_UP
+    )
+    return format(
+        number, ("+" if sign else "") + ("," if group else "") + f".{digits}f"
+    )
+
+
+def _percent_of(value: Any, digits: int) -> str:
+    """A share as a percentage to ``digits`` places."""
+    return _fixed(value, digits, scale=2) + "%"
+
+
+def _significant(value: Any, digits: int = 3) -> str:
+    """A number to ``digits`` significant figures, without trailing zeros."""
+    number = _decimal(value)
+    if number == 0:
+        return "0"
+    exponent = number.adjusted() - digits + 1
+    rounded = number.quantize(Decimal(1).scaleb(exponent), rounding=ROUND_HALF_UP)
+    return format(rounded.normalize(), "f")
+
+
 def _n(value: Any, digits: int = 2) -> str:
     """A number as the page shows it; a missing one as a dash."""
     if value is None:
@@ -472,11 +519,11 @@ def _n(value: Any, digits: int = 2) -> str:
         return "yes" if value else "no"
     if isinstance(value, int):
         return f"{value:,}"
-    return f"{value:,.{digits}f}"
+    return _fixed(value, digits, group=True)
 
 
 def _signed(value: Any, digits: int = 2) -> str:
-    return "–" if value is None else f"{value:+.{digits}f}"
+    return "–" if value is None else _fixed(value, digits, sign=True)
 
 
 def _interval(
@@ -503,7 +550,7 @@ def _difference(entry: Mapping[str, Any] | None, digits: int = 2) -> str:
         return "–"
     text = _interval(entry, digits, signed=True)
     if entry.get("mcse") is not None:
-        text += f", SE {entry['mcse']:.{digits}f}"
+        text += f", SE {_fixed(entry['mcse'], digits)}"
     return text
 
 
@@ -511,10 +558,13 @@ def _share(entry: Mapping[str, Any]) -> str:
     """A share of homes with its count and Wilson interval."""
     if entry.get("estimate") is None:
         return "–"
-    text = f"{entry['count']} of {entry['homes']} ({entry['estimate']:.0%})"
+    text = f"{entry['count']} of {entry['homes']} ({_percent_of(entry['estimate'], 0)})"
     interval = entry.get("interval")
     if interval:
-        text += f" [{interval['low']:.0%}, {interval['high']:.0%}]"
+        text += (
+            f" [{_percent_of(interval['low'], 0)}, "
+            f"{_percent_of(interval['high'], 0)}]"
+        )
     return text
 
 
@@ -522,12 +572,12 @@ def _percent(entry: Mapping[str, Any] | None, digits: int = 2) -> str:
     """A share of days with its interval, in percent."""
     if entry is None or entry.get("estimate") is None:
         return "–"
-    text = f"{100.0 * entry['estimate']:.{digits}f}%"
+    text = _percent_of(entry["estimate"], digits)
     interval = entry.get("interval")
     if interval:
         text += (
-            f" [{100.0 * interval['low']:.{digits}f}, "
-            f"{100.0 * interval['high']:.{digits}f}]"
+            f" [{_fixed(interval['low'], digits, scale=2)}, "
+            f"{_fixed(interval['high'], digits, scale=2)}]"
         )
     return text
 
@@ -538,7 +588,7 @@ def _threshold(entry: Mapping[str, Any]) -> str:
         return "–"
 
     def show(number: Any) -> str:
-        return "none passed" if number is None else f"{number:.2f}"
+        return "none passed" if number is None else _fixed(number)
 
     text = show(entry.get("equivalent_threshold"))
     interval = entry.get("equivalent_threshold_interval")
@@ -591,8 +641,8 @@ def _thresholds_of(payload: Mapping[str, Any], condition: str) -> str:
         if model["name"] == f"replay_{condition}":
             settings = model["configuration"]
             return (
-                f"{settings['deviation_threshold']:.3g} and "
-                f"{settings['trend_threshold']:.3g}"
+                f"{_significant(settings['deviation_threshold'])} and "
+                f"{_significant(settings['trend_threshold'])}"
             )
     return "–"
 
@@ -685,7 +735,7 @@ def _match_part(payload: Mapping[str, Any]) -> list[str]:
     if match["status"] == "bracketed":
         low, high = match["between"]
         where = (
-            f"at {match['multiple']:.3f} times the declared thresholds, between "
+            f"at {_fixed(match['multiple'], 3)} times the declared thresholds, between "
             f"the multiples {low:g} and {high:g} of the grid"
         )
     elif match["status"] == "not_reached":
@@ -1019,7 +1069,7 @@ def _calibration_part(payload: Mapping[str, Any]) -> list[str]:
                 [
                     reference,
                     threshold,
-                    f"{100.0 * entry['stated']:.2f}%",
+                    _percent_of(entry["stated"], 2),
                     _percent(entry),
                     _threshold(entry),
                     verdicts[threshold] if reference == "calibrated" else "described",
@@ -1082,7 +1132,8 @@ def _calibration_part(payload: Mapping[str, Any]) -> list[str]:
                 "",
                 "What the thresholds state: "
                 + ", ".join(
-                    f"{100.0 * tail[next(iter(tail))][point]['stated']:.2f}% at {point}"
+                    f"{_percent_of(tail[next(iter(tail))][point]['stated'], 2)} "
+                    f"at {point}"
                     for point in points
                 )
                 + ".",
@@ -1191,7 +1242,8 @@ def _curves_part(payload: Mapping[str, Any]) -> list[str]:
                         _interval(entry["false_alerts_per_home"]),
                         *(
                             f"{_interval(entry[arm]['excess_detection'])}; "
-                            f"{entry[arm]['detected']['estimate']:.0%} detected"
+                            f"{_percent_of(entry[arm]['detected']['estimate'], 0)} "
+                            "detected"
                             for arm in arms
                         ),
                     ]
@@ -1267,7 +1319,9 @@ def _features_part(payload: Mapping[str, Any]) -> list[str]:
                     (
                         "–"
                         if entry["share_of_days_under_a_hundredth_of_an_hour"] is None
-                        else f"{entry['share_of_days_under_a_hundredth_of_an_hour']:.1%}"
+                        else _percent_of(
+                            entry["share_of_days_under_a_hundredth_of_an_hour"], 1
+                        )
                     ),
                 ]
                 for name, entry in sorted(features.items())
@@ -1295,8 +1349,8 @@ def _tihm_cell(entry: Mapping[str, Any]) -> str:
     if entry["share"] is None:
         return "–"
     equivalent = entry["equivalent_threshold"]
-    shown = "none passed" if equivalent is None else f"{equivalent:.2f}"
-    return f"{100.0 * entry['share']:.1f}% ({shown})"
+    shown = "none passed" if equivalent is None else _fixed(equivalent)
+    return f"{_percent_of(entry['share'], 1)} ({shown})"
 
 
 def _tihm_part(tihm: Mapping[str, Any], payload: Mapping[str, Any]) -> list[str]:

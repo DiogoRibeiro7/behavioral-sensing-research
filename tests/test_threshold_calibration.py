@@ -637,3 +637,171 @@ class TestDeclaration:
         assert not any(
             "same detection" in text for text in declared["estimands"].values()
         )
+
+
+# ----------------------------------------------------------------------------
+# The published run and description
+# ----------------------------------------------------------------------------
+RUN_COMMIT = "b0f6035"
+RECORD = ROOT / "artifacts/threshold_calibration/threshold-calibration.json"
+TIHM_RECORD = ROOT / "artifacts/threshold_calibration/threshold-calibration-tihm.json"
+
+
+@pytest.fixture(scope="module")
+def published() -> dict:
+    return load_record(RECORD)
+
+
+@pytest.fixture(scope="module")
+def described() -> dict:
+    return load_record(TIHM_RECORD)
+
+
+def flags(text: str) -> list[int]:
+    return [int(character) for character in text]
+
+
+class TestPublishedRun:
+    """The record of the protocol's test, as published."""
+
+    def test_it_ran_the_frozen_protocol_from_a_clean_commit(
+        self, published: dict
+    ) -> None:
+        protocol = declared_protocol()
+        configuration = published["configuration"]
+        assert configuration["protocol_sha256"] == protocol.sha256()
+        assert configuration["protocol_file_sha256"] == check_frozen_protocol(
+            protocol, FROZEN
+        )
+        assert published["inputs"][0]["sha256"] == configuration["protocol_file_sha256"]
+        assert {entry["source"] for entry in published["inputs"]} >= {
+            NULL_RECORD,
+            PLANNING_RECORD,
+        }
+        assert published["environment"]["git_dirty"] == "false"
+        assert published["environment"]["git_commit"].startswith(RUN_COMMIT)
+        assert published["data_source"] == "simulator"
+        assert configuration["code_changed_since_the_freeze"] == {
+            "sources": [],
+            "distributions": [],
+            "defaults": [],
+        }
+        assert configuration["between_the_freeze_and_the_run"] == list(
+            between_the_freeze_and_the_run(ROOT)
+        )
+
+    def test_every_home_of_the_protocol_is_in_it(self, published: dict) -> None:
+        protocol = declared_protocol()
+        results, seeds = published["results"], protocol.study_seeds()
+        assert results["homes"] == protocol.homes == 400
+        assert published["seeds"] == [protocol.seed_root, protocol.seed, *seeds]
+        assert results["raw"]["seeds"] == list(seeds)
+        rows = published["household_metrics"]["simulated_homes"]
+        assert set(rows) == {str(seed) for seed in seeds}
+        check = results["check"]
+        assert check["default_replays"] == 4 * 400
+        assert check["default_replays_that_differ"] == []
+        assert check["calibrated_runs_checked"] == 10 * 4 * 3
+        assert check["calibrated_runs_that_differ"] == []
+
+    def test_the_criteria_are_what_the_estimands_decide(self, published: dict) -> None:
+        from sensor_modeling.datasets.threshold_calibration_experiment import (
+            criteria,
+        )
+
+        results = published["results"]
+        assert criteria(results, declared_protocol()) == results["criteria"]
+
+    def test_the_match_is_what_the_homes_own_counts_give(self, published: dict) -> None:
+        import numpy as np
+
+        from sensor_modeling.datasets import threshold_calibration_experiment as e
+
+        protocol = declared_protocol()
+        conditions = published["results"]["raw"]["conditions"]
+        homes = protocol.homes
+
+        def counts(name: str) -> np.ndarray:
+            return np.array(
+                [int(v) for v in conditions[name]["false_alerts"].split()],
+                dtype=np.int64,
+            )
+
+        def net(name: str, arm: str) -> np.ndarray:
+            found = conditions[name]
+            return np.array(flags(found[f"{arm}/detected"])) - np.array(
+                flags(found[f"{arm}/false_detection"])
+            )
+
+        names = [condition_name(CALIBRATED, s) for s in protocol.curve_scales]
+        samples = e._samples(homes, protocol)
+        false = samples @ np.column_stack([counts(name) for name in names])
+        default_false = samples @ counts(protocol.default)
+        place, share, status = e.crossing(-false[:, ::-1], -default_false)
+        recorded = published["results"]["matched"]["excess_detection"]
+        for arm in CHANGE_ARMS:
+            grid = samples @ np.column_stack([net(name, arm) for name in names])
+            default = samples @ net(protocol.default, arm)
+            values = e.read_at(grid[:, ::-1] / homes, place, share) - default / homes
+            again = e.matched_estimate(values, status, protocol, homes)
+            assert again["estimate"] == pytest.approx(recorded[arm]["estimate"])
+            assert again["interval"] == recorded[arm]["interval"]
+            assert again["resamples"] == recorded[arm]["resamples"]
+
+    def test_the_page_and_its_figures_are_the_records_rendering(
+        self, published: dict, described: dict
+    ) -> None:
+        import re
+
+        from sensor_modeling.datasets.threshold_calibration_figures import (
+            FIGURES,
+            PREFIX,
+            TIHM_FIGURES,
+            data_sha256,
+            figure_data,
+            tihm_figure_data,
+        )
+        from sensor_modeling.datasets.threshold_calibration_summary import (
+            RESULTS_PAGE,
+            render_page,
+        )
+
+        page = (ROOT / "docs" / RESULTS_PAGE).read_text(encoding="utf-8")
+        assert page == render_page(published, described)
+        data = {**figure_data(published), **tihm_figure_data(described)}
+        for name in (*FIGURES, *TIHM_FIGURES):
+            svg = (ROOT / "docs" / "figures" / f"{PREFIX}-{name}.svg").read_text(
+                encoding="utf-8"
+            )
+            found = re.search(r"data sha256 ([0-9a-f]{64})", svg)
+            assert found is not None
+            assert found.group(1) == data_sha256(data[name])
+
+
+class TestPublishedDescription:
+    """The record of the description on TIHM, as published. Not a test."""
+
+    def test_it_was_made_from_a_clean_commit_on_the_published_runs(
+        self, described: dict
+    ) -> None:
+        protocol = declared_protocol()
+        configuration = described["configuration"]
+        assert described["environment"]["git_dirty"] == "false"
+        assert described["environment"]["git_commit"].startswith(RUN_COMMIT)
+        assert described["data_source"] == "tihm"
+        assert configuration["protocol_sha256"] == protocol.sha256()
+        assert configuration["code_changed_since_the_freeze"] == {
+            "sources": [],
+            "distributions": [],
+            "defaults": [],
+        }
+        results = described["results"]
+        assert results["homes"] == 56
+        check = results["check"]
+        for rule, published in TIHM_PUBLISHED.items():
+            assert check[rule]["monitored_days"] == published["monitored_days"]
+            assert check[rule]["behavioural_alerts"] == published["behavioural_alerts"]
+        assert check["homes_compared_one_by_one"] == 56
+        assert check["homes_that_differ"] == []
+        assert check["calibrated_runs"]["that_differ"] == []
+        assert len(check["calibrated_runs"]["homes"]) == protocol.tihm_checked_homes

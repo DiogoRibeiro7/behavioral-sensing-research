@@ -303,7 +303,11 @@ A threshold that means what it says is passed far less often, so it is not a
 drop-in replacement: at the declared thresholds the calibrated reference
 reports much less, of what is there as well as of what is not.
 [The baseline's thresholds on days with nothing in them](THRESHOLD_CALIBRATION_NULL.md)
-measures both references on synthetic days, where the answer is known.
+measures both references on synthetic days, where the answer is known, and
+[the threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md) test the
+calibrated one on simulated homes, under a protocol frozen before the test:
+at the default's false alerts it finds more of a step change, and its
+threshold means what it says there on the hours of sleep.
 
 Poorly observed days go through
 `skip`, which records the

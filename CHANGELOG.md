@@ -11,6 +11,8 @@ Runs the online pipeline on a clinical cohort for the first time, with its decla
 
 Adds an opt-in rule for the failure that run showed, a home that reports nothing being read as a home asleep, and tests it on simulated homes under a protocol frozen before the test.
 
+Adds an opt-in baseline reference whose deviation threshold means what it says, for the second failure that run showed, measures it on synthetic days, and tests it on simulated homes under a protocol frozen before the test.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.
@@ -29,6 +31,14 @@ Adds an opt-in rule for the failure that run showed, a home that reports nothing
     - Every outage is reported, a median 12.0 hours after it began. The fleet check finds an outage that every home shares, and none among outages each home has on its own.
     - An 8-hour outage is not seen, apart from one home in 100 in which the home's last observation before it and its first after it were more than the horizon apart.
   - **The same rule on TIHM, as a description.** Nothing here is a test: the rule was designed from these homes. At 12 hours 147 of the 183 behavioural alerts are no longer raised and 13 are raised that were not, leaving 49; the day that held 33 has none. The rule refuses 322 of the 2,850 monitored days, in 48 of the 56 homes, and raises 324 alerts about silence, 145 of them inside the two stretches the fleet check calls common. A simulated home is not silent for twelve hours unless a fault makes it so; the TIHM homes often are. TIHM is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0; Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged, as the dataset asks.
+  - **The baseline's thresholds on synthetic days.** Independent Gaussian days given to the baseline directly; no home is simulated. The default reference passes its threshold of 3 on 6.24% of days, 23 times the 0.27% it states, and on 16.0% with four days of the weekday behind it. The calibrated reference passes it on 0.28%, and a weekly rhythm adds no gradual drift to it: it reports one on 4 of 1,060,000 days with the rhythm and without it.
+  - **The calibrated reference, on simulated homes.** 400 paired simulated homes reduced to their event sensors, each replayed under both references at 42 multiples of the declared thresholds, under a protocol frozen and pushed before any of them had been run with the calibrated reference. The evidence is simulated.
+    - Where its operating curve has the default's false alerts, 0.855 a home in 84 days, it finds the step change net of false detections in 0.72 of homes against 0.63: +0.09 [+0.03, +0.16], Monte Carlo standard error 0.03, with the match placed again in every resample. The pre-specified criterion is a success.
+    - Its threshold means what it says for hours of sleep: 0.35% of stable days of sleep pass 3, 4.79% pass 2 and 12.75% pass 1.5, equivalent to thresholds of 2.92, 1.98 and 1.52. The default passes 3 on 7.91%. The criterion holds at all three. On hours away, where no criterion was stated, it passes 3 on 1.66% of days, equivalent to a threshold of 2.40.
+    - For the smaller step and the gradual change no difference is shown: −0.02 [−0.09, +0.04] and −0.01 [−0.10, +0.09].
+    - At the declared thresholds it raises 3 false alerts in the 400 homes against 342, and finds the step net of chance in 0.04 of homes against 0.63.
+    - Before the freeze, the criterion was tried on outcomes drawn from operating curves written down by hand, and called a reference with the default's own curve better in 2 to 4 runs in 100 and worse in 2 to 4.
+  - **The calibrated reference on TIHM, as a description.** Nothing here is a test: the reference was built from these homes. With the silent-home rule off it passes 3 on 8.1% of evaluable days of sleep, against 17.4%, and raises 84 behavioural alerts at the declared thresholds against 183. With the rule on at 12 hours, 1.7% against 10.9%, and 16 alerts against 49.
 - **Sensor health.** An opt-in rule for deployments with no sensor that reports on a cadence, `HealthConfig.home_silence_horizon`. Off by default.
   - A home in which no sensor has reported for the horizon is treated as not observed: its sensors are downgraded, the silent time is left out of the day's summary from the moment it began and recorded as `DailySummary.silent`, and a day that lost any time this way is refused by the baseline.
   - One `data_quality` alert about `home_silence` is raised and repeated once per cooldown. It says the home may be empty, its resident may need help, or nothing may be arriving, and does not choose.
@@ -38,9 +48,10 @@ Adds an opt-in rule for the failure that run showed, a home that reports nothing
   - The deviation is reported as the Gaussian value as unusual as the day is under the Student t that scale has, with 0.368 degrees of freedom for each day behind it. `BaselineReference` records `scale_samples` and `dof`, and a verdict's words name the scale its deviation is on.
   - The trend is fitted to those same distances, so a weekly rhythm is not read as a drift. Its movement is measured against the same pooled scale and is not mapped.
   - It is not a drop-in replacement. A threshold that means what it says is passed far less often, by what is there as well as by what is not.
+  - `sensor_modeling.datasets.threshold_null` measures both references on synthetic days, and `threshold_calibration_protocol`, `threshold_calibration_experiment` and `threshold_calibration_planning` declare, score and plan its test on simulated homes.
 - **Online pipeline.** `sensor_modeling.online.replay_days` passes the days a run closed through fresh baselines and a fresh alert engine under another baseline configuration or alert policy, without running the home again. It calls `judge_day`, the function the pipeline now calls when it closes a day, and `reproduces` checks that a replay under the run's own configuration returns the run's verdicts and alerts.
 - **External datasets.** A TIHM adapter, `sensor_modeling.external.tihm`, with its frozen ontology mapping. The dataset is read from a local download and is not redistributed.
-- **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the silent-home protocol and results pages, generated the same way; the roadmap and the external-dataset contract name the new evidence.
+- **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the silent-home protocol and results pages, generated the same way; the pages of the measurement on synthetic days and of the threshold-calibration protocol and results, generated the same way; the roadmap and the external-dataset contract name the new evidence.
 
 The online pipeline's defaults, the baseline and the alert policy are unchanged.
 
