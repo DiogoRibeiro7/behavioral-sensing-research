@@ -158,11 +158,14 @@ the 14 homes with enough of them:
   mean within-home Spearman correlation of 0.11 [0.03, 0.19], against a
   declared margin of 0.5. On simulated homes, against the simulator's true
   hours of sleep, the same correlation is 0.70 [0.68, 0.71].
-- **It counts more sleep than the mat does, and more than the time in bed.**
-  3.95 hours a day more than the mat's sleep [+1.54, +6.37], and 1.97 more
-  than its hours in bed.
-- **A deviation in one is not a deviation in the other.** The deviations a
-  personal baseline gives the two correlate at 0.03 [−0.04, 0.11].
+- **It counts more sleep than the mat does, and about two hours more than the
+  time in bed.** 3.95 hours a day more than the mat's sleep [+1.54, +6.37],
+  and 1.97 more than its hours in bed [−0.01, +3.94], an interval that reaches
+  zero.
+- **A deviation in one is seldom a deviation in the other.** The deviations a
+  personal baseline gives the two correlate at 0.03 [−0.04, 0.11], over 12
+  homes; on 4 of the 46 days the pipeline's reached 3, the mat's did too, in
+  the same direction.
 
 The mat's stages are the device's own and are not validated here. See
 [the sleep-mat results](docs/SLEEP_MAT_RESULTS.md).

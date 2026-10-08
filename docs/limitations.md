@@ -138,7 +138,7 @@ whole run. A likely reading, not a tested one, is that this is the mechanism
 behind the saturated confidence above: with no evidence the belief goes to the
 quietest state, and the pipeline abstained on 0.06% of usable time.
 
-**The pipeline's hours of sleep do not follow a sleep mat in real homes.** In
+**The pipeline's hours of sleep do not follow a sleep mat in the TIHM homes.** In
 the 14 TIHM homes with enough days on a mat under the mattress, the mean
 within-home Spearman correlation between the pipeline's daily
 `sleeping_hours` and the mat's hours asleep is 0.11 [0.03, 0.19], on the days
