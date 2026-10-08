@@ -16,6 +16,12 @@ correlation, and its true value for a scenario is computed on many more homes.
 differ from the bias by Gaussian noise. The estimand is the mean over homes
 of the home's mean difference, whose true value is the centre.
 
+**Outlying homes.** In three of the mat homes the mat stages less than half
+of the time in bed as asleep, where every other included home is above 0.79.
+If the mat's stages are what differs in those homes, they would follow the
+pipeline less and differ from it more. Every scenario is also run with those
+three homes given no correlation and four more hours of bias.
+
 Two intervals over homes are compared: a percentile bootstrap and a Student
 t interval. The record is ``artifacts/sleep_mat/sleep-mat-planning.json``.
 """
@@ -64,6 +70,9 @@ class Planning:
     biases, bias_spreads, within_sd
         The level scenarios: the typical bias in hours, the spread of homes'
         biases, and the spread of a home's days about its bias.
+    outliers, outlier_positions, outlier_centre, outlier_extra_bias
+        Whether the outlying homes are tried; which homes they are, by place
+        in ``days``; their correlation; and the bias added to theirs.
     tracking_margin, level_margin, confidence
         The protocol's margins and level.
     """
@@ -79,6 +88,10 @@ class Planning:
     biases: tuple[float, ...] = (0.0, 0.5, 1.0, 1.5, 3.0)
     bias_spreads: tuple[float, ...] = (0.5, 1.0, 2.0)
     within_sd: float = 1.5
+    outliers: tuple[bool, ...] = (False, True)
+    outlier_positions: tuple[int, ...] = (0, 10, 13)
+    outlier_centre: float = 0.0
+    outlier_extra_bias: float = 4.0
     tracking_margin: float = 0.5
     level_margin: float = 1.0
     confidence: float = 0.95
@@ -89,6 +102,8 @@ class Planning:
             raise ValueError("at least three homes of at least three days")
         if self.replications < 100:
             raise ValueError("a planning trial needs at least 100 replications")
+        if any(not 0 <= k < len(self.days) for k in self.outlier_positions):
+            raise ValueError("an outlying home must be one of the homes")
 
 
 def _ranks(values: np.ndarray) -> np.ndarray:
@@ -128,11 +143,19 @@ def _home_correlations(
     spread: float,
     contamination: float,
     homes_per_size: int = 1,
+    outliers: bool = False,
 ) -> np.ndarray:
     """Within-home Spearman correlations, ``homes_per_size`` rows per size."""
     out = np.empty((homes_per_size, len(planning.days)))
     for column, days in enumerate(planning.days):
-        rho = np.tanh(np.arctanh(centre) + spread * rng.standard_normal(homes_per_size))
+        typical = (
+            planning.outlier_centre
+            if outliers and column in planning.outlier_positions
+            else centre
+        )
+        rho = np.tanh(
+            np.arctanh(typical) + spread * rng.standard_normal(homes_per_size)
+        )
         x, y = _pairs(rng, rho, days, contamination)
         out[:, column] = spearman_rows(x, y)
     return out
@@ -197,18 +220,29 @@ def _summary(
 
 
 def tracking_cell(
-    planning: Planning, centre: float, spread: float, contamination: float, key: int
+    planning: Planning,
+    centre: float,
+    spread: float,
+    contamination: float,
+    key: int,
+    outliers: bool = False,
 ) -> dict[str, Any]:
     """One tracking scenario: its true value and how each interval reads it."""
     truth_rng = np.random.default_rng([planning.seed_root, key, 0])
     truth = float(
         _home_correlations(
-            truth_rng, planning, centre, spread, contamination, planning.truth_homes
+            truth_rng,
+            planning,
+            centre,
+            spread,
+            contamination,
+            planning.truth_homes,
+            outliers,
         ).mean()
     )
     rng = np.random.default_rng([planning.seed_root, key, 1])
     studies = _home_correlations(
-        rng, planning, centre, spread, contamination, planning.replications
+        rng, planning, centre, spread, contamination, planning.replications, outliers
     )
     found: dict[str, list[tuple[float, float]]] = {m: [] for m in METHODS}
     for row in studies:
@@ -218,19 +252,28 @@ def tracking_cell(
         "centre": centre,
         "spread": spread,
         "contamination": contamination,
+        "outliers": outliers,
         "truth": truth,
         **_summary(found, truth, tracking_verdict, planning.tracking_margin),
     }
 
 
 def level_cell(
-    planning: Planning, bias: float, spread: float, key: int
+    planning: Planning, bias: float, spread: float, key: int, outliers: bool = False
 ) -> dict[str, Any]:
-    """One level scenario: how each interval reads a known bias."""
+    """One level scenario: how each interval reads a known bias.
+
+    With the outlying homes, the true value is the mean over homes of their
+    expected biases, which the extra bias of three homes raises.
+    """
     rng = np.random.default_rng([planning.seed_root, key, 2])
+    extra = np.zeros(len(planning.days))
+    if outliers:
+        extra[list(planning.outlier_positions)] = planning.outlier_extra_bias
+    truth = float(bias + extra.mean())
     found: dict[str, list[tuple[float, float]]] = {m: [] for m in METHODS}
     for _ in range(planning.replications):
-        home_bias = bias + spread * rng.standard_normal(len(planning.days))
+        home_bias = bias + extra + spread * rng.standard_normal(len(planning.days))
         means = np.array(
             [
                 (b + planning.within_sd * rng.standard_normal(days)).mean()
@@ -242,8 +285,9 @@ def level_cell(
     return {
         "bias": bias,
         "spread": spread,
-        "truth": bias,
-        **_summary(found, bias, level_verdict, planning.level_margin),
+        "outliers": outliers,
+        "truth": truth,
+        **_summary(found, truth, level_verdict, planning.level_margin),
     }
 
 
@@ -256,18 +300,22 @@ def plan(planning: Planning) -> dict[str, Any]:
     """Every scenario of both criteria, and the coverage each interval reached."""
     tracking: list[dict[str, Any]] = []
     key = 0
-    for contamination in planning.contamination:
-        for spread in planning.spreads:
-            for centre in planning.centres:
-                key += 1
-                tracking.append(
-                    tracking_cell(planning, centre, spread, contamination, key)
-                )
+    for outliers in planning.outliers:
+        for contamination in planning.contamination:
+            for spread in planning.spreads:
+                for centre in planning.centres:
+                    key += 1
+                    tracking.append(
+                        tracking_cell(
+                            planning, centre, spread, contamination, key, outliers
+                        )
+                    )
     level: list[dict[str, Any]] = []
-    for spread in planning.bias_spreads:
-        for bias in planning.biases:
-            key += 1
-            level.append(level_cell(planning, bias, spread, key))
+    for outliers in planning.outliers:
+        for spread in planning.bias_spreads:
+            for bias in planning.biases:
+                key += 1
+                level.append(level_cell(planning, bias, spread, key, outliers))
     every = tracking + level
     coverage = {method: _range(every, method) for method in METHODS}
     chosen = max(METHODS, key=lambda method: coverage[method]["lowest"])

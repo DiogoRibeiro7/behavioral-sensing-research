@@ -86,7 +86,7 @@ class TestTrials:
     def test_the_trials_are_repeatable_and_complete(self) -> None:
         first, second = plan(small()), plan(small())
         assert first == second
-        assert len(first["tracking"]) == 2 and len(first["level"]) == 2
+        assert len(first["tracking"]) == 4 and len(first["level"]) == 4
         assert first["chosen"] in (PERCENTILE, STUDENT)
         for cell in first["tracking"] + first["level"]:
             for method in (PERCENTILE, STUDENT):
@@ -97,6 +97,20 @@ class TestTrials:
         large = plan(small())["level"][1]
         assert large["bias"] == 3.0
         assert large[STUDENT]["verdicts"].get("does_not_agree", 0.0) > 0.9
+
+    def test_the_outlying_homes_raise_the_true_bias(self) -> None:
+        planning = small()
+        level = plan(planning)["level"]
+        assert [cell["outliers"] for cell in level] == [False, False, True, True]
+        extra = 4.0 * 3 / len(planning.days)
+        assert level[2]["truth"] == pytest.approx(0.0 + extra)
+        assert level[3]["truth"] == pytest.approx(3.0 + extra)
+
+    def test_the_outlying_homes_lower_the_true_correlation(self) -> None:
+        tracking = plan(small())["tracking"]
+        plain = [c for c in tracking if not c["outliers"] and not c["contamination"]]
+        outlying = [c for c in tracking if c["outliers"] and not c["contamination"]]
+        assert outlying[0]["truth"] < plain[0]["truth"] - 0.05
 
     def test_too_few_replications_are_refused(self) -> None:
         with pytest.raises(ValueError, match="100 replications"):
