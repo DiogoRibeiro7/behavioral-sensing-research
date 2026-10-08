@@ -31,11 +31,16 @@ FIGURE_DIR = "figures"
 FIGURE_PREFIX = "sleep-mat"
 
 _REFERENCE_TITLES = {SLEEP: "the mat's sleep", IN_BED: "the mat's hours in bed"}
-_ANALYSIS_TITLES = {
-    PRIMARY: "rule off, silent days left out (primary)",
-    WITH_SILENT_DAYS: "rule off, silent days kept",
-    RULE: "rule on at 12 hours",
-}
+
+
+def _analysis_title(name: str, rule_hours: float) -> str:
+    return {
+        PRIMARY: "rule off, silenced days left out (primary)",
+        WITH_SILENT_DAYS: "rule off, every usable day",
+        RULE: f"rule on at {rule_hours:g} hours, silenced days left out",
+    }[name]
+
+
 _READINGS = {
     "follows": "follows",
     "does_not_follow": "does not follow",
@@ -298,6 +303,8 @@ def render_protocol(payload: Mapping[str, Any]) -> str:
         "",
         f"{_sentence(intervals['method'])}",
         "",
+        f"- **Unit.** {intervals['unit'].capitalize()}; the interval chosen is "
+        f"`{intervals['chosen']}`.",
         f"- **Why this interval.** {_sentence(intervals['why'])}",
         f"- **The planning's days.** {_sentence(intervals['planning_days'])}",
         f"- **Counts.** {_sentence(intervals['counts'])}",
@@ -345,7 +352,7 @@ def render_protocol(payload: Mapping[str, Any]) -> str:
 # ----------------------------------------------------------------------------
 # The results page
 # ----------------------------------------------------------------------------
-def _check_part(results: Mapping[str, Any]) -> list[str]:
+def _check_part(results: Mapping[str, Any], rule_hours: float) -> list[str]:
     off, rule = results["check"]["off"], results["check"]["rule_12h"]
     return [
         "## The runs",
@@ -354,7 +361,7 @@ def _check_part(results: Mapping[str, Any]) -> list[str]:
         "count of their rows in the published alert-burden record: "
         f"{off['monitored_days']:,} monitored days and "
         f"{_count(off['behavioural_alerts'], 'behavioural alert')}. With it on "
-        "at 12 hours they give the silent-home description's counts: "
+        f"at {rule_hours:g} hours they give the silent-home description's counts: "
         f"{_count(rule['days_refused_because_of_the_rule'], 'day')} refused "
         "because of the rule and "
         f"{_count(rule['silence_alerts'], 'silence alert')}.",
@@ -408,9 +415,10 @@ def _criteria_part(results: Mapping[str, Any]) -> list[str]:
         "",
         "Both were fixed, with their margins, before any value of the pipeline "
         "was set beside any record of the mat. They are read in the primary "
-        "analysis: the rule off, days with no activity record left out. C1 is "
-        "the only primary criterion, and the two are not adjusted for each "
-        "other.",
+        "analysis: the rule off, silenced days left out, which are the days "
+        "with no activity record and those the run with the rule on flags as "
+        "touched by a silence of the whole home. C1 is the only primary "
+        "criterion, and the two are not adjusted for each other.",
         "",
         *_table(["Criterion", "Claim", "Reading", "What decided it"], rows),
         "",
@@ -421,13 +429,13 @@ def _criteria_part(results: Mapping[str, Any]) -> list[str]:
     ]
 
 
-def _homes_part(results: Mapping[str, Any]) -> list[str]:
-    rows = []
+def _homes_part(results: Mapping[str, Any], minimum: int) -> list[str]:
+    days_rows, agreement_rows = [], []
     for home, row in results["homes"].items():
         primary = row.get(PRIMARY) or {}
         sleep = primary.get(SLEEP) or {}
         bed = primary.get(IN_BED) or {}
-        rows.append(
+        days_rows.append(
             [
                 f"`{home}`",
                 f"{row['mat_records']:,}",
@@ -435,24 +443,41 @@ def _homes_part(results: Mapping[str, Any]) -> list[str]:
                 row["mat_observed_days"],
                 row["monitored_days"],
                 row["usable_days"]["off"],
-                primary.get("matched_days", 0),
+                row["silent_days"],
                 row["silent_matched_days"],
+                row["partly_silent_matched_days"],
+                primary.get("matched_days", 0),
                 "yes" if primary.get("included") else "no",
                 _n(row["staged_asleep_share"]),
-                _n(sleep.get("spearman")),
-                _n(bed.get("spearman")),
-                _signed(sleep.get("mean_difference"), 1),
-                _signed(bed.get("mean_difference"), 1),
-                _n(sleep.get("median_pipeline"), 1),
-                _n(sleep.get("median_mat"), 1),
             ]
         )
+        if primary.get("included"):
+            agreement_rows.append(
+                [
+                    f"`{home}`",
+                    _n(sleep.get("spearman")),
+                    _n(bed.get("spearman")),
+                    _signed(sleep.get("mean_difference"), 1),
+                    _signed(bed.get("mean_difference"), 1),
+                    _n(sleep.get("median_pipeline"), 1),
+                    _n(sleep.get("median_mat"), 1),
+                    _n(bed.get("median_mat"), 1),
+                    (
+                        "–"
+                        if row["most_negative_lag"] is None
+                        else row["most_negative_lag"]
+                    ),
+                ]
+            )
     return [
         "## The homes",
         "",
-        "Every mat home, in the primary analysis. A home enters the estimands "
-        "with at least 14 matched days. Silent matched days are the days that "
-        "would be matched if days with no activity record were kept.",
+        "Every mat home's days. A silent day has no activity record; a "
+        "partly silent day has records and lost time to a silence of the whole "
+        "home, as the run with the rule on flags it. Both are counted among "
+        "the days that would otherwise be matched, and both are left out of "
+        f"the primary analysis. A home enters the estimands with at least "
+        f"{minimum} matched days.",
         "",
         *_table(
             [
@@ -462,23 +487,38 @@ def _homes_part(results: Mapping[str, Any]) -> list[str]:
                 "Mat-observed",
                 "Monitored",
                 "Usable",
+                "Silent",
+                "Silent, matched",
+                "Partly silent, matched",
                 "Matched",
-                "Silent matched",
                 "Included",
                 "Staged asleep",
+            ],
+            days_rows,
+        ),
+        "",
+        "The included homes beside the mat, in the primary analysis. The last "
+        "column is the lag of E11 at which the home's hourly activity is most "
+        "opposed to its minutes in bed.",
+        "",
+        *_table(
+            [
+                "Home",
                 "Spearman, sleep",
                 "Spearman, in bed",
                 "Difference, sleep (h)",
                 "Difference, in bed (h)",
                 "Median pipeline (h)",
                 "Median mat sleep (h)",
+                "Median mat in bed (h)",
+                "Most opposed at lag",
             ],
-            rows,
+            agreement_rows,
         ),
     ]
 
 
-def _agreement_part(results: Mapping[str, Any]) -> list[str]:
+def _agreement_part(results: Mapping[str, Any], rule_hours: float) -> list[str]:
     rows = []
     for name in ANALYSES:
         entry = results["analyses"][name]
@@ -486,7 +526,7 @@ def _agreement_part(results: Mapping[str, Any]) -> list[str]:
             values = entry[reference]
             rows.append(
                 [
-                    _ANALYSIS_TITLES[name],
+                    _analysis_title(name, rule_hours),
                     _REFERENCE_TITLES[reference],
                     len(entry["homes"]),
                     _interval(values["spearman"]),
@@ -540,7 +580,7 @@ def _agreement_part(results: Mapping[str, Any]) -> list[str]:
     ]
 
 
-def _deviations_part(results: Mapping[str, Any]) -> list[str]:
+def _deviations_part(results: Mapping[str, Any], minimum: int) -> list[str]:
     e6 = results["E6_deviations"]
     flagged = e6["pipeline_past_threshold"]
     return [
@@ -552,8 +592,8 @@ def _deviations_part(results: Mapping[str, Any]) -> list[str]:
         "silent days too.",
         "",
         f"- **Correlation of the two deviations.** {_interval(e6['spearman'])}, "
-        f"over {e6['spearman']['homes']} homes with at least 14 days on which "
-        "both baselines gave a verdict.",
+        f"over {e6['spearman']['homes']} homes with at least {minimum} days on "
+        "which both baselines gave a verdict.",
         f"- **Days the pipeline's deviation reached {_n(e6['threshold'], 0)}.** "
         f"{flagged:,}. On {e6['same_sign']:,} of them the mat's deviation had "
         f"the same sign, and on {e6['also_past_threshold']:,} it also reached "
@@ -592,7 +632,8 @@ def _alerts_part(results: Mapping[str, Any]) -> list[str]:
                     "the mat baseline's deviation",
                     baseline["same_sign"],
                     baseline["opposite"],
-                    f"{baseline['no_verdict']} without a verdict",
+                    f"{baseline['no_verdict']} without a verdict, "
+                    f"{baseline['zero']} at zero",
                 ],
             ],
         ),
@@ -614,8 +655,9 @@ def _silent_part(results: Mapping[str, Any]) -> list[str]:
     ]
 
 
-def _clocks_part(results: Mapping[str, Any]) -> list[str]:
+def _clocks_part(results: Mapping[str, Any], shifts: Sequence[float]) -> list[str]:
     e10, e11 = results["E10_alignment"], results["E11_clocks"]
+    shift_text = " and ".join(f"{h:+g}" for h in shifts)
     rows = [
         [
             f"{shift} h",
@@ -632,8 +674,8 @@ def _clocks_part(results: Mapping[str, Any]) -> list[str]:
         "## The clocks (E10, E11)",
         "",
         "The dataset does not say which clock either file is in. E10 shifts the "
-        "mat's clock by an hour each way and recomputes E1 and E2; +1 stands for "
-        "a mat clock in UTC while the activity clock is local. An hour moves "
+        f"mat's clock by {shift_text} hours and recomputes E1 and E2; +1 stands "
+        "for a mat clock in UTC while the activity clock is local. An hour moves "
         "little of a night across midnight, so E10 shows how much the result "
         "depends on the clock and cannot find the right one.",
         "",
@@ -642,8 +684,13 @@ def _clocks_part(results: Mapping[str, Any]) -> list[str]:
         "E11 reads only the inputs: the activity records in each local hour of "
         "the matched days, against the mat's minutes in bed in the same hour "
         "with its clock shifted by the lag. A person in bed moves little, so "
-        "the correlation should be most negative where the clocks agree. It is "
-        f"most negative at a lag of {e11['most_negative']} hours.",
+        "the correlation should be most negative where the clocks agree. "
+        + (
+            f"It is most negative at a lag of {e11['most_negative']} hours. "
+            if e11["most_negative"] is not None
+            else "It could not be computed. "
+        )
+        + "Whatever it shows, every other estimand keeps the mat's clock as read.",
         "",
         *_table(["Lag", "Mean within-home Spearman"], lags),
         "",
@@ -653,13 +700,20 @@ def _clocks_part(results: Mapping[str, Any]) -> list[str]:
 
 def _staged_part(results: Mapping[str, Any]) -> list[str]:
     e12 = results["E12_staged_asleep"]
+    others = [
+        row["staged_asleep_share"]
+        for home, row in results["homes"].items()
+        if home not in e12["left_out"] and row["staged_asleep_share"] is not None
+    ]
+    floor = int(100 * min(others)) if others else None
     return [
         "## Without the homes the mat stages as mostly awake (E12)",
         "",
         f"In {_code(e12['left_out'])} the mat stages less than "
-        f"{_percent_of(e12['share'], 0)} of the minutes in bed as asleep, where "
-        "every other home is above 74%. The cut was fixed from the mat's file "
-        "alone, before the comparison. Without those homes:",
+        f"{_percent_of(e12['share'], 0)} of the minutes in bed as asleep"
+        + (f", where every other mat home stages at least {floor}%" if floor else "")
+        + ". The cut was fixed from the mat's file alone, before the comparison. "
+        "Without those homes:",
         "",
         *_table(
             ["Against", "Homes", "Spearman", "Pearson", "Difference (h)"],
@@ -677,7 +731,7 @@ def _staged_part(results: Mapping[str, Any]) -> list[str]:
     ]
 
 
-def _simulated_part(simulated: Mapping[str, Any]) -> list[str]:
+def _simulated_part(simulated: Mapping[str, Any], minimum: int) -> list[str]:
     results = simulated["results"]
     sleep = results[SLEEP]
     homes = len(results["homes"])
@@ -687,8 +741,8 @@ def _simulated_part(simulated: Mapping[str, Any]) -> list[str]:
         f"**The evidence is simulated.** {homes} simulated homes reduced to "
         "their event sensors, set against the simulator's true hours of sleep: "
         "what the estimands give when the observation model is the one that "
-        f"made the data. {results['included']} homes had at least 14 matched "
-        "days.",
+        f"made the data. {results['included']} homes had at least {minimum} "
+        "matched days.",
         "",
         *_table(
             ["Estimand", "Value"],
@@ -713,6 +767,8 @@ def render_page(payload: Mapping[str, Any], simulated: Mapping[str, Any]) -> str
     changed_names = [name for names in changed.values() for name in names]
     between = configuration.get("between_the_freeze_and_the_run") or []
     dirty = payload.get("environment", {}).get("git_dirty") != "false"
+    minimum = int(configuration["min_matched_days"])
+    rule_hours = float(configuration["rule_hours"])
     lines = [
         "# The pipeline's hours of sleep beside a sleep mat: results",
         "",
@@ -746,25 +802,25 @@ def render_page(payload: Mapping[str, Any], simulated: Mapping[str, Any]) -> str
         ]
     lines += [
         "",
-        *_check_part(results),
+        *_check_part(results, rule_hours),
         "",
         *_criteria_part(results),
         "",
-        *_agreement_part(results),
+        *_agreement_part(results, rule_hours),
         "",
-        *_homes_part(results),
+        *_homes_part(results, minimum),
         "",
-        *_deviations_part(results),
+        *_deviations_part(results, minimum),
         "",
         *_alerts_part(results),
         "",
         *_silent_part(results),
         "",
-        *_clocks_part(results),
+        *_clocks_part(results, configuration["shifts_hours"]),
         "",
         *_staged_part(results),
         "",
-        *_simulated_part(simulated),
+        *_simulated_part(simulated, minimum),
         "",
         "## Acknowledgement",
         "",

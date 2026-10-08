@@ -40,6 +40,7 @@ from sensor_modeling.datasets.sleep_mat_experiment import (
     run_simulated_home,
     score,
     score_simulated,
+    silenced_days,
     silent_days,
     staged_awake_homes,
     tihm_record,
@@ -234,12 +235,19 @@ class TestMatching:
         assert list(pairs.references[SLEEP]) == [9.0, 11.0, 12.0, 13.0]
         assert list(pairs.references[IN_BED]) == [10.0, 12.0, 13.0, 14.0]
 
-    def test_a_silent_day_is_left_out_unless_kept(self) -> None:
+    def test_a_silenced_day_is_left_out_when_asked(self) -> None:
         mat = a_mat("h", {day(n): (7.0, 8.0) for n in range(0, 8)})
-        days = [a_day(n, 9.0) for n in range(0, 8)]
-        days[3] = a_day(3, 23.8, events=0)
-        assert day(3) not in [d.day for d in matched_days(days, mat, False)]
-        assert day(3) in [d.day for d in matched_days(days, mat, True)]
+        off = [a_day(n, 9.0) for n in range(0, 8)]
+        off[3] = a_day(3, 23.8, events=0)
+        rule = [a_day(n, 9.0) for n in range(0, 8)]
+        rule[3] = a_day(3, 0.0, events=0, silent=1.0, usable=False)
+        rule[5] = a_day(5, 6.0, silent=0.3, usable=False)
+        silenced = silenced_days(off, rule)
+        assert silenced == {day(3), day(5)}
+        kept = [d.day for d in matched_days(off, mat)]
+        left = [d.day for d in matched_days(off, mat, silenced)]
+        assert day(3) in kept and day(5) in kept
+        assert day(3) not in left and day(5) not in left
 
     def test_a_home_without_a_mat_has_no_matched_day(self) -> None:
         assert pairs_of("h", [a_day(1, 9.0)], None).size == 0
@@ -432,6 +440,7 @@ class TestWhatElse:
         assert found["mat_baseline"] == {
             "same_sign": 1,
             "opposite": 0,
+            "zero": 0,
             "no_verdict": 2,
         }
         assert found["homes"]["h"]["judged"] == 3
@@ -536,8 +545,12 @@ def synthetic_cohort() -> tuple[dict, dict, dict, dict]:
         runs_on[home] = a_run(
             home,
             [
-                dataclasses.replace(r, usable=False, silent=0.4) if not r.events else r
-                for r in records
+                (
+                    dataclasses.replace(r, usable=False, silent=0.4)
+                    if not r.events or (index == 1 and n == 25)
+                    else r
+                )
+                for n, r in enumerate(records)
             ],
         )
     runs = {"off": runs_off, "rule_12h": runs_on}
@@ -589,6 +602,12 @@ class TestTheWhole:
         }
         assert results["homes"]["m00"]["silent_matched_days"] == 0
         assert results["homes"][STAGED_AWAKE_HOMES[0]]["silent_matched_days"] == 1
+        partly = results["homes"][STAGED_AWAKE_HOMES[1]]
+        assert partly["partly_silent_matched_days"] == 1
+        assert partly[PRIMARY]["matched_days"] == 37
+        assert partly[WITH_SILENT_DAYS]["matched_days"] == 38
+        # The synthetic mats hold no hourly minutes, so no lag is found.
+        assert results["homes"]["m00"]["most_negative_lag"] is None
 
     def test_score_refuses_a_mat_that_stages_other_homes_awake(self) -> None:
         runs, mats, _, _ = synthetic_cohort()

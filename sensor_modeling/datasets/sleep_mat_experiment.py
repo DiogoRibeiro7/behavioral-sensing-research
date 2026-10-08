@@ -227,6 +227,9 @@ class PipelineDay:
         Behavioural alerts about the hours of sleep raised when the day closed.
     events
         Activity records on the day.
+    silent
+        The share of the day the run left out because the whole home was
+        silent; zero unless the run has the silent-home rule on.
     """
 
     day: date
@@ -236,6 +239,7 @@ class PipelineDay:
     deviation: float
     alerts: int
     events: int
+    silent: float = 0.0
 
     @property
     def has_verdict(self) -> bool:
@@ -254,8 +258,21 @@ def pipeline_days(run: HouseholdRun) -> tuple[PipelineDay, ...]:
             deviation=float(record.deviations.get(TRACKED_FEATURE, 0.0)),
             alerts=sum(1 for subject, _ in record.alerts if subject == TRACKED_FEATURE),
             events=record.events,
+            silent=float(record.silent),
         )
         for record in run.days
+    )
+
+
+def silenced_days(
+    off: Sequence[PipelineDay], rule: Sequence[PipelineDay]
+) -> frozenset[date]:
+    """A home's silent days, and the days the run with the rule flags as silenced.
+
+    Only the flag is read from the run with the rule on.
+    """
+    return frozenset(d.day for d in off if not d.events) | frozenset(
+        d.day for d in rule if d.silent > 0.0
     )
 
 
@@ -278,11 +295,14 @@ class Pairs:
 
 
 def matched_days(
-    days: Sequence[PipelineDay], mat: MatHome | None, keep_silent: bool
+    days: Sequence[PipelineDay],
+    mat: MatHome | None,
+    left_out: frozenset[date] = frozenset(),
 ) -> list[PipelineDay]:
     """The usable days the mat observed, other than the home's first and last.
 
-    A silent day is left out unless *keep_silent*.
+    The days in *left_out*, the home's silenced days in an analysis that
+    leaves them out, are not matched either.
     """
     if mat is None or not days:
         return []
@@ -293,7 +313,7 @@ def matched_days(
         if d.usable
         and d.day in mat.observed
         and first < d.day < last
-        and (keep_silent or d.events > 0)
+        and d.day not in left_out
     ]
 
 
@@ -301,10 +321,10 @@ def pairs_of(
     home: str,
     days: Sequence[PipelineDay],
     mat: MatHome | None,
-    keep_silent: bool = False,
+    left_out: frozenset[date] = frozenset(),
 ) -> Pairs:
     """A home's matched days, as arrays."""
-    chosen = matched_days(days, mat, keep_silent)
+    chosen = matched_days(days, mat, left_out)
     return Pairs(
         home=home,
         days=tuple(d.day for d in chosen),
@@ -542,7 +562,12 @@ def alerts_beside_the_mat(
             "by_kind": {},
             "judged": 0,
             "median": {"same_side": 0, "opposite": 0, "at_the_median": 0},
-            "mat_baseline": {"same_sign": 0, "opposite": 0, "no_verdict": 0},
+            "mat_baseline": {
+                "same_sign": 0,
+                "opposite": 0,
+                "zero": 0,
+                "no_verdict": 0,
+            },
         }
 
     total = empty()
@@ -572,6 +597,8 @@ def alerts_beside_the_mat(
             verdict = verdicts.get(home, {}).get(d.day)
             if verdict is None or verdict[0] == INSUFFICIENT:
                 baseline_key = "no_verdict"
+            elif verdict[1] == 0.0:
+                baseline_key = "zero"
             else:
                 baseline_key = "same_sign" if verdict[1] * sign > 0 else "opposite"
             for target in (counts, total):
@@ -792,10 +819,12 @@ def _analysis(
     days: Mapping[str, Sequence[PipelineDay]],
     mats: Mapping[str, MatHome],
     protocol: SleepMatProtocol,
-    keep_silent: bool,
+    left_out: Mapping[str, frozenset[date]],
 ) -> tuple[dict[str, Pairs], dict[str, Any]]:
     pairs = {
-        home: pairs_of(home, days[home], mats.get(home), keep_silent)
+        home: pairs_of(
+            home, days[home], mats.get(home), left_out.get(home, frozenset())
+        )
         for home in sorted(days)
     }
     table = {home: home_statistics(pairs[home], protocol) for home in sorted(days)}
@@ -819,18 +848,25 @@ def score(
         run: {home: pipeline_days(result) for home, result in runs[run].items()}
         for run in RUNS
     }
+    silenced = {
+        home: silenced_days(by_run[RUN_OFF][home], by_run[RUN_RULE].get(home, ()))
+        for home in by_run[RUN_OFF]
+    }
+    nothing: dict[str, frozenset[date]] = {}
     analyses: dict[str, Any] = {}
     tables: dict[str, Any] = {}
     all_pairs: dict[str, dict[str, Pairs]] = {}
-    for name, (run, keep_silent) in ANALYSES.items():
-        pairs, table = _analysis(by_run[run], mats, protocol, keep_silent)
+    for name, (run, leave_out) in ANALYSES.items():
+        pairs, table = _analysis(
+            by_run[run], mats, protocol, silenced if leave_out else nothing
+        )
         all_pairs[name], tables[name] = pairs, table
         analyses[name] = agreement(table, protocol)
     primary, primary_pairs = analyses[PRIMARY], all_pairs[PRIMARY]
     verdicts = {home: mat_verdicts(mat) for home, mat in mats.items()}
     alignment = {}
-    for hours, homes in sorted(shifted.items()):
-        _, table = _analysis(by_run[RUN_OFF], homes, protocol, keep_silent=False)
+    for hours, shifted_mats in sorted(shifted.items()):
+        _, table = _analysis(by_run[RUN_OFF], shifted_mats, protocol, silenced)
         result = agreement(table, protocol)
         alignment[f"{hours:+g}"] = {
             "homes": result["homes"],
@@ -839,10 +875,22 @@ def score(
                 "mean_difference": result[SLEEP]["mean_difference"],
             },
         }
+    clocks = hourly_alignment(
+        runs[RUN_OFF], mats, primary_pairs, primary["homes"], protocol
+    )
+    e8 = silent_days(by_run[RUN_OFF], mats)
     homes: dict[str, Any] = {}
     for home in sorted(mats):
         mat = mats[home]
         off_days = by_run[RUN_OFF].get(home, ())
+        every = matched_days(off_days, mat)
+        no_events = {d.day for d in every if not d.events}
+        flagged = {d.day for d in every if d.day in silenced.get(home, frozenset())}
+        lags = {
+            lag: entry["homes"][home]
+            for lag, entry in clocks["lags"].items()
+            if entry["homes"].get(home) is not None
+        }
         homes[home] = {
             "mat_records": mat.records,
             "mat_days": len(mat.days),
@@ -853,8 +901,10 @@ def score(
                 run: sum(1 for d in by_run[run].get(home, ()) if d.usable)
                 for run in RUNS
             },
-            "silent_matched_days": len(matched_days(off_days, mat, keep_silent=True))
-            - len(matched_days(off_days, mat, keep_silent=False)),
+            "silent_days": e8["homes"].get(home, {}).get("silent_days", 0),
+            "silent_matched_days": len(no_events),
+            "partly_silent_matched_days": len(flagged - no_events),
+            "most_negative_lag": min(lags, key=lags.__getitem__) if lags else None,
             **{name: tables[name].get(home) for name in ANALYSES},
         }
     return {
@@ -884,11 +934,9 @@ def score(
         "E7_alerts": alerts_beside_the_mat(
             by_run[RUN_OFF], mats, primary_pairs, verdicts
         ),
-        "E8_silent_days": silent_days(by_run[RUN_OFF], mats),
+        "E8_silent_days": e8,
         "E10_alignment": alignment,
-        "E11_clocks": hourly_alignment(
-            runs[RUN_OFF], mats, primary_pairs, primary["homes"], protocol
-        ),
+        "E11_clocks": clocks,
         "E12_staged_asleep": {
             "share": STAGED_ASLEEP_SHARE,
             "left_out": list(STAGED_AWAKE_HOMES),
@@ -932,6 +980,16 @@ def intervals_of(results: Mapping[str, Any]) -> list[ReportedInterval]:
     out.append(
         _interval("E6: deviations: spearman", results["E6_deviations"]["spearman"])
     )
+    for shift, entry in results["E10_alignment"].items():
+        out.append(_interval(f"E10: {shift} h: spearman", entry[SLEEP]["spearman"]))
+        out.append(
+            _interval(
+                f"E10: {shift} h: mean difference, hours",
+                entry[SLEEP]["mean_difference"],
+            )
+        )
+    for lag, entry in results["E11_clocks"]["lags"].items():
+        out.append(_interval(f"E11: lag {lag} h: spearman", entry["spearman"]))
     for reference in REFERENCES:
         entry = results["E12_staged_asleep"][reference]
         out.append(_interval(f"E12: {reference}: spearman", entry["spearman"]))
@@ -1126,6 +1184,11 @@ def tihm_record(
             "tihm_protocol_sha256": tihm.sha256(),
             "analyses": {name: list(spec) for name, spec in ANALYSES.items()},
             "timezone": TIHM_TIMEZONE,
+            "min_matched_days": protocol.min_matched_days,
+            "rule_hours": protocol.rule_hours,
+            "shifts_hours": list(protocol.shifts_hours),
+            "lags_hours": list(protocol.lags_hours),
+            "staged_asleep_share": STAGED_ASLEEP_SHARE,
             "code_changed_since_the_freeze": {
                 group: list(names) for group, names in (code_changed or {}).items()
             },

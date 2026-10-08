@@ -84,14 +84,14 @@ RUN_OFF = "off"
 RUN_RULE = "rule_12h"
 RUNS = (RUN_OFF, RUN_RULE)
 
-#: The analyses: which run, and whether days with no activity record are kept.
+#: The analyses: which run, and whether silenced days are left out.
 PRIMARY = "off"
 WITH_SILENT_DAYS = "off_with_silent_days"
 RULE = "rule_12h"
 ANALYSES: dict[str, tuple[str, bool]] = {
-    PRIMARY: (RUN_OFF, False),
-    WITH_SILENT_DAYS: (RUN_OFF, True),
-    RULE: (RUN_RULE, False),
+    PRIMARY: (RUN_OFF, True),
+    WITH_SILENT_DAYS: (RUN_OFF, False),
+    RULE: (RUN_RULE, True),
 }
 
 #: The readings of a criterion stated against a margin.
@@ -274,7 +274,7 @@ class SleepMatProtocol:
         "after, and 14 homes have at least 14 such days. Four homes have a "
         "median under five hours asleep on the days they have records: 0f352 "
         "(3.7 asleep, 5.3 in bed), 16f4b (4.2, 9.4), d7a46 (2.6, 6.1) and "
-        "f220c (1.8, 7.8)",
+        "f220c (1.8, 7.9)",
         "the share of each home's minutes in bed on its mat-observed days "
         "that the mat stages as asleep: under 0.5 in 16f4b, d7a46 and f220c, "
         "and 0.74 or more in every other home. E12's cut was set from it",
@@ -304,6 +304,23 @@ class SleepMatProtocol:
         "the outage of 16 June falls on mat-observed days in 11 of the 14 "
         "homes, and the draft's primary was changed to leave days with no "
         "activity record out",
+        "a second review of the revision read the mat's file alone and, from "
+        "the activity file, each mat home's activity timestamps, to find gaps "
+        "of 12 hours or more on mat-observed days; it ran no pipeline on TIHM "
+        "and read no value of the pipeline. Counted again from the same "
+        "inputs: in the 14 homes with at least 14 mat-observed days, 737 "
+        "mat-observed days have an activity record and are neither a home's "
+        "first nor its last activity day, and 37 of them hold such a gap, 18 "
+        "on 15 or 17 June, the edges of the server failure, in 11 homes. The "
+        "primary was changed again to leave out every day the run with the "
+        "rule on flags as touched by a home-wide silence. The review also ran "
+        "simulated homes from seeds 1 to 14, which are not seeds of the "
+        "reference, without the pipeline",
+        "the two checks of the runs were rehearsed on six TIHM homes without "
+        "a mat before the freeze: with the rule off they gave every count of "
+        "their "
+        "rows in the published record, and with it on the silent-home record's "
+        "refused days and silence alerts. Nothing else of those runs was read",
     )
 
     def __post_init__(self) -> None:
@@ -439,10 +456,11 @@ class SleepMatProtocol:
                     "usable and evaluable days, events, behavioural alerts and "
                     "those about the hours of sleep, alert days, deviating "
                     "days, label days and alerts about the system and the data",
-                    RUN_RULE: "every mat home must give its monitored days, the "
-                    "days the baseline refused because of the rule and its "
-                    "silence alerts as the silent-home record has them at "
-                    f"{self.rule_hours:g} hours, `{SILENT_HOME_RECORD}`",
+                    RUN_RULE: "every mat home must give the days the baseline "
+                    "refused because of the rule and its silence alerts as the "
+                    f"silent-home record has them at {self.rule_hours:g} hours, "
+                    f"`{SILENT_HOME_RECORD}`, and the same monitored days as the "
+                    "run with the rule off",
                     "records": {
                         PUBLISHED_RECORD: PUBLISHED_RECORD_SHA256,
                         SILENT_HOME_RECORD: SILENT_HOME_RECORD_SHA256,
@@ -464,6 +482,11 @@ class SleepMatProtocol:
                 "are the days the baseline is given",
                 "silent_day": "a monitored day on which no activity record of "
                 "the home falls",
+                "silenced_day": "a silent day, or a day that the run with the "
+                f"rule on at {self.rule_hours:g} hours flags as having lost time "
+                "to a silence of the whole home at least that long. Only the "
+                "flag is taken from that run: the rule changes how far the "
+                "sensors are trusted after a silence, so its values can differ",
                 "mat_sleep": "the day's records whose state is one of "
                 f"{', '.join(ASLEEP_STATES)}, in hours: a record is a minute",
                 "mat_in_bed": "every record of the day, in hours",
@@ -475,31 +498,34 @@ class SleepMatProtocol:
                 "out too",
                 "matched_day": "a usable day that is mat-observed and is "
                 "neither the home's first nor its last monitored day, which "
-                "are partial. In an analysis that leaves silent days out, it is "
-                "also not a silent day",
+                "are partial. In an analysis that leaves silenced days out, it "
+                "is also not a silenced day",
                 "included_home": "a mat home with at least "
                 f"{self.min_matched_days} matched days in the analysis. "
                 "Inclusion is decided in each analysis, and again at each shift "
                 "of E10. E6 counts days with a verdict from both baselines "
                 "instead; E7 and E8 read every mat home",
                 "constant_values": "a home whose values on either source are "
-                "all equal on its matched days has no correlation. It counts as "
-                "0 in E1 and E5, as not following, and its difference counts "
-                "in E2 as any other",
+                "all equal on the days an estimand reads has no correlation. It "
+                "counts as 0 in E1, E5, E6 and E11, as not following, and its "
+                "difference counts in E2 as any other",
                 "difference": "the pipeline's value minus the mat's, in hours",
             },
             "analyses": {
-                PRIMARY: "the rule off, silent days left out. The primary "
+                PRIMARY: "the rule off, silenced days left out. The primary "
                 "analysis: it asks the question on the days the sensors "
-                "reported. A silent day is read as nearly a whole day asleep, "
-                "which the alert-burden descriptions measured and the "
-                "silent-home rule exists for; kept, it would measure that "
-                "again",
+                "reported throughout. A silent day is read as nearly a whole day "
+                "asleep, which the alert-burden descriptions measured and the "
+                "silent-home rule exists for, and a day partly lost to a silence, "
+                "as on the edges of the server failure of 15 to 17 June, is read "
+                "with too much sleep the same way; kept, they would measure that "
+                "again. A long night with no movement anywhere in the home is "
+                "left out with them",
                 WITH_SILENT_DAYS: "the rule off, every usable day: the pipeline "
                 "as it ships and as its baseline sees the days. A description",
-                RULE: f"the rule on at {self.rule_hours:g} hours, silent days "
-                "left out. The rule also refuses a day that lost any time to a "
-                "silence as long as the horizon. A description",
+                RULE: f"the rule on at {self.rule_hours:g} hours, silenced days "
+                "left out: the pipeline's own values with the rule on, which "
+                "refuses those days itself. A description",
             },
             "estimands": {
                 "E1": "the mean over included homes of the within-home "
@@ -539,9 +565,9 @@ class SleepMatProtocol:
                 "ways: whether the day's mat sleep is on the same side of the "
                 "home's median mat sleep over its matched days as the "
                 "pipeline's deviation, and whether the mat baseline's deviation "
-                "that day, where E6 gives it a verdict, has the same sign. An "
-                "alert for a drift, or on a day that is not matched, is counted "
-                "and not judged",
+                "that day, where E6 gives it a verdict, has the same sign; a mat "
+                "deviation of exactly zero is neither. An alert for a drift, or "
+                "on a day that is not matched, is counted and not judged",
                 "E8": "the silent days of the mat homes with the rule off: how "
                 "many there are, how many are mat-observed, and on those, the "
                 "median pipeline value and the median hours of mat sleep and in "
@@ -554,15 +580,17 @@ class SleepMatProtocol:
                 "the reverse. A shift of an hour moves little of a night across "
                 "midnight, so E10 says how much the result depends on the "
                 "clock, and cannot find which clock is right",
-                "E11": "an alignment of the two clocks from the inputs alone, "
-                "which reads no output of the pipeline: at each lag of "
+                "E11": "an alignment of the two clocks from the inputs, which "
+                "reads no value of the pipeline, only the days the primary "
+                "analysis matched: at each lag of "
                 + ", ".join(f"{h:+d}" for h in self.lags_hours)
                 + " hours, the mean over included homes of the within-home "
                 "Spearman correlation between the home's activity records in "
                 "each local hour of its matched days and the mat's minutes in "
                 "bed in the same hour with its clock shifted by the lag. A "
                 "person in bed moves little, so the correlation is expected to "
-                "be most negative where the clocks agree",
+                "be most negative where the clocks agree. Whatever E11 shows, "
+                "every other estimand keeps the mat's clock as read",
                 "E12": "E1 to E5 in the primary analysis without the homes in "
                 "which the mat stages less than "
                 f"{STAGED_ASLEEP_SHARE:g} of the minutes in bed on its observed "
@@ -586,8 +614,9 @@ class SleepMatProtocol:
                 "estimable": "a criterion is not estimable when fewer than "
                 "three homes are included",
                 "multiplicity": "C1 is the only primary criterion. The two "
-                "criteria are not adjusted for each other, and E3 to E12 and S1 "
-                "are descriptions with intervals",
+                "criteria are not adjusted for each other. E3 to E12 and S1 are "
+                "descriptions: those that are means over homes have intervals, "
+                "and the pooled counts of E6, E7 and E8 have none",
             },
             "margins": {
                 "tracking": f"{self.tracking_margin:g}, a declared convention. "
@@ -613,14 +642,19 @@ class SleepMatProtocol:
                 "itself, so C2 is secondary",
             },
             "expected_readings": {
-                "C2": "C2 can say the pipeline does not agree in level and can "
-                "hardly say it agrees. With no bias and the homes' mean "
-                "differences spread by an hour, the planning read agrees in "
-                f"{readings['c2_agrees_no_bias_spread_1']:.0%} of studies; "
-                "spread by two hours, in "
-                f"{readings['c2_agrees_no_bias_spread_2']:.0%}; and with the "
-                "three homes the mat stages as mostly awake four hours further "
-                "off, almost never",
+                "C2": "the homes' mean differences are expected to spread by two "
+                "hours or more: from the mat alone, the median hours asleep of "
+                "the 14 homes with enough mat-observed days have a standard "
+                "deviation of 2.5 hours between homes, and the published "
+                "per-household median of the pipeline's hours of sleep runs from "
+                "5.6 to 20.2. With no bias and that spread, the planning read "
+                f"agrees in {readings['c2_agrees_no_bias_spread_2']:.0%} of "
+                "studies, and with the three homes the mat stages as mostly "
+                "awake four hours further off, almost never; with a spread of "
+                f"one hour it would have read agrees in "
+                f"{readings['c2_agrees_no_bias_spread_1']:.0%}. So C2 can say "
+                "the pipeline does not agree in level, and can hardly say it "
+                "agrees",
                 "C1": "with those three homes not following at all and the "
                 "rest at a Gaussian correlation of 0.6, the true value of E1 "
                 f"was {readings['c1_truth_outlying_homes_rest_at_0_6']:.2f} in "
@@ -641,7 +675,10 @@ class SleepMatProtocol:
                 "outlying homes both covered more, "
                 f"{_span(outlying['percentile_bootstrap'])} and "
                 f"{_span(outlying['student_t'])}, since their difference was "
-                "fixed and not drawn",
+                "fixed and not drawn. Homes that are outlying at random, rather "
+                "than these three, can make a t interval over so few homes cover "
+                "less than its level; C2, which they would move most, is "
+                "secondary",
                 "planning_days": "the numbers of mat-observed days with both "
                 "neighbours, from the mat alone: upper bounds on the matched "
                 "days",
