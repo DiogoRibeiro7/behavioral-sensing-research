@@ -96,6 +96,7 @@ nav:
       - "TIHM: alert-burden results": TIHM_ALERT_BURDEN_RESULTS.md
       - "Silent homes: protocol": SILENT_HOME_PROTOCOL.md
       - "Silent homes: results": SILENT_HOME_RESULTS.md
+      - "Thresholds on synthetic days": THRESHOLD_CALIBRATION_NULL.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:

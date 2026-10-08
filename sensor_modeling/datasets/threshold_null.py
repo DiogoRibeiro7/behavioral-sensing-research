@@ -25,8 +25,7 @@ not fire equally often.
 
 **Where the calibrated reference matches the default**: the multiple of its
 thresholds at which it finds a step as often, and the one at which it reports
-falsely as often, by the rule the threshold-calibration protocol applies to
-its tuning homes.
+falsely as often, by a rule fixed before the measurement.
 
 The values are synthetic. A real day is not an independent Gaussian draw, so
 nothing here says how either reference behaves in a home. It says what each

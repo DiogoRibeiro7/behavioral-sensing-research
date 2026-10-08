@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from datetime import date
 from pathlib import Path
 
@@ -11,8 +12,10 @@ import numpy as np
 import pytest
 
 from sensor_modeling.baseline import BaselineConfig, ChangeKind
+from sensor_modeling.datasets.external_figures import data_sha256
 from sensor_modeling.datasets.threshold_calibration_figures import (
     NULL_FIGURES,
+    NULL_PREFIX,
     null_figure_data,
 )
 from sensor_modeling.datasets.threshold_null import (
@@ -42,11 +45,14 @@ from sensor_modeling.datasets.threshold_null import (
     share,
 )
 from sensor_modeling.datasets.threshold_null_summary import (
+    NULL_PAGE,
+    RECORD_PATH,
     dominated,
     render_page,
 )
 from sensor_modeling.evaluation import load_record
 
+ROOT = Path(__file__).resolve().parents[1]
 TINY = ThresholdNull(
     rate_series=6,
     series=4,
@@ -352,3 +358,88 @@ class TestDominated:
         table[WEEKEND][CALIBRATED]["0.6"]["found"]["share"] = 0.50
         assert dominated(table, STEP2) == ["1"]
         assert dominated(table, WEEKEND_STEP2) == []
+
+
+# ----------------------------------------------------------------------------
+# The published record
+# ----------------------------------------------------------------------------
+@pytest.fixture(scope="module")
+def published() -> dict:
+    return load_record(ROOT / RECORD_PATH)
+
+
+class TestPublished:
+    def test_the_record_is_of_the_declared_measurement(self, published: dict) -> None:
+        declared = {**ThresholdNull().to_dict(), "result_schema": RESULT_SCHEMA}
+        assert published["configuration"] == json.loads(json.dumps(declared))
+        assert published["experiment"] == "threshold-null"
+        assert published["data_source"] == "synthetic"
+        assert published["environment"]["git_dirty"] == "false"
+
+    def test_the_page_is_the_rendering_of_the_record(self, published: dict) -> None:
+        page = (ROOT / "docs" / NULL_PAGE).read_text(encoding="utf-8")
+        assert page == render_page(published)
+
+    def test_each_figure_was_drawn_from_the_record(self, published: dict) -> None:
+        data = null_figure_data(published)
+        for name in NULL_FIGURES:
+            svg = (ROOT / "docs" / "figures" / f"{NULL_PREFIX}-{name}.svg").read_text(
+                encoding="utf-8"
+            )
+            found = re.search(r"data sha256 ([0-9a-f]{64})", svg)
+            assert found is not None
+            assert found.group(1) == data_sha256(data[name])
+
+    def test_the_default_passes_its_threshold_far_more_often_than_stated(
+        self, published: dict
+    ) -> None:
+        results = published["results"]
+        rate = results["rates"][NONE][DEFAULT]["phase"]["all"]["3"]["rate"]
+        assert rate > 10 * results["nominal"]["3"]
+
+    def test_the_calibrated_reference_passes_about_as_often_as_stated(
+        self, published: dict
+    ) -> None:
+        results = published["results"]
+        cell = results["rates"][NONE][CALIBRATED]["phase"]["all"]
+        for threshold, stated in results["nominal"].items():
+            assert 0.75 * stated < cell[threshold]["rate"] < 1.33 * stated
+
+    def test_the_matching_multiples_follow_the_rule(self, published: dict) -> None:
+        results = published["results"]
+        operating, scales = results["operating"], ThresholdNull().scales
+
+        def shares(shape: str) -> dict[float, float]:
+            return {
+                scale: operating[shape][CALIBRATED][f"{scale:g}"]["found"]["share"]
+                for scale in scales
+            }
+
+        for entry in results["matching"].values():
+            quiet, moved = entry["nothing_changed"], entry["a_step"]
+            again = matching_multiples(
+                shares(quiet),
+                shares(moved),
+                operating[quiet][DEFAULT]["1"]["found"]["share"],
+                operating[moved][DEFAULT]["1"]["found"]["share"],
+            )
+            assert {name: entry[name] for name in again} == again
+            for shapes in entry["calibrated_minus_default"].values():
+                assert set(shapes) == set(SHAPES)
+
+    def test_a_weekly_rhythm_does_not_move_the_calibrated_reference(
+        self, published: dict
+    ) -> None:
+        """Its window opens in the ninth week, when every weekday has a centre."""
+        operating = published["results"]["operating"]
+        for scale in (f"{s:g}" for s in ThresholdNull().scales):
+            for flat, rhythmic in ((NONE, WEEKEND), (STEP2, WEEKEND_STEP2)):
+                assert operating[rhythmic][CALIBRATED][scale]["found"]["share"] == (
+                    pytest.approx(
+                        operating[flat][CALIBRATED][scale]["found"]["share"], abs=0.02
+                    )
+                )
+        assert (
+            operating[WEEKEND][DEFAULT]["1"]["found"]["share"]
+            > operating[NONE][DEFAULT]["1"]["found"]["share"] + 0.02
+        )

@@ -351,8 +351,14 @@ def _verdicts(payload: Mapping[str, Any]) -> list[str]:
         "noise.",
         "- **With a weekly rhythm added**, gradual drifts go from "
         f"{_pct(flat[DEFAULT], 3)} to {_pct(rhythm[DEFAULT], 3)} of days for the "
-        f"default and from {_pct(flat[CALIBRATED], 3)} to "
-        f"{_pct(rhythm[CALIBRATED], 3)} for the calibrated one. The default "
+        "default and "
+        + (
+            f"stay at {_pct(flat[CALIBRATED], 3)}"
+            if _pct(flat[CALIBRATED], 3) == _pct(rhythm[CALIBRATED], 3)
+            else f"go from {_pct(flat[CALIBRATED], 3)} to "
+            f"{_pct(rhythm[CALIBRATED], 3)}"
+        )
+        + " for the calibrated one. The default "
         "fits its trend to the days as they are. The calibrated reference fits "
         "it to each day's distance from the centre of its own weekday, so once "
         "every weekday has a centre of its own a rhythm is no part of its "
@@ -478,7 +484,12 @@ def _matching(payload: Mapping[str, Any]) -> list[str]:
         f"- **The same detection:** {rule['same_detection']}.",
         f"- **The same false reports:** {rule['same_false_reports']}.",
         "",
-        f"{_sentence(rule['why'])}",
+        "When this measurement was made, the threshold-calibration protocol "
+        "was to read two multiples off some of its homes by this rule and test "
+        "them on the others, as the record says. It now places its match "
+        "between the multiples of a finer grid, at the same false alerts "
+        "alone, and finds it again in every resample of its homes. What is "
+        "found here is what that match can be set against.",
     ]
     for name, entry in matching.items():
         quiet, moved = entry["nothing_changed"], entry["a_step"]
@@ -581,7 +592,7 @@ def _limits(payload: Mapping[str, Any]) -> list[str]:
         "these series.",
         "- **Where the references match here is not where they match in a "
         "home.** The threshold-calibration protocol finds that on simulated "
-        "homes of its own, and tests the result on others.",
+        "homes of its own, again in every resample of them.",
     ]
 
 

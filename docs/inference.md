@@ -302,6 +302,8 @@ is an opt-in answer to that, and it is off by default:
 A threshold that means what it says is passed far less often, so it is not a
 drop-in replacement: at the declared thresholds the calibrated reference
 reports much less, of what is there as well as of what is not.
+[The baseline's thresholds on days with nothing in them](THRESHOLD_CALIBRATION_NULL.md)
+measures both references on synthetic days, where the answer is known.
 
 Poorly observed days go through
 `skip`, which records the
