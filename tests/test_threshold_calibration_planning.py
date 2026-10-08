@@ -275,3 +275,77 @@ class TestPlan:
         assert payload["results"]["result_schema"] == planning.RESULT_SCHEMA
         assert len(payload["mcse"]) == len(payload["results"]["cells"]) * 4
         record.to_json()
+
+
+class TestWhatTheDrawsAssume:
+    def test_homes_differ_in_their_false_alerts_as_the_record_s_homes_do(
+        self,
+    ) -> None:
+        config = small(homes=4000)
+        cohort = draw(np.random.default_rng(8), Cell("most", 1.0, 0.6), config)
+        counts = cohort["default"][0][:, config.scales.index(1.0)]
+        # A gamma rate of shape 1.9 under a Poisson count of mean one.
+        assert counts.std(ddof=1) == pytest.approx(np.sqrt(1 + 1 / 1.9), abs=0.06)
+
+    def test_a_home_found_under_one_reference_tends_to_be_under_the_other(
+        self,
+    ) -> None:
+        config = small(homes=4000)
+        cohort = draw(np.random.default_rng(9), Cell("most", 1.0, 0.6), config)
+        default = cohort["default"][1][:, config.scales.index(1.0)]
+        calibrated = cohort["calibrated"][1][:, config.scales.index(0.6)]
+        assert np.corrcoef(default, calibrated)[0, 1] > 0.2
+        # A false detection is drawn apart from a detection, so a home can
+        # be falsely detected and not found.
+        assert (default == -1).any()
+
+    def test_the_other_match_says_better_with_fewer_false_alerts(self) -> None:
+        config = small(homes=400, resamples=200)
+        rng = np.random.default_rng(10)
+        found = [trial(rng, Cell("most", 0.25, 0.6), config) for _ in range(5)]
+        for one in found:
+            assert one[SAME_DETECTION]["estimate"] < 0.0
+            assert one[SAME_DETECTION]["verdict"] == BETTER
+
+    def test_a_match_at_the_end_of_the_grid_is_not_bracketed(self) -> None:
+        estimate = {"status": "at_the_end_of_the_grid", "interval": {}}
+        assert planning._verdict(estimate, more_is_better=True) == NOT_BRACKETED
+
+    def test_a_cell_s_summary_is_computed_from_its_trials(self) -> None:
+        trials = [
+            {
+                "verdict": verdict,
+                "estimate": estimate,
+                "mcse": 0.1,
+                "resamples": {"bracketed": bracketed},
+            }
+            for verdict, estimate, bracketed in (
+                (BETTER, 0.3, 10),
+                (NOT_SHOWN, -0.1, 10),
+                (NOT_BRACKETED, None, 4),
+                (WORSE, -0.5, 8),
+            )
+        ]
+        found = planning._summarise(trials, resamples=10)
+        assert found[BETTER]["share"] == 0.25
+        assert found[NOT_BRACKETED]["share"] == 0.25
+        assert found["trials_with_an_estimate"] == 3
+        assert found["mean_estimate"] == pytest.approx(-0.1)
+        assert found["sd_of_estimates"] == pytest.approx(
+            np.std([0.3, -0.1, -0.5], ddof=1)
+        )
+        assert found["resamples_bracketed"] == pytest.approx(0.8)
+
+    def test_the_other_match_is_summarised_over_the_main_cells(self) -> None:
+        config = small(homes=40, resamples=40)
+        cells = plan(config)["cells"]
+        found = summary(cells, config)[SAME_DETECTION]["by_shape"]["most"]["1"]
+        assert found["cells"] == 1
+        main = next(
+            cell
+            for cell in cells
+            if (cell["shape"], cell["ratio"]) == ("most", 1.0)
+            and cell["cell"].endswith("correlation=0.6/dispersion=1.9/alerts=1")
+        )
+        share = main[SAME_DETECTION][NOT_BRACKETED]["share"]
+        assert found[NOT_BRACKETED] == {"low": share, "high": share}

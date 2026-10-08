@@ -6,11 +6,13 @@ Usage::
 
 Writes ``artifacts/threshold_calibration/threshold_calibration_protocol.json``
 from the protocol the code declares, with its digest and, beside it, the
-digest of every source file of the package, the versions of the numerical
-libraries and every default setting as they are now. It refuses when the protocol does not pin the record of the
-measurement on synthetic days, or the published TIHM records, to the files in
-the repository, and when a frozen file already exists that differs from what
-the code declares: a frozen protocol is not written twice.
+digest of every source file of the package, the versions of Python and of the
+numerical libraries, and every default setting as they are now. It refuses
+when the protocol does not pin the record of the measurement on synthetic
+days, the record of the trials it was planned on, or the published TIHM
+records, to the files in the repository, and when a frozen file already
+exists that differs from what the code declares: a frozen protocol is not
+written twice.
 """
 
 from __future__ import annotations

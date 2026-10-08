@@ -17,9 +17,9 @@ reference and under the calibrated one, each at a grid of multiples of the
 declared thresholds.
 
 The calibrated reference is not compared at the default's thresholds, where it
-reports far less of everything. Two rules can be compared when they find as
-much, or when they report falsely as often, and where that is for these two is
-not known in advance. So the comparison is made where the calibrated
+reports far less of everything. Two rules can be compared when they report
+falsely as often, and where that is for these two is not known in advance.
+So the comparison is made where the calibrated
 reference's operating curve, over its multiples, has the false alerts of the
 default as it ships, and what it finds is read there. Where that place is is
 part of what is estimated, so it is found again in every resample of homes,
@@ -44,6 +44,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import platform
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
@@ -163,7 +164,8 @@ def code_now(root: Path | None = None) -> dict[str, Any]:
     return {
         "sources": {name: file_sha256(root / name) for name in pinned_sources(root)},
         "distributions": {
-            name: metadata.version(name) for name in PINNED_DISTRIBUTIONS
+            "python": platform.python_version(),
+            **{name: metadata.version(name) for name in PINNED_DISTRIBUTIONS},
         },
         "defaults": defaults,
     }
@@ -235,8 +237,9 @@ class ThresholdCalibrationProtocol:
         the day after.
     max_delay_days, gradual_max_delay_days
         How long after a change begins a detection still counts.
-    informative_recall, calibration_tolerance
-        The criteria's margins.
+    informative_detection, calibration_tolerance
+        The criteria's margins: the default's excess detection below which C1
+        is uninformative, and the band of C2.
     calibration_thresholds
         The thresholds at which the calibrated reference's deviation is asked
         to mean what it says.
@@ -324,7 +327,7 @@ class ThresholdCalibrationProtocol:
     gradual_ramp_days: int = 28
     max_delay_days: float = 21.0
     gradual_max_delay_days: float = 42.0
-    informative_recall: float = 0.20
+    informative_detection: float = 0.20
     calibration_tolerance: float = 0.25
     calibration_thresholds: tuple[float, ...] = (1.5, 2.0, 3.0)
     planned_sd: float = 0.6
@@ -415,12 +418,29 @@ class ThresholdCalibrationProtocol:
         "and the silent-home record's alerts home by home, ran the "
         "calibrated reference on synthetic Gaussian series, and ran no "
         "simulated home",
-        "the scoring code as it now stands was run once more on the six "
-        "homes above, from the replays kept from the first time, in which "
-        "the default at other multiples of its own thresholds stands in for "
-        "the calibrated conditions. No home was run again. The stand-in has "
-        "the default's own curve, and the match came out where it is known "
-        "to be, with a difference of zero",
+        "the scoring code, once the match was placed on the curve, was run "
+        "once more on the six homes above, from the replays kept from the "
+        "first time, in which the default at other multiples of its own "
+        "thresholds stands in for the calibrated conditions. No home was run "
+        "again. The stand-in has the default's own curve, and the match came "
+        "out where it is known to be, with a difference of zero",
+        "a third review, before the freeze, read the protocol, the scoring, "
+        "the trials on hand-written curves, the pages, the scripts and the "
+        "tests, and both records of the measurement on synthetic days. It "
+        "ran the declaration and both pages on made-up values and on twelve "
+        "homes built by hand, drew 72,000 cohorts from operating curves of "
+        "its own and decided the criterion on them with the scoring's own "
+        "functions, and tested the unit tests against altered copies of the "
+        "code. It ran no simulated home. It found that the straight line "
+        "between two multiples of the grid, which then had 13, moved the "
+        "criterion well past its stated error where neighbouring multiples "
+        "were far apart. The grid was made three times as fine after that, "
+        "from a scan of smooth curves written down by hand, in which no draw "
+        "was made and no home run, and the trials were widened over where "
+        "the match can fall",
+        "one home of the six above, seed 140752, was simulated once more "
+        "with the default reference, to time a replay against a run of the "
+        "pipeline. Only the times were read",
     )
 
     def __post_init__(self) -> None:
@@ -603,14 +623,14 @@ class ThresholdCalibrationProtocol:
         return begin, begin + timedelta(days=days)
 
     def standard_error_planned(self, homes: int | None = None) -> float:
-        """The standard error of E2, as planned."""
+        """The standard error of E1, as planned."""
         count = self.homes if homes is None else homes
         return float(self.planned_sd / np.sqrt(count))
 
     def planned_power(self, difference: float, homes: int | None = None) -> float:
-        """How often C2 would be a success, as planned, at a true difference.
+        """How often C1 would be a success, as planned, at a true difference.
 
-        C2 is a success when the lower bound of E2's interval is above zero,
+        C1 is a success when the lower bound of E1's interval is above zero,
         so the estimate must exceed the interval's half width. The interval
         is taken as normal.
         """
@@ -619,7 +639,7 @@ class ThresholdCalibrationProtocol:
         return NormalDist().cdf(difference / error - half)
 
     def planned_difference(self, power: float, homes: int | None = None) -> float:
-        """The true difference at which C2 would be a success that often."""
+        """The true difference at which C1 would be a success that often."""
         error = self.standard_error_planned(homes)
         half = NormalDist().inv_cdf(1.0 - (1.0 - self.confidence) / 2.0)
         return float((half + NormalDist().inv_cdf(power)) * error)
@@ -635,10 +655,14 @@ class ThresholdCalibrationProtocol:
 
     def _by_default(self, name: str) -> str:
         """A range for each default, as runs in 100."""
-        return ", ".join(
-            f"{self._runs(f'{name}_{shape}')} where the default finds {words} " "steps"
-            for shape, words in PLANNED_DEFAULTS.items()
-        )
+        parts = [
+            f"{self._runs(f'{name}_{shape}')} where "
+            + ("the default" if place == 0 else "it")
+            + f" finds {words}"
+            + (" steps" if place == 0 else "")
+            for place, (shape, words) in enumerate(PLANNED_DEFAULTS.items())
+        ]
+        return ", ".join(parts[:-1]) + " and " + parts[-1]
 
     def _signed(self, name: str) -> str:
         """A range of the planning record's estimates, with their signs."""
@@ -981,8 +1005,8 @@ class ThresholdCalibrationProtocol:
             "with half as many false alerts again was called worse in "
             f"{self._by_default('half_more_worse')}. All are runs in 100. Where "
             "the default already finds nearly every step there is little more "
-            "to find, and the difference shows in false alerts, which C1 does "
-            "not read"
+            "to be found, and a better reference shows itself more in false "
+            "alerts, which C1 does not read"
         )
 
     def _definitions(self) -> dict[str, Any]:
@@ -1112,7 +1136,7 @@ class ThresholdCalibrationProtocol:
             ],
             "C1_more_is_detected_at_the_same_false_alerts": "uninformative "
             f"when the mean excess detection in `{CHANGE}` under `{default}` "
-            f"is below {self.informative_recall:g}; otherwise not bracketed "
+            f"is below {self.informative_detection:g}; otherwise not bracketed "
             "when the match is not bracketed on the homes as they are; "
             "otherwise success when E1's interval lies above zero, failure "
             "when it lies below zero, and inconclusive otherwise",
@@ -1125,9 +1149,9 @@ class ThresholdCalibrationProtocol:
             "lies wholly outside that band; inconclusive otherwise. The "
             "verdicts are points on one curve, since a day's deviation does "
             "not depend on the threshold it is read against",
-            "margin_order": ["informative_recall", "calibration_tolerance"],
+            "margin_order": ["informative_detection", "calibration_tolerance"],
             "margins": {
-                "informative_recall": f"{self.informative_recall:g} of excess "
+                "informative_detection": f"{self.informative_detection:g} of excess "
                 "detection: below it the default finds too little beyond "
                 "chance for a comparison to mean anything",
                 "calibration_tolerance": f"{tolerance:g} on the scale of the "
@@ -1147,6 +1171,10 @@ class ThresholdCalibrationProtocol:
                 "a match that is not bracketed is reported as such, with "
                 "whether it was not reached or lies at the end of the grid, "
                 "and no claim follows from it",
+                "C2 is decided threshold by threshold. The option's claim "
+                "holds on these homes when it holds at all three, does not "
+                "hold when it does not hold at one of them, and is not shown "
+                "otherwise",
                 "C2 is about the option's claim and not about its "
                 "usefulness: a threshold can be miscalibrated on a simulated "
                 "home and still be the better rule, and the reverse",
@@ -1210,8 +1238,9 @@ class ThresholdCalibrationProtocol:
                 "for each feature and each reference, beside what the "
                 "threshold states, and the threshold it is equivalent to",
                 "under every described condition: change verdicts by kind, "
-                "and behavioural alerts in all, per home and by the verdict "
-                "that raised them",
+                "and behavioural alerts in all and by the verdict that raised "
+                f"them; and per home under `{self.default}` and "
+                f"`{self.declared}`",
             ],
             "not_reported": "any relation to the dataset's labels. Whether "
             "what the pipeline raises relates to what a clinical team "
@@ -1235,7 +1264,7 @@ class ThresholdCalibrationProtocol:
             "question": "whether a reference whose deviation threshold means "
             "what it says does better than the default one in a simulated "
             "home, when the two are compared at thresholds that make them "
-            "find as much, or report falsely as often",
+            "report falsely as often",
             "inspected_before": [*self.inspected_before, *self._tried()],
             **self._seen(),
             "simulator": self._simulator(),
@@ -1324,9 +1353,12 @@ class ThresholdCalibrationProtocol:
                 "another: these homes come from one simulator with one set of "
                 "settings",
                 "between two multiples the curve is taken to be a straight "
-                "line. Where the true curve bends, the line puts the "
-                "calibrated reference slightly worse than it is: less found "
-                "at the same false alerts",
+                "line, which can lie to either side of the true curve. The "
+                "grid is fine where a match is likely, so that the gap is "
+                "small beside the interval, and the trials on curves written "
+                "down by hand say how often it moved a verdict there. Where "
+                "the grid is coarse, above 1.5 times the declared thresholds, "
+                "it can move one more often",
                 "no estimate is given of how many fewer false alerts the "
                 "calibrated reference raises at the same detection, for the "
                 "reason the matching rule gives",
@@ -1334,7 +1366,11 @@ class ThresholdCalibrationProtocol:
             "tihm": self._tihm(),
             "reporting": "every estimand, criterion, arm, condition and home, "
             "whatever it shows; no multiple, margin, window or rule is changed "
-            "after scoring",
+            "after scoring. The first run of this protocol that completes is "
+            "its result. A run that stops before it completes, refused by a "
+            "check or interrupted and not resumed with the same code, is not "
+            "read, and the record of the run that completes lists every such "
+            "attempt and why it stopped",
         }
 
     def sha256(self) -> str:
@@ -1348,16 +1384,83 @@ class ThresholdCalibrationProtocol:
 
 #: The digest of the committed record of the measurement on synthetic days,
 #: and where it puts the two multiples.
-NULL_RECORD_SHA256 = ""
-NULL_EXPECTED: tuple[tuple[str, tuple[tuple[str, float], ...]], ...] = ()
+NULL_RECORD_SHA256 = "513c48884b69f956a1f842dbb3c7a695cd4400556bd406f2ee44843fb3c4711c"
+NULL_EXPECTED: tuple[tuple[str, tuple[tuple[str, float], ...]], ...] = (
+    (
+        "plain",
+        (
+            ("same_false_alerts", 0.55),
+            ("default_false", 0.085),
+            ("default_found", 0.842),
+            ("at_the_same_false_alerts_false", 0.053),
+            ("at_the_same_false_alerts_found", 0.9685),
+        ),
+    ),
+    (
+        "weekly_rhythm",
+        (
+            ("same_false_alerts", 0.5),
+            ("default_false", 0.145),
+            ("default_found", 0.86),
+            ("at_the_same_false_alerts_false", 0.093),
+            ("at_the_same_false_alerts_found", 0.9885),
+        ),
+    ),
+)
 
 #: The digest of the committed record of the trials on curves written down by
 #: hand, and the ranges of it that the declaration quotes.
-PLANNING_RECORD_SHA256 = ""
-PLANNING_EXPECTED: tuple[tuple[str, float], ...] = ()
+PLANNING_RECORD_SHA256 = (
+    "8ae86baca7d3ff90c76f70f02996b637d9a74b941936260e6f559be9d8fc970a"
+)
+PLANNING_EXPECTED: tuple[tuple[str, float], ...] = (
+    ("offset_low", 0.45),
+    ("offset_high", 1.1),
+    ("same_curve_better_low", 0.017),
+    ("same_curve_better_high", 0.035),
+    ("same_curve_worse_low", 0.016),
+    ("same_curve_worse_high", 0.038),
+    ("same_curve_estimate_low", -0.002782545821513541),
+    ("same_curve_estimate_high", 0.0006042056666903963),
+    ("error_low", 0.02243782244956684),
+    ("error_high", 0.036566435136005805),
+    ("half_better_most_low", 0.991),
+    ("half_better_most_high", 0.996),
+    ("half_better_nearly_all_low", 0.671),
+    ("half_better_nearly_all_high", 0.707),
+    ("half_better_few_low", 0.982),
+    ("half_better_few_high", 0.988),
+    ("quarter_fewer_better_most_low", 0.457),
+    ("quarter_fewer_better_most_high", 0.496),
+    ("quarter_fewer_better_nearly_all_low", 0.178),
+    ("quarter_fewer_better_nearly_all_high", 0.2),
+    ("quarter_fewer_better_few_low", 0.38),
+    ("quarter_fewer_better_few_high", 0.416),
+    ("half_more_worse_most_low", 0.773),
+    ("half_more_worse_most_high", 0.803),
+    ("half_more_worse_nearly_all_low", 0.582),
+    ("half_more_worse_nearly_all_high", 0.625),
+    ("half_more_worse_few_low", 0.605),
+    ("half_more_worse_few_high", 0.634),
+    ("same_detection_same_curve_better_low", 0.053),
+    ("same_detection_same_curve_better_high", 0.065),
+    ("same_detection_half_more_not_bracketed_low", 0.915),
+    ("same_detection_half_more_not_bracketed_high", 0.955),
+    ("same_detection_half_more_estimate_low", -0.5068273613565015),
+    ("same_detection_half_more_estimate_high", -0.4603814665272998),
+)
 
 #: The digests of the published TIHM records the description must reproduce.
-TIHM_RECORDS_SHA256: tuple[tuple[str, str], ...] = ()
+TIHM_RECORDS_SHA256: tuple[tuple[str, str], ...] = (
+    (
+        "artifacts/tihm/tihm-alert-burden.json",
+        "5a5bb24167c8f089de3138f9c35ec6e07cd902ba385999f172458e40b40a64ff",
+    ),
+    (
+        "artifacts/silent_home/silent-home-tihm.json",
+        "96798aa2e573f281477faad624ee7369ff2508d5a8631c7003f7f75218bae6a9",
+    ),
+)
 
 
 #: The defaults the trials on hand-written curves were run for, by how much of
@@ -1487,6 +1590,14 @@ def check_inputs(
     if planned_from(tried) != protocol.planning_expected:
         raise ValueError(
             f"what the protocol says {PLANNING_RECORD} gives is not what it holds"
+        )
+    # The trials decided the criterion with the scoring's own functions; if
+    # those have changed since, the trials are not of the criterion scored.
+    from .threshold_calibration_planning import scoring_sources
+
+    if tried["configuration"].get("scoring_functions") != scoring_sources():
+        raise ValueError(
+            f"{PLANNING_RECORD} was made with other scoring functions than these"
         )
     pinned = dict(protocol.tihm_records_sha256)
     if set(pinned) != set(TIHM_RECORDS):

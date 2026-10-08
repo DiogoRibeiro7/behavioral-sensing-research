@@ -1198,7 +1198,7 @@ def criteria(
     found = results["matched"]
     default_found = results["detection"][CHANGE][protocol.default]["excess_detection"]
     e1 = found["excess_detection"][CHANGE]
-    if default_found["estimate"] < protocol.informative_recall:
+    if default_found["estimate"] < protocol.informative_detection:
         one = "uninformative"
     elif e1["status"] != BRACKETED:
         one = "not bracketed"
@@ -1216,10 +1216,17 @@ def criteria(
             "E1": e1,
             "match": found["match"],
             "default_excess_detection": default_found,
-            "informative_at": protocol.informative_recall,
+            "informative_at": protocol.informative_detection,
         },
         "C2_the_threshold_means_what_it_says": {
             "verdicts": two,
+            "together": (
+                "holds"
+                if two and all(verdict == "holds" for verdict in two.values())
+                else (
+                    "does not hold" if "does not hold" in two.values() else "not shown"
+                )
+            ),
             "tolerance": protocol.calibration_tolerance,
             "E3": {
                 threshold: entry[CALIBRATED]
@@ -1598,6 +1605,22 @@ def _mcse(
     }
 
 
+def _code_note(changed: Mapping[str, Sequence[str]], why: str) -> str:
+    """What a record says about the code its run used."""
+    names = [name for group in changed.values() for name in group]
+    if not names:
+        return (
+            "The source files, the libraries' versions and the default "
+            "settings the protocol recorded at its freeze are those the run "
+            "used."
+        )
+    return (
+        "Code the protocol recorded at its freeze had changed by the run: "
+        + ", ".join(names)
+        + f". {why}"
+    )
+
+
 @dataclass(frozen=True)
 class ThresholdCalibrationResult:
     """A run of the evaluation: the record, and where it was written."""
@@ -1677,14 +1700,7 @@ def record_of(
             "protocol names it returned those of the pipeline run with the "
             "calibrated reference itself.",
             *(text[0].upper() + text[1:] + "." for text in between),
-            (
-                "The source files, the libraries' versions and the default "
-                "settings the protocol recorded at its freeze are those the "
-                "run used."
-                if not any(changed.values())
-                else "Code the protocol recorded at its freeze had changed by "
-                f"the run: {changed}. {code_note}"
-            ),
+            _code_note(changed, code_note),
             "A home with a change shares its seed with the same home without "
             "it and not its days, so a detection is set against the same "
             "window of the stable record as a rate, home by home, and not day "
@@ -2086,9 +2102,9 @@ def describe_tihm(
     protocol_sha256: str,
     inputs: Sequence[InputArtifact] = (),
     output_dir: Path | None = None,
+    published_homes: Mapping[str, Mapping[str, Any]],
     jobs: int = 1,
     progress: Callable[[int, int], None] | None = None,
-    published_homes: Mapping[str, Mapping[str, Any]] | None = None,
     code_changes: Mapping[str, Sequence[str]] | None = None,
     code_note: str = "",
 ) -> ThresholdCalibrationResult:
@@ -2149,14 +2165,7 @@ def describe_tihm(
             "to the dataset's labels is reported.",
             "A share of deviating days is given with no interval: it "
             "describes these homes.",
-            (
-                "The source files, the libraries' versions and the default "
-                "settings the protocol recorded at its freeze are those the "
-                "run used."
-                if not any(changed.values())
-                else "Code the protocol recorded at its freeze had changed by "
-                f"the run: {changed}. {code_note}"
-            ),
+            _code_note(changed, code_note),
         ],
         inputs=list(inputs),
         preprocessing={

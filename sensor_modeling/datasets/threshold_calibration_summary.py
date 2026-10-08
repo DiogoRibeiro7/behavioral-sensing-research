@@ -54,7 +54,7 @@ def _code(names: Sequence[Any]) -> str:
 
 
 def _criterion(name: str) -> tuple[str, str]:
-    """Split ``C1_fewer_false_alerts`` into its number and its claim."""
+    """Split ``C1_more_is_detected`` into its number and its claim."""
     number, _, claim = name.partition("_")
     return number, _title(claim)
 
@@ -739,6 +739,18 @@ def _match_part(payload: Mapping[str, Any]) -> list[str]:
     ]
 
 
+_READING_SENTENCES = {
+    "better": "At the false alerts of the default as it ships, the calibrated "
+    "reference finds more of the step change than the default.",
+    "worse": "At the false alerts of the default as it ships, the calibrated "
+    "reference finds less of the step change than the default.",
+    "not shown": "At the false alerts of the default as it ships, no difference "
+    "in what the two references find is shown either way.",
+    "uninformative": "The default finds too little of the step change beyond "
+    "chance for the comparison to mean anything, and nothing is claimed.",
+}
+
+
 def _criteria_part(payload: Mapping[str, Any]) -> list[str]:
     results, configuration = payload["results"], payload["configuration"]
     judged = results["criteria"]
@@ -751,7 +763,8 @@ def _criteria_part(payload: Mapping[str, Any]) -> list[str]:
             claim,
             f"**{one['verdict']}**",
             "The default's excess detection is "
-            f"{_interval(one['default_excess_detection'])}, and the match is "
+            f"{_interval(one['default_excess_detection'])}, where below "
+            f"{one['informative_at']:g} nothing is claimed, and the match is "
             f"{_STATUS_TITLES[one['match']['status']]}. E1 is "
             f"{_interval(one['E1'], signed=True)}.",
         ]
@@ -783,10 +796,13 @@ def _criteria_part(payload: Mapping[str, Any]) -> list[str]:
         "",
         "Read as the protocol fixed it:",
         "",
-        "- **At the false alerts of the default as it ships, the calibrated "
-        f"reference is: {judged['reading']}.**",
+        f"- **{_READING_SENTENCES[judged['reading']]}**",
+        "- **Whether the calibrated reference's threshold means what it says "
+        "on these homes, at all three thresholds together:** "
+        f"{two['together']}.",
         "- **Not shown is not no difference.** An inconclusive verdict means "
-        "the interval reached the value it was judged against.",
+        "the interval reached the value it was judged against, or that one of "
+        "its bounds does not exist because too many resamples had no match.",
     ]
 
 
@@ -925,7 +941,9 @@ def _detection_part(payload: Mapping[str, Any]) -> list[str]:
         "same home's stable record, and the excess is the one minus the other: "
         "what a condition finds beyond what it would have raised anyway. These "
         "tables are of conditions that were run; C1 is decided at the match, "
-        "above, and not here.",
+        "above, and not here. The calibrated reference at the multiple nearest "
+        "the match was chosen from these homes: its differences from the "
+        "default describe it, and their intervals do not carry the choice.",
     ]
     for arm in _arms(configuration):
         detection = results["detection"][arm]
@@ -989,7 +1007,7 @@ def _detection_part(payload: Mapping[str, Any]) -> list[str]:
 def _calibration_part(payload: Mapping[str, Any]) -> list[str]:
     results = payload["results"]
     calibration = results["calibration"]
-    five = results["criteria"]["C2_the_threshold_means_what_it_says"]["verdicts"]
+    verdicts = results["criteria"]["C2_the_threshold_means_what_it_says"]["verdicts"]
     thresholds = sorted(calibration["thresholds"], key=float, reverse=True)
     rows, phases, others = [], [], []
     features: list[str] = []
@@ -1004,7 +1022,7 @@ def _calibration_part(payload: Mapping[str, Any]) -> list[str]:
                     f"{100.0 * entry['stated']:.2f}%",
                     _percent(entry),
                     _threshold(entry),
-                    five[threshold] if reference == "calibrated" else "described",
+                    verdicts[threshold] if reference == "calibrated" else "described",
                 ]
             )
             phases.append(
@@ -1303,8 +1321,13 @@ def _tihm_part(tihm: Mapping[str, Any], payload: Mapping[str, Any]) -> list[str]
             "silent-home rule off and on",
         ),
         "",
-        f"- **Run.** Commit `{environment.get('git_commit', 'unknown')[:7]}`; "
-        f"recorded {tihm['recorded_at']}. {results['homes']} homes.",
+        f"- **Run.** Commit `{environment.get('git_commit', 'unknown')[:7]}`, "
+        + (
+            "with uncommitted changes"
+            if environment.get("git_dirty") != "false"
+            else "with no uncommitted change"
+        )
+        + f"; recorded {tihm['recorded_at']}. {results['homes']} homes.",
         f"- **Code.** {_code_line(configuration)}",
         "- **Checked.** The replay under the default reference returned each "
         "run's verdicts and alerts. In "

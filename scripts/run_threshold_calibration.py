@@ -18,7 +18,8 @@ The script writes the record, ``<output_dir>/threshold-calibration.json``.
 Each home is kept in ``<output_dir>/homes-<protocol>-<commit>-<code>`` as soon
 as it is finished, so a run that is interrupted can be started again without
 repeating the homes already done; the last part of the name is a digest of
-the source files, so homes run by other code are never read back. That
+the source files and the libraries' versions, so homes run by other code are
+never read back. That
 directory is working storage and is not part of the result, and the output
 directory must be outside the repository or ignored by it, or the homes kept
 there would make the tree a modified one. The evidence is simulated. The page
@@ -41,6 +42,7 @@ from sensor_modeling.datasets.threshold_calibration_experiment import (
 )
 from sensor_modeling.datasets.threshold_calibration_protocol import (
     NULL_RECORD,
+    PLANNING_RECORD,
     check_frozen_protocol,
     check_inputs,
     code_changes,
@@ -96,15 +98,19 @@ def main() -> None:
         ["git", "check-ignore", "-q", str(args.output_dir)],  # noqa: S607
         check=False,
     )
-    here = Path.cwd().resolve()
-    if here in args.output_dir.resolve().parents and inside.returncode != 0:
+    here, output = Path.cwd().resolve(), args.output_dir.resolve()
+    if (here == output or here in output.parents) and inside.returncode != 0:
         raise SystemExit(
             "the output directory is inside the repository and is not ignored, "
             "so the homes kept there would make the tree a modified one"
         )
     commit = str(state.get("git_commit", "unknown"))[:12]
+    now = code_now()
     code = hashlib.sha256(
-        json.dumps(code_now()["sources"], sort_keys=True).encode("utf-8")
+        json.dumps(
+            {"sources": now["sources"], "distributions": now["distributions"]},
+            sort_keys=True,
+        ).encode("utf-8")
     ).hexdigest()[:12]
     checkpoint = args.output_dir / f"homes-{protocol.sha256()[:12]}-{commit}-{code}"
 
@@ -133,6 +139,13 @@ def main() -> None:
                 "the measurement on synthetic days that the option was designed "
                 "on; not read by the run",
                 NULL_RECORD,
+            ),
+            InputArtifact(
+                Path(PLANNING_RECORD).name,
+                file_sha256(Path(PLANNING_RECORD)),
+                "the trials on curves written down by hand that the number of "
+                "homes was planned on; not read by the run",
+                PLANNING_RECORD,
             ),
         ],
         output_dir=args.output_dir,

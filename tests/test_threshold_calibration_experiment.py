@@ -912,7 +912,7 @@ class TestCriteria:
         ]
         results = scored(protocol, homes)
         default = results["detection"][CHANGE][D1]["excess_detection"]
-        assert default["estimate"] == protocol.informative_recall == 0.2
+        assert default["estimate"] == protocol.informative_detection == 0.2
         assert results["criteria"][C1_NAME]["verdict"] == "success"
 
     def test_a_match_that_is_not_bracketed_claims_nothing(self) -> None:
@@ -1063,6 +1063,12 @@ class TestThresholdMeansWhatItSays:
         two = results["criteria"][C2_NAME]
         assert set(two["verdicts"]) == {"1.5", "2", "3"}
         assert two["verdicts"]["1.5"] == verdict
+        # No day passes 2 or 3, so the claim cannot hold at all three.
+        assert two["together"] == (
+            "does not hold"
+            if "does not hold" in two["verdicts"].values()
+            else "not shown"
+        )
         assert two["E3"]["1.5"]["threshold"] == 1.5
         assert two["tolerance"] == 0.25
 
@@ -1211,21 +1217,22 @@ class TestDescriptions:
                     ]
                 }
             },
-            *quiet(11),
+            {STABLE: {D1: [away(50)]}},
+            *quiet(10),
         ]
         stable = scored(protocol, homes)["stable"][D1]
-        assert stable["behavioural_alerts"] == 3
-        assert stable["per_home"]["estimate"] == pytest.approx(3 / 12)
-        assert stable["per_person_day"]["estimate"] == pytest.approx(3 / (12 * 84))
-        assert stable["homes_with_one"] == 1 and stable["most_in_one_home"] == 3
-        assert stable["by_feature"] == {"away_hours": 1, "sleeping_hours": 2}
-        assert stable["by_verdict"] == {"gradual_drift": 2, "persistent_change": 1}
-        assert stable["by_direction"] == {"decrease": 1, "increase": 2}
-        assert stable["by_severity"] == {"information": 3}
-        # Raised at the close of days 30, 31 and 36: weeks five and six.
+        assert stable["behavioural_alerts"] == 4
+        assert stable["per_home"]["estimate"] == pytest.approx(4 / 12)
+        assert stable["per_person_day"]["estimate"] == pytest.approx(4 / (12 * 84))
+        assert stable["homes_with_one"] == 2 and stable["most_in_one_home"] == 3
+        assert stable["by_feature"] == {"away_hours": 2, "sleeping_hours": 2}
+        assert stable["by_verdict"] == {"gradual_drift": 3, "persistent_change": 1}
+        assert stable["by_direction"] == {"decrease": 1, "increase": 3}
+        assert stable["by_severity"] == {"information": 4}
+        # Raised at the close of days 30, 31, 36 and 50: weeks five to eight.
         weeks = stable["by_week_of_the_day_closed"]
         assert len(weeks) == 12
-        assert weeks[4] == 2 and weeks[5] == 1 and sum(weeks) == 3
+        assert weeks[4] == 2 and weeks[5] == 1 and weeks[7] == 1 and sum(weeks) == 4
 
     def test_a_week_is_the_week_of_the_day_closed(self) -> None:
         protocol = scoring_protocol()
@@ -2133,7 +2140,11 @@ class TestPages:
             "| C1 | More is detected at the same false alerts | **success** |" in page
         )
         assert "E1 is +0.50 [" in page
-        assert "the calibrated reference is: better.**" in page
+        assert (
+            "the calibrated reference finds more of the step change than the "
+            "default.**" in page
+        )
+        assert "where below 0.2 nothing is claimed" in page
         assert "it is at 0.575 times the declared thresholds, between the " in page
         assert "multiples 0.55 and 0.6 of the grid" in page
         assert "`calibrated@0.55`, at the multiple of the grid" in page
@@ -2164,7 +2175,7 @@ class TestPages:
         page = render_page(json.loads(record.to_json()))
         assert "**not bracketed**" in page
         assert "not reached: at every multiple of the grid" in page
-        assert "the calibrated reference is: not shown.**" in page
+        assert "no difference in what the two references find is shown" in page
         assert "0 of 400 resamples bracketed, 400 not reached" in page
 
     def test_code_that_changed_is_said_on_the_page(self) -> None:
@@ -2254,3 +2265,230 @@ class TestPages:
         assert data["share"]["h12"][CALIBRATED][0] == pytest.approx(0.1)
         with pytest.raises(ValueError, match="not a threshold-calibration-tihm/1"):
             tihm_figure_data(a_record(protocol))
+
+
+# ----------------------------------------------------------------------------
+# What the third review found no test for
+# ----------------------------------------------------------------------------
+class TestWhatElseIsRead:
+    def test_too_little_found_is_said_before_a_missing_match(self) -> None:
+        protocol = scoring_protocol()
+        homes = [
+            entry(protocol, default_false=2, default_found=k < 2, false=lambda s: 3)
+            for k in range(protocol.homes)
+        ]
+        verdict = scored(protocol, homes)["criteria"][C1_NAME]["verdict"]
+        assert verdict == "uninformative"
+
+    def test_the_calibrated_reference_s_share_is_the_one_judged(self) -> None:
+        protocol = scoring_protocol()
+        results = score(
+            with_deviations(protocol, deviating(protocol.days, 0.1, 1.5)), protocol
+        )
+        judged = results["criteria"][C2_NAME]["E3"]["1.5"]
+        assert judged["estimate"] == pytest.approx(0.1)
+
+    def test_a_home_given_twice_is_refused(self) -> None:
+        protocol = scoring_protocol()
+        homes = cohort(protocol, quiet(12))
+        with pytest.raises(ValueError, match="not the protocol's homes"):
+            in_order([*homes, homes[0]], protocol)
+
+    def test_the_declared_condition_is_set_against_the_default_in_the_step(
+        self,
+    ) -> None:
+        protocol = scoring_protocol()
+        payload = record_of(
+            cohort(protocol, better(protocol)), protocol, protocol_sha256="0" * 64
+        ).to_dict()
+        intervals = {i["label"]: i for i in payload["intervals"]}
+        # The default finds the step in three homes of twelve; the calibrated
+        # reference as declared, in none. In the smaller step neither does.
+        found = intervals["E2: excess detection, calibrated as declared minus default"]
+        assert found["estimate"] == pytest.approx(-0.25)
+
+    def test_the_default_s_false_alerts_are_those_of_the_homes_as_they_are(
+        self,
+    ) -> None:
+        protocol = scoring_protocol()
+        homes = [
+            entry(
+                protocol,
+                default_false=(0, 2, 5)[k % 3],
+                false=lambda scale: 3,
+            )
+            for k in range(protocol.homes)
+        ]
+        found = matched(cohort(protocol, homes), protocol)
+        assert found["default"]["false_alerts_per_home"] == pytest.approx(7 / 3)
+
+    def test_each_arm_has_its_own_curve(self) -> None:
+        protocol = scoring_protocol()
+        curves = scored(protocol, better(protocol))["curves"][CALIBRATED]["0.6"]
+        assert curves[CHANGE]["excess_detection"]["estimate"] == pytest.approx(0.5)
+        assert curves[SMALL_CHANGE]["excess_detection"]["estimate"] == 0.0
+        assert curves[GRADUAL_CHANGE]["detected"]["estimate"] == 0.0
+
+    def test_each_other_feature_is_read_on_its_own_days(self) -> None:
+        protocol = scoring_protocol()
+        homes = with_deviations(protocol, deviating(protocol.days, 0.1, 1.5))
+        for home in homes:
+            away_days = home.arms[STABLE].deviations[CALIBRATED]["away_hours"]
+            away_days[:] = deviating(protocol.days, 0.5, 1.5)  # type: ignore[index]
+        found = score(homes, protocol)["calibration"]["thresholds"]["1.5"]
+        assert found[CALIBRATED]["other_features"]["away_hours"]["estimate"] == (
+            pytest.approx(0.5)
+        )
+        assert found[CALIBRATED]["estimate"] == pytest.approx(0.1)
+
+    def test_the_curves_are_read_the_right_way_round(self) -> None:
+        protocol = scoring_protocol()
+        results = scored(protocol, better(protocol))
+        curves, reading = results["curves"], results["curves_reading"][CHANGE]
+        mine = matched_or_beaten(curves, CHANGE, DEFAULT, CALIBRATED)
+        theirs = matched_or_beaten(curves, CHANGE, CALIBRATED, DEFAULT)
+        assert mine != theirs
+        assert reading["default_multiples_a_calibrated_one_is_no_worse_than"] == mine
+        assert reading["calibrated_multiples_a_default_one_is_no_worse_than"] == (
+            theirs
+        )
+
+
+class TestTihmDetails:
+    def test_the_alerts_are_compared_with_the_published_totals(self) -> None:
+        protocol = tihm_protocol()
+        runs = tihm_runs(protocol)
+        one = runs["h12"][0]
+        more = dataclasses.replace(
+            one.record,
+            conditions={
+                **one.record.conditions,
+                D1: a_run(protocol, [away(k % 84) for k in range(31)]),
+            },
+        )
+        runs["h12"][0] = dataclasses.replace(one, record=more)
+        with pytest.raises(ValueError, match="is not the published one"):
+            describe(runs, protocol, PUBLISHED)
+
+    def test_the_alerts_are_compared_home_by_home(self) -> None:
+        protocol = tihm_protocol()
+        runs = tihm_runs(protocol)
+
+        def with_alerts(run: TihmRun, count: int) -> TihmRun:
+            record = dataclasses.replace(
+                run.record,
+                conditions={
+                    **run.record.conditions,
+                    D1: a_run(protocol, [away(k % 84) for k in range(count)]),
+                },
+            )
+            return dataclasses.replace(run, record=record)
+
+        # One alert moves from one home to another: the totals are kept.
+        runs[RULE_OFF][0] = with_alerts(runs[RULE_OFF][0], 99)
+        runs[RULE_OFF][1] = with_alerts(runs[RULE_OFF][1], 81)
+        with pytest.raises(ValueError, match="do not have the published record's"):
+            describe(runs, protocol, PUBLISHED)
+
+    def test_a_day_at_the_threshold_is_past_it_on_tihm(self) -> None:
+        protocol = tihm_protocol()
+        days = np.full(protocol.days, np.nan)
+        days[:10] = 1.5
+        days[10:20] = 0.1
+        run = TihmRun(
+            household="a01",
+            monitored=84,
+            usable=84,
+            evaluable=20,
+            record=an_arm(protocol, deviations={DEFAULT: days, CALIBRATED: days}),
+        )
+        found = experiment._tihm_share([run], TRACKED_FEATURE, CALIBRATED, 1.5)
+        assert (found["deviating"], found["evaluable_feature_days"]) == (10, 20)
+
+    def test_alerts_are_given_per_home_for_both_references_as_declared(self) -> None:
+        protocol = tihm_protocol()
+        found = describe(tihm_runs(protocol), protocol, PUBLISHED)
+        per_home = found["rules"][RULE_OFF]["behavioural_alerts_per_home"]
+        assert per_home[C1] == {"a01": 1, "b02": 0, "c03": 0}
+
+    def test_the_rule_is_off_and_then_on_at_its_horizon(self) -> None:
+        protocol = scoring_protocol()
+        assert experiment.rule_settings(protocol) == {RULE_OFF: None, "h12": 12.0}
+
+    def test_the_calibrated_pipeline_is_run_on_the_first_homes_with_the_rule_off(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        protocol = scoring_protocol(tihm_checked_homes=2)
+
+        class Data:
+            def __init__(self, name: str) -> None:
+                self.household = name
+
+        class Adapter:
+            def households(self) -> list[str]:
+                return ["c03", "a01", "d04", "b02"]
+
+            def load(self, name: str) -> Data:
+                return Data(name)
+
+        class Valid:
+            ok = True
+
+        monkeypatch.setattr(experiment, "validate_household", lambda *_: Valid())
+        monkeypatch.setattr(experiment, "_run_tihm", lambda task: task)
+        tihm = type("Tihm", (), {"mapping": None})()
+        runs = experiment.run_tihm_homes(Adapter(), protocol, tihm)  # type: ignore[arg-type]
+        off = {task[0].household: (task[3], task[4]) for task in runs[RULE_OFF]}
+        on = {task[0].household: (task[3], task[4]) for task in runs["h12"]}
+        assert off == {
+            "a01": (None, True),
+            "b02": (None, True),
+            "c03": (None, False),
+            "d04": (None, False),
+        }
+        assert set(on.values()) == {(12.0, False)}
+
+
+class TestOneArm:
+    def test_each_arm_gets_its_change_and_the_named_homes_are_checked(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        protocol = scoring_protocol()
+        seen: list[tuple] = []
+
+        class Result:
+            config = type("Config", (), {"tz": timezone.utc})()
+            registry = type("Registry", (), {"subset": lambda self, s: None})()
+            end = START
+
+            def observations_for(self, sensors: object) -> list:
+                return []
+
+        def simulate(config: object) -> Result:
+            seen.append(("simulate", config))
+            return Result()
+
+        def replay(*arguments: object, **options: object) -> str:
+            seen.append(("replay", arguments[3], options["checked"]))
+            return "replayed"
+
+        monkeypatch.setattr(experiment, "simulate", simulate)
+        monkeypatch.setattr(experiment, "degrade", lambda *_: ([], None))
+        monkeypatch.setattr(experiment, "_run_pipeline", lambda *_, **__: [])
+        monkeypatch.setattr(experiment, "replay_arm", replay)
+        checked, plain = protocol.checked_seeds()[0], protocol.study_seeds()[-1]
+        for seed in (checked, plain):
+            home = experiment.run_home(seed, protocol)
+            assert set(home.arms) == set(ARMS)
+        configs = [entry[1] for entry in seen if entry[0] == "simulate"]
+        assert [config.seed for config in configs] == [checked] * 4 + [plain] * 4
+        assert [config.shift for config in configs[:4]] == [
+            protocol.shift(arm) for arm in ARMS
+        ]
+        assert all(config.days == protocol.days for config in configs)
+        replays = [entry for entry in seen if entry[0] == "replay"]
+        assert all(entry[1] == protocol.conditions for entry in replays)
+        assert [entry[2] for entry in replays[:4]] == [
+            list(protocol.checked_conditions)
+        ] * 4
+        assert [entry[2] for entry in replays[4:]] == [[]] * 4
