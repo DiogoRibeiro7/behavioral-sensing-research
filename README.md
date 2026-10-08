@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/project-avatar.png" alt="behavioral-sensing-research project logo" width="160" height="160">
+</p>
+
 # Sensor Modeling Research Toolkit
 
 A research-grade Python toolkit for **interpretable, probabilistic,
