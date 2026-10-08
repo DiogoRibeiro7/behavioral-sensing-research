@@ -461,13 +461,16 @@ class AdaptiveBaseline:
     def _left_out_residuals(self) -> list[float]:
         """How far each retained day fell from the centre the others gave it.
 
-        Each day is compared as a new day would be: against the median of the
-        other days of its weekday, or, where its weekday has too few others
-        for the reference to be weekday-aware, against the median of all the
-        other days. The spread of these residuals is the spread a new day's
-        distance from its reference has, the uncertainty of a centre drawn
-        from a few days included. A single retained day has no other, and its
-        residual is zero.
+        Each day is compared much as a new day would be: against the median
+        of the other days of its weekday where that weekday has enough days
+        for the reference to be weekday-aware, and against the median of all
+        the other days where it has not. A retained day is one of its
+        weekday's days, so its centre rests on one day fewer than a new
+        day's: on three others where a new day would have four. The spread of
+        these residuals is close to the spread a new day's distance from its
+        reference has, the uncertainty of a centre drawn from a few days
+        included. A single retained day has no other, and its residual is
+        zero.
         """
         values = list(self._values)
         if len(values) < 2:
