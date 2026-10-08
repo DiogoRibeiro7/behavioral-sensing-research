@@ -13,6 +13,8 @@ Adds an opt-in rule for the failure that run showed, a home that reports nothing
 
 Adds an opt-in baseline reference whose deviation threshold means what it says, for the second failure that run showed, measures it on synthetic days, and tests it on simulated homes under a protocol frozen before the test.
 
+Sets the pipeline's hours of sleep beside a sleep mat in the TIHM homes that have one, under a protocol frozen before any value of the pipeline was set beside any record of the mat.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.
@@ -39,6 +41,15 @@ Adds an opt-in baseline reference whose deviation threshold means what it says, 
     - At the declared thresholds it raises 3 false alerts in the 400 homes against 342, and finds the step net of chance in 0.04 of homes against 0.63.
     - Before the freeze, the criterion was tried on outcomes drawn from operating curves written down by hand, and called a reference with the default's own curve better in 2 to 4 runs in 100 and worse in 2 to 4.
   - **The calibrated reference on TIHM, as a description.** Nothing here is a test: the reference was built from these homes. With the silent-home rule off it passes 3 on 8.1% of evaluable days of sleep, against 17.4%, and raises 84 behavioural alerts at the declared thresholds against 183. With the rule on at 12 hours, 1.7% against 10.9%, and 16 alerts against 49.
+  - **The pipeline's hours of sleep beside a sleep mat.** In the 14 TIHM homes with at least 14 matched days on a mat under the mattress, on the days whose sensors reported throughout, under a protocol frozen and pushed before any value of the pipeline was set beside any record of the mat. Nothing was fitted. The mat's stages are the device's own and are not validated.
+    - Within a home, the pipeline's daily `sleeping_hours` barely follows the mat's sleep: a mean Spearman correlation of 0.11 [0.03, 0.19], against a declared margin of 0.5. The pre-specified criterion reads does not follow. Against the mat's hours in bed, 0.14 [0.01, 0.27].
+    - It gives 3.95 hours a day more sleep than the mat, [+1.54, +6.37], and 1.97 more than its hours in bed, [−0.01, +3.94]. The criterion on level reads does not agree. In one home, one of the three the mat stages as mostly awake, the pipeline's median is 19.9 hours of sleep a day, the mat's 2.2 asleep and 8.1 in bed.
+    - The deviations a personal baseline gives the two correlate at 0.03 [−0.04, 0.11], over 12 homes. Of the 46 days on which the pipeline's deviation reached 3, the mat's had the same sign on 31 and reached 3 on 4.
+    - None of the 23 alerts for an abrupt change in `sleeping_hours` raised in the mat homes came on a day the comparison matched; the 11 for a gradual drift are counted and not judged.
+    - On the 19 silent days the mat observed, the pipeline's median is 23.8 hours of sleep and the mat's 8.4.
+    - Without the three homes in which the mat stages less than 60% of the time in bed as asleep, 0.07 [−0.01, 0.16] and +2.55 hours [+1.86, +3.23]. With the mat's clock an hour earlier, 0.10 [0.02, 0.17]; an hour later, 0.13 [0.04, 0.21], over 13 homes.
+    - On 100 simulated homes, against the simulator's true hours of sleep, the same correlation is 0.70 [0.68, 0.71], with a bias of −0.23 hours. That evidence is simulated.
+    - TIHM is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0; Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged, as the dataset asks.
 - **Sensor health.** An opt-in rule for deployments with no sensor that reports on a cadence, `HealthConfig.home_silence_horizon`. Off by default.
   - A home in which no sensor has reported for the horizon is treated as not observed: its sensors are downgraded, the silent time is left out of the day's summary from the moment it began and recorded as `DailySummary.silent`, and a day that lost any time this way is refused by the baseline.
   - One `data_quality` alert about `home_silence` is raised and repeated once per cooldown. It says the home may be empty, its resident may need help, or nothing may be arriving, and does not choose.
@@ -51,7 +62,8 @@ Adds an opt-in baseline reference whose deviation threshold means what it says, 
   - `sensor_modeling.datasets.threshold_null` measures both references on synthetic days, and `threshold_calibration_protocol`, `threshold_calibration_experiment` and `threshold_calibration_planning` declare, score and plan its test on simulated homes.
 - **Online pipeline.** `sensor_modeling.online.replay_days` passes the days a run closed through fresh baselines and a fresh alert engine under another baseline configuration or alert policy, without running the home again. It calls `judge_day`, the function the pipeline now calls when it closes a day, and `reproduces` checks that a replay under the run's own configuration returns the run's verdicts and alerts.
 - **External datasets.** A TIHM adapter, `sensor_modeling.external.tihm`, with its frozen ontology mapping. The dataset is read from a local download and is not redistributed.
-- **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the silent-home protocol and results pages, generated the same way; the pages of the measurement on synthetic days and of the threshold-calibration protocol and results, generated the same way; the roadmap and the external-dataset contract name the new evidence.
+  - `sensor_modeling.datasets.sleep_mat_protocol`, `sleep_mat_experiment` and `sleep_mat_planning` declare, score and plan the comparison with the TIHM sleep mat. It reads `Sleep.csv` itself; the adapter still does not.
+- **Documentation.** The TIHM alert-burden protocol and results pages, generated from the frozen protocol and the two records; the silent-home protocol and results pages, generated the same way; the pages of the measurement on synthetic days and of the threshold-calibration protocol and results, generated the same way; the sleep-mat protocol and results pages, generated the same way; the roadmap and the external-dataset contract name the new evidence.
 
 The online pipeline's defaults, the baseline and the alert policy are unchanged.
 

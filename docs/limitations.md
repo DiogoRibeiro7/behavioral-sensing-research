@@ -138,6 +138,17 @@ whole run. A likely reading, not a tested one, is that this is the mechanism
 behind the saturated confidence above: with no evidence the belief goes to the
 quietest state, and the pipeline abstained on 0.06% of usable time.
 
+**The pipeline's hours of sleep do not follow a sleep mat in the TIHM homes.** In
+the 14 TIHM homes with enough days on a mat under the mattress, the mean
+within-home Spearman correlation between the pipeline's daily
+`sleeping_hours` and the mat's hours asleep is 0.11 [0.03, 0.19], on the days
+the sensors reported throughout, and the pipeline gives 3.95 hours a day more
+sleep than the mat. On simulated homes, against the simulator's true hours of
+sleep, the same correlation is 0.70. Every alerting study here counts its
+detections on that feature, so a detection in simulation is a statement about
+the simulator's sleep, not a person's. The mat's stages are the device's own
+and are not validated; see [the sleep-mat results](SLEEP_MAT_RESULTS.md).
+
 **An opt-in baseline reference now keeps its threshold's meaning, and where
 its thresholds belong on a real home is not known.** On synthetic Gaussian
 days the default reference passes its deviation threshold of 3 on 6.24% of

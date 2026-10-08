@@ -99,6 +99,8 @@ nav:
       - "Thresholds on synthetic days": THRESHOLD_CALIBRATION_NULL.md
       - "Threshold calibration: protocol": THRESHOLD_CALIBRATION_PROTOCOL.md
       - "Threshold calibration: results": THRESHOLD_CALIBRATION_RESULTS.md
+      - "Sleep mat: protocol": SLEEP_MAT_PROTOCOL.md
+      - "Sleep mat: results": SLEEP_MAT_RESULTS.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:
