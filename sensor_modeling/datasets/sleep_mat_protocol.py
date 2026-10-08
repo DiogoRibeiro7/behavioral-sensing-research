@@ -655,8 +655,9 @@ class SleepMatProtocol:
                 f"{readings['c2_agrees_no_bias_spread_1']:.0%}. So C2 can say "
                 "the pipeline does not agree in level, and can hardly say it "
                 "agrees",
-                "C1": "with those three homes not following at all and the "
-                "rest at a Gaussian correlation of 0.6, the true value of E1 "
+                "C1": "with the three homes the mat stages as mostly awake not "
+                "following at all and the rest at a Gaussian correlation of 0.6, "
+                "the true value of E1 "
                 f"was {readings['c1_truth_outlying_homes_rest_at_0_6']:.2f} in "
                 "the planning: they alone can hold C1 below its margin, which "
                 "is why E12 is declared",
