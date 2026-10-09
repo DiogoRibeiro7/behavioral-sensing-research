@@ -19,19 +19,25 @@ active, still or asleep, and while a visitor is.
 
 *Spill-over.* While the resident is at home and awake, a motion sensor of a
 room they are not in fires at ``spill_rate`` an hour, as one that sees through
-a doorway or into an open-plan space would. Asleep, out, or with no resident at
-home, it fires at the simulator's idle rate.
+a doorway or into an open-plan space would: every such sensor, the bathroom's
+and the hallway's among them, at the same rate whether the resident is moving
+or still. Asleep, out, or with no resident at home, it fires at the
+simulator's idle rate. A visitor causes no spill-over.
 
-*A hallway.* A motion sensor in a hallway, which every room change passes,
-reports once at each change of room and otherwise spills over like any other.
+*A hallway.* A motion sensor in a hallway reports once at each change of the
+resident's room, leaving or coming home included, and once at each change of a
+visitor's; it fires at the visitor rate while a visitor is in the hallway, and
+otherwise spills over like any other.
 
 *Paired contact rows.* A contact that logs its opening and its closing as two
 rows records each activation of the fridge or the entrance door twice, the
-second row 1 to 30 seconds after the first.
+second row 1 to 17 seconds after the first, uniformly, so the median gap is 9
+seconds.
 
-The profile draws from its own generator, so the record it gives depends on the
-home's seed and the profile alone. With :data:`STANDARD_PROFILE` it draws the
-event sensors by the same rules as the simulator, not the same numbers.
+The profile draws from its own generator, seeded with the home's seed and a
+stream, so the record it gives depends on the plan, the seed, the stream and
+the profile alone. With :data:`STANDARD_PROFILE` it draws the event sensors by
+the same rules as the simulator, not the same numbers.
 """
 
 from __future__ import annotations
@@ -72,7 +78,7 @@ FRIDGE = "fridge_contact"
 FRONT_DOOR = "front_door"
 
 #: The second row of a paired contact comes this many seconds after the first.
-PAIR_GAP_SECONDS = (1.0, 30.0)
+PAIR_GAP_SECONDS = (1.0, 17.0)
 
 #: The generator stream a profile draws from, beside the home's seed.
 PROFILE_STREAM = 7
@@ -188,7 +194,10 @@ def _motion(
     if profile.hallway:
         sensors[HALLWAY_ROOM] = HALLWAY
     found: list[tuple[datetime, str, str]] = []
-    previous_room: str | None = None
+    opening = truth.episodes[0] if truth.episodes else None
+    previous_room: str | None = (
+        opening.room if opening is not None and opening.state is not S.AWAY else None
+    )
     for episode in truth.episodes:
         home = episode.state is not S.AWAY
         for room, sensor in sensors.items():
@@ -219,7 +228,7 @@ def _motion(
             if profile.hallway and visited != last:
                 found.append((entry, HALLWAY, "visitor"))
             last = visited
-            seen_by = ROOM_SENSORS.get(visited)
+            seen_by = sensors.get(visited)
             if seen_by is None:
                 continue
             rate = ACTIVE_RATE * VISITOR_SHARE * profile.presence_scale
@@ -292,15 +301,18 @@ def _contacts(
 
 
 def profile_observations(
-    truth: GroundTruth, seed: int, profile: SensorProfile
+    truth: GroundTruth, seed: int, profile: SensorProfile, stream: int = 0
 ) -> list[Observation]:
     """The event sensors' record of *truth* under *profile*, in time order.
 
-    The draws come from a generator seeded with *seed* and
-    :data:`PROFILE_STREAM`, so the record is a function of the plan, the seed
-    and the profile.
+    The draws come from a generator seeded with *seed*, :data:`PROFILE_STREAM`
+    and *stream*, so the record is a function of the plan, the seed, the
+    stream and the profile. Two records of one home drawn on different streams
+    share no sensor noise.
     """
-    rng = np.random.default_rng(np.random.SeedSequence([int(seed), PROFILE_STREAM]))
+    rng = np.random.default_rng(
+        np.random.SeedSequence([int(seed), PROFILE_STREAM, int(stream)])
+    )
     motion = hold_off(_motion(truth, profile, rng), profile.hold_off_seconds)
     records = [
         _event(moment, sensor, Modality.MOTION, who) for moment, sensor, who in motion

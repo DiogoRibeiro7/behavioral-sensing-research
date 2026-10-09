@@ -101,6 +101,22 @@ class TestTheProfile:
         }
         assert changes <= hall
 
+    def test_the_hallway_does_not_report_at_the_first_instant(self, home) -> None:
+        quiet = SensorProfile(spill_rate=0.0, hallway=True)
+        records = profile_observations(home.truth, 4242, quiet)
+        first = home.truth.episodes[0].start
+        assert not any(o.sensor_id == HALLWAY and o.timestamp == first for o in records)
+
+    def test_two_streams_share_no_sensor_noise(self, home) -> None:
+        one = profile_observations(home.truth, 4242, MATCHED, stream=0)
+        two = profile_observations(home.truth, 4242, MATCHED, stream=1)
+        moments = {o.timestamp for o in one if o.modality is Modality.MOTION}
+        shared = [
+            o for o in two if o.modality is Modality.MOTION and o.timestamp in moments
+        ]
+        hall_changes = [o for o in shared if o.sensor_id == HALLWAY]
+        assert len(shared) == len(hall_changes)
+
     def test_the_standard_profile_has_no_hallway(self, home) -> None:
         records = profile_observations(home.truth, 4242, STANDARD_PROFILE)
         assert HALLWAY not in {o.sensor_id for o in records}
