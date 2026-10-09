@@ -27,6 +27,16 @@ FIGURES = ("detection", "tracking", "moments")
 
 _COLOURS = {STANDARD: "#0072B2", MATCHED: "#D55E00"}
 _LABELS = {STANDARD: "the simulator's sensors", MATCHED: "TIHM-matched sensors"}
+_SHORT = {
+    "kitchen_per_day": "kitchen a day",
+    "bathroom_per_day": "bathroom a day",
+    "bedroom_per_day": "bedroom a day",
+    "living_per_day": "living room a day",
+    "hall_per_day": "hallway a day",
+    "switch_share": "after another room",
+    "night_bedroom": "bedroom a night",
+    "retrigger_gap_seconds": "retrigger gap",
+}
 
 
 def _point(entry: Mapping[str, Any]) -> dict[str, float | None]:
@@ -134,7 +144,7 @@ def _tracking(plt: Any, data: Mapping[str, Any]) -> Any:
         ls="--",
     )
     axis.axvline(0.0, color="#888888", lw=0.6)
-    axis.set_yticks(range(len(features)), [f"`{f}`" for f in features], fontsize=7)
+    axis.set_yticks(range(len(features)), features, fontsize=7)
     axis.set_xlabel("mean within-home Spearman correlation with the truth")
     axis.legend(frameon=False, fontsize=7, loc="lower left")
     figure.tight_layout()
@@ -161,7 +171,7 @@ def _moments(plt: Any, data: Mapping[str, Any]) -> Any:
             markersize=4,
         )
     axis.axvline(0.0, color="#555555", lw=0.8)
-    axis.set_yticks(range(len(names)), names, fontsize=7)
+    axis.set_yticks(range(len(names)), [_SHORT[n] for n in names], fontsize=7)
     axis.set_xlabel("log2 of the simulated median over TIHM's")
     axis.legend(frameon=False, fontsize=7, loc="lower right")
     figure.tight_layout()
@@ -175,6 +185,8 @@ def draw_figures(payload: Mapping[str, Any], out_dir: Path) -> dict[str, Path]:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    if not payload["results"]["check"]["reproduced"]:
+        return {}
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     data = figure_data(payload)

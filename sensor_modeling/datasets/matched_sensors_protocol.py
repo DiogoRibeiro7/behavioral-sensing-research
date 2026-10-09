@@ -326,6 +326,15 @@ class MatchedSensorsProtocol:
         "homes. The profile was corrected, the planning run again, the "
         "sensitivity profile and E7 to E9 declared, and the mechanisms below "
         "written down",
+        "a second review of the revision read the code and the second "
+        "planning record. To check the code it ran the pipeline under the "
+        "matched profile on seeds 999, 1001 and 4242 for 24 days, and under "
+        "the sensitivity profile on seed 999, and built a results page and "
+        "figures from those runs with every digit masked; it passed on no "
+        "value. It found that under the standard profile the two arms of a "
+        "home can share sensor draws, a mechanism wrongly stated for sleep, "
+        "and the render script failing on a record whose check failed. All "
+        "three were corrected, with other wording, before the freeze",
     )
 
     def __post_init__(self) -> None:
@@ -385,9 +394,10 @@ class MatchedSensorsProtocol:
         return {
             "schema": "matched-sensors-protocol/1",
             "name": EXPERIMENT,
-            "status": "pre-specified simulation study. The profile's hold-off "
-            "and two of its settings are taken from TIHM's sensor records, in the "
-            "planning record; its form is this project's, written after a pilot. "
+            "status": "pre-specified simulation study. The profile's hold-off is "
+            "TIHM's, and two of its settings were chosen to match eight moments "
+            "of TIHM's sensor records, in the planning record; its form is this "
+            "project's, written after a pilot. "
             "No pipeline output under spill-over or under the chosen profile has "
             "been read for any home. Nothing in the pipeline is changed or "
             "fitted. Every result is a statement about the simulator",
@@ -453,10 +463,19 @@ class MatchedSensorsProtocol:
                 "pairing": "the profiles of one home and arm share the plan, so "
                 "they differ in the sensors and not in the resident. The stable "
                 "and changed arms of one home share the seed and not the days "
-                "after the change. Re-drawn sensors come from the arm's own "
-                f"stream, {self.stream(STABLE)} for the stable arm and "
-                f"{self.stream(CHANGE)} for the changed one, so under every "
-                "profile the two arms share no sensor noise",
+                "after the change. Under the standard profile the simulator draws "
+                "the plan and the sensors from one generator, and two arms whose "
+                "plans differ can fall back into step, so they share a part of "
+                "their sensor draws before the change that depends on the home, "
+                "from none of the weeks to all of them. Re-drawn sensors come "
+                f"from the arm's own stream, {self.stream(STABLE)} for the stable "
+                f"arm and {self.stream(CHANGE)} for the changed one, so under the "
+                "matched and sensitivity profiles the two arms share only the rows "
+                "the plan fixes: the hallway's reports at changes of room and the "
+                "door's crossings. The matched and sensitivity profiles of one arm "
+                "draw from the same stream. This changes how a home's detection "
+                "and its false detection move together, not what either is "
+                "expected to be",
                 "delivery": "every record passes through "
                 "`sensor_modeling.simulation.faults.degrade` with its default "
                 "configuration: no loss, lateness, duplication or fault",
@@ -488,18 +507,28 @@ class MatchedSensorsProtocol:
             "what_the_outcomes_turn_on": [
                 "the default emissions expect 0.15 activations an hour from the "
                 "motion sensor of a room other than the one a state names, so "
-                "while the resident is in the kitchen, the bathroom or asleep "
-                "each spill-over activation is strong evidence against that "
-                f"state. Spill-over at {self.spill_rate:g} an hour therefore "
+                "while the resident is in the kitchen, the bathroom or in bed "
+                "awake each spill-over activation is strong evidence against "
+                f"that state. Spill-over at {self.spill_rate:g} an hour therefore "
                 "pushes belief away "
                 "from kitchen and bathroom activity whenever the resident is "
                 "awake",
                 "the living room's and the hallway's sensors name no state's "
                 "room, so the default emissions read them as evidence for "
                 "`home_active` (10 an hour) and `home_inactive` (2.5 an hour)",
+                f"the hold-off of {self.hold_off_seconds:g} seconds lowers the "
+                "rate a room's sensor reports while the resident is active in it "
+                "from 45 an hour to about 25, against the 40 the emissions expect "
+                "of the room's state; this is what the pilot showed",
+                "paired contact rows double the evidence a fridge opening gives "
+                "for an active state and a door crossing gives for `away` and "
+                "`home_active`, which works against C3",
                 "the occupancy layer reads two rooms firing within 60 seconds of "
                 "each other as evidence of a visitor. Spill-over makes such "
-                "pairs common while the resident is alone, which lowers the "
+                "pairs common while the resident is alone, and the hallway's "
+                "report at a change of room, with the next room's first "
+                "activation, makes one at most changes of room even without "
+                "spill-over. That lowers the "
                 "attribution of activity to the resident, can hold an alert back "
                 f"at the confidence gate of {policy.min_confidence:g}, and "
                 "discounts the evidence. E7 describes it",
@@ -573,13 +602,14 @@ class MatchedSensorsProtocol:
                 "those that raised an alert, and those that did not because the "
                 "day's coverage times attribution was under the confidence gate "
                 "or for another reason; the notices that alerts were held back "
-                "in a burst; and the mean over homes and days of the resident's "
-                "ambient attribution at each day's close",
+                "in a burst; and the mean over homes of each home's mean ambient "
+                "attribution of activity to the resident at its days' closes",
                 "E8": "for each profile, in the stable arm: the mean belief in "
                 "each state at the end of the steps whose window held motion "
                 "activations of the kitchen's sensor and of no other motion "
                 "sensor, and likewise of the bathroom's, with how many such "
-                "steps there were",
+                "steps there were. The study's steps are of 15 minutes; TIHM's "
+                "beliefs were read after 10-minute windows, TIHM's step",
                 "E9": "E1, E2 and E4 for the sensitivity profile against the "
                 f"standard profile, on the study's first {self.sensitivity_homes} "
                 "homes",
@@ -604,10 +634,10 @@ class MatchedSensorsProtocol:
             "margins": {
                 "survival": f"{self.survival_margin:g}, a declared convention: a "
                 "tenth of the homes. The standard profile's excess detection in "
-                "the published record is 0.63. With a standard deviation of "
-                "about 0.6 for a home's paired difference, as the "
-                "threshold-calibration protocol planned for its own, 400 homes "
-                "give an interval about 0.06 either side",
+                "the published record is 0.63. Assuming a standard deviation of "
+                "about 0.6 for a home's paired difference, which the "
+                "threshold-calibration protocol assumed for its own, 400 homes "
+                "would give an interval about 0.06 either side",
                 "tracking": f"{self.tracking_margin:g}, the sleep-mat protocol's "
                 "margin. At 0.5 a deviation at the baseline's threshold of "
                 f"{baseline.deviation_threshold:g} would stand for one of 1.5 in "

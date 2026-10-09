@@ -593,6 +593,14 @@ def _sensitivity_part(results: Mapping[str, Any]) -> list[str]:
     ]
 
 
+def _changed(configuration: Mapping[str, Any]) -> str:
+    changed = configuration.get("code_changed_since_the_freeze") or {}
+    found = [
+        f"{group}: {', '.join(names)}" for group, names in changed.items() if names
+    ]
+    return "; ".join(found) + "." if found else "None."
+
+
 def render_page(payload: Mapping[str, Any]) -> str:
     """The results page, from the study's record."""
     configuration = payload["configuration"]
@@ -614,6 +622,7 @@ def render_page(payload: Mapping[str, Any]) -> str:
         f"recorded {payload.get('recorded_at', '')}.",
         f"- **Homes.** {check['homes']:,}, each in both arms under the standard "
         "and the matched profiles.",
+        f"- **Code changed since the freeze.** {_changed(configuration)}",
         "",
         "## The check",
         "",

@@ -22,7 +22,6 @@ import json
 from pathlib import Path
 
 from sensor_modeling.datasets.matched_sensors_protocol import (
-    HOLD_OFF_SECONDS,
     MATCHED,
     PLANNING_RECORD,
     THRESHOLD_PROTOCOL,
@@ -62,8 +61,10 @@ def main() -> None:
             raise SystemExit(f"{name} is not the file the protocol pins")
     planning = json.loads(Path(PLANNING_RECORD).read_text(encoding="utf-8"))
     chosen = planning["results"]["chosen"]
+    if planning["environment"]["git_dirty"] != "false":
+        raise SystemExit("the planning record was not made from a clean commit")
     if (
-        chosen["hold_off_seconds"] != HOLD_OFF_SECONDS
+        chosen["hold_off_seconds"] != protocol.hold_off_seconds
         or chosen["at_the_edge_of_the_grid"]
     ):
         raise SystemExit("the hold-off or the grid is not what the protocol says")

@@ -13,6 +13,7 @@ evidence is simulated, and every result is a statement about the simulator.
 from __future__ import annotations
 
 import bisect
+import hashlib
 import json
 import pickle
 from collections import Counter
@@ -63,6 +64,7 @@ from .matched_sensors_protocol import (
     TRACKED_FEATURE,
     MatchedSensorsProtocol,
     between_the_freeze_and_the_run,
+    code_now,
 )
 from .silent_home_experiment import wilson
 from .silent_home_protocol import event_sensors
@@ -378,6 +380,13 @@ def _run_home(arguments: tuple[int, MatchedSensorsProtocol, Path | None]) -> Hom
     return home
 
 
+def checkpoint_key(protocol: MatchedSensorsProtocol) -> str:
+    """A name for a run's checkpoints: the protocol's and the sources' digests."""
+    sources = json.dumps(code_now()["sources"], sort_keys=True)
+    digest = hashlib.sha256(f"{protocol.sha256()}{sources}".encode()).hexdigest()
+    return digest[:16]
+
+
 def run_homes(
     protocol: MatchedSensorsProtocol,
     seeds: Sequence[int] | None = None,
@@ -390,13 +399,13 @@ def run_homes(
 
     Each home is a function of its seed and the protocol alone, so the result
     does not depend on *jobs*. With *checkpoint*, each home is written to a
-    directory named for the protocol's digest inside it when it is finished,
-    and read back from there if the run is started again.
+    directory inside it named for the protocol's and the sources' digests when
+    it is finished, and read back from there if the run is started again.
     """
     chosen = tuple(protocol.study.study_seeds() if seeds is None else seeds)
     directory = None
     if checkpoint is not None:
-        directory = Path(checkpoint) / protocol.sha256()[:16]
+        directory = Path(checkpoint) / checkpoint_key(protocol)
         directory.mkdir(parents=True, exist_ok=True)
     tasks = [(seed, protocol, directory) for seed in chosen]
     homes: list[HomeRun] = []

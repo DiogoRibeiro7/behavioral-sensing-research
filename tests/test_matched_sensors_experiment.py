@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import date, timedelta
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -203,6 +204,9 @@ class TestTheScore:
         )
         assert not record.household_metrics
         assert not record.intervals
+        payload = json.loads(json.dumps(record.to_dict(), default=str))
+        assert "nothing is reported" in render_page(payload)
+        assert draw_figures(payload, Path("unused")) == {}
 
     def test_the_sensitivity_profile_is_described_on_its_homes(self) -> None:
         homes = [_home(k, True, k % 2 == 0) for k in range(1, 7)]

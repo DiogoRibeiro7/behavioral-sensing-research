@@ -35,6 +35,8 @@ def main() -> None:
     page.write_text(render_page(record), encoding="utf-8", newline="\n")
     paths = draw_figures(record, args.docs_dir / FIGURE_DIR)
     print(f"written {page} and {len(paths)} figures")
+    if not paths:
+        print("the check failed, so no figure is drawn")
 
 
 if __name__ == "__main__":
