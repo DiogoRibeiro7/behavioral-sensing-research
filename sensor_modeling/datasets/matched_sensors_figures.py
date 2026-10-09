@@ -37,6 +37,11 @@ _SHORT = {
     "night_bedroom": "bedroom a night",
     "retrigger_gap_seconds": "retrigger gap",
 }
+_FEATURE_LABELS = {
+    "bathroom_activity_hours": "bathroom hours",
+    "kitchen_activity_hours": "kitchen hours",
+    "sleeping_hours": "hours of sleep",
+}
 
 
 def _point(entry: Mapping[str, Any]) -> dict[str, float | None]:
@@ -143,10 +148,21 @@ def _tracking(plt: Any, data: Mapping[str, Any]) -> Any:
         lw=0.8,
         ls="--",
     )
-    axis.axvline(0.0, color="#888888", lw=0.6)
-    axis.set_yticks(range(len(features)), features, fontsize=7)
+    axis.text(
+        data["margin"] - 0.01,
+        place + 0.3,
+        "margin",
+        ha="right",
+        va="center",
+        fontsize=7,
+        color="#555555",
+    )
+    axis.set_xlim(0.0, 1.0)
+    axis.set_yticks(
+        range(len(features)), [_FEATURE_LABELS.get(f, f) for f in features], fontsize=7
+    )
     axis.set_xlabel("mean within-home Spearman correlation with the truth")
-    axis.legend(frameon=False, fontsize=7, loc="lower left")
+    axis.legend(frameon=False, fontsize=7, loc="upper left")
     figure.tight_layout()
     return figure
 
@@ -170,10 +186,21 @@ def _moments(plt: Any, data: Mapping[str, Any]) -> Any:
             label=_LABELS[profile],
             markersize=4,
         )
+    for k, name in enumerate(names):
+        if data[name][STANDARD] is None or data[name][STANDARD] <= 0:
+            axis.text(
+                -0.7,
+                k + 0.12,
+                "the simulator has no such sensor",
+                ha="right",
+                va="center",
+                fontsize=7,
+                color=_COLOURS[STANDARD],
+            )
     axis.axvline(0.0, color="#555555", lw=0.8)
     axis.set_yticks(range(len(names)), [_SHORT[n] for n in names], fontsize=7)
     axis.set_xlabel("log2 of the simulated median over TIHM's")
-    axis.legend(frameon=False, fontsize=7, loc="lower right")
+    axis.legend(frameon=False, fontsize=7, loc="upper right")
     figure.tight_layout()
     return figure
 
