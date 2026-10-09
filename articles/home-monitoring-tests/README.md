@@ -1,6 +1,8 @@
-# Evaluating a Home Monitoring Alert Pipeline on the TIHM Dementia Dataset
+# A Home Monitoring Pipeline, From Its Simulator to 56 Homes of People Living With Dementia
 
-Published on Medium: [Evaluating a Home Monitoring Alert Pipeline on the TIHM Dementia Dataset](https://medium.com/@diogo-ribeiro-1975/evaluating-a-home-monitoring-alert-pipeline-on-the-tihm-dementia-dataset-f763cebd96f1).
+Published on Medium: [A Home Monitoring Pipeline, From Its Simulator to 56 Homes of People Living With Dementia](https://medium.com/@diogo-ribeiro-1975/a-home-monitoring-pipeline-from-its-simulator-to-56-homes-of-people-living-with-dementia-e04ce8361cf8).
+
+The previous article in the series is [Evaluating a Home Monitoring Alert Pipeline on the TIHM Dementia Dataset](https://medium.com/@diogo-ribeiro-1975/evaluating-a-home-monitoring-alert-pipeline-on-the-tihm-dementia-dataset-f763cebd96f1).
 
 `article.md` is the Markdown the article was published from. The figures in `figures/` and every repository number the article quotes, in `numbers.json`, are rebuilt from the committed records by running this from the repository's root:
 
