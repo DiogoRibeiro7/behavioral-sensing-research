@@ -726,6 +726,48 @@ Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0; Surrey and
 Borders Partnership NHS Foundation Trust and Howz are acknowledged, as the
 dataset asks.
 
+### Measured: the simulator's homes with TIHM's sensors
+
+Until this study every detection in simulation came from event sensors
+cleaner than TIHM's. Two activations of one of TIHM's motion sensors are never
+less than 61 seconds apart, 54 of its 56 homes have hallway records, its
+contacts log an opening twice, and 63% of its motion activations follow
+another room's, against 7% in the simulator.
+
+- **The protocol.** `docs/MATCHED_SENSORS_PROTOCOL.md`, frozen before any of
+  the study's homes was run with the matched profile, after two reviews. The profile's
+  hold-off is TIHM's; its presence scale and spill-over rate are the grid
+  point whose eight moments of the sensor records were nearest TIHM's, in a
+  planning record that runs no pipeline. The second-nearest point is run on
+  100 homes as a sensitivity profile.
+- **The run.** From clean commit `e7d41db`, with the standard profile's runs
+  reproducing the published threshold-calibration alerts home by home;
+  `docs/MATCHED_SENSORS_RESULTS.md` is generated from its record. Nothing in
+  the pipeline was changed or fitted.
+- **The detection survives (C1).** Excess detection 0.70 against 0.63,
+  +0.07 [+0.01, +0.13], against a margin of −0.10. False alerts 1.02 a home
+  against 0.86. The sensitivity profile gives +0.14 [+0.02, +0.26].
+- **The hours of sleep still follow the truth (C2).** 0.71 [0.70, 0.71],
+  against 0.67 with the simulator's own sensors and a margin of 0.5.
+- **The kitchen and bathroom collapse is not reproduced (C3).** The bathroom's
+  pooled-day median falls to 0.01 hours against a true 0.28, under its
+  ceiling of 0.05; the kitchen's to 0.68 against a true 1.96, over its
+  ceiling of 0.25. After steps with only the kitchen's motion activations,
+  belief in kitchen activity is 0.28 against 0.71.
+- **The profile is nearer TIHM's records than the simulator's own, not on
+  them.** 158 living-room activations a day against TIHM's 77, 50 hallway
+  activations against 67, and 57% of motion activations after another room's
+  against 63%. **That evidence is
+  simulated.**
+
+Consequence: in simulation the detection does not rest on the sensors
+lacking the properties the profile matches. In the simulator those properties
+do not make the hours of sleep stop following the truth, so they do not by
+themselves bring it near TIHM's 0.11 against the sleep mat; the gap may lie in
+what the profile does not model, in the homes' days or in the mat. In the
+simulator they do take the bathroom's hours to TIHM's level, and the
+kitchen's to about a third of the truth.
+
 ### What remains in Phase 5
 
 - **More independent evidence.** Two homes are two case studies. A

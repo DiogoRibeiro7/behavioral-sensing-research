@@ -160,7 +160,7 @@ the 14 homes with enough of them:
 
 - **Within a home, the pipeline's hours of sleep barely follow the mat's.** A
   mean within-home Spearman correlation of 0.11 [0.03, 0.19], against a
-  declared margin of 0.5. On simulated homes, against the simulator's true
+  declared margin of 0.5. On 100 simulated homes, against the simulator's true
   hours of sleep, the same correlation is 0.70 [0.68, 0.71].
 - **It counts more sleep than the mat does, and about two hours more than the
   time in bed.** 3.95 hours a day more than the mat's sleep [+1.54, +6.37],
@@ -173,6 +173,33 @@ the 14 homes with enough of them:
 
 The mat's stages are the device's own and are not validated here. See
 [the sleep-mat results](docs/SLEEP_MAT_RESULTS.md).
+
+The simulator's event sensors are cleaner than TIHM's: no hold-off between
+activations, no hallway sensor, a contact logged once, and 7% of motion
+activations after another room's against 63%. The 400 threshold-calibration
+homes were run again with their sensors drawn from the same days under a
+profile matched to TIHM's sensor records: a 61-second hold-off, a hallway
+sensor, contacts logged twice, and 2 activations an hour from each motion
+sensor of a room the resident is not in, while the resident is at home and
+awake. The protocol was frozen before any of the study's homes was run with
+it. **The evidence is simulated.**
+
+- **The detection of the step change survives.** Net of false detections it
+  finds the step in 0.70 of homes against 0.63: +0.07 [+0.01, +0.13], against
+  a margin of −0.10. False alerts rise from 0.86 to 1.02 a home in 84 days.
+- **The hours of sleep still follow the truth.** A mean within-home
+  correlation of 0.71 [0.70, 0.71], against a margin of 0.5, and 0.67 on the
+  same homes with the simulator's own sensors. In the simulator, the sensor
+  properties the profile matches do not by themselves bring the correlation
+  anywhere near the 0.11 against the sleep mat.
+- **The bathroom collapses; the kitchen falls to about a third.** Pooled-day
+  medians of 0.01 hours of bathroom activity against a true 0.28, and 0.68 of
+  kitchen activity against a true 1.96; TIHM's are 0.00 and 0.06. The
+  pre-specified criterion, which needed both under their ceilings of 0.05 and
+  0.25 hours, reads not reproduced: the kitchen's is over its ceiling. Their
+  correlations with the truth fall from 0.72 to 0.51 and from 0.70 to 0.40.
+
+See [the matched-sensor results](docs/MATCHED_SENSORS_RESULTS.md).
 
 The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
 under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz

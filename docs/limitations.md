@@ -143,8 +143,12 @@ the 14 TIHM homes with enough days on a mat under the mattress, the mean
 within-home Spearman correlation between the pipeline's daily
 `sleeping_hours` and the mat's hours asleep is 0.11 [0.03, 0.19], on the days
 the sensors reported throughout, and the pipeline gives 3.95 hours a day more
-sleep than the mat. On simulated homes, against the simulator's true hours of
-sleep, the same correlation is 0.70. Every alerting study here counts its
+sleep than the mat. On the sleep-mat study's 100 simulated homes, against the
+simulator's true hours of sleep, the same correlation is 0.70. On the 400
+threshold-calibration homes it is 0.67 with the simulator's own sensors and
+0.71 with their event sensors drawn again to match TIHM's sensor records, so
+in the simulator the sensor properties that profile matches do not by
+themselves bring it anywhere near 0.11. Every alerting study here counts its
 detections on that feature, so a detection in simulation is a statement about
 the simulator's sleep, not a person's. The mat's stages are the device's own
 and are not validated; see [the sleep-mat results](SLEEP_MAT_RESULTS.md).
@@ -215,7 +219,8 @@ therefore present with no change over time at all.
 median 0.06 hours of kitchen activity and 0.00 hours of bathroom activity a
 day, so the reference sits at the scale floor for 87% of kitchen feature-days
 and for every bathroom one. Why the declared emissions read so little from
-these homes has not been examined. What the room sensors are is declared, not
+these homes was looked at afterwards in three TIHM homes, and then in the
+pre-specified simulation study below. What the room sensors are is declared, not
 known: the activity table names a location and no sensor type, and the dataset
 paper is not of one voice. Its methods place passive infrared sensors in the
 hallway and living room and movement sensors on the kitchen, bedroom and
@@ -226,6 +231,19 @@ locations as motion in that room, with the sensor type declared approximate.
 Each of the last three was found after the run had been read. They are
 diagnoses, kept apart from the protocol's results, and no default has been
 changed because of them.
+
+**In the simulator, TIHM's sensor properties take away the bathroom's hours
+and most of the kitchen's.** Under a protocol frozen before any of its homes
+was run, the 400 threshold-calibration homes were run again with their event
+sensors drawn under a profile matched to TIHM's sensor records: a 61-second
+hold-off, a hallway sensor, contacts logged twice and spill-over from the
+motion sensors of other rooms. The pooled-day median of bathroom activity
+falls to 0.01 hours against a true 0.28, and that of kitchen activity to 0.68
+against a true 1.96. The pre-specified criterion, which needed both under
+ceilings of 0.05 and 0.25 hours, reads not reproduced. That such sensors take
+the bathroom's hours to TIHM's level in the simulator does not show that they
+are why TIHM's are near zero; see
+[the matched-sensor results](MATCHED_SENSORS_RESULTS.md).
 
 ## The single most important limitation
 
