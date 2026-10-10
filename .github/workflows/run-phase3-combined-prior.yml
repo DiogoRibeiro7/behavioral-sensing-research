@@ -1,0 +1,89 @@
+name: Run Phase 3 combined prior
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: run-phase3-combined-prior
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: score the frozen protocol on the development panel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out the frozen revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      # The fitted-rates record the run must reproduce was made with these
+      # versions; matching them keeps the reproduction check meaningful.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . "numpy==2.3.5" "pandas==2.3.3" "scipy==1.15.3"
+
+      - name: Download and verify public CASAS archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Outside the checkout, so the working tree stays clean for the record.
+          mkdir -p "$RUNNER_TEMP/casas"
+          python - <<'PY'
+          import os
+          import hashlib
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          record = "15708568"
+          with urllib.request.urlopen(f"https://zenodo.org/api/records/{record}") as response:
+              meta = json.load(response)
+          candidates = [f for f in meta.get("files", []) if f.get("key") == "labeled_data.zip"]
+          if len(candidates) != 1:
+              raise SystemExit(f"expected one labeled_data.zip, got {len(candidates)}")
+          item = candidates[0]
+          target = Path(os.environ["RUNNER_TEMP"]) / "casas" / "labeled_data.zip"
+          urllib.request.urlretrieve(item["links"]["self"], target)
+          algorithm, expected = item["checksum"].split(":", 1)
+          digest = hashlib.new(algorithm)
+          with target.open("rb") as handle:
+              for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(chunk)
+          if digest.hexdigest() != expected:
+              raise SystemExit(f"archive checksum mismatch: {digest.hexdigest()} != {expected}")
+          PY
+          unzip -q "$RUNNER_TEMP/casas/labeled_data.zip" -d "$RUNNER_TEMP/casas/extracted"
+
+      - name: Run the frozen protocol
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)"
+          python scripts/run_phase3_combined_prior.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/phase3-combined-prior"
+
+      - name: Upload the record and its page
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase3-combined-prior
+          path: ${{ runner.temp }}/phase3-combined-prior/
+          retention-days: 90
+          if-no-files-found: error
