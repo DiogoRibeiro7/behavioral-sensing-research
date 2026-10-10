@@ -36,7 +36,10 @@ instantaneous per-room counts the best achievable is 0.397; the pipeline scores
 had.
 
 **The three additions made in response do not combine.** Use one, chosen by what
-the output feeds; see [What to actually use](#what-to-actually-use).
+the output feeds; see [What to actually use](#what-to-actually-use). The Phase 3
+successors of fitted rates and the circadian prior, fitted hurdle channels and a
+hierarchical time prior, do combine in the filter's recursion on the development
+homes; see [the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md).
 
 
 ## What is implemented
@@ -557,6 +560,16 @@ what the output feeds.
 
 Stacking them is the one thing to avoid, and it is exactly what a reader would
 do by default given three separate features each documented as an improvement.
+
+This holds for these three components in the production filter, on these 11
+homes. The Phase 3 successors of fitted rates and the circadian prior are
+different models: a hurdle model fitted for each evidence channel and state, and
+a hierarchical periodic prior entering the recursion as an hour-dependent
+transition. Under a frozen protocol on the 20 development homes, cross-fitted on
+two folds, they combine: 0.517 balanced accuracy, against 0.456 with the fitted
+channels alone, and calibration error 0.213 against 0.284. That is not yet
+confirmed on held-out homes, and the production pipeline does not offer the
+combination; see [the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md).
 
 ### Why abstention does not fire, and why raising the threshold will not fix it
 
