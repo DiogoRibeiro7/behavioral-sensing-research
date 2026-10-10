@@ -1,0 +1,131 @@
+name: Run held-out confirmation
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_inputs:
+        description: Write the inputs report the protocol declares; score nothing
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: run-heldout-confirmation
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: fit on the development panel, score the held-out cohort once
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out the frozen revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      # The same versions as the combined-prior run on the development panel.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . "numpy==2.3.5" "pandas==2.3.3" "scipy==1.15.3" \
+            "scikit-learn==1.6.1"
+
+      - name: Refuse a second confirmation
+        if: ${{ !inputs.check_inputs }}
+        shell: bash
+        run: |
+          if git ls-remote --exit-code --heads origin run-artifacts/heldout-confirmation; then
+            echo "run-artifacts/heldout-confirmation exists: the confirmation has been run"
+            exit 1
+          fi
+
+      - name: Download and verify public CASAS archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Outside the checkout, so the working tree stays clean for the record.
+          mkdir -p "$RUNNER_TEMP/casas"
+          python - <<'PY'
+          import os
+          import hashlib
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          record = "15708568"
+          with urllib.request.urlopen(f"https://zenodo.org/api/records/{record}") as response:
+              meta = json.load(response)
+          candidates = [f for f in meta.get("files", []) if f.get("key") == "labeled_data.zip"]
+          if len(candidates) != 1:
+              raise SystemExit(f"expected one labeled_data.zip, got {len(candidates)}")
+          item = candidates[0]
+          target = Path(os.environ["RUNNER_TEMP"]) / "casas" / "labeled_data.zip"
+          urllib.request.urlretrieve(item["links"]["self"], target)
+          algorithm, expected = item["checksum"].split(":", 1)
+          digest = hashlib.new(algorithm)
+          with target.open("rb") as handle:
+              for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(chunk)
+          if digest.hexdigest() != expected:
+              raise SystemExit(f"archive checksum mismatch: {digest.hexdigest()} != {expected}")
+          PY
+          unzip -q "$RUNNER_TEMP/casas/labeled_data.zip" -d "$RUNNER_TEMP/casas/extracted"
+
+      - name: Write the inputs report, scoring nothing
+        if: inputs.check_inputs
+        shell: bash
+        run: |
+          python scripts/run_heldout_confirmation.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/heldout" --check-inputs
+
+      - name: Run the frozen protocol
+        if: ${{ !inputs.check_inputs }}
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)"
+          python scripts/run_heldout_confirmation.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/heldout"
+
+      - name: Commit the outputs to a results branch
+        shell: bash
+        env:
+          CHECK: ${{ inputs.check_inputs }}
+        run: |
+          set -euo pipefail
+          if [ "$CHECK" = "true" ]; then
+            branch="run-artifacts/$GITHUB_RUN_ID"
+          else
+            branch="run-artifacts/heldout-confirmation"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          mkdir -p "$branch"
+          cp -r "$RUNNER_TEMP/heldout/." "$branch/"
+          git add "$branch"
+          git commit -m "run artifact $GITHUB_RUN_ID"
+          git push origin "$branch"
+
+      - name: Upload the outputs
+        uses: actions/upload-artifact@v7
+        with:
+          name: heldout-confirmation
+          path: ${{ runner.temp }}/heldout/
+          retention-days: 90
+          if-no-files-found: error
