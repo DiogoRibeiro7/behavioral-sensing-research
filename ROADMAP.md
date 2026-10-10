@@ -1032,7 +1032,9 @@ lets each answer inform the next.
    - **The combination.** The time prior (3.1) and the fitted hurdle channels
      (3.3) are the two Phase 3 successes, and they have never been evaluated
      together in the recursion. Evaluate the combination on the development
-     panel under a frozen protocol.
+     panel under a frozen protocol. *Protocol frozen
+     ([PHASE3_COMBINED_PRIOR_PROTOCOL](docs/PHASE3_COMBINED_PRIOR_PROTOCOL.md));
+     the run on the CASAS archive is pending.*
    - **The confirmation.** Freeze the resulting formulation, with the Phase 2
      baselines under matched information. Score it on CASAS households outside
      the development panel, under a protocol frozen before scoring.
