@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Any
 
+from .sleep_gap_experiment import CORRELATED, REFERENCED
 from .sleep_gap_plan import (
     AN_HOUR_LATER,
     AS_RECORDED,
@@ -549,6 +550,14 @@ def _context_part(clocks: Mapping[str, Any]) -> list[str]:
     return lines
 
 
+def _ordered(entries: Mapping[str, Any], order: Sequence[tuple[str, str]]) -> list[str]:
+    """The record's names in the order the description declares them."""
+    names = [f"{left}~{right}" for left, right in order]
+    return [name for name in names if name in entries] + sorted(
+        name for name in entries if name not in names
+    )
+
+
 def _pair_title(name: str) -> str:
     left, right = name.split("~")
     return f"{_QUANTITY_TITLES[left]}, with {_QUANTITY_TITLES[right]}"
@@ -562,7 +571,7 @@ def _tracking_part(clocks: Mapping[str, Any]) -> list[str]:
         header += [_title(CLOCK_TITLES[clock]), "Swapped-mask reference"]
     header.append("Constant")
     rows = []
-    for name in first["correlations"]:
+    for name in _ordered(first["correlations"], CORRELATED):
         row = [_sentence(_pair_title(name))[:-1]]
         for clock in CLOCKS:
             entry = clocks[clock]["D5"]
@@ -586,7 +595,7 @@ def _tracking_part(clocks: Mapping[str, Any]) -> list[str]:
                 for c in CLOCKS
             ],
         ]
-        for name in first["excess"]
+        for name in _ordered(first["excess"], REFERENCED)
     ]
     shares = [
         [
@@ -647,7 +656,7 @@ def _without_part(clocks: Mapping[str, Any]) -> list[str]:
             _sentence(_pair_title(name))[:-1],
             *[_interval(clocks[c]["D6"]["D5"]["correlations"][name]) for c in CLOCKS],
         ]
-        for name in first["D5"]["correlations"]
+        for name in _ordered(first["D5"]["correlations"], CORRELATED)
     ]
     rows += [
         [

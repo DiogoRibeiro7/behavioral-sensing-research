@@ -104,6 +104,7 @@ nav:
       - "Matched sensors: protocol": MATCHED_SENSORS_PROTOCOL.md
       - "Matched sensors: results": MATCHED_SENSORS_RESULTS.md
       - "Sleep gap: plan": SLEEP_GAP_PLAN.md
+      - "Sleep gap: results": SLEEP_GAP_RESULTS.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:

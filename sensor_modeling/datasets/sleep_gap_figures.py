@@ -40,17 +40,17 @@ _COMPONENTS = (
 _SINCE = (*(name for name, _, _ in SINCE_BINS), NOTHING_YET)
 _DISTANCE = tuple(name for name, _, _ in DISTANCE_BINS)
 _DISTANCE_LABELS = {
-    "under_30_minutes": "under 30 min",
-    "30_minutes_to_2_hours": "30 min to 2 h",
-    "2_to_6_hours": "2 to 6 h",
-    "6_hours_or_more": "6 h or more",
+    "under_30_minutes": "under\n30 min",
+    "30_minutes_to_2_hours": "30 min\nto 2 h",
+    "2_to_6_hours": "2 to\n6 h",
+    "6_hours_or_more": "6 h or\nmore",
 }
 _SINCE_LABELS = {
-    "under_10_minutes": "under 10 min",
-    "10_to_60_minutes": "10 to 60 min",
-    "1_to_3_hours": "1 to 3 h",
-    "3_hours_or_more": "3 h or more",
-    NOTHING_YET: "nothing yet",
+    "under_10_minutes": "under\n10 min",
+    "10_to_60_minutes": "10 to\n60 min",
+    "1_to_3_hours": "1 to\n3 h",
+    "3_hours_or_more": "3 h or\nmore",
+    NOTHING_YET: "nothing\nyet",
 }
 
 
