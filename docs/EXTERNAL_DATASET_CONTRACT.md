@@ -70,7 +70,10 @@ layout. Two datasets have one:
   results](SILENT_HOME_RESULTS.md), and of the calibrated baseline reference
   in the [threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md).
   The [sleep-mat comparison](SLEEP_MAT_RESULTS.md) reads the dataset's
-  `Sleep.csv` itself, beside the adapter, which still does not.
+  `Sleep.csv` itself, beside the adapter, which still does not. The planning record of the
+  [matched-sensor protocol](MATCHED_SENSORS_PROTOCOL.md) reads `Activity.csv`
+  itself for its sensors alone, the gaps between activations and eight
+  moments of each home's records, and maps no record to a state.
 
 ## The mapping layer
 
