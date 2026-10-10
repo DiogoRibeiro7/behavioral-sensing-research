@@ -73,7 +73,9 @@ layout. Two datasets have one:
   `Sleep.csv` itself, beside the adapter, which still does not. The planning record of the
   [matched-sensor protocol](MATCHED_SENSORS_PROTOCOL.md) reads `Activity.csv`
   itself for its sensors alone, the gaps between activations and eight
-  moments of each home's records, and maps no record to a state.
+  moments of each home's records, and maps no record to a state. The
+  [sleep-gap description](SLEEP_GAP_RESULTS.md) reads `Sleep.csv` minute by
+  minute, beside the adapter, and records per-home summaries only.
 
 ## The mapping layer
 
