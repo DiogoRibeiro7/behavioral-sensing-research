@@ -19,6 +19,8 @@ Draws the simulator's event sensors again under a profile matched to TIHM's sens
 
 Sets the pipeline's belief beside the TIHM sleep mat minute by minute, to describe where the two part, under a plan frozen before any of it was computed.
 
+Freezes the protocol that puts the Phase 3.1 time prior into the filter's recursion, with the declared and the fitted hurdle channels, on the development panel; the run reproduces the fitted-rates record before it reports anything.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.
