@@ -1,0 +1,29 @@
+name: Fetch run artifact
+
+on:
+  push:
+    branches: ['run-artifacts/**']
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v7
+      - name: Commit the artifact of the named run to this branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id="${GITHUB_REF_NAME#run-artifacts/}"
+          gh run download "$run_id" -R "$GITHUB_REPOSITORY" -D "run-artifacts/$run_id"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "run-artifacts/$run_id"
+          git commit -m "run artifact $run_id"
+          git push

@@ -90,7 +90,12 @@ prior and smoothing — **do not combine.** All three together score 0.435
 balanced accuracy against 0.463 for smoothing alone, with calibration worse than
 the baseline. Fitted rates trade accuracy for calibration and smoothing trades
 calibration for accuracy, so stacking them gives up both. See
-[Real-data validation](real_data.md) for which to use when.
+[Real-data validation](real_data.md) for which to use when. Their Phase 3
+successors for the first two, fitted hurdle channels and the hierarchical time
+prior, do combine in the filter's recursion: 0.517 balanced accuracy against
+0.456 for the fitted channels alone, on the development homes and not yet on
+held-out ones. The production pipeline does not offer that combination; see
+[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md).
 
 Two further attempts failed. Declared dwell times are 3 to 9 times longer than
 real state durations, but fitting them to measurement lowered balanced accuracy
