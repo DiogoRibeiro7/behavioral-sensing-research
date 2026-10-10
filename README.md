@@ -201,6 +201,44 @@ it. **The evidence is simulated.**
 
 See [the matched-sensor results](docs/MATCHED_SENSORS_RESULTS.md).
 
+Where, then, do the pipeline's sleep and the mat's part? In the same 14 TIHM
+homes the pipeline's belief was set beside the mat minute by minute, under a
+plan frozen before any of it was computed. It is a description, not a test:
+the comparison it breaks down had been read. With the mat's clock as
+recorded:
+
+- **The extra sleep falls when the mat has no record, mostly by day.** Of the
+  3.95 hours a day more sleep than the mat's, 4.10 are counted when the mat
+  has no record, 3.20 of them between 07:00 and 22:00; 1.34 are counted while
+  the mat says awake in bed; and 1.48 hours of the mat's sleep are not
+  counted. The median home's excess is 2.38 hours; one home's is 17.20.
+  Without the three homes the mat stages mostly awake, 3.36 hours are counted
+  with no record and the excess is 2.55.
+- **The longer the home is quiet, the surer the pipeline is of sleep.** With
+  no mat record, its belief in sleep is 0.39 between ten minutes and an hour
+  after the last activation, 0.90 between one and three hours, and 0.99
+  after three; 2.29 of the 4.10 hours fall within the hour, 1.80 after it.
+  By the sensor that last reported, 1.40 hours follow the bedroom's and 1.07
+  an exit door's, 0.79 of them an hour or more after it. A door's record does
+  not say which way anyone went.
+- **That part moves the daily number.** It carries 0.68 [0.54, 0.83] of the
+  day-to-day variance of the pipeline's hours of sleep, and it follows the
+  mat no better than any other day's beliefs set beside the same mat would.
+  The sleep counted while the mat has a record does follow the mat's sleep
+  beyond that, by +0.10 [+0.05, +0.15], above zero in all 14 homes. The daily
+  hours of sleep correlate with the day's activations at −0.71, which the way
+  the pipeline infers sleep partly builds in.
+- **Part of it sits at the edges of the mat's nights.** Counting each mat
+  record an hour later, the sleep counted off the mat within 30 minutes of a
+  record falls from 0.73 to 0.32 hours a day, and the on-mat part follows the
+  mat by +0.18 [+0.09, +0.26] beyond the reference, above zero in 12 of 14
+  homes. That is consistent with a mat clock an hour behind, or with the
+  pipeline's timing at bedtime and waking.
+
+The mat's stages are the device's own, and a minute with no record may be an
+empty bed, a person asleep elsewhere or a mat that stopped. See
+[the sleep-gap results](docs/SLEEP_GAP_RESULTS.md).
+
 The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
 under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz
 are acknowledged, as the dataset asks. It is not redistributed here.

@@ -768,6 +768,50 @@ what the profile does not model, in the homes' days or in the mat. In the
 simulator they do take the bathroom's hours to TIHM's level, and the
 kitchen's to about a third of the truth.
 
+### Described: where the pipeline's sleep parts from the sleep mat
+
+The sleep-mat comparison said that `sleeping_hours` does not follow the mat
+within a home; the matched-sensor study said the sensor properties its matched
+profile reproduces do not explain it in the simulator. Neither said where in a
+day the two part.
+
+- **The plan.** `docs/SLEEP_GAP_PLAN.md`, frozen and pushed before any value
+  was computed, after an independent review of the draft, which the plan
+  records, and a second of its revision, which it does not. It sets each
+  step's belief beside the mat's class of each minute, under the mat's clock
+  as recorded and an hour later, on the sleep-mat comparison's primary days
+  and homes. Exploratory: no criterion, no margin.
+- **The run.** From clean commit `1e46865`; both runs and the matched days
+  reproduced the published records, the repeat the first run's daily hours,
+  and the mat's minutes its daily hours. `docs/SLEEP_GAP_RESULTS.md` is
+  generated from its record.
+- **The extra sleep.** Of the 3.95 hours a day, 4.10 are counted when the mat
+  has no record, 3.20 of them by day; 1.34 while the mat says awake in bed;
+  and 1.48 hours of the mat's sleep are not counted.
+- **A quiet home is read as a sleeping one.** With no mat record the belief in
+  sleep is 0.90 one to three hours after the last activation and 0.99 after
+  three, and 0.39 between ten minutes and an hour; 2.29 of the 4.10 hours fall
+  within the hour. 1.40 hours a day follow the bedroom's sensor and 1.07 an
+  exit door.
+- **That part moves the daily number.** It carries 0.68 [0.54, 0.83] of the
+  daily variance and follows the mat no better than a swapped-mask reference;
+  the sleep counted on the mat follows it by +0.10 [+0.05, +0.15] beyond the
+  reference, above zero in all 14 homes, and by +0.18 [+0.09, +0.26], above
+  zero in 12, with the mat's clock an hour later.
+
+Consequence: in these homes the pipeline's daily hours of sleep are consistent
+with a measure of how quiet the day was, more than of the night the mat
+records: the part counted with no mat record moves them and does not follow
+the mat. They correlate at −0.71 with the day's activations, which the way the
+pipeline infers sleep partly builds in. Telling rest by day, absence and sleep
+apart may need what these event sensors do not give, such as a door's
+direction or a bed sensor, or a model that gives more weight to the resident
+being out after a silence that follows an exit door; that is a conjecture, and
+any such change would need its own frozen test on homes other than these. TIHM
+is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0;
+Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged,
+as the dataset asks.
+
 ### What remains in Phase 5
 
 - **More independent evidence.** Two homes are two case studies. A

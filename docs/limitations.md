@@ -148,7 +148,14 @@ simulator's true hours of sleep, the same correlation is 0.70. On the 400
 threshold-calibration homes it is 0.67 with the simulator's own sensors and
 0.71 with their event sensors drawn again to match TIHM's sensor records, so
 in the simulator the sensor properties that profile matches do not by
-themselves bring it anywhere near 0.11. Every alerting study here counts its
+themselves bring it anywhere near 0.11. Set beside the mat minute by minute,
+in a description planned after this comparison had been read, most of the
+pipeline's extra sleep falls when the mat has no record, mostly by day, where
+its belief in sleep reaches 0.90 once the home has been quiet for an hour;
+the sleep counted with no record carries about two thirds of the day-to-day
+variance of the daily hours, and follows the mat no better than other days'
+beliefs set beside the same mat; see
+[the sleep-gap results](SLEEP_GAP_RESULTS.md). Every alerting study here counts its
 detections on that feature, so a detection in simulation is a statement about
 the simulator's sleep, not a person's. The mat's stages are the device's own
 and are not validated; see [the sleep-mat results](SLEEP_MAT_RESULTS.md).
