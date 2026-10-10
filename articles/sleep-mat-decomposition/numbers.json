@@ -1,0 +1,788 @@
+{
+  "matched_sensors": {
+    "E1_matched_minus_standard": [
+      0.07,
+      0.005,
+      0.13
+    ],
+    "E8_kitchen_belief_after_kitchen_alone": {
+      "matched": 0.2828007051906201,
+      "standard": 0.714251240897351
+    },
+    "E9_sensitivity_minus_standard": [
+      0.14,
+      0.02,
+      0.26
+    ],
+    "check_reproduced": true,
+    "criteria": {
+      "C1_the_detection_survives_the_matched_profile": "survives",
+      "C2_the_hours_of_sleep_still_follow_the_truth": "follows",
+      "C3_the_kitchen_and_bathroom_collapse_is_reproduced": "not_reproduced"
+    },
+    "excess_detection": {
+      "matched": [
+        0.6975,
+        0.6475,
+        0.745
+      ],
+      "standard": [
+        0.6275,
+        0.58,
+        0.6775
+      ]
+    },
+    "false_alerts_per_home": {
+      "matched": [
+        1.0225,
+        0.9075,
+        1.14
+      ],
+      "standard": [
+        0.855,
+        0.7475,
+        0.965
+      ]
+    },
+    "homes": 400,
+    "moments": {
+      "bathroom_per_day": {
+        "matched": 36.01829268292683,
+        "standard": 16.109756097560975,
+        "tihm": 29.041339612768184
+      },
+      "bedroom_per_day": {
+        "matched": 38.36585365853659,
+        "standard": 17.29268292682927,
+        "tihm": 41.00396825396825
+      },
+      "hall_per_day": {
+        "matched": 49.85365853658537,
+        "standard": null,
+        "tihm": 66.57556935817806
+      },
+      "kitchen_per_day": {
+        "matched": 79.45121951219512,
+        "standard": 97.73780487804879,
+        "tihm": 86.57142857142857
+      },
+      "living_per_day": {
+        "matched": 157.8109756097561,
+        "standard": 240.77439024390245,
+        "tihm": 76.60087719298247
+      },
+      "night_bedroom": {
+        "matched": 3.7439024390243905,
+        "standard": 3.75,
+        "tihm": 5.733954451345756
+      },
+      "retrigger_gap_seconds": {
+        "matched": 137.08970625,
+        "standard": 59.81022625,
+        "tihm": 152.5
+      },
+      "switch_share": {
+        "matched": 0.5696358875934207,
+        "standard": 0.07475465487465206,
+        "tihm": 0.6336094752474986
+      }
+    },
+    "pooled_day_median_hours": {
+      "bathroom_activity": {
+        "matched": 0.009714970696504085,
+        "standard": 0.23961959630218893,
+        "truth": 0.2803689338888889
+      },
+      "kitchen_activity": {
+        "matched": 0.6783762399262386,
+        "standard": 1.6370314904801762,
+        "truth": 1.9615743229166667
+      },
+      "sleeping": {
+        "matched": 7.398601390930499,
+        "standard": 7.907462627817181,
+        "truth": 8.212754644444445
+      }
+    },
+    "profiles": {
+      "hold_off_seconds": {
+        "matched": 61.0,
+        "meaning": "the shortest gap, in seconds, between two activations one motion sensor reports",
+        "sensitivity": 61.0,
+        "standard": 0.0
+      },
+      "presence_scale": {
+        "matched": 1.0,
+        "meaning": "the multiple of the simulator's in-room rates of 45 an hour active, 6 still and 0.6 asleep, and of a visitor's 31.5",
+        "sensitivity": 1.0,
+        "standard": 1.0
+      },
+      "spill_rate": {
+        "matched": 2.0,
+        "meaning": "activations an hour of every motion sensor of a room the resident is not in, the bathroom's and the hallway's among them, while the resident is at home and awake, moving or still; asleep, out or with no resident at home, 0.12 an hour",
+        "sensitivity": 2.5,
+        "standard": 0.12
+      }
+    },
+    "record": "artifacts/matched_sensors/matched-sensors.json",
+    "within_home_correlation": {
+      "bathroom_activity_hours": {
+        "matched": [
+          0.5055889683394826,
+          0.4979293202620781,
+          0.5132051294609332
+        ],
+        "standard": [
+          0.7180942196972171,
+          0.7123983059609713,
+          0.7236049999455819
+        ]
+      },
+      "kitchen_activity_hours": {
+        "matched": [
+          0.39617320229427194,
+          0.38723412892763465,
+          0.40528877569900196
+        ],
+        "standard": [
+          0.7028333931933696,
+          0.6971080772956324,
+          0.7086094744832991
+        ]
+      },
+      "sleeping_hours": {
+        "matched": [
+          0.7073194675721857,
+          0.7008863842905497,
+          0.7138358134434758
+        ],
+        "standard": [
+          0.6742583885678215,
+          0.667793077458887,
+          0.6807506516581231
+        ]
+      }
+    }
+  },
+  "sleep_gap": {
+    "D1": {
+      "an_hour_later": {
+        "difference": [
+          3.954675525870831,
+          1.5380374537925632,
+          6.371313597949099,
+          2.3887731600573576
+        ],
+        "difference_in_bed": [
+          1.9637105923151488,
+          -0.012598252967492174,
+          3.9400194375977895,
+          1.5267498001660131
+        ],
+        "mat_asleep_unwatched": [
+          0.10209799398180566,
+          0.07084777939954917,
+          0.13334820856406215,
+          0.11846869468175171
+        ],
+        "mat_in_bed": [
+          9.381953708033297,
+          8.482579346239152,
+          10.281328069827442,
+          9.357748917748918
+        ],
+        "mat_in_bed_not_counted": [
+          1.6449864607238691,
+          0.8115847733991064,
+          2.478388148048632,
+          1.219364004384068
+        ],
+        "mat_sleep": [
+          7.390988774477615,
+          6.0016515709192095,
+          8.78032597803602,
+          8.138010204081631
+        ],
+        "mat_sleep_not_counted": [
+          0.9662385504664757,
+          0.5434406665349674,
+          1.389036434397984,
+          0.8882078702095266
+        ],
+        "pipeline": [
+          11.345664300348448,
+          9.734644282816229,
+          12.956684317880667,
+          10.91239992258312
+        ],
+        "pipeline_asleep": [
+          6.42475022401114,
+          5.170534594017658,
+          7.6789658540046215,
+          7.180142995477512
+        ],
+        "pipeline_awake_on_the_mat": [
+          1.3122170232982886,
+          0.5249762992411227,
+          2.0994577473554545,
+          0.6180118295604092
+        ],
+        "pipeline_off_the_mat": [
+          3.6086970530390174,
+          2.1130263895830295,
+          5.104367716495005,
+          2.8837343780800238
+        ]
+      },
+      "as_recorded": {
+        "difference": [
+          3.953098596057025,
+          1.5381333414989249,
+          6.368063850615124,
+          2.381853517200214
+        ],
+        "difference_in_bed": [
+          1.9656986745322063,
+          -0.013193012713483832,
+          3.9445903617778963,
+          1.5267400192583471
+        ],
+        "mat_asleep_unwatched": [
+          0.11973804956078883,
+          0.08606562598916262,
+          0.15341047313241504,
+          0.15080150462962966
+        ],
+        "mat_in_bed": [
+          9.379965625816242,
+          8.477050806549254,
+          10.28288044508323,
+          9.357748917748916
+        ],
+        "mat_in_bed_not_counted": [
+          2.130449358368248,
+          1.3580148505995981,
+          2.902883866136898,
+          1.7519143912937944
+        ],
+        "mat_sleep": [
+          7.392565704291423,
+          6.006460087909683,
+          8.778671320673164,
+          8.121145124716552
+        ],
+        "mat_sleep_not_counted": [
+          1.4810462915059615,
+          1.0327895375421217,
+          1.9293030454698012,
+          1.465334922617684
+        ],
+        "pipeline": [
+          11.345664300348448,
+          9.734644282816229,
+          12.956684317880667,
+          10.91239992258312
+        ],
+        "pipeline_asleep": [
+          5.911519412785461,
+          4.750413411601904,
+          7.072625413969019,
+          6.585542904879008
+        ],
+        "pipeline_awake_on_the_mat": [
+          1.3379968546625316,
+          0.5972740712754946,
+          2.0787196380495687,
+          0.8363763225971608
+        ],
+        "pipeline_off_the_mat": [
+          4.096148032900453,
+          2.6135843810288613,
+          5.5787116847720455,
+          3.4410053258619095
+        ]
+      }
+    },
+    "D3": {
+      "an_hour_later": {
+        "asleep": {
+          "away": 0.024345593681380413,
+          "bathroom_activity": 0.00021918622463428083,
+          "bed_awake": 0.012235343842029872,
+          "home_active": 0.019935185979019526,
+          "home_inactive": 0.05921350830389318,
+          "kitchen_activity": 0.00094421026506508,
+          "sleeping": 0.8831069717039778
+        },
+        "awake_on_the_mat": {
+          "away": 0.03987047822348646,
+          "bathroom_activity": 0.00032106719784036266,
+          "bed_awake": 0.04616608055170953,
+          "home_active": 0.047352376989292906,
+          "home_inactive": 0.23870018540364316,
+          "kitchen_activity": 0.0009061764435615202,
+          "sleeping": 0.6266836351904661
+        },
+        "off_the_mat": {
+          "away": 0.10537655610238834,
+          "bathroom_activity": 0.0006621237751423158,
+          "bed_awake": 0.017789278947906783,
+          "home_active": 0.1708848623894063,
+          "home_inactive": 0.44767321280332245,
+          "kitchen_activity": 0.014455406951135147,
+          "sleeping": 0.24315855903069863
+        }
+      },
+      "as_recorded": {
+        "asleep": {
+          "away": 0.026452719993745877,
+          "bathroom_activity": 0.00022736197286434391,
+          "bed_awake": 0.020060882107461892,
+          "home_active": 0.030350657676225617,
+          "home_inactive": 0.10841156653853676,
+          "kitchen_activity": 0.0009052159863129039,
+          "sleeping": 0.8135915957248526
+        },
+        "awake_on_the_mat": {
+          "away": 0.04566599660044599,
+          "bathroom_activity": 0.0001911671382730919,
+          "bed_awake": 0.017769053253232043,
+          "home_active": 0.049218259744364466,
+          "home_inactive": 0.22103462333416993,
+          "kitchen_activity": 0.0020891949579504177,
+          "sleeping": 0.6640317049715639
+        },
+        "off_the_mat": {
+          "away": 0.10330217550457854,
+          "bathroom_activity": 0.0006677639302559728,
+          "bed_awake": 0.016330214611026562,
+          "home_active": 0.16602863685068497,
+          "home_inactive": 0.4230214348073475,
+          "kitchen_activity": 0.014430693835899289,
+          "sleeping": 0.2762190804602072
+        }
+      }
+    },
+    "D4_exit": {
+      "exit": 1.066933173913703,
+      "other": 3.0292148589867693
+    },
+    "D4_exit_an_hour_or_more_after": 0.7943268898136073,
+    "D4_period": {
+      "day": {
+        "hours_with_no_record": 13.139487315772655,
+        "pipeline_sleep_hours": 3.2023069506784387
+      },
+      "night": {
+        "hours_with_no_record": 1.4805470584111056,
+        "pipeline_sleep_hours": 0.8938410822220036
+      }
+    },
+    "D4_sensor": {
+      "Back Door": {
+        "pipeline_sleep_hours": 0.2418663905984893,
+        "sleeping_belief": [
+          0.17219697677596574,
+          0.08782477512334265,
+          0.25656917842858884
+        ]
+      },
+      "Bathroom": {
+        "pipeline_sleep_hours": 0.15049179705500007,
+        "sleeping_belief": [
+          0.2349899374450338,
+          0.12196897884857111,
+          0.3480108960414965
+        ]
+      },
+      "Bedroom": {
+        "pipeline_sleep_hours": 1.3996064933227879,
+        "sleeping_belief": [
+          0.5558689800580364,
+          0.4693253005255725,
+          0.6424126595905004
+        ]
+      },
+      "Fridge Door": {
+        "pipeline_sleep_hours": 0.15348563727103715,
+        "sleeping_belief": [
+          0.12773719311364443,
+          0.00765435319996817,
+          0.2478200330273207
+        ]
+      },
+      "Front Door": {
+        "pipeline_sleep_hours": 0.825066783315216,
+        "sleeping_belief": [
+          0.40394788573527113,
+          0.316640704191782,
+          0.4912550672787603
+        ]
+      },
+      "Hallway": {
+        "pipeline_sleep_hours": 0.44182372782659546,
+        "sleeping_belief": [
+          0.2139080029955241,
+          0.09998840891975293,
+          0.3278275970712953
+        ]
+      },
+      "Kitchen": {
+        "pipeline_sleep_hours": 0.2614279930101448,
+        "sleeping_belief": [
+          0.09896617256034529,
+          0.0637342056921204,
+          0.13419813942857017
+        ]
+      },
+      "Lounge": {
+        "pipeline_sleep_hours": 0.6223792105011946,
+        "sleeping_belief": [
+          0.16088440055714234,
+          0.11817277716134969,
+          0.203596023952935
+        ]
+      }
+    },
+    "D4_since": {
+      "10_to_60_minutes": {
+        "hours_with_no_record": 3.901294752647239,
+        "pipeline_sleep_hours": 1.5981278014230402,
+        "sleeping_belief": [
+          0.3860278432789189,
+          0.30000882060289696,
+          0.4720468659549409
+        ]
+      },
+      "1_to_3_hours": {
+        "hours_with_no_record": 1.5300175943279324,
+        "pipeline_sleep_hours": 1.3877006035597363,
+        "sleeping_belief": [
+          0.9010268541599168,
+          0.8659976664117964,
+          0.9360560419080372
+        ]
+      },
+      "3_hours_or_more": {
+        "hours_with_no_record": 0.4187983069789974,
+        "pipeline_sleep_hours": 0.41696780783956283,
+        "sleeping_belief": [
+          0.9921728059994542,
+          0.9865617509469204,
+          0.997783861051988
+        ]
+      },
+      "under_10_minutes": {
+        "hours_with_no_record": 8.769923720229592,
+        "pipeline_sleep_hours": 0.6933518200781076,
+        "sleeping_belief": [
+          0.09521319140329047,
+          0.02288718480975037,
+          0.1675391979968306
+        ]
+      }
+    },
+    "D5": {
+      "an_hour_later": {
+        "correlations": {
+          "mat_in_bed~pipeline": [
+            0.1671873368691926,
+            0.03168924363513659,
+            0.3026854301032486
+          ],
+          "mat_in_bed~pipeline_off_the_mat": [
+            -0.364357323939125,
+            -0.49356738842977876,
+            -0.23514725944847123
+          ],
+          "mat_in_bed~pipeline_on_the_mat": [
+            0.7067640992002818,
+            0.5830321706035801,
+            0.8304960277969835
+          ],
+          "mat_sleep~pipeline": [
+            0.15481953315149335,
+            0.059201665482854604,
+            0.2504374008201321
+          ],
+          "mat_sleep~pipeline_off_the_mat": [
+            -0.2726068619743295,
+            -0.37030494632968025,
+            -0.17490877761897872
+          ],
+          "mat_sleep~pipeline_on_the_mat": [
+            0.6076219059739006,
+            0.5046588146810489,
+            0.7105849972667524
+          ],
+          "pipeline~events": [
+            -0.7059078417451149,
+            -0.7678967787700609,
+            -0.6439189047201689
+          ],
+          "pipeline~quiet_hours": [
+            0.5421058934991616,
+            0.44060632336212036,
+            0.6436054636362029
+          ]
+        },
+        "excess": {
+          "mat_in_bed~pipeline_off_the_mat": [
+            -0.01810901590898529,
+            -0.07895645855572098,
+            0.0427384267377504,
+            7
+          ],
+          "mat_in_bed~pipeline_on_the_mat": [
+            0.18898024628941293,
+            0.09871322998555257,
+            0.27924726259327326,
+            13
+          ],
+          "mat_sleep~pipeline_off_the_mat": [
+            0.01032052897639688,
+            -0.047616476336779935,
+            0.0682575342895737,
+            7
+          ],
+          "mat_sleep~pipeline_on_the_mat": [
+            0.17727901019012565,
+            0.09183965827111379,
+            0.2627183621091375,
+            12
+          ]
+        },
+        "references": {
+          "mat_in_bed~pipeline_off_the_mat": [
+            -0.34624830803013973,
+            -0.491498615692359,
+            -0.20099800036792045
+          ],
+          "mat_in_bed~pipeline_on_the_mat": [
+            0.5177838529108689,
+            0.39799406540405224,
+            0.6375736404176856
+          ],
+          "mat_sleep~pipeline_off_the_mat": [
+            -0.2829273909507263,
+            -0.3857649538596779,
+            -0.18008982804177465
+          ],
+          "mat_sleep~pipeline_on_the_mat": [
+            0.43034289578377505,
+            0.3417777738288726,
+            0.5189080177386776
+          ]
+        },
+        "shares": {
+          "pipeline_off_the_mat": [
+            0.7014104348276878,
+            0.5435969686672437,
+            0.859223900988132
+          ],
+          "pipeline_on_the_mat": [
+            0.2985895651723121,
+            0.14077609901186788,
+            0.45640303133275634
+          ]
+        }
+      },
+      "as_recorded": {
+        "correlations": {
+          "mat_in_bed~pipeline": [
+            0.14146663028489592,
+            0.009667568496673579,
+            0.27326569207311824
+          ],
+          "mat_in_bed~pipeline_off_the_mat": [
+            -0.39481486971353735,
+            -0.5183213881186256,
+            -0.2713083513084491
+          ],
+          "mat_in_bed~pipeline_on_the_mat": [
+            0.6992413910392364,
+            0.5835466125845391,
+            0.8149361694939338
+          ],
+          "mat_sleep~pipeline": [
+            0.10987159862425792,
+            0.028415261321203464,
+            0.1913279359273124
+          ],
+          "mat_sleep~pipeline_off_the_mat": [
+            -0.31488256654453445,
+            -0.4024392139245068,
+            -0.22732591916456207
+          ],
+          "mat_sleep~pipeline_on_the_mat": [
+            0.5764787593257903,
+            0.48005662439187285,
+            0.6729008942597077
+          ],
+          "pipeline~events": [
+            -0.7059078417451149,
+            -0.7678967787700609,
+            -0.6439189047201689
+          ],
+          "pipeline~quiet_hours": [
+            0.5421058934991616,
+            0.44060632336212036,
+            0.6436054636362029
+          ]
+        },
+        "excess": {
+          "mat_in_bed~pipeline_off_the_mat": [
+            0.003408218834146292,
+            -0.06352611756887083,
+            0.07034255523716343,
+            8
+          ],
+          "mat_in_bed~pipeline_on_the_mat": [
+            0.11120090212941647,
+            0.03757744304929807,
+            0.18482436120953488,
+            12
+          ],
+          "mat_sleep~pipeline_off_the_mat": [
+            0.0019498142042874392,
+            -0.04889451576804751,
+            0.05279414417662239,
+            9
+          ],
+          "mat_sleep~pipeline_on_the_mat": [
+            0.10343751601841707,
+            0.05269848528118243,
+            0.1541765467556517,
+            14
+          ]
+        },
+        "references": {
+          "mat_in_bed~pipeline_off_the_mat": [
+            -0.3982230885476836,
+            -0.525559557527202,
+            -0.2708866195681653
+          ],
+          "mat_in_bed~pipeline_on_the_mat": [
+            0.5880404889098197,
+            0.48909120038290005,
+            0.6869897774367395
+          ],
+          "mat_sleep~pipeline_off_the_mat": [
+            -0.3168323807488219,
+            -0.40152590844314084,
+            -0.232138853054503
+          ],
+          "mat_sleep~pipeline_on_the_mat": [
+            0.47304124330737324,
+            0.39880424672929693,
+            0.5472782398854495
+          ]
+        },
+        "shares": {
+          "pipeline_off_the_mat": [
+            0.6837615935455522,
+            0.5364895918834371,
+            0.8310335952076673
+          ],
+          "pipeline_on_the_mat": [
+            0.3162384064544476,
+            0.16896640479233246,
+            0.46351040811656274
+          ]
+        }
+      }
+    },
+    "D6": {
+      "difference": [
+        2.545511017287241,
+        1.8592300416411662,
+        3.2317919929333154
+      ],
+      "left_out": [
+        "16f4b",
+        "d7a46",
+        "f220c"
+      ],
+      "pipeline_off_the_mat": [
+        3.36001222582855,
+        2.979899214149363,
+        3.7401252375077365
+      ],
+      "share_off": [
+        0.7876664774272758,
+        0.6888480530476939,
+        0.8864849018068577
+      ]
+    },
+    "D7_under_30_minutes": {
+      "an_hour_later": 0.3213603884088254,
+      "as_recorded": 0.7317628646234912
+    },
+    "homes": 14,
+    "largest_difference_hours": 1.3677947663381929e-13,
+    "largest_home": [
+      "f220c",
+      17.19717061479344,
+      12.396298407053672
+    ],
+    "matched_days": 705,
+    "plan_commit": "1e46865",
+    "record": "artifacts/sleep_gap/sleep-gap.json"
+  },
+  "sleep_gap_plan": {
+    "record": "artifacts/sleep_gap/sleep_gap_plan.json",
+    "review_of_the_mat_file": "An independent review of the draft read the code and the mat's file on its own: only minute records, sessions that start AWAKE 3,183 times in 3,304 and end asleep about 71% of the time; 75 stretches without records of 3 hours or more beginning between 22:00 and 05:00, 61 of them in home 55cd4; and, over every home's observed days, 5 with under 2 hours of records and 15 with under 4. It found that the draft's correlations of the mat with the pipeline's sleep on and off the mat are partly mechanical, that a minute without a record was called an empty bed, and that a minute's context was taken before the step its belief came from had seen all it saw. The plan was revised for each."
+  },
+  "sleep_mat": {
+    "homes": 14,
+    "mean_difference_hours": [
+      3.953098596057025,
+      1.5381333414989249,
+      6.368063850615124
+    ],
+    "record": "artifacts/sleep_mat/sleep-mat.json",
+    "simulated_record": "artifacts/sleep_mat/sleep-mat-simulated.json",
+    "simulated_spearman": [
+      0.6952804170611987,
+      0.6814409071686967,
+      0.7091199269537007
+    ],
+    "spearman": [
+      0.10987159862425792,
+      0.028415261321203464,
+      0.1913279359273124
+    ]
+  },
+  "tihm_sensors": {
+    "contacts": {
+      "Back Door": {
+        "gaps": 48192,
+        "median_gap_under_a_minute_seconds": 7.0,
+        "share_under_a_minute": 0.462234395750332
+      },
+      "Fridge Door": {
+        "gaps": 108748,
+        "median_gap_under_a_minute_seconds": 9.0,
+        "share_under_a_minute": 0.5891970427042337
+      },
+      "Front Door": {
+        "gaps": 58234,
+        "median_gap_under_a_minute_seconds": 9.0,
+        "share_under_a_minute": 0.4404986777483944
+      }
+    },
+    "hold_off_seconds": 61.0,
+    "homes": 56,
+    "homes_with_a_hallway": 54,
+    "record": "artifacts/matched_sensors/matched-sensors-planning.json"
+  },
+  "tihm_state_hours": {
+    "pooled_day_median_hours": {
+      "bathroom_activity": 0.002085362972549955,
+      "kitchen_activity": 0.05868306062507398,
+      "sleeping": 10.94304315311403
+    },
+    "record": "artifacts/tihm/tihm-alert-burden-post-hoc.json",
+    "usable_days": 2793
+  }
+}
