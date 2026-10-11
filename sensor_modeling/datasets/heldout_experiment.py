@@ -334,6 +334,18 @@ class HeldOutProtocol:
             if everywhere - set(homes[home]["instrumented"])
         }
         states = sorted({s for home in self.test for s in homes[home]["states"]})
+        channels = sorted(
+            {c for entry in homes.values() for c in entry["instrumented"]}
+        )
+        counts = {
+            channel: {
+                "training": sum(
+                    channel in homes[h]["instrumented"] for h in self.training
+                ),
+                "held_out": sum(channel in homes[h]["instrumented"] for h in self.test),
+            }
+            for channel in channels
+        }
         return {
             "report": {"file": INPUTS_FILE, "sha256": self.inputs["sha256"]},
             "test": {
@@ -345,6 +357,19 @@ class HeldOutProtocol:
             },
             "channels_every_training_home_instruments": sorted(everywhere),
             "held_out_homes_lacking_one": lacking,
+            "homes_instrumenting_each_channel": counts,
+            "shifted_channels": {
+                "channels": sorted(
+                    c
+                    for c, n in counts.items()
+                    if 2 * n["training"] < len(self.training)
+                    and 2 * n["held_out"] >= len(self.test)
+                ),
+                "reading": "instrumented by fewer than half of the training homes "
+                "and at least half of the held-out ones: the recursion's fitted "
+                "channel rests on the few training homes that have it, and the "
+                "baselines saw its columns mostly missing in training",
+            },
             "held_out_homes_with_each_state": {
                 state: sum(state in homes[home]["states"] for home in self.test)
                 for state in states

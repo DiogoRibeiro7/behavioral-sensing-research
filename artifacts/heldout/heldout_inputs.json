@@ -1,0 +1,1541 @@
+{
+  "fit_seconds": 110.1,
+  "homes": {
+    "hh101": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 16376,
+      "observations": 111430,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17151
+    },
+    "hh102": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 16583,
+      "observations": 140716,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17839
+    },
+    "hh103": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 14096,
+      "observations": 56236,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 16559
+    },
+    "hh104": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 11788,
+      "observations": 172284,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17566
+    },
+    "hh105": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 11823,
+      "observations": 73536,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17478
+    },
+    "hh106": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 15952,
+      "observations": 101274,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17812
+    },
+    "hh108": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 15807,
+      "observations": 142884,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17557
+    },
+    "hh109": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 15924,
+      "observations": 199574,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17562
+    },
+    "hh110": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6849,
+      "observations": 49315,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8756
+    },
+    "hh111": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 16814,
+      "observations": 110629,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17561
+    },
+    "hh112": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 28968,
+      "observations": 234260,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 31104
+    },
+    "hh113": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 128512,
+      "observations": 1141063,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 146696
+    },
+    "hh114": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7950,
+      "observations": 67551,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8762
+    },
+    "hh115": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 83246,
+      "observations": 800032,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 92147
+    },
+    "hh116": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 14806,
+      "observations": 194313,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17677
+    },
+    "hh117": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 77216,
+      "observations": 385093,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 99534
+    },
+    "hh118": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 8393,
+      "observations": 89752,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8743
+    },
+    "hh119": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7989,
+      "observations": 46370,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8922
+    },
+    "hh120": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 17536,
+      "observations": 109691,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 18431
+    },
+    "hh122": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 8047,
+      "observations": 64968,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8615
+    },
+    "hh123": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 8521,
+      "observations": 53418,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8893
+    },
+    "hh124": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 17064,
+      "observations": 6687,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17489
+    },
+    "hh125": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 15470,
+      "observations": 108114,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17533
+    },
+    "hh126": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7138,
+      "observations": 55901,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 10516
+    },
+    "hh127": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 4615,
+      "observations": 25422,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 7600
+    },
+    "hh128": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 11643,
+      "observations": 201285,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17563
+    },
+    "hh129": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7849,
+      "observations": 80339,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8894
+    },
+    "hh130": {
+      "excluded_sensors": 0,
+      "family": "hh",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 8103,
+      "observations": 60799,
+      "role": "training",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8631
+    },
+    "ihs07": {
+      "excluded_sensors": 3,
+      "family": "ihs",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 14325,
+      "observations": 227360,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 20368
+    },
+    "ihs11": {
+      "excluded_sensors": 0,
+      "family": "ihs",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 9477,
+      "observations": 217833,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 15091
+    },
+    "mn57": {
+      "excluded_sensors": 0,
+      "family": "mn",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6293,
+      "observations": 128180,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 7599
+    },
+    "mn77": {
+      "excluded_sensors": 3,
+      "family": "mn",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 5699,
+      "observations": 116362,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9198
+    },
+    "mn82": {
+      "excluded_sensors": 0,
+      "family": "mn",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 3684,
+      "observations": 31420,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 4189
+    },
+    "rw101": {
+      "excluded_sensors": 2,
+      "family": "rw",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7312,
+      "observations": 34909,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8634
+    },
+    "rw103": {
+      "excluded_sensors": 2,
+      "family": "rw",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6525,
+      "observations": 55601,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8619
+    },
+    "rw105": {
+      "excluded_sensors": 2,
+      "family": "rw",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6725,
+      "observations": 49229,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8910
+    },
+    "rw106": {
+      "excluded_sensors": 2,
+      "family": "rw",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 4296,
+      "observations": 57329,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 7339
+    },
+    "rw107": {
+      "excluded_sensors": 2,
+      "family": "rw",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7722,
+      "observations": 44382,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8898
+    },
+    "tm001": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 13340,
+      "observations": 124083,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17560
+    },
+    "tm002": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 31678,
+      "observations": 403424,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 46506
+    },
+    "tm003": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 12245,
+      "observations": 104540,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 20249
+    },
+    "tm005": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 5010,
+      "observations": 136392,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8894
+    },
+    "tm006": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6486,
+      "observations": 111077,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8631
+    },
+    "tm007": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6660,
+      "observations": 42214,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8615
+    },
+    "tm008": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7125,
+      "observations": 78442,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8634
+    },
+    "tm009": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 16970,
+      "observations": 103774,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "sleeping"
+      ],
+      "windows": 17533
+    },
+    "tm010": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 15049,
+      "observations": 195676,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17554
+    },
+    "tm011": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 12278,
+      "observations": 285508,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17542
+    },
+    "tm013": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 16950,
+      "observations": 147957,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "bed_awake",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17557
+    },
+    "tm014": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 9311,
+      "observations": 82906,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 17841
+    },
+    "tm015": {
+      "excluded_sensors": 0,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6332,
+      "observations": 80218,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "sleeping"
+      ],
+      "windows": 8919
+    },
+    "tm016": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 1380,
+      "observations": 40643,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9216
+    },
+    "tm017": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 1775,
+      "observations": 48455,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9206
+    },
+    "tm018": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6208,
+      "observations": 71421,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9154
+    },
+    "tm019": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 8051,
+      "observations": 53682,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8877
+    },
+    "tm020": {
+      "excluded_sensors": 3,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 5261,
+      "observations": 82240,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8208
+    },
+    "tm021": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7187,
+      "observations": 94379,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9215
+    },
+    "tm022": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7013,
+      "observations": 152522,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9210
+    },
+    "tm026": {
+      "excluded_sensors": 3,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 7174,
+      "observations": 138326,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9214
+    },
+    "tm029": {
+      "excluded_sensors": 1,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 4626,
+      "observations": 85176,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9213
+    },
+    "tm035": {
+      "excluded_sensors": 3,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 4622,
+      "observations": 88664,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 8923
+    },
+    "tm037": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 8336,
+      "observations": 72809,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9213
+    },
+    "tm038": {
+      "excluded_sensors": 2,
+      "family": "tm",
+      "instrumented": [
+        "bathroom_motion",
+        "bedroom_motion",
+        "hall_door",
+        "hall_motion",
+        "kitchen_motion",
+        "living_motion"
+      ],
+      "labelled": 6281,
+      "observations": 213437,
+      "recursions_finite": true,
+      "role": "held out",
+      "states": [
+        "away",
+        "bathroom_activity",
+        "home_active",
+        "home_inactive",
+        "kitchen_activity",
+        "sleeping"
+      ],
+      "windows": 9209
+    }
+  },
+  "peak_memory_mb": 5100,
+  "schema": "heldout-inputs/1",
+  "scored": "nothing: no prediction was compared with a label"
+}

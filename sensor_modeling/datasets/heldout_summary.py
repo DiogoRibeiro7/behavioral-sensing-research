@@ -53,6 +53,21 @@ def _instrumentation(declared: Mapping[str, Any]) -> list[str]:
             ],
         ),
         "",
+        *_table(
+            ["Channel", "Training homes", "Held-out homes"],
+            [
+                [f"`{c}`", _n(n["training"]), _n(n["held_out"])]
+                for c, n in declared["homes_instrumenting_each_channel"].items()
+            ],
+        ),
+        "",
+        "**Shifted channels.** "
+        + (
+            ", ".join(f"`{c}`" for c in declared["shifted_channels"]["channels"])
+            or "none"
+        )
+        + f": {declared['shifted_channels']['reading']}.",
+        "",
         "Held-out homes in which each state occurs: "
         + "; ".join(
             f"`{state}` {count}"
