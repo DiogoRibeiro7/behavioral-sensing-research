@@ -56,6 +56,18 @@ accuracy, in 19 of 20 homes; part of the gap is the formulation. See
 changes to the generative model have since been measured on the same homes; see
 [`ROADMAP.md`](ROADMAP.md). None of them is a held-out claim.
 
+The two that succeeded, a hurdle model fitted for each evidence channel and a
+hierarchical time-of-day prior, were then run together in the filter's
+recursion, under a protocol frozen before any household was scored. Together
+they score 0.517 balanced accuracy on those 20 homes, against 0.456 for the
+fitted channels alone and 0.417 for the declared model. The prior adds +0.061
+[+0.044, +0.077], most in the recall of `away` and `sleeping`, and lowers
+calibration error from 0.284 to 0.213. The earlier versions of the same two
+parts, in the production filter on 11 held-out homes of the panel, scored 0.434
+together against 0.460 for the circadian term alone. The production pipeline
+does not yet offer the combination, and a held-out confirmation is next. See
+[the combined-prior results](docs/PHASE3_COMBINED_PRIOR_RESULTS.md).
+
 The frozen v0.3 candidate was also tested once on 43 single-resident CASAS homes
 outside the development panel. The optional circadian prior improved the median
 paired household balanced accuracy by **+0.0091**, with a 95% household bootstrap

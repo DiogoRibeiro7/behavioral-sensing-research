@@ -46,17 +46,17 @@ Five kinds of evidence appear below, and they are never merged:
 | --- | --- | --- | --- |
 | 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
 | 2. Baseline benchmark | Partly complete | Development panel | Baselines and a supervised diagnostic are in place; no held-out benchmark |
-| 3. Inference redesign | All five hypotheses evaluated | Development panel | The time prior and fitted channels succeed; the history state fails |
+| 3. Inference redesign | All five hypotheses evaluated; the two successes combined | Development panel | The time prior and fitted channels succeed, alone and together in the recursion; the history state fails |
 | 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
 | 5. External generalisation | First evaluation complete | Independent external, 2 homes | The CASAS-trained model does not transfer |
 | 6. Sensor-information frontier | Not started | — | — |
 | 7. Reliability and failure robustness | One rule evaluated | Simulated homes, pre-specified; clinical cohort, described | An opt-in rule treats a home silent past a declared horizon as not observed; the TIHM homes are silent that long often |
 | 8. Real-time system hardening | Deferred by its own gate | — | — |
 
-In one sentence: on the development panel the generative model has improved
-where a mechanism was tested one at a time, but no improvement has yet been
-confirmed on held-out homes, and on the first independent dataset the model is
-at chance.
+In one sentence: on the development panel the generative model has improved,
+one mechanism at a time and with its two successes together, but no
+improvement has yet been confirmed on held-out homes, and on the first
+independent dataset the model is at chance.
 
 ## Current Stable Baseline
 
@@ -282,14 +282,17 @@ scored. None is a held-out claim.
 
 | Hypothesis | Result | Consequence |
 | --- | --- | --- |
-| 3.1 Hierarchical time structure | Success | The time prior is the generative model's hour term; it has not been evaluated in the recursion |
+| 3.1 Hierarchical time structure | Success | The time prior is the generative model's hour term; in the recursion with the fitted channels it is a success too |
 | 3.2 Explicit recent-history state | Failure | Not adopted |
 | 3.3 Correlated silence | Weakened | Routed to fitted channel models, a success; the negative binomial is not adopted |
 | 3.4 Household adaptation | Success with current windows; inconclusive in the recursion | The declared pooling strength is too strong |
 | 3.5 Smoothing versus online inference | Contract enforced; smoothing gain measured | No smoothing result is reported as online |
 
 The current reference formulation is the online filter's recursion with fitted
-hurdle-Poisson channels and population parameters. Phases 4 and 5 use it.
+hurdle-Poisson channels and population parameters. Phases 4 and 5 use it. With
+the time prior's hour-dependent transition added it scores higher on the
+development panel (below), so that combination is the formulation the held-out
+confirmation will freeze.
 
 ### 3.1 Hierarchical time structure
 
@@ -423,15 +426,39 @@ improvement.
 - **No smoother reports a new state sooner** than the online filter. Smoothing
   is no help to alerting or to any decision made when a state changes.
 
+### Measured: the two successes together
+
+The time prior entered the filter's recursion as an hour-dependent transition,
+with the declared and with the fitted hurdle channels, under a protocol frozen
+before any household was scored; see `docs/PHASE3_COMBINED_PRIOR_RESULTS.md`.
+The run first reproduced the fitted-rates record's fold fits and scores.
+
+- **The primary, K1, is a success.** The prior adds +0.061 [+0.044, +0.077]
+  balanced accuracy to the fitted channels, 0.517 against 0.456. Log loss,
+  Brier score and calibration error improve too; calibration error falls from
+  0.284 to 0.213.
+- **Both secondaries are successes.** The prior adds +0.055 to the declared
+  channels, and the fitted channels add +0.044 with the prior.
+- **Where the gain is.** `away` recall rises by 0.167 and `sleeping` by 0.110.
+  `bed_awake`, in the 5 homes that have it, falls by 0.148. `home_active` is
+  unchanged, so the fitted channels' loss there stands.
+- **No clear interaction in balanced accuracy.** K1 minus K2 is +0.005
+  [−0.009, +0.020]. In log loss and calibration error the prior gains less with
+  the fitted channels than with the declared ones.
+
+The earlier versions of the two parts, the v0.3 circadian term with fitted
+sensor rates in the production filter, did not combine on 11 held-out homes of
+the panel: 0.434 together, against 0.460 for the circadian term alone; see
+`docs/real_data.md`.
+
 ### What remains in Phase 3
 
-- **Combining the two successes.** The time prior and the fitted channels have
-  not been evaluated together in the recursion.
 - **Within-state temporal dependence.** The family the predictive checks route
   to has not been built.
 - **`home_active` recall.** The fitted channels lose 0.23 of it, and the
   negative binomial does not recover it.
-- **Confirmation.** Every Phase 3 conclusion is on the development panel.
+- **Confirmation.** Every Phase 3 conclusion is on the development panel,
+  the combination's included.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
@@ -1030,11 +1057,11 @@ lets each answer inform the next.
 1. **Evaluate the reference formulation with the time prior, then confirm it
    on held-out homes.**
    - **The combination.** The time prior (3.1) and the fitted hurdle channels
-     (3.3) are the two Phase 3 successes, and they have never been evaluated
+     (3.3) are the two Phase 3 successes, and they had not been evaluated
      together in the recursion. Evaluate the combination on the development
-     panel under a frozen protocol. *Protocol frozen
-     ([PHASE3_COMBINED_PRIOR_PROTOCOL](docs/PHASE3_COMBINED_PRIOR_PROTOCOL.md));
-     the run on the CASAS archive is pending.*
+     panel under a frozen protocol. *Done: a success, +0.061 balanced accuracy
+     over the fitted channels alone
+     ([PHASE3_COMBINED_PRIOR_RESULTS](docs/PHASE3_COMBINED_PRIOR_RESULTS.md)).*
    - **The confirmation.** Freeze the resulting formulation, with the Phase 2
      baselines under matched information. Score it on CASAS households outside
      the development panel, under a protocol frozen before scoring.

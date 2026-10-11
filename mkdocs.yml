@@ -80,6 +80,7 @@ nav:
       - "Phase 3.4: partial pooling": PHASE3_PARTIAL_POOLING.md
       - "Phase 3.5: fixed-lag smoothing": PHASE3_SMOOTHING.md
       - "Phase 3: time prior with fitted channels, protocol": PHASE3_COMBINED_PRIOR_PROTOCOL.md
+      - "Phase 3: time prior with fitted channels, results": PHASE3_COMBINED_PRIOR_RESULTS.md
       - Structural disagreement: STRUCTURAL_DISAGREEMENT.md
       - Evidence-group disagreement: EVIDENCE_GROUP_DISAGREEMENT.md
       - Observation mismatch: OBSERVATION_MISMATCH.md
