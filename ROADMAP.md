@@ -1064,7 +1064,10 @@ lets each answer inform the next.
      ([PHASE3_COMBINED_PRIOR_RESULTS](docs/PHASE3_COMBINED_PRIOR_RESULTS.md)).*
    - **The confirmation.** Freeze the resulting formulation, with the Phase 2
      baselines under matched information. Score it on CASAS households outside
-     the development panel, under a protocol frozen before scoring.
+     the development panel, under a protocol frozen before scoring. *Protocol
+     frozen for the 43 homes of the external cohort
+     ([HELDOUT_CONFIRMATION_PROTOCOL](docs/HELDOUT_CONFIRMATION_PROTOCOL.md));
+     the one-shot run is pending.*
 
    Until then, every Phase 3 and 4 conclusion is a development-panel result.
 2. **Explain the external transfer failure (Phase 5).**
