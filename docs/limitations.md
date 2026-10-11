@@ -93,9 +93,12 @@ calibration for accuracy, so stacking them gives up both. See
 [Real-data validation](real_data.md) for which to use when. Their Phase 3
 successors for the first two, fitted hurdle channels and the hierarchical time
 prior, do combine in the filter's recursion: 0.517 balanced accuracy against
-0.456 for the fitted channels alone, on the development homes and not yet on
-held-out ones. The production pipeline does not offer that combination; see
-[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md).
+0.456 for the fitted channels alone on the development homes, and 0.567
+against 0.490 on 43 held-out CASAS homes, where the prior's gain holds in every
+home. That is not an independent dataset, and the production pipeline does not
+offer the combination; see
+[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
+[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
 
 Two further attempts failed. Declared dwell times are 3 to 9 times longer than
 real state durations, but fitting them to measurement lowered balanced accuracy
