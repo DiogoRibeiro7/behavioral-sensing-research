@@ -38,8 +38,10 @@ had.
 **The three additions made in response do not combine.** Use one, chosen by what
 the output feeds; see [What to actually use](#what-to-actually-use). The Phase 3
 successors of fitted rates and the circadian prior, fitted hurdle channels and a
-hierarchical time prior, do combine in the filter's recursion on the development
-homes; see [the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md).
+hierarchical time prior, do combine in the filter's recursion, on the development
+homes and on 43 held-out CASAS homes, which are not independent of CASAS; see
+[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
+[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
 
 
 ## What is implemented
@@ -567,9 +569,13 @@ different models: a hurdle model fitted for each evidence channel and state, and
 a hierarchical periodic prior entering the recursion as an hour-dependent
 transition. Under a frozen protocol on the 20 development homes, cross-fitted on
 two folds, they combine: 0.517 balanced accuracy, against 0.456 with the fitted
-channels alone, and calibration error 0.213 against 0.284. That is not yet
-confirmed on held-out homes, and the production pipeline does not offer the
-combination; see [the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md).
+channels alone, and calibration error 0.213 against 0.284. Fitted on those 20
+homes and scored once on the 43 held-out homes of the external cohort, they
+score 0.567 against 0.490, and the prior's gain holds in all 43. Those homes
+share CASAS's sensors and labelling, so they are not an independent dataset,
+and the production pipeline does not offer the combination; see
+[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
+[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
 
 ### Why abstention does not fire, and why raising the threshold will not fix it
 

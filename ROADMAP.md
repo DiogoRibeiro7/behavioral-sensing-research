@@ -27,8 +27,10 @@ Five kinds of evidence appear below, and they are never merged:
 - **Development panel.** The 20 single-resident CASAS homes, cross-fitted on
   two frozen household folds. Every Phase 1 to 4 result uses them. They have
   been inspected many times, so none of those results is a held-out claim.
-- **Held-out CASAS.** The frozen v0.3 external test on 43 CASAS homes outside
-  the development panel. It evaluated an older model, before Phase 1.
+- **Held-out CASAS.** 43 CASAS homes outside the development panel. The
+  frozen v0.3 external test scored an older model on them once, before
+  Phase 1; the held-out confirmation then scored the Phase 3 formulation and
+  the Phase 2 baselines on them once, under its own frozen protocol.
 - **Independent external.** The Phase 5 evaluation on the two homes of the UCI
   ADL Binary dataset, collected independently of CASAS with a different
   sensing layout.
@@ -45,8 +47,8 @@ Five kinds of evidence appear below, and they are never merged:
 | Phase | Status | Evidence | Headline |
 | --- | --- | --- | --- |
 | 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
-| 2. Baseline benchmark | Partly complete | Development panel | Baselines and a supervised diagnostic are in place; no held-out benchmark |
-| 3. Inference redesign | All five hypotheses evaluated; the two successes combined | Development panel | The time prior and fitted channels succeed, alone and together in the recursion; the history state fails |
+| 2. Baseline benchmark | Partly complete | Development panel; held-out CASAS | On held-out homes neither the diagnostic at `I3` nor the Phase 3 formulation leads in balanced accuracy |
+| 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS | The time prior and fitted channels succeed together in the recursion, and the prior's gain holds on 43 held-out homes; the history state fails |
 | 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
 | 5. External generalisation | First evaluation complete | Independent external, 2 homes | The CASAS-trained model does not transfer |
 | 6. Sensor-information frontier | Not started | — | — |
@@ -54,9 +56,9 @@ Five kinds of evidence appear below, and they are never merged:
 | 8. Real-time system hardening | Deferred by its own gate | — | — |
 
 In one sentence: on the development panel the generative model has improved,
-one mechanism at a time and with its two successes together, but no
-improvement has yet been confirmed on held-out homes, and on the first
-independent dataset the model is at chance.
+one mechanism at a time and with its two successes together; on 43 held-out
+CASAS homes the time prior's gain over the fitted channels holds; and on the
+first independent dataset the model is at chance.
 
 ## Current Stable Baseline
 
@@ -120,6 +122,8 @@ figures are household means with 95% household bootstrap intervals.
 | Generative model with the time prior, current window and hour (`I1`) | 0.509 [0.486, 0.531] | Development, 20 homes |
 | Supervised diagnostic, current window, hour and history (`I3`) | 0.590 [0.550, 0.624] | Development, 20 homes |
 | Frozen v0.3 candidate gain over `0.2.0` | +0.0091 [+0.0054, +0.0117], 37 / 43 homes | Held-out CASAS |
+| Recursion with fitted channels and the time prior | 0.567 [0.544, 0.590] | Held-out CASAS, 43 homes |
+| Supervised diagnostic at `I3`, fitted on the 20 development homes | 0.557 [0.532, 0.582] | Held-out CASAS, 43 homes |
 | Zero-shot transfer of the fitted hurdle recursion | 0.246 and 0.244, chance 0.25 | Independent external, 2 homes |
 | In-sample oracle on those homes | 0.437 and 0.559 | Independent external, descriptive |
 | Frozen five-sensor non-inferiority gap | 0.1548 | Simulator |
@@ -259,10 +263,20 @@ Measured, on the development panel:
     negative binomial.
   - **With the hour.** At `I1` and `I3` its median log loss is 0.925 and 0.909.
 
+Measured once on 43 held-out CASAS homes, fitted on the 20 development homes,
+at `I3` (`docs/HELDOUT_CONFIRMATION_RESULTS.md`):
+
+- **Balanced accuracy.** The diagnostic scores 0.557, not distinguishable from
+  the Phase 3 formulation's 0.567 in the recursion: −0.010 [−0.033, +0.014],
+  uncertain. The tree
+  scores 0.440, logistic regression 0.343 and persistence 0.260.
+- **Probabilities.** The diagnostic has the lowest log loss, 1.577; logistic
+  regression's is 2.494.
+
 **What remains.**
 
-- **Held-out benchmark.** No benchmark comparison has been run on held-out
-  households.
+- **Held-out benchmark.** Done once, at `I3` only, on held-out CASAS homes; no
+  benchmark has been run on an independent dataset.
 - **Sequence models.** None has been added. One belongs in the benchmark only
   if it consumes exactly the permitted information and the sample size and
   protocol make the comparison meaningful. Deep learning is not added because
@@ -276,9 +290,10 @@ an external dataset.
 
 ## Phase 3 — Inference Redesign
 
-**Status: all five hypotheses evaluated on the development panel.** Each
+**Status: all five hypotheses evaluated on the development panel; the
+combination of the two successes confirmed on held-out CASAS homes.** Each
 evaluation was pre-specified, with its protocol frozen before any household was
-scored. None is a held-out claim.
+scored. Only the held-out confirmation is a held-out claim.
 
 | Hypothesis | Result | Consequence |
 | --- | --- | --- |
@@ -288,11 +303,11 @@ scored. None is a held-out claim.
 | 3.4 Household adaptation | Success with current windows; inconclusive in the recursion | The declared pooling strength is too strong |
 | 3.5 Smoothing versus online inference | Contract enforced; smoothing gain measured | No smoothing result is reported as online |
 
-The current reference formulation is the online filter's recursion with fitted
-hurdle-Poisson channels and population parameters. Phases 4 and 5 use it. With
-the time prior's hour-dependent transition added it scores higher on the
-development panel (below), so that combination is the formulation the held-out
-confirmation will freeze.
+Phases 4 and 5 used the online filter's recursion with fitted hurdle-Poisson
+channels and population parameters. With the time prior's hour-dependent
+transition added it scores higher on the development panel and on 43 held-out
+CASAS homes (below), so that combination is the reference formulation from
+here.
 
 ### 3.1 Hierarchical time structure
 
@@ -451,14 +466,43 @@ sensor rates in the production filter, did not combine on 11 held-out homes of
 the panel: 0.434 together, against 0.460 for the circadian term alone; see
 `docs/real_data.md`.
 
+### Measured: the held-out confirmation
+
+Fitted once on the 20 development homes and frozen, the formulation was scored
+once on the 43 single-resident CASAS homes of the external cohort, beside the
+Phase 2 baselines at `I3`; see `docs/HELDOUT_CONFIRMATION_RESULTS.md`. The
+homes had been scored once before, by the v0.2 and v0.3 production filter, and
+35 of them come from CASAS families other than the training homes', with other
+layouts and sensor names. The intervals resample homes and do not allow for
+families; 25 of the 43 are of the tm family.
+
+- **The primary, K1, is a success.** The prior adds +0.077 [+0.070, +0.084]
+  balanced accuracy to the fitted channels, 0.567 against 0.490, in all 43
+  homes and in each of the five families. Log loss, Brier score and
+  calibration error improve too; calibration error falls from 0.296 to 0.233.
+- **Both secondaries are successes.** The prior adds +0.043 to the declared
+  channels, and the fitted channels add +0.042 with the prior.
+- **Where the gain is.** `away` recall rises by 0.194, `sleeping` by 0.132 and
+  `home_inactive` by 0.106. `home_active` is unchanged.
+- **The interaction, described.** In balanced accuracy the prior gains more
+  with the fitted channels than with the declared ones: K1 minus K2 is +0.034
+  [+0.024, +0.044]. In log loss it gains less.
+- **The diagnostic is not distinguishable from it.** Fitted on the same 20
+  homes and given the hour and the last three windows, it scores 0.557:
+  −0.010 [−0.033, +0.014] against the combination, uncertain. Its log loss is
+  better, 1.577 against 2.262, and its Brier score worse. Cross-fitted on the
+  development homes it had scored 0.590 against 0.517. Logistic regression
+  scores 0.343, against 0.498 cross-fitted there.
+
 ### What remains in Phase 3
 
 - **Within-state temporal dependence.** The family the predictive checks route
   to has not been built.
 - **`home_active` recall.** The fitted channels lose 0.23 of it, and the
   negative binomial does not recover it.
-- **Confirmation.** Every Phase 3 conclusion is on the development panel,
-  the combination's included.
+- **Confirmation.** The combination is confirmed on held-out CASAS homes, not
+  on an independent dataset; every other Phase 3 conclusion is on the
+  development panel.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
@@ -989,8 +1033,9 @@ as the dataset asks.
 
 ## Phase 8 — Real-Time System Hardening
 
-**Status: deferred.** Its gate is not met: no inference improvement has
-survived held-out or external evaluation, and the first external evaluation was
+**Status: deferred.** Its gate is not met: one inference improvement has
+survived held-out CASAS evaluation, which is not independent of CASAS; none has
+faced an independent external one, and the first external evaluation was
 negative.
 
 Only after the inference improvements survive held-out and external evaluation
@@ -1066,10 +1111,12 @@ lets each answer inform the next.
      baselines under matched information. Score it on CASAS households outside
      the development panel, under a protocol frozen before scoring. *Protocol
      frozen for the 43 homes of the external cohort
-     ([HELDOUT_CONFIRMATION_PROTOCOL](docs/HELDOUT_CONFIRMATION_PROTOCOL.md));
-     the one-shot run is pending.*
+     ([HELDOUT_CONFIRMATION_PROTOCOL](docs/HELDOUT_CONFIRMATION_PROTOCOL.md)).
+     Done: a success, +0.077 balanced accuracy over the fitted channels alone,
+     in all 43 homes
+     ([HELDOUT_CONFIRMATION_RESULTS](docs/HELDOUT_CONFIRMATION_RESULTS.md)).*
 
-   Until then, every Phase 3 and 4 conclusion is a development-panel result.
+   Every other Phase 3 and 4 conclusion is a development-panel result.
 2. **Explain the external transfer failure (Phase 5).**
    - **The questions.** The transferred parameters lose 0.19 to 0.32 of
      balanced accuracy against an in-sample oracle, and adaptation at the

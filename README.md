@@ -64,9 +64,26 @@ fitted channels alone and 0.417 for the declared model. The prior adds +0.061
 [+0.044, +0.077], most in the recall of `away` and `sleeping`, and lowers
 calibration error from 0.284 to 0.213. The earlier versions of the same two
 parts, in the production filter on 11 held-out homes of the panel, scored 0.434
-together against 0.460 for the circadian term alone. The production pipeline
-does not yet offer the combination, and a held-out confirmation is next. See
+together against 0.460 for the circadian term alone. See
 [the combined-prior results](docs/PHASE3_COMBINED_PRIOR_RESULTS.md).
+
+Fitted once on those 20 homes and frozen, the combination was then scored once
+on the 43 single-resident CASAS homes outside the development panel, beside
+the Phase 2 baselines, under a protocol frozen before any of them was scored.
+**The gain holds.** The prior adds +0.077 [+0.070, +0.084] balanced accuracy
+to the fitted channels, in all 43 homes and in each of the five CASAS
+families, although 35 of the homes come from families other than the training
+homes', with other layouts and sensor names. The combination scores 0.567,
+against 0.490 for the fitted channels alone and 0.482 for the declared model,
+with calibration error 0.233. The supervised diagnostic, given the hour and the
+last three windows, scores 0.557: not distinguishable from it in balanced
+accuracy, −0.010 [−0.033, +0.014], with better log loss but a worse Brier
+score. Cross-fitted on the development homes it had scored 0.590 against
+0.517. The intervals resample homes and do not allow for families, 25 of the
+43 homes being of one. These homes had been scored once before, by the
+production filter, and share CASAS's sensors and labelling, so this is not an
+independent dataset; the production pipeline does not yet offer the
+combination. See [the held-out results](docs/HELDOUT_CONFIRMATION_RESULTS.md).
 
 The frozen v0.3 candidate was also tested once on 43 single-resident CASAS homes
 outside the development panel. The optional circadian prior improved the median
