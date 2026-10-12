@@ -572,10 +572,19 @@ two folds, they combine: 0.517 balanced accuracy, against 0.456 with the fitted
 channels alone, and calibration error 0.213 against 0.284. Fitted on those 20
 homes and scored once on the 43 held-out homes of the external cohort, they
 score 0.567 against 0.490, and the prior's gain holds in all 43. Those homes
-share CASAS's sensors and labelling, so they are not an independent dataset,
-and the production pipeline does not offer the combination; see
-[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
+share CASAS's sensors and labelling, so they are not an independent dataset;
+see [the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
 [the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
+
+The online pipeline offers this combination as an opt-in,
+`PipelineConfig(formulation="phase3")`, with its parameters fitted once on the
+20 development homes and shipped with the package; its defaults are unchanged.
+On simulated homes its beliefs equal the research recursion's. It was fitted on
+CASAS `hh` homes and has not been run on TIHM or on any deployment outside
+CASAS. It needs a five-minute step, reads only the CASAS channels' motion and
+hall-door sensors, and reads the hour from timestamps that must carry the home's
+local zone. Its channels are not weighted by sensor health or attribution, as in
+the evaluations above, so a sensor that stops reporting reads as silence.
 
 ### Why abstention does not fire, and why raising the threshold will not fix it
 

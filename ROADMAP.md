@@ -1122,7 +1122,8 @@ other Phase 3 and 4 conclusion is a development-panel result.
    confirmed. Ship its parameters, fitted once on the 20 development homes,
    behind an opt-in of the online pipeline whose beliefs equal the research
    recursion's. No default changes, and the opt-in claims nothing beyond the
-   two existing records.
+   two existing records. *Done: `PipelineConfig(formulation="phase3")`, off by
+   default, with the parameters the held-out record digests.*
 2. **An independent dataset, and the external transfer failure (Phase 5).**
    - **The data.** The Ordóñez homes are now exploratory only, and the held-out
      CASAS homes are not independent of CASAS. A confirmatory answer needs a

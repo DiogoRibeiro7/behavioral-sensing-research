@@ -95,8 +95,9 @@ successors for the first two, fitted hurdle channels and the hierarchical time
 prior, do combine in the filter's recursion: 0.517 balanced accuracy against
 0.456 for the fitted channels alone on the development homes, and 0.567
 against 0.490 on 43 held-out CASAS homes, where the prior's gain holds in every
-home. That is not an independent dataset, and the production pipeline does not
-offer the combination; see
+home. That is not an independent dataset. The online pipeline offers the
+combination only as an opt-in, `PipelineConfig(formulation="phase3")`, which
+has not been run on any home outside CASAS; see
 [the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
 [the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
 
