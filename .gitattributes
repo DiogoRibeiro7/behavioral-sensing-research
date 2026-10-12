@@ -14,3 +14,10 @@ artifacts/phase3/*.json text eol=lf
 # digest of the data it plots. Matplotlib writes path data with trailing
 # spaces, so the files are not diffed as text.
 docs/figures/*.svg text eol=lf -diff
+
+# Records, frozen protocols and figures are written by scripts, and they are
+# most of the lines in a typical pull request. Marking them generated collapses
+# them in GitHub's diffs and leaves them out of the language statistics; a
+# reviewer can still open each one.
+artifacts/**/*.json linguist-generated=true
+docs/figures/*.svg linguist-generated=true
