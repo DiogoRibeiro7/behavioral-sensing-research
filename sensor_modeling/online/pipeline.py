@@ -42,7 +42,7 @@ import logging
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, replace
 from datetime import date, datetime, time, timedelta, tzinfo
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ..alerts.alert import Alert, AlertEngine, AlertPolicy
 from ..baseline.adaptive import AdaptiveBaseline, BaselineConfig, BehaviouralChange
@@ -58,7 +58,23 @@ from ..observations.observation import Observation
 from ..observations.registry import SensorRegistry
 from ..states.ontology import BehaviouralState, StateOntology
 
+if TYPE_CHECKING:
+    from ..datasets.phase3_formulation import Phase3Formulation
+
 logger = logging.getLogger(__name__)
+
+#: The declared per-sensor emissions and the time-homogeneous ontology.
+DECLARED = "declared"
+
+#: The formulation confirmed on 43 held-out CASAS homes: fitted hurdle channels
+#: with the hierarchical time prior, its parameters frozen in the package.
+PHASE3 = "phase3"
+
+#: The formulations the state filter can run.
+FORMULATIONS = (DECLARED, PHASE3)
+
+#: The window the ``phase3`` channels were fitted at.
+PHASE3_STEP = timedelta(minutes=5)
 
 
 @dataclass
@@ -88,6 +104,20 @@ class PipelineConfig:
         naive behaviour most ambient monitoring assumes. It exists so that
         assumption can be *measured* against the occupancy-aware default
         rather than argued about.
+    formulation
+        The state filter's observation model and dynamics. ``"declared"``, the
+        default, is the declared emission model of every sensor with the
+        time-homogeneous ontology, or whatever emissions and ontology the
+        pipeline is given. ``"phase3"`` opts in to the formulation the
+        held-out confirmation scored: a hurdle model of each CASAS channel and
+        the hierarchical time prior as an hour-dependent transition, with the
+        parameters fitted once on 20 CASAS development homes and shipped with
+        the package. It needs a five-minute step, the window the channels were
+        fitted at. Its channels are not weighted by sensor reliability or by
+        attribution to the resident, which the formulation was neither fitted
+        nor confirmed with: a sensor that stops reporting reads as silence.
+        The time prior reads the hour from the observations' timestamps, which
+        must therefore carry the home's local time zone.
     """
 
     tz: tzinfo | None = None
@@ -102,11 +132,19 @@ class PipelineConfig:
     min_day_coverage: float = 0.5
     min_day_observed: float = 0.6
     attribute_activity: bool = True
+    formulation: str = DECLARED
 
     def __post_init__(self) -> None:
         """Validate the pipeline configuration."""
         if self.step <= timedelta(0):
             raise ValueError("step must be positive")
+        if self.formulation not in FORMULATIONS:
+            raise ValueError(f"formulation must be one of {FORMULATIONS}")
+        if self.formulation == PHASE3 and self.step != PHASE3_STEP:
+            raise ValueError(
+                "the phase3 formulation's channels are defined per window of "
+                f"{PHASE3_STEP.total_seconds():g} s, so the step must be that window"
+            )
         if self.lateness_tolerance < timedelta(0):
             raise ValueError("lateness_tolerance must be non-negative")
         if not self.features:
@@ -154,7 +192,8 @@ class BehaviouralSensingPipeline:
     ontology
         Latent behavioural states and their dynamics.
     emissions
-        Observation models. Defaults are derived from the registry.
+        Observation models. Defaults are derived from the registry. The
+        ``phase3`` formulation brings its own and refuses others.
     config
         Pipeline configuration.
     fusion_config, health_config, context_config, baseline_config, alert_policy
@@ -175,8 +214,24 @@ class BehaviouralSensingPipeline:
         alert_policy: AlertPolicy | None = None,
     ) -> None:
         self.registry = registry
-        self.ontology = ontology or StateOntology()
         self.config = config or PipelineConfig()
+        self._formulation: Phase3Formulation | None = None
+        if self.config.formulation == PHASE3:
+            if emissions is not None:
+                raise ValueError(
+                    "the phase3 formulation brings its own emission models"
+                )
+            if ontology is not None and ontology != StateOntology():
+                raise ValueError(
+                    "the phase3 formulation was fitted under the default ontology"
+                )
+            # Imported here: the research layer imports this package.
+            from ..datasets.phase3_formulation import Phase3Formulation
+
+            self._formulation = Phase3Formulation.load()
+            ontology = self._formulation.ontology()
+            emissions = self._formulation.emissions(registry)
+        self.ontology = ontology or StateOntology()
 
         self.ingestor = ObservationIngestor(registry)
         self.health = SensorHealthMonitor(registry, health_config)
@@ -299,9 +354,19 @@ class BehaviouralSensingPipeline:
             else None
         )
 
-        estimate = self.filter.update(
-            moment, batch, reliabilities=reliabilities, attribution=attribution
-        )
+        if self._formulation is None:
+            estimate = self.filter.update(
+                moment, batch, reliabilities=reliabilities, attribution=attribution
+            )
+        else:
+            if self.filter.at is None:
+                # As the research recursion: from the time prior at the first
+                # window's hour, one window before it.
+                self.filter.reset(
+                    self._formulation.start(moment), at=moment - self.config.step
+                )
+            # Unweighted, as the formulation was fitted and confirmed.
+            estimate = self.filter.update(moment, batch)
 
         day = self._local_day(moment)
         closed: DailySummary | None = None

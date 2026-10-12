@@ -140,7 +140,8 @@ class MultimodalBayesFilter:
     ontology
         Latent states and their continuous-time dynamics.
     emissions
-        One observation model per sensor that should inform the state.
+        One observation model per sensor that should inform the state, or per
+        channel of sensors read together (:attr:`EmissionModel.sources`).
     registry
         Sensor declarations, used to label evidence with its modality.
     config
@@ -170,6 +171,16 @@ class MultimodalBayesFilter:
             self.emissions[emission.sensor_id] = emission
         if not self.emissions:
             raise ValueError("at least one emission model is required")
+        #: The model that reads each sensor's records. A per-sensor model reads
+        #: its own sensor; a channel model reads every sensor it pools.
+        self._routes: dict[str, str] = {}
+        for key, emission in self.emissions.items():
+            for sensor_id in emission.sources:
+                if sensor_id in self._routes:
+                    raise ValueError(
+                        f"sensor '{sensor_id}' is read by more than one emission model"
+                    )
+                self._routes[sensor_id] = key
 
         self._prior: np.ndarray = self._validated_prior(prior)
         self._belief: np.ndarray = self._prior.copy()
@@ -202,11 +213,19 @@ class MultimodalBayesFilter:
         current: np.ndarray = self._belief.copy()
         return current
 
-    def reset(self, prior: np.ndarray | None = None) -> None:
-        """Return the filter to its initial belief and clear its clock."""
+    def reset(
+        self, prior: np.ndarray | None = None, at: datetime | None = None
+    ) -> None:
+        """Return the filter to its initial belief, with its clock at *at*.
+
+        Without *at* the clock is cleared, so the next update advances no time.
+        With it, the next update's transition spans the time since *at*: a
+        filter can start one window before its first, as a recursion over
+        whole windows does.
+        """
         self._prior = self._validated_prior(prior)
         self._belief = self._prior.copy()
-        self._at = None
+        self._at = None if at is None else require_aware(at, "at")
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -221,11 +240,16 @@ class MultimodalBayesFilter:
         return float(weights)
 
     def _modality_of(self, sensor_id: str) -> Modality:
-        """Return the modality of *sensor_id*, or ``OTHER`` when unknown."""
-        if self.registry is None:
-            return Modality.OTHER
-        spec = self.registry.get(sensor_id)
-        return spec.modality if spec is not None else Modality.OTHER
+        """Return the modality of *sensor_id*, or ``OTHER`` when unknown.
+
+        A channel model is not a registered sensor; it reports the modality it
+        declares.
+        """
+        spec = self.registry.get(sensor_id) if self.registry is not None else None
+        if spec is not None:
+            return spec.modality
+        declared = getattr(self.emissions.get(sensor_id), "modality", None)
+        return declared if isinstance(declared, Modality) else Modality.OTHER
 
     def update(
         self,
@@ -244,7 +268,7 @@ class MultimodalBayesFilter:
             previous update.
         observations
             Records covering the interval since the previous update. Records
-            from sensors without an emission model are ignored.
+            from sensors that no emission model reads are ignored.
         reliabilities
             Per-sensor evidence weights from the health monitor. A missing
             entry defaults to full reliability.
@@ -334,8 +358,9 @@ class MultimodalBayesFilter:
 
         grouped: dict[str, list[Observation]] = {}
         for observation in observations:
-            if observation.sensor_id in self.emissions:
-                grouped.setdefault(observation.sensor_id, []).append(observation)
+            key = self._routes.get(observation.sensor_id)
+            if key is not None:
+                grouped.setdefault(key, []).append(observation)
             else:
                 logger.debug(
                     "No emission model for sensor '%s'; observation ignored",
