@@ -55,11 +55,20 @@ CASAS readers.
   the provenance.
 
 A new dataset needs its own adapter only when it cannot be exported to that
-layout. Two datasets have one:
+layout. Three datasets have one:
 
 - **`OrdonezAdapter`**, in `sensor_modeling.external.ordonez`. The UCI ADL
   Binary dataset, used by the [Phase 5 external
   evaluation](PHASE5_EXTERNAL_PROTOCOL.md).
+- **`ContextActAdapter`**, in `sensor_modeling.external.contextact`. The
+  ContextAct@A4H dataset: one resident of the Amiqual4Home apartment, recorded
+  for 7 days in July 2016 and 21 in November 2016, read as two periods that are
+  not independent homes. Its labels are the resident's own annotations, each with
+  a start and an end, and its motion sensors feed five of the six channels of the
+  CASAS-trained model; it has no hall motion. The mapping was written from the
+  documentation and the dataset paper, before any model was run on the data. It
+  is the candidate independent dataset for a transfer test, which no protocol has
+  yet declared.
 - **`TihmAdapter`**, in `sensor_modeling.external.tihm`. The TIHM dataset of
   56 homes of people living with dementia. Its labels are alerts a clinical
   team verified, stamped at a moment, so they are point annotations and every
