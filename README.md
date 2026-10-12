@@ -82,8 +82,9 @@ score. Cross-fitted on the development homes it had scored 0.590 against
 0.517. The intervals resample homes and do not allow for families, 25 of the
 43 homes being of one. These homes had been scored once before, by the
 production filter, and share CASAS's sensors and labelling, so this is not an
-independent dataset; the production pipeline does not yet offer the
-combination. See [the held-out results](docs/HELDOUT_CONFIRMATION_RESULTS.md).
+independent dataset. The online pipeline offers the combination as an opt-in,
+off by default; see below. See
+[the held-out results](docs/HELDOUT_CONFIRMATION_RESULTS.md).
 
 The frozen v0.3 candidate was also tested once on 43 single-resident CASAS homes
 outside the development panel. The optional circadian prior improved the median
@@ -387,6 +388,32 @@ dropout and five days of wearable non-adherence, loses, duplicates, delays and
 clock-skews the record, introduces a genuine change in sleep on a known day,
 then runs the whole pipeline and reports what it did and did not recover —
 including its own false-alert burden. Two runs produce identical numbers.
+
+### The formulation confirmed on held-out CASAS homes, as an opt-in
+
+The online pipeline can run the formulation the held-out confirmation scored:
+a hurdle model of each CASAS evidence channel, with the hierarchical time prior
+as an hour-dependent transition. Its parameters were fitted once on 20
+single-resident CASAS development homes and ship with the package. It is off by
+default, and nothing else changes.
+
+```python
+from sensor_modeling.online import BehaviouralSensingPipeline, PipelineConfig
+
+pipeline = BehaviouralSensingPipeline(
+    registry, config=PipelineConfig(formulation="phase3")
+)
+steps = pipeline.run(observations)
+```
+
+It reads event sensors whose room and modality name a CASAS channel: motion in
+the bathroom, bedroom, hall, kitchen and living room, and the hall door. It
+works in five-minute windows, and reads the hour from the timestamps, which must
+carry the home's local zone. Its channels are not weighted by sensor health, as
+in the evaluations, so a sensor that stops reporting reads as silence. It scored
+0.517 balanced accuracy on the development homes and 0.567 on 43 held-out CASAS
+homes. Those homes share CASAS's sensors and labelling, and it has not been run
+on TIHM or on any home outside CASAS.
 
 ### Sensor-ablation experiment
 
