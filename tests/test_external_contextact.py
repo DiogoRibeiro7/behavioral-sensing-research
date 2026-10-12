@@ -58,7 +58,7 @@ S = BehaviouralState
 ROOT = Path(__file__).resolve().parents[1]
 JULY = HOUSEHOLDS[0]
 
-HEADER = [
+HEADER: list[str | None] = [
     "Sensor Id in Dataset",
     "Sensor Type",
     "Measured Property",
@@ -66,7 +66,7 @@ HEADER = [
     "Measure Unit",
     "Sensor Location",
 ]
-VARIABLES = [
+VARIABLES: list[list[str | None]] = [
     ["Presence_Salon", "Infrared Movement Sensor", "Presence Living Room", None, None, "Living Room"],
     ["Presence_Table", "Infrared Movement Sensor", "Presence Dining Room", None, None, "Dining Room"],
     ["Presence_Bureau", "Infrared Movement Sensor", "Presence Study Room", None, None, "Study Room"],
