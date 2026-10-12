@@ -30,7 +30,10 @@ Five kinds of evidence appear below, and they are never merged:
 - **Held-out CASAS.** 43 CASAS homes outside the development panel. The
   frozen v0.3 external test scored an older model on them once, before
   Phase 1; the held-out confirmation then scored the Phase 3 formulation and
-  the Phase 2 baselines on them once, under its own frozen protocol.
+  the Phase 2 baselines on them once, under its own frozen protocol. **These
+  homes are now used up for confirmation.** The Phase 3 formulation's
+  per-home scores on them are published, and they share CASAS's sensors and
+  labelling, so no new formulation can be confirmed on them.
 - **Independent external.** The Phase 5 evaluation on the two homes of the UCI
   ADL Binary dataset, collected independently of CASAS with a different
   sensing layout.
@@ -1097,35 +1100,41 @@ the single source of truth for release notes.
 ## Immediate Order of Work
 
 Each item is an open question that a measured result left, in the order that
-lets each answer inform the next.
+lets each answer inform the next. The 43 held-out CASAS homes are used up for
+confirmation: a formulation or rule chosen after the held-out confirmation
+needs data whose outcomes have not been seen.
 
-1. **Evaluate the reference formulation with the time prior, then confirm it
-   on held-out homes.**
-   - **The combination.** The time prior (3.1) and the fitted hurdle channels
-     (3.3) are the two Phase 3 successes, and they had not been evaluated
-     together in the recursion. Evaluate the combination on the development
-     panel under a frozen protocol. *Done: a success, +0.061 balanced accuracy
-     over the fitted channels alone
-     ([PHASE3_COMBINED_PRIOR_RESULTS](docs/PHASE3_COMBINED_PRIOR_RESULTS.md)).*
-   - **The confirmation.** Freeze the resulting formulation, with the Phase 2
-     baselines under matched information. Score it on CASAS households outside
-     the development panel, under a protocol frozen before scoring. *Protocol
-     frozen for the 43 homes of the external cohort
-     ([HELDOUT_CONFIRMATION_PROTOCOL](docs/HELDOUT_CONFIRMATION_PROTOCOL.md)).
-     Done: a success, +0.077 balanced accuracy over the fitted channels alone,
-     in all 43 homes
-     ([HELDOUT_CONFIRMATION_RESULTS](docs/HELDOUT_CONFIRMATION_RESULTS.md)).*
+**Done: the combination, then its confirmation.** The time prior (3.1) and the
+fitted hurdle channels (3.3), the two Phase 3 successes, were evaluated
+together in the recursion on the development panel under a frozen protocol: a
+success, +0.061 [+0.044, +0.077] balanced accuracy over the fitted channels
+alone ([PHASE3_COMBINED_PRIOR_RESULTS](docs/PHASE3_COMBINED_PRIOR_RESULTS.md)). The
+formulation was then fitted once on the 20 development homes and scored once
+on the 43 homes of the external cohort, beside the Phase 2 baselines under
+matched information: a success again, +0.077 [+0.070, +0.084] over the
+fitted channels alone, in all 43 homes
+([HELDOUT_CONFIRMATION_RESULTS](docs/HELDOUT_CONFIRMATION_RESULTS.md)). Every
+other Phase 3 and 4 conclusion is a development-panel result.
 
-   Every other Phase 3 and 4 conclusion is a development-panel result.
-2. **Explain the external transfer failure (Phase 5).**
+1. **Offer the confirmed formulation in the online pipeline, as an opt-in.**
+   The fitted hurdle channels and the time prior exist only in research code,
+   so a user of the package cannot run the formulation the held-out homes
+   confirmed. Ship its parameters, fitted once on the 20 development homes,
+   behind an opt-in of the online pipeline whose beliefs equal the research
+   recursion's. No default changes, and the opt-in claims nothing beyond the
+   two existing records.
+2. **An independent dataset, and the external transfer failure (Phase 5).**
+   - **The data.** The Ordóñez homes are now exploratory only, and the held-out
+     CASAS homes are not independent of CASAS. A confirmatory answer needs a
+     public dataset that nobody on this project has inspected, with its
+     adapter, ontology mapping and transfer protocol frozen before any outcome
+     is seen. It tests the confirmed formulation as the opt-in ships it.
    - **The questions.** The transferred parameters lose 0.19 to 0.32 of
      balanced accuracy against an in-sample oracle, and adaptation at the
      declared strength changes no decision. Whether adaptation permitted before
      scoring can recover part of that loss is open. Phase 3.4 found the
      declared strength stronger than the data need. Whether the event-rate
      mismatch is a property of the sensing layout is also open.
-   - **The data.** The Ordóñez homes are now exploratory only. A confirmatory
-     answer needs an independent dataset not yet inspected.
 3. **Within-state temporal dependence (Phase 3.3).**
    - **The model family.** The predictive checks route to activity sub-states
      or a Markov-modulated emission. These would produce the long quiet runs
@@ -1134,8 +1143,9 @@ lets each answer inform the next.
      channels, is the test it must pass.
 4. **An abstention rule (Phase 4).** Select a selective-prediction rule on
    development data, with a guard covering the activity states and `away`
-   that the first comparison under-retained. Freeze it before any held-out
-   evaluation.
+   that the first comparison under-retained. Freeze it before any
+   confirmatory evaluation, which needs data not yet scored with the
+   formulation.
 5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
    deployment trade-offs for the confirmed formulation, with configurations
    selected before confirmatory scoring.

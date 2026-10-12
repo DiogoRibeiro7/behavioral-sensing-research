@@ -200,6 +200,28 @@ rewrote byte-identically after migration.
 Its `results` hold the household summaries and the full comparisons, in the
 layout named `matched-evaluation/3`.
 
+## Verifying the recordings a run reads
+
+A run script on real data finds each recording under the extracted archive
+and refuses any whose bytes differ from the digest its splits file or cohort
+manifest records. New scripts import this from `sensor_modeling.datasets.archive`
+instead of copying it:
+
+```python
+from sensor_modeling.datasets.archive import locate, sha256
+
+paths = locate(extracted, {"hh101": {"filename": "hh101.csv", "sha256": "3f4d..."}})
+inputs = [
+    InputArtifact(path.name, sha256(path), "recording", "zenodo:15708568")
+    for path in paths.values()
+]
+```
+
+`locate` raises `ValueError` when a file name matches no file or more than one,
+or when a recording does not match its digest. The run scripts behind published
+records keep their own copies of these helpers, because they are the provenance
+of those records.
+
 ## What this does not cover
 
 The frozen v0.3 validation files in `artifacts/v03/` predate this schema and
