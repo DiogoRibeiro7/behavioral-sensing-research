@@ -1,0 +1,171 @@
+name: Run ContextAct transfer
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_inputs:
+        description: Write the inputs report the protocol declares; score nothing
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: run-contextact-transfer
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: fit on the development panel, score ContextAct once
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out the frozen revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      # The versions the held-out confirmation fitted with.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . "numpy==2.3.5" "pandas==2.3.3" "scipy==1.15.3" \
+            "scikit-learn==1.6.1"
+
+      - name: Refuse a second transfer test
+        if: ${{ !inputs.check_inputs }}
+        shell: bash
+        run: |
+          if git ls-remote --exit-code --heads origin run-artifacts/contextact-transfer; then
+            echo "run-artifacts/contextact-transfer exists: the transfer test has been run"
+            exit 1
+          fi
+
+      - name: Describe the runner's CPU
+        shell: bash
+        run: |
+          grep -m1 "model name" /proc/cpuinfo
+          if grep -qw avx512f /proc/cpuinfo; then echo "AVX-512: yes"; else echo "AVX-512: no"; fi
+
+      - name: Download and verify public CASAS archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Outside the checkout, so the working tree stays clean for the record.
+          mkdir -p "$RUNNER_TEMP/casas"
+          python - <<'PY'
+          import os
+          import hashlib
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          record = "15708568"
+          with urllib.request.urlopen(f"https://zenodo.org/api/records/{record}") as response:
+              meta = json.load(response)
+          candidates = [f for f in meta.get("files", []) if f.get("key") == "labeled_data.zip"]
+          if len(candidates) != 1:
+              raise SystemExit(f"expected one labeled_data.zip, got {len(candidates)}")
+          item = candidates[0]
+          target = Path(os.environ["RUNNER_TEMP"]) / "casas" / "labeled_data.zip"
+          urllib.request.urlretrieve(item["links"]["self"], target)
+          algorithm, expected = item["checksum"].split(":", 1)
+          digest = hashlib.new(algorithm)
+          with target.open("rb") as handle:
+              for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(chunk)
+          if digest.hexdigest() != expected:
+              raise SystemExit(f"archive checksum mismatch: {digest.hexdigest()} != {expected}")
+          PY
+          unzip -q "$RUNNER_TEMP/casas/labeled_data.zip" -d "$RUNNER_TEMP/casas/extracted"
+
+      - name: Download and verify ContextAct@A4H
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/contextact"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          base = "https://data.mendeley.com/public-api/datasets/fcj2hmz5kb"
+          root = Path(os.environ["RUNNER_TEMP"]) / "contextact"
+
+          def get(url):
+              with urllib.request.urlopen(url, timeout=60) as response:
+                  return json.load(response)
+
+          folders = [{"id": "root", "name": ""}, *get(f"{base}/folders/3")]
+          for folder in folders:
+              for item in get(f"{base}/files?folder_id={folder['id']}&version=3"):
+                  details = item["content_details"]
+                  target = root / folder["name"] / item["filename"]
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  urllib.request.urlretrieve(details["download_url"], target)
+                  digest = hashlib.sha256(target.read_bytes()).hexdigest()
+                  if digest != details["sha256_hash"]:
+                      raise SystemExit(f"{target.name}: sha256 mismatch")
+                  print(f"verified {target.relative_to(root)}")
+          PY
+
+      - name: Write the inputs report, scoring nothing
+        if: inputs.check_inputs
+        shell: bash
+        run: |
+          python scripts/run_contextact_transfer.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/contextact" \
+            "$RUNNER_TEMP/transfer" --check-inputs
+
+      - name: Run the frozen protocol
+        if: ${{ !inputs.check_inputs }}
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)"
+          python scripts/run_contextact_transfer.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/contextact" \
+            "$RUNNER_TEMP/transfer"
+
+      - name: Commit the outputs to a results branch
+        shell: bash
+        env:
+          CHECK: ${{ inputs.check_inputs }}
+        run: |
+          set -euo pipefail
+          if [ "$CHECK" = "true" ]; then
+            branch="run-artifacts/$GITHUB_RUN_ID"
+          else
+            branch="run-artifacts/contextact-transfer"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          mkdir -p "$branch"
+          cp -r "$RUNNER_TEMP/transfer/." "$branch/"
+          git add "$branch"
+          git commit -m "run artifact $GITHUB_RUN_ID"
+          git push origin "$branch"
+
+      - name: Upload the outputs
+        uses: actions/upload-artifact@v7
+        with:
+          name: contextact-transfer
+          path: ${{ runner.temp }}/transfer/
+          retention-days: 90
+          if-no-files-found: error
