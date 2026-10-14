@@ -580,8 +580,11 @@ The online pipeline offers this combination as an opt-in,
 `PipelineConfig(formulation="phase3")`, with its parameters fitted once on the
 20 development homes and shipped with the package; its defaults are unchanged.
 On simulated homes its beliefs equal the research recursion's. It was fitted on
-CASAS `hh` homes and has not been run on TIHM or on any deployment outside
-CASAS. It needs a five-minute step, reads only the CASAS channels' motion and
+CASAS `hh` homes. On ContextAct@A4H, one resident outside CASAS, its beliefs
+equal the recursion's and it scored 0.385 balanced accuracy over 29 days,
+below the declared channels with the time prior at 0.534; the prior's gain held
+there, but the fitted channels did not transfer
+([the ContextAct results](CONTEXTACT_TRANSFER_RESULTS.md)). It has not been run on TIHM. It needs a five-minute step, reads only the CASAS channels' motion and
 hall-door sensors, and reads the hour from timestamps that must carry the home's
 local zone. Its channels are not weighted by sensor health or attribution, as in
 the evaluations above, so a sensor that stops reporting reads as silence.

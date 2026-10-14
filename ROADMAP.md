@@ -36,7 +36,9 @@ Five kinds of evidence appear below, and they are never merged:
   labelling, so no new formulation can be confirmed on them.
 - **Independent external.** The Phase 5 evaluation on the two homes of the UCI
   ADL Binary dataset, collected independently of CASAS with a different
-  sensing layout.
+  sensing layout; and the ContextAct transfer test on the one resident of
+  ContextAct@A4H, 29 days in a smart apartment in France, under a protocol
+  frozen before any day was scored. Its intervals resample days of one person.
 - **Clinical cohort, exploratory.** The online pipeline, with its declared
   emissions, baseline and alert policy, on the 56 homes of the TIHM dataset.
   Its labels are alerts a clinical team verified, not behavioural states, so
@@ -50,18 +52,20 @@ Five kinds of evidence appear below, and they are never merged:
 | Phase | Status | Evidence | Headline |
 | --- | --- | --- | --- |
 | 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
-| 2. Baseline benchmark | Partly complete | Development panel; held-out CASAS | On held-out homes neither the diagnostic at `I3` nor the Phase 3 formulation leads in balanced accuracy |
-| 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS | The time prior and fitted channels succeed together in the recursion, and the prior's gain holds on 43 held-out homes; the history state fails |
+| 2. Baseline benchmark | Partly complete | Development panel; held-out CASAS; independent external, 1 resident | On held-out homes neither the diagnostic at `I3` nor the Phase 3 formulation leads in balanced accuracy |
+| 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS; independent external, 1 resident | The time prior and fitted channels succeed together in the recursion; the prior's gain holds on 43 held-out homes and for one independent resident, on whom the fitted channels do not transfer; the history state fails |
 | 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
-| 5. External generalisation | First evaluation complete | Independent external, 2 homes | The CASAS-trained model does not transfer |
+| 5. External generalisation | Two evaluations complete | Independent external: 2 homes; 1 resident | The Phase 5 model does not transfer to the UCI homes; on ContextAct the time prior's gain holds, and the declared channels with the prior beat the fitted ones in balanced accuracy |
 | 6. Sensor-information frontier | Not started | — | — |
 | 7. Reliability and failure robustness | One rule evaluated | Simulated homes, pre-specified; clinical cohort, described | An opt-in rule treats a home silent past a declared horizon as not observed; the TIHM homes are silent that long often |
 | 8. Real-time system hardening | Deferred by its own gate | — | — |
 
 In one sentence: on the development panel the generative model has improved,
 one mechanism at a time and with its two successes together; on 43 held-out
-CASAS homes the time prior's gain over the fitted channels holds; and on the
-first independent dataset the model is at chance.
+CASAS homes the time prior's gain over the fitted channels holds; on the
+first independent dataset the model is at chance; and for one independent
+resident the time prior's gain holds while the CASAS-fitted channels lose
+balanced accuracy to the declared ones with the prior.
 
 ## Current Stable Baseline
 
@@ -112,7 +116,9 @@ ontology or the frozen v0.3 external-validation result.
 ## The Evidence Base
 
 Household balanced accuracy. The 22-home figures are medians; the 20-home
-figures are household means with 95% household bootstrap intervals.
+figures are household means with 95% household bootstrap intervals. The
+ContextAct figures are means over 29 days of one resident, with 95% day
+bootstrap intervals.
 
 | Result | Value | Evidence |
 | --- | ---: | --- |
@@ -129,6 +135,9 @@ figures are household means with 95% household bootstrap intervals.
 | Supervised diagnostic at `I3`, fitted on the 20 development homes | 0.557 [0.532, 0.582] | Held-out CASAS, 43 homes |
 | Zero-shot transfer of the fitted hurdle recursion | 0.246 and 0.244, chance 0.25 | Independent external, 2 homes |
 | In-sample oracle on those homes | 0.437 and 0.559 | Independent external, descriptive |
+| Recursion with fitted channels and the time prior, as shipped | 0.385 [0.319, 0.451] | Independent external, 1 resident, 29 days |
+| Recursion with declared channels and the time prior | 0.534 [0.488, 0.580] | Independent external, 1 resident, 29 days |
+| Supervised diagnostic at `I3`, fitted on the 20 development homes | 0.566 [0.513, 0.619] | Independent external, 1 resident, 29 days |
 | Frozen five-sensor non-inferiority gap | 0.1548 | Simulator |
 | Frozen eight-sensor gap to full deployment | 0.00529 | Simulator |
 
@@ -160,7 +169,12 @@ against each other. Matched comparisons are in the phase sections.
    that sees more has not shown a modelling advantage by scoring higher, and a
    smoothing gain is not an online gain.
 7. **The development-panel model did not transfer.** On two independently
-   collected homes it is at chance.
+   collected homes the Phase 5 recursion with fitted hurdle channels is at
+   chance. On a second independent dataset, one resident over 29 days, the
+   combination with the time prior is above chance by +0.113 [+0.049,
+   +0.175], and the time prior's gain holds, +0.049 [+0.013, +0.087]; but the
+   CASAS-fitted channels lose 0.149 [0.076, 0.221] of balanced accuracy to the
+   declared ones with the prior.
    - **Labels.** Label incompatibility is small: 96% to 98% of annotated time
      is scorable.
    - **Parameters.** The transferred parameters lose 0.19 and 0.32 of balanced
@@ -278,8 +292,11 @@ at `I3` (`docs/HELDOUT_CONFIRMATION_RESULTS.md`):
 
 **What remains.**
 
-- **Held-out benchmark.** Done once, at `I3` only, on held-out CASAS homes; no
-  benchmark has been run on an independent dataset.
+- **Held-out benchmark.** Done once, at `I3` only, on held-out CASAS homes.
+  On ContextAct, one independent resident, the baselines at `I3` were scored
+  beside the combination: the diagnostic leads it by +0.181 [+0.124, +0.239]
+  in balanced accuracy. That was not a fair test of the baselines, which read
+  the apartment's missing hall motion as a silent hall.
 - **Sequence models.** None has been added. One belongs in the benchmark only
   if it consumes exactly the permitted information and the sample size and
   protocol make the comparison meaningful. Deep learning is not added because
@@ -503,9 +520,10 @@ families; 25 of the 43 are of the tm family.
   to has not been built.
 - **`home_active` recall.** The fitted channels lose 0.23 of it, and the
   negative binomial does not recover it.
-- **Confirmation.** The combination is confirmed on held-out CASAS homes, not
-  on an independent dataset; every other Phase 3 conclusion is on the
-  development panel.
+- **Confirmation.** The time prior's gain is confirmed on held-out CASAS homes
+  and, for one resident, on an independent dataset (ContextAct, K1 a success).
+  The fitted channels did not transfer to that resident, which no result yet
+  explains. Every other Phase 3 conclusion is on the development panel.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
@@ -888,8 +906,13 @@ as the dataset asks.
 
 ### What remains in Phase 5
 
-- **More independent evidence.** Two homes are two case studies. A
-  confirmatory claim needs an independent dataset with more homes.
+- **More independent evidence.** Two homes and one resident are three case
+  studies. A claim about homes in general needs an independent dataset with
+  more homes.
+- **Why the fitted channels did not transfer to ContextAct.** The apartment's
+  open ground floor, its pooled living-room channel, the missing hall motion,
+  the different annotation conventions and the resident's own routine cannot
+  be separated from it.
 - **The Ordóñez homes are now inspected.** Any further analysis of them,
   including another adaptation strength, is exploratory.
 - **A reference for sleep.** `sleeping_hours` does not follow a sleep mat in
@@ -1036,10 +1059,11 @@ as the dataset asks.
 
 ## Phase 8 — Real-Time System Hardening
 
-**Status: deferred.** Its gate is not met: one inference improvement has
-survived held-out CASAS evaluation, which is not independent of CASAS; none has
-faced an independent external one, and the first external evaluation was
-negative.
+**Status: deferred.** Its gate is not met. One inference improvement, the time
+prior, has survived held-out CASAS evaluation and, for one resident, an
+independent external one; but on that resident the fitted channels it is
+shipped with did not transfer, and the first external evaluation, on two
+homes, was negative.
 
 Only after the inference improvements survive held-out and external evaluation
 should the project expand its production surface. Potential work includes:
@@ -1130,11 +1154,12 @@ other Phase 3 and 4 conclusion is a development-panel result.
      public dataset that nobody on this project has inspected, with its
      adapter, ontology mapping and transfer protocol frozen before any outcome
      is seen. It tests the confirmed formulation as the opt-in ships it.
-     *Chosen: ContextAct@A4H, one resident of a smart apartment in France over
-     two periods. Its adapter and mapping are frozen, and the transfer protocol
-     is frozen with its inputs report
-     ([CONTEXTACT_TRANSFER_PROTOCOL](docs/CONTEXTACT_TRANSFER_PROTOCOL.md)); it
-     has not been run.*
+     *Done: ContextAct@A4H, one resident of a smart apartment in France over
+     two periods, under a protocol frozen with its inputs report. K1 is a
+     success, +0.049 [+0.013, +0.087], 0.385 against 0.336 over 29 days; but
+     the declared channels with the prior scored 0.534, so the CASAS-fitted
+     channels did not transfer to this resident
+     ([CONTEXTACT_TRANSFER_RESULTS](docs/CONTEXTACT_TRANSFER_RESULTS.md)).*
    - **The questions.** The transferred parameters lose 0.19 to 0.32 of
      balanced accuracy against an in-sample oracle, and adaptation at the
      declared strength changes no decision. Whether adaptation permitted before
