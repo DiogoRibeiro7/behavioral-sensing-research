@@ -61,9 +61,19 @@ jobs:
           grep -m1 "model name" /proc/cpuinfo
           if grep -qw avx512f /proc/cpuinfo; then echo "AVX-512: yes"; else echo "AVX-512: no"; fi
 
+      # The verified archive is kept in this repository's Actions cache, keyed by
+      # its published checksum, so a run need not wait on Zenodo. A restored
+      # archive is still checked against the checksum Zenodo publishes.
+      - name: Restore the CASAS archive from the cache
+        id: casas-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/casas/labeled_data.zip
+          key: casas-labeled-data-md5-ec37d679e85a6ae39e84994888afd514
+
       - name: Download and verify public CASAS archive
         shell: bash
-        timeout-minutes: 20
+        timeout-minutes: 90
         run: |
           set -euo pipefail
           # Outside the checkout, so the working tree stays clean for the record.
@@ -96,7 +106,10 @@ jobs:
               raise SystemExit(f"expected one labeled_data.zip, got {len(candidates)}")
           item = candidates[0]
           target = Path(os.environ["RUNNER_TEMP"]) / "casas" / "labeled_data.zip"
-          fetch(item["links"]["self"], target)
+          if target.exists():
+              print("restored from the cache; verifying")
+          else:
+              fetch(item["links"]["self"], target)
           algorithm, expected = item["checksum"].split(":", 1)
           digest = hashlib.new(algorithm)
           with target.open("rb") as handle:
@@ -106,6 +119,13 @@ jobs:
               raise SystemExit(f"archive checksum mismatch: {digest.hexdigest()} != {expected}")
           PY
           unzip -q "$RUNNER_TEMP/casas/labeled_data.zip" -d "$RUNNER_TEMP/casas/extracted"
+
+      - name: Keep the verified CASAS archive in the cache
+        if: steps.casas-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/casas/labeled_data.zip
+          key: casas-labeled-data-md5-ec37d679e85a6ae39e84994888afd514
 
       - name: Download and verify ContextAct@A4H
         shell: bash
