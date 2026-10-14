@@ -517,7 +517,8 @@ families; 25 of the 43 are of the tm family.
 ### What remains in Phase 3
 
 - **Within-state temporal dependence.** The family the predictive checks route
-  to has not been built.
+  to is built as activity sub-states, and its test is frozen; it has not been
+  run.
 - **`home_active` recall.** The fitted channels lose 0.23 of it, and the
   negative binomial does not recover it.
 - **Confirmation.** The time prior's gain is confirmed on held-out CASAS homes
@@ -1172,6 +1173,10 @@ other Phase 3 and 4 conclusion is a development-panel result.
      that no marginal count distribution can.
    - **What it must recover.** `home_active` recall, lost to the fitted
      channels, is the test it must pass.
+     *Frozen: two activity sub-states in each common state, against the fitted
+     channels with the time prior, on the development panel, one run
+     ([PHASE3_ACTIVITY_SUBSTATES_PROTOCOL](docs/PHASE3_ACTIVITY_SUBSTATES_PROTOCOL.md));
+     it has not been run.*
 4. **An abstention rule (Phase 4).** Select a selective-prediction rule on
    development data, with a guard covering the activity states and `away`
    that the first comparison under-retained. Freeze it before any

@@ -27,6 +27,8 @@ Offers that formulation in the online pipeline as an opt-in, with its parameters
 
 Tests that formulation once on ContextAct@A4H, a dataset collected independently of CASAS, under a protocol frozen before any of it was scored: one resident, two periods, days as the unit.
 
+Freezes, before any household is scored, a one-shot test on the development panel of two hidden activity sub-states in the common states, the within-state dependence the predictive checks routed to, against that formulation, with `home_active` recall the declared criterion.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.
