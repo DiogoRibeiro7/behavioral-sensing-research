@@ -83,6 +83,7 @@ nav:
       - "Phase 3: time prior with fitted channels, results": PHASE3_COMBINED_PRIOR_RESULTS.md
       - "Held-out confirmation: protocol": HELDOUT_CONFIRMATION_PROTOCOL.md
       - "Held-out confirmation: results": HELDOUT_CONFIRMATION_RESULTS.md
+      - "Phase 3.3 follow-up: activity sub-states, protocol": PHASE3_ACTIVITY_SUBSTATES_PROTOCOL.md
       - Structural disagreement: STRUCTURAL_DISAGREEMENT.md
       - Evidence-group disagreement: EVIDENCE_GROUP_DISAGREEMENT.md
       - Observation mismatch: OBSERVATION_MISMATCH.md
