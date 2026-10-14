@@ -62,13 +62,15 @@ layout. Three datasets have one:
   evaluation](PHASE5_EXTERNAL_PROTOCOL.md).
 - **`ContextActAdapter`**, in `sensor_modeling.external.contextact`. The
   ContextAct@A4H dataset: one resident of the Amiqual4Home apartment, recorded
-  for 7 days in July 2016 and 21 in November 2016, read as two periods that are
-  not independent homes. Its labels are the resident's own annotations, each with
-  a start and an end, and its motion sensors feed five of the six channels of the
-  CASAS-trained model; it has no hall motion. The mapping was written from the
-  documentation and the dataset paper, before any model was run on the data. It
-  is the candidate independent dataset for a transfer test, which no protocol has
-  yet declared.
+  for 7 days in July 2016 and 21 in November 2016, as its README gives them,
+  read as two periods that are not independent homes; their labelled windows
+  fall on 29 calendar days, 7 and 22. Its labels are the resident's own
+  annotations, each with a start and an end, and its motion sensors feed five of
+  the six channels of the CASAS-trained model; it has no hall motion. The
+  mapping was written from the documentation and the dataset paper, before any
+  model was run on the data. It is the dataset of the
+  [ContextAct transfer test](CONTEXTACT_TRANSFER_PROTOCOL.md); see
+  [its results](CONTEXTACT_TRANSFER_RESULTS.md).
 - **`TihmAdapter`**, in `sensor_modeling.external.tihm`. The TIHM dataset of
   56 homes of people living with dementia. Its labels are alerts a clinical
   team verified, stamped at a moment, so they are point annotations and every

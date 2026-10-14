@@ -18,8 +18,10 @@ non-homogeneous Poisson processes.
 > a diagnosis, and no claim of clinical effectiveness is made or supported.
 > Simulator results are not estimates of field performance; the pipeline has
 > now been evaluated on real CASAS recordings, externally tested on a frozen
-> 43-home CASAS cohort, and tested on two independently collected homes, to
-> which it does not transfer. The evidence boundaries are described below.
+> 43-home CASAS cohort, tested on two independently collected homes, to which
+> it does not transfer, and tested on one independently recorded resident, for
+> whom the time prior's gain holds and the CASAS-fitted channels do not
+> transfer. The evidence boundaries are described below.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.11--3.14-blue.svg)](https://www.python.org/downloads/)
@@ -85,6 +87,22 @@ production filter, and share CASAS's sensors and labelling, so this is not an
 independent dataset. The online pipeline offers the combination as an opt-in,
 off by default; see below. See
 [the held-out results](docs/HELDOUT_CONFIRMATION_RESULTS.md).
+
+**On an independent dataset the prior's gain holds, and the fitted channels do
+not transfer.** The same fit, as the package ships it, was then scored once on
+ContextAct@A4H, collected independently of CASAS: one resident of a smart
+apartment in France, over 29 days in two periods, with the day as the unit,
+under a protocol frozen before any day was scored. The prior adds +0.049
+[+0.013, +0.087] balanced accuracy to the fitted channels, 0.385 against 0.336
+(K1, a success), and improves log loss and the Brier score. But with the prior,
+the declared channels score 0.534 there: the CASAS-fitted channels lose 0.149
+[0.076, 0.221] of balanced accuracy to them, with better log loss. The
+combination is not distinguishable from the declared model without the prior in
+balanced accuracy, −0.029 [−0.125, +0.073], with better log loss, Brier score
+and calibration, and the supervised diagnostic at `I3` leads it by +0.181
+[+0.124, +0.239]. The intervals resample days of one person, so they describe
+this resident and nobody else. See
+[the ContextAct results](docs/CONTEXTACT_TRANSFER_RESULTS.md).
 
 The frozen v0.3 candidate was also tested once on 43 single-resident CASAS homes
 outside the development panel. The optional circadian prior improved the median
@@ -412,8 +430,10 @@ works in five-minute windows, and reads the hour from the timestamps, which must
 carry the home's local zone. Its channels are not weighted by sensor health, as
 in the evaluations, so a sensor that stops reporting reads as silence. It scored
 0.517 balanced accuracy on the development homes and 0.567 on 43 held-out CASAS
-homes. Those homes share CASAS's sensors and labelling, and it has not been run
-on TIHM or on any home outside CASAS.
+homes. Those homes share CASAS's sensors and labelling. On ContextAct@A4H, one
+resident outside CASAS, its beliefs equal the recursion's and it scored 0.385
+balanced accuracy over 29 days, below the declared channels with the time prior
+at 0.534. It has not been run on TIHM.
 
 ### Sensor-ablation experiment
 

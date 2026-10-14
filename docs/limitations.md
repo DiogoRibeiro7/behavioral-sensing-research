@@ -95,11 +95,15 @@ successors for the first two, fitted hurdle channels and the hierarchical time
 prior, do combine in the filter's recursion: 0.517 balanced accuracy against
 0.456 for the fitted channels alone on the development homes, and 0.567
 against 0.490 on 43 held-out CASAS homes, where the prior's gain holds in every
-home. That is not an independent dataset. The online pipeline offers the
-combination only as an opt-in, `PipelineConfig(formulation="phase3")`, which
-has not been run on any home outside CASAS; see
-[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
-[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
+home. That is not an independent dataset. On ContextAct@A4H, one resident
+recorded independently of CASAS, the prior's gain holds, +0.049 [+0.013,
++0.087] balanced accuracy, but the CASAS-fitted channels do not transfer: with
+the prior, the declared channels score 0.534 balanced accuracy against 0.385.
+That interval resamples days of one person. The online pipeline offers the
+combination only as an opt-in, `PipelineConfig(formulation="phase3")`; see
+[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md),
+[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md) and
+[the ContextAct results](CONTEXTACT_TRANSFER_RESULTS.md).
 
 Two further attempts failed. Declared dwell times are 3 to 9 times longer than
 real state durations, but fitting them to measurement lowered balanced accuracy
@@ -445,9 +449,12 @@ In rough priority order, with what has been done since this list was written:
    against real annotations.
    - **CASAS.** Done: a 22-home development panel and a frozen 43-home external
      cohort; see [Real-data validation](real_data.md).
-   - **An independent dataset.** The two homes of UCI ADL Binary were evaluated
+   - **Independent datasets.** The two homes of UCI ADL Binary were evaluated
      under a frozen protocol, and the CASAS-trained model does not transfer;
-     see [Phase 5 external results](PHASE5_EXTERNAL_RESULTS.md).
+     see [Phase 5 external results](PHASE5_EXTERNAL_RESULTS.md). The one
+     resident of ContextAct@A4H was evaluated under another, and the time
+     prior's gain holds while the fitted channels do not transfer; see
+     [the ContextAct results](CONTEXTACT_TRANSFER_RESULTS.md).
    - **Still needed.** Independent datasets with more homes.
 2. **Parameter estimation from data** rather than declaration.
    - **Done for the evidence channels.** Fitted channel models improve
