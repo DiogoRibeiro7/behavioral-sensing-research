@@ -1130,6 +1130,11 @@ other Phase 3 and 4 conclusion is a development-panel result.
      public dataset that nobody on this project has inspected, with its
      adapter, ontology mapping and transfer protocol frozen before any outcome
      is seen. It tests the confirmed formulation as the opt-in ships it.
+     *Chosen: ContextAct@A4H, one resident of a smart apartment in France over
+     two periods. Its adapter and mapping are frozen, and the transfer protocol
+     is frozen with its inputs report
+     ([CONTEXTACT_TRANSFER_PROTOCOL](docs/CONTEXTACT_TRANSFER_PROTOCOL.md)); it
+     has not been run.*
    - **The questions.** The transferred parameters lose 0.19 to 0.32 of
      balanced accuracy against an in-sample oracle, and adaptation at the
      declared strength changes no decision. Whether adaptation permitted before
