@@ -71,8 +71,18 @@ jobs:
           import os
           import hashlib
           import json
+          import subprocess
           import urllib.request
           from pathlib import Path
+
+          # A dropped connection is retried and resumed where it stopped; the
+          # checksum below decides whether the file is the published one.
+          def fetch(url, target):
+              subprocess.run(
+                  ["curl", "-fsSL", "--retry", "8", "--retry-delay", "15",
+                   "--retry-all-errors", "-C", "-", "-o", str(target), url],
+                  check=True,
+              )
 
           record = "15708568"
           with urllib.request.urlopen(f"https://zenodo.org/api/records/{record}") as response:
@@ -82,7 +92,7 @@ jobs:
               raise SystemExit(f"expected one labeled_data.zip, got {len(candidates)}")
           item = candidates[0]
           target = Path(os.environ["RUNNER_TEMP"]) / "casas" / "labeled_data.zip"
-          urllib.request.urlretrieve(item["links"]["self"], target)
+          fetch(item["links"]["self"], target)
           algorithm, expected = item["checksum"].split(":", 1)
           digest = hashlib.new(algorithm)
           with target.open("rb") as handle:
@@ -102,6 +112,7 @@ jobs:
           import hashlib
           import json
           import os
+          import subprocess
           import urllib.request
           from pathlib import Path
 
@@ -118,7 +129,12 @@ jobs:
                   details = item["content_details"]
                   target = root / folder["name"] / item["filename"]
                   target.parent.mkdir(parents=True, exist_ok=True)
-                  urllib.request.urlretrieve(details["download_url"], target)
+                  subprocess.run(
+                      ["curl", "-fsSL", "--retry", "8", "--retry-delay", "15",
+                       "--retry-all-errors", "-C", "-", "-o", str(target),
+                       details["download_url"]],
+                      check=True,
+                  )
                   digest = hashlib.sha256(target.read_bytes()).hexdigest()
                   if digest != details["sha256_hash"]:
                       raise SystemExit(f"{target.name}: sha256 mismatch")
