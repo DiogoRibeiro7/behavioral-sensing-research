@@ -25,6 +25,8 @@ Confirms that formulation on held-out homes: fitted once on the 20 development h
 
 Offers that formulation in the online pipeline as an opt-in, with its parameters fitted once on the 20 development homes and shipped with the package.
 
+Freezes a test of that formulation on ContextAct@A4H, a dataset collected independently of CASAS, before any of it is scored: one resident, two periods, days as the unit.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.

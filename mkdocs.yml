@@ -96,6 +96,7 @@ nav:
       - External dataset contract: EXTERNAL_DATASET_CONTRACT.md
       - "Phase 5: external protocol": PHASE5_EXTERNAL_PROTOCOL.md
       - "Phase 5: external results": PHASE5_EXTERNAL_RESULTS.md
+      - "ContextAct transfer: protocol": CONTEXTACT_TRANSFER_PROTOCOL.md
       - "TIHM: alert-burden protocol": TIHM_ALERT_BURDEN_PROTOCOL.md
       - "TIHM: alert-burden results": TIHM_ALERT_BURDEN_RESULTS.md
       - "Silent homes: protocol": SILENT_HOME_PROTOCOL.md
