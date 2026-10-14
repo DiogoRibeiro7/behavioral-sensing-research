@@ -53,7 +53,7 @@ Five kinds of evidence appear below, and they are never merged:
 | --- | --- | --- | --- |
 | 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
 | 2. Baseline benchmark | Partly complete | Development panel; held-out CASAS; independent external, 1 resident | On held-out homes neither the diagnostic at `I3` nor the Phase 3 formulation leads in balanced accuracy |
-| 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS; independent external, 1 resident | The time prior and fitted channels succeed together in the recursion; the prior's gain holds on 43 held-out homes and for one independent resident, on whom the fitted channels do not transfer; the history state fails |
+| 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS; independent external, 1 resident | The time prior and fitted channels succeed together in the recursion; the prior's gain holds on 43 held-out homes and for one independent resident, on whom the fitted channels do not transfer; the history state fails; activity sub-states are inconclusive |
 | 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
 | 5. External generalisation | Two evaluations complete | Independent external: 2 homes; 1 resident | The Phase 5 model does not transfer to the UCI homes; on ContextAct the time prior's gain holds, and the declared channels with the prior beat the fitted ones in balanced accuracy |
 | 6. Sensor-information frontier | Not started | — | — |
@@ -126,8 +126,10 @@ bootstrap intervals.
 | Online pipeline with declared defaults, 22-home CASAS panel | 0.420 | Development |
 | Supervised diagnostic on that panel | 0.607 | Development |
 | Generative recursion, declared rates | 0.417 [0.392, 0.442] | Development, 20 homes |
-| Generative recursion, fitted hurdle channels, the current reference | 0.456 [0.425, 0.484] | Development, 20 homes |
+| Generative recursion, fitted hurdle channels | 0.456 [0.425, 0.484] | Development, 20 homes |
 | Generative recursion, hurdle negative binomial, not adopted | 0.499 [0.470, 0.529] | Development, 20 homes |
+| Recursion with fitted channels and the time prior, the current reference | 0.517 [0.486, 0.547] | Development, 20 homes |
+| Recursion with activity sub-states and the time prior, not adopted | 0.515 [0.487, 0.545] | Development, 20 homes |
 | Generative model with the time prior, current window and hour (`I1`) | 0.509 [0.486, 0.531] | Development, 20 homes |
 | Supervised diagnostic, current window, hour and history (`I3`) | 0.590 [0.550, 0.624] | Development, 20 homes |
 | Frozen v0.3 candidate gain over `0.2.0` | +0.0091 [+0.0054, +0.0117], 37 / 43 homes | Held-out CASAS |
@@ -413,9 +415,34 @@ hurdle-Poisson; see `docs/PHASE3_NEGATIVE_BINOMIAL.md`.
 - **Not adopted.** The rule declared in advance needed both settings, and with
   current windows the result is a trade-off.
 
-Consequence: the fitted hurdle-Poisson channels are the reference. Within-state
-temporal dependence is named but not built. The negative binomial addresses the
-dispersion but not the runs.
+Consequence: the fitted hurdle-Poisson channels are the reference. The negative
+binomial addresses the dispersion but not the runs.
+
+Within-state temporal dependence was then built as two activity sub-states,
+quiet and busy, in each common state, and tested once in the recursion with the
+time prior on the 20 development homes, under a protocol frozen before any
+household was scored. Those homes have been inspected before, so it is not a
+held-out claim; see `docs/PHASE3_ACTIVITY_SUBSTATES_RESULTS.md`.
+
+- **The primary is inconclusive.** `home_active` recall rises from 0.268 to
+  0.316, +0.048 [−0.009, +0.099], uncertain.
+- **Balanced accuracy is unchanged.** 0.515 against 0.517, −0.001 [−0.018,
+  +0.017], negligible.
+- **Probabilities improve.** Log loss improves by 0.448 [0.267, 0.686], the
+  Brier score by 0.135 [0.060, 0.233] and calibration error by 0.041 [0.003,
+  0.091].
+- **Recall moves between states.** `away` gains 0.213 [0.153, 0.281], in all
+  20 homes, and `sleeping` 0.053 [0.012, 0.095]. `bathroom_activity` and
+  `kitchen_activity`, which have no sub-states, lose 0.168 [0.125, 0.212], in
+  all 20 homes, and 0.157 [0.088, 0.233].
+- **The mechanism.** The excess of quiet runs of at least an hour falls in
+  `home_active` and `home_inactive` (M1), but remains: 3.368 and 1.804 times
+  the predicted, against 6.173 and 2.584 under the fold's population hurdle,
+  `home_active` in the 15 homes with enough runs.
+
+Consequence: the fitted hurdle-Poisson channels stay the reference. The
+negative binomial does not recover `home_active` recall, and whether two
+activity sub-states do is inconclusive.
 
 ### 3.4 Household adaptation
 
@@ -516,11 +543,11 @@ families; 25 of the 43 are of the tm family.
 
 ### What remains in Phase 3
 
-- **Within-state temporal dependence.** The family the predictive checks route
-  to is built as activity sub-states, and its test is frozen; it has not been
-  run.
-- **`home_active` recall.** The fitted channels lose 0.23 of it, and the
-  negative binomial does not recover it.
+- **Within-state temporal dependence.** Two activity sub-states, shared by the
+  channels, were tested once and are inconclusive. A chain per channel, exits
+  that depend on the sub-state and more than two sub-states are untested.
+- **`home_active` recall.** The fitted channels lose 0.23 of it. The negative
+  binomial does not recover it; two activity sub-states are inconclusive.
 - **Confirmation.** The time prior's gain is confirmed on held-out CASAS homes
   and, for one resident, on an independent dataset (ContextAct, K1 a success).
   The fitted channels did not transfer to that resident, which no result yet
@@ -1173,10 +1200,10 @@ other Phase 3 and 4 conclusion is a development-panel result.
      that no marginal count distribution can.
    - **What it must recover.** `home_active` recall, lost to the fitted
      channels, is the test it must pass.
-     *Frozen: two activity sub-states in each common state, against the fitted
-     channels with the time prior, on the development panel, one run
-     ([PHASE3_ACTIVITY_SUBSTATES_PROTOCOL](docs/PHASE3_ACTIVITY_SUBSTATES_PROTOCOL.md));
-     it has not been run.*
+     *Done: two activity sub-states in each common state are inconclusive.
+     `home_active` recall gains +0.048 [−0.009, +0.099], uncertain, with
+     balanced accuracy unchanged and log loss and calibration improved
+     ([PHASE3_ACTIVITY_SUBSTATES_RESULTS](docs/PHASE3_ACTIVITY_SUBSTATES_RESULTS.md)).*
 4. **An abstention rule (Phase 4).** Select a selective-prediction rule on
    development data, with a guard covering the activity states and `away`
    that the first comparison under-retained. Freeze it before any
