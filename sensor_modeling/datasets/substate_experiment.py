@@ -30,11 +30,9 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import platform
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from importlib import metadata
 from pathlib import Path
 from typing import Any
 
@@ -46,7 +44,7 @@ from ..evaluation.provenance import ExperimentRecord, InputArtifact, ModelRecord
 from ..fusion.regime import ONLINE
 from ..states.ontology import BehaviouralState, StateOntology
 from . import combined_prior_experiment as combined
-from . import predictive_checks
+from . import pinning, predictive_checks
 from .casas import CasasRecording
 from .channel_models import HURDLE, HurdleChannel, total_loglik
 from .combined_prior_experiment import (
@@ -59,6 +57,7 @@ from .combined_prior_experiment import (
 )
 from .history_experiment import Estimand
 from .matched_evaluation import MATCHED_METRIC_DEFINITIONS, _finite, online_evidence
+from .pinning import file_sha256, read_amendments
 from .predictive_checks import (
     POPULATION,
     PredictiveProtocol,
@@ -602,45 +601,11 @@ def declared_protocol(splits: FrozenSplits, root: Path = Path(".")) -> SubstateP
     return SubstateProtocol(base, predictive)
 
 
-def file_sha256(path: Path) -> str:
-    """SHA-256 of a text file, whatever its line endings."""
-    return hashlib.sha256(Path(path).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
-
-
 def code_now(root: Path | None = None) -> dict[str, Any]:
     """The digest of every pinned source file, and the libraries' versions, now."""
-    root = _REPOSITORY if root is None else Path(root)
-    package = sorted(
-        path.relative_to(root).as_posix()
-        for path in (root / PINNED_PACKAGE).rglob("*.py")
-        if "__pycache__" not in path.parts
+    return pinning.code_now(
+        _REPOSITORY if root is None else Path(root), PINNED_FILES, PINNED_DISTRIBUTIONS
     )
-    return {
-        "sources": {
-            name: file_sha256(root / name) for name in (*package, *PINNED_FILES)
-        },
-        "distributions": {
-            "python": platform.python_version(),
-            **{name: metadata.version(name) for name in PINNED_DISTRIBUTIONS},
-        },
-    }
-
-
-def read_amendments(path: Path) -> list[dict[str, Any]]:
-    """The declared amendments, or none when the file does not exist.
-
-    Each amendment names its ``reason`` and, in ``sources``, the digest of
-    every pinned source it changes, ``None`` for one it removes.
-    """
-    if not Path(path).exists():
-        return []
-    amendments = json.loads(Path(path).read_text(encoding="utf-8"))["amendments"]
-    for amendment in amendments:
-        if not str(amendment.get("reason", "")).strip():
-            raise ValueError("every amendment needs its reason")
-        if not isinstance(amendment.get("sources"), dict) or not amendment["sources"]:
-            raise ValueError("every amendment names the sources it changes")
-    return list(amendments)
 
 
 def code_changes(
@@ -648,24 +613,9 @@ def code_changes(
     root: Path | None = None,
     amendments: Sequence[Mapping[str, Any]] = (),
 ) -> list[str]:
-    """The pinned sources that differ now from the freeze and its amendments.
-
-    A source an amendment changes is expected at the digest the amendment
-    gives, the last amendment's when several change it.
-    """
-    frozen = json.loads(Path(path).read_text(encoding="utf-8")).get("at_freeze")
-    if frozen is None:
-        raise ValueError(f"{path} does not record the code it was frozen against")
-    now = code_now(root)["sources"]
-    then = dict(frozen["sources"])
-    for amendment in amendments:
-        for name, digest in amendment["sources"].items():
-            if digest is None:
-                then.pop(name, None)
-            else:
-                then[name] = digest
-    return sorted(
-        name for name in set(then) | set(now) if then.get(name) != now.get(name)
+    """The pinned sources that differ now from the freeze and its amendments."""
+    return pinning.code_changes(
+        path, _REPOSITORY if root is None else Path(root), PINNED_FILES, amendments
     )
 
 
@@ -1141,6 +1091,7 @@ __all__ = [
     "read_amendments",
     "code_now",
     "declared_protocol",
+    "file_sha256",
     "household_cells",
     "mechanism",
     "mechanism_conclusion",
