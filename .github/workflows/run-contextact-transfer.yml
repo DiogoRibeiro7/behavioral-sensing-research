@@ -63,6 +63,7 @@ jobs:
 
       - name: Download and verify public CASAS archive
         shell: bash
+        timeout-minutes: 20
         run: |
           set -euo pipefail
           # Outside the checkout, so the working tree stays clean for the record.
@@ -75,12 +76,15 @@ jobs:
           import urllib.request
           from pathlib import Path
 
-          # A dropped connection is retried and resumed where it stopped; the
-          # checksum below decides whether the file is the published one.
+          # A dropped or stalled connection, under 1 KB/s for a minute, is retried
+          # and resumed where it stopped; the checksum below decides whether the
+          # file is the published one.
           def fetch(url, target):
               subprocess.run(
                   ["curl", "-fsSL", "--retry", "8", "--retry-delay", "15",
-                   "--retry-all-errors", "-C", "-", "-o", str(target), url],
+                   "--retry-all-errors", "--connect-timeout", "30",
+                   "--speed-limit", "1024", "--speed-time", "60",
+                   "-C", "-", "-o", str(target), url],
                   check=True,
               )
 
@@ -105,6 +109,7 @@ jobs:
 
       - name: Download and verify ContextAct@A4H
         shell: bash
+        timeout-minutes: 20
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/contextact"
@@ -131,7 +136,9 @@ jobs:
                   target.parent.mkdir(parents=True, exist_ok=True)
                   subprocess.run(
                       ["curl", "-fsSL", "--retry", "8", "--retry-delay", "15",
-                       "--retry-all-errors", "-C", "-", "-o", str(target),
+                       "--retry-all-errors", "--connect-timeout", "30",
+                       "--speed-limit", "1024", "--speed-time", "60",
+                       "-C", "-", "-o", str(target),
                        details["download_url"]],
                       check=True,
                   )
