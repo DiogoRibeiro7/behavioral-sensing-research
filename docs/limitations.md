@@ -460,6 +460,13 @@ In rough priority order, with what has been done since this list was written:
    - **Done for the evidence channels.** Fitted channel models improve
      calibration on the development homes; see
      [fitted rates](PHASE3_FITTED_RATES.md).
+   - **Within-state dependence.** Two hidden activity sub-states in the common
+     states were tested once on the development homes. Whether they recover
+     `home_active` recall is inconclusive: +0.048 [−0.009, +0.099],
+     uncertain. They leave balanced accuracy unchanged and improve log loss
+     and calibration, and they move recall from `bathroom_activity` and
+     `kitchen_activity` to `away` and `sleeping`; see
+     [the sub-state results](PHASE3_ACTIVITY_SUBSTATES_RESULTS.md).
    - **Partial pooling.** Household parameters with partial pooling are
      evaluated; see [partial pooling](PHASE3_PARTIAL_POOLING.md).
    - **Transfer.** The fitted parameters did not transfer to the external

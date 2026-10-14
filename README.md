@@ -104,6 +104,21 @@ and calibration, and the supervised diagnostic at `I3` leads it by +0.181
 this resident and nobody else. See
 [the ContextAct results](docs/CONTEXTACT_TRANSFER_RESULTS.md).
 
+**Whether activity sub-states recover `home_active` recall is inconclusive.**
+Back on the 20 development homes, the next model family the predictive
+checks pointed to was tested once, under a protocol frozen before any household
+was scored: two hidden sub-states, quiet and busy, in each common state, in the
+recursion with the time prior. `home_active` recall rises from 0.268 to 0.316,
++0.048 [−0.009, +0.099], which is uncertain, so the primary is inconclusive and
+the fitted hurdle channels stay the reference. Balanced accuracy is unchanged,
+0.515 against 0.517, a negligible −0.001 [−0.018, +0.017], while log loss falls
+from 1.728 to 1.280 and calibration error from 0.213 to 0.172. Recall moves
+between states: `away` gains 0.213 [0.153, 0.281] and `sleeping` 0.053 [0.012,
+0.095], and `bathroom_activity` and `kitchen_activity`, which have no
+sub-states, lose 0.168 [0.125, 0.212] and 0.157 [0.088, 0.233]. These homes have
+been inspected before, so this is not a held-out claim. See
+[the sub-state results](docs/PHASE3_ACTIVITY_SUBSTATES_RESULTS.md).
+
 The frozen v0.3 candidate was also tested once on 43 single-resident CASAS homes
 outside the development panel. The optional circadian prior improved the median
 paired household balanced accuracy by **+0.0091**, with a 95% household bootstrap
