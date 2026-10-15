@@ -358,9 +358,17 @@ a failure. Current real-data diagnostics show that the implemented confidence
 threshold is not yet a reliable safety mechanism: confidence weakly separates
 correct from incorrect predictions and becomes less reliable in the highest
 confidence band. Version 0.9.0 adds structural uncertainty diagnostics and a
-selective-prediction evaluation. On the development homes, disagreement between
-fitted model specifications ranks errors better than confidence, but no
-abstention rule has been selected, and abstention is not solved.
+selective-prediction evaluation. On the development homes, for the fitted
+channels without the time prior, disagreement between fitted model
+specifications is materially better than confidence by the declared rule. Rerun
+for the fitted channels with the time prior, under a protocol frozen before any
+household was scored, it is again materially better: its household error AURC
+is 0.048 [0.033, 0.062] lower than confidence's, in 18 of 20 homes. It retains
+less than confidence of `bathroom_activity` and `kitchen_activity`, minority
+states its guard does not cover, at every inspection coverage: at 50% it keeps
+0.55 and 0.50 of the proportional share of each. No abstention rule has been
+selected, and abstention is not solved. See
+[the time-prior results](docs/PHASE4_TIME_PRIOR_RESULTS.md).
 
 ### Supported and unsupported claims
 

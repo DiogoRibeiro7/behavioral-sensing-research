@@ -37,7 +37,12 @@ band (0.653). Raising the threshold discards the pipeline's best band and keeps
 its saturated one. The likely cause is that during quiet periods the belief
 approaches certainty because no evidence arrived, not because the evidence was
 strong. This is a safety limitation, not a tuning parameter, and the v0.3
-candidate does not touch it.
+candidate does not touch it. On the development homes, disagreement between
+fitted model specifications is materially better than confidence, for the
+formulation with the time prior as for the one without. With the time prior it
+retains less than confidence of `bathroom_activity` and `kitchen_activity`,
+and no abstention rule has been selected; see
+[the time-prior results](PHASE4_TIME_PRIOR_RESULTS.md).
 
 An earlier revision of this page reported `away` recall of 0.00 and treated it
 as a finding. **That was wrong.** `Leave_Home` annotates twelve seconds of
