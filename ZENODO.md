@@ -81,7 +81,7 @@ partial bump fails the build rather than reaching Zenodo.
   author    = {Ribeiro, Diogo},
   title     = {Sensor Modeling Research Toolkit},
   year      = {2026},
-  version   = {0.9.0},
+  version   = {0.10.0},
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.21337272},
   url       = {https://doi.org/10.5281/zenodo.21337272}
