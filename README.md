@@ -366,9 +366,14 @@ household was scored, it is again materially better: its household error AURC
 is 0.048 [0.033, 0.062] lower than confidence's, in 18 of 20 homes. It retains
 less than confidence of `bathroom_activity` and `kitchen_activity`, minority
 states its guard does not cover, at every inspection coverage: at 50% it keeps
-0.55 and 0.50 of the proportional share of each. No abstention rule has been
-selected, and abstention is not solved. See
-[the time-prior results](docs/PHASE4_TIME_PRIOR_RESULTS.md).
+0.55 and 0.50 of the proportional share of each. A rule was then selected on
+those homes, cross-fitted, under a frozen protocol: abstain when structural
+disagreement exceeds 0.2385, which keeps 95% of the windows and at least 0.8
+of each guarded state's proportional share. On homes it was not chosen on it
+lowers the error by only 0.016
+[0.012, 0.019], negligible, so it is not supported and not adopted; abstention
+is not solved. See [the time-prior results](docs/PHASE4_TIME_PRIOR_RESULTS.md)
+and [the abstention rule](docs/PHASE4_ABSTENTION_RESULTS.md).
 
 ### Supported and unsupported claims
 
