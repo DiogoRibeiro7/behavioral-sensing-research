@@ -54,7 +54,7 @@ Five kinds of evidence appear below, and they are never merged:
 | 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
 | 2. Baseline benchmark | Partly complete | Development panel; held-out CASAS; independent external, 1 resident | On held-out homes neither the diagnostic at `I3` nor the Phase 3 formulation leads in balanced accuracy |
 | 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS; independent external, 1 resident | The time prior and fitted channels succeed together in the recursion; the prior's gain holds on 43 held-out homes and for one independent resident, on whom the fitted channels do not transfer; the history state fails; activity sub-states are inconclusive |
-| 4. Uncertainty and selective prediction | Comparison evaluated for both references | Development panel; external check inconclusive | Structural disagreement beats confidence, with the time prior too; no abstention rule yet |
+| 4. Uncertainty and selective prediction | Comparison evaluated for both references; abstention rule selected, not supported | Development panel; external check inconclusive | Structural disagreement beats confidence, with the time prior too; the abstention rule selected on it is not supported |
 | 5. External generalisation | Two evaluations complete | Independent external: 2 homes; 1 resident | The Phase 5 model does not transfer to the UCI homes; on ContextAct the time prior's gain holds, and the declared channels with the prior beat the fitted ones in balanced accuracy |
 | 6. Sensor-information frontier | Not started | — | — |
 | 7. Reliability and failure robustness | One rule evaluated | Simulated homes, pre-specified; clinical cohort, described | An opt-in rule treats a home silent past a declared horizon as not observed; the TIHM homes are silent that long often |
@@ -557,7 +557,7 @@ families; 25 of the 43 are of the tm family.
 
 **Status: diagnostics implemented; the comparison evaluated on the
 development panel for the reference without the time prior and again with it;
-no abstention rule selected.**
+an abstention rule selected and not supported.**
 
 Paper 1 ruled out a scalar-score swap. Four pieces of infrastructure are
 implemented. Each is diagnostic only and changes no decision:
@@ -636,14 +636,35 @@ reference's published scores first. Its full-coverage error is 0.364.
 - **The abstention rule's signal.** By the rule declared before scoring, it is
   structural disagreement.
 
+### Measured: the abstention rule
+
+Selected once, cross-fitted on the two folds, under a protocol frozen with the
+code it ran; see `docs/PHASE4_ABSTENTION_RESULTS.md`. Each fold's threshold was
+chosen on its training homes, scored leave-one-out, and applied to its held-out
+homes.
+
+- **The guard decides the coverage.** From a target of 0.8, the guard on
+  `bathroom_activity` and `kitchen_activity` first holds at 0.95, in both folds
+  and pooled over all 20 homes.
+- **The rule frozen.** Abstain when structural disagreement exceeds 0.2385.
+- **Not supported.** On the development homes it was not chosen on, the error
+  falls by 0.016 [0.012, 0.019], lower in all 20 homes, with its interval within
+  the minimal difference of 0.02: negligible. Balanced accuracy rises by 0.018
+  [0.010, 0.027], uncertain. The guard holds, and the rule keeps 0.954 of the
+  windows.
+- **Not adopted.** The online pipeline is unchanged.
+
 ### What remains in Phase 4
 
-- **An abstention rule.** None has been selected. Its signal is chosen,
-  structural disagreement; its coverage or threshold must be chosen on
-  development data with a guard that covers `bathroom_activity` and
-  `kitchen_activity`, which that signal under-retains with the time prior, and
-  `away`, which the first comparison under-retained, and frozen before any
-  evaluation on data this formulation has not been scored on.
+- **An abstention rule.** One was selected and is not supported: with the
+  guard, it abstains on 5% of windows and lowers the error negligibly. A rule
+  worth confirming needs a better signal or a different trade-off, chosen on
+  development data.
+- **What a confirmation needs.** Data whose outcomes for this formulation have
+  not been seen. The 43 held-out CASAS homes are used up, its scores in each of
+  them published, and so is ContextAct, whose per-day scores of it are
+  published too. It needs another independent dataset, with the rule frozen
+  beforehand and applied once.
 - **Other decision information.** Expected loss under an explicit decision cost
   has not been evaluated, and neither have out-of-distribution or low-support
   states as abstention signals.
@@ -1245,11 +1266,13 @@ other Phase 3 and 4 conclusion is a development-panel result.
    *Its signal is picked: with the time prior, structural disagreement is
    again materially better than confidence, and the declared rule picks it as
    the rule's signal
-   ([PHASE4_TIME_PRIOR_RESULTS](docs/PHASE4_TIME_PRIOR_RESULTS.md)). The rule
-   itself is not yet selected.*
-   *Its selection is frozen
-   ([PHASE4_ABSTENTION_PROTOCOL](docs/PHASE4_ABSTENTION_PROTOCOL.md)); it has
-   not been run.*
+   ([PHASE4_TIME_PRIOR_RESULTS](docs/PHASE4_TIME_PRIOR_RESULTS.md)).*
+   *Done: the rule selected, abstaining above 0.2385 on 5% of windows, is not
+   supported; its error gain on the development homes it was not chosen on,
+   0.016 [0.012, 0.019], is negligible
+   ([PHASE4_ABSTENTION_RESULTS](docs/PHASE4_ABSTENTION_RESULTS.md)). A
+   confirmation needs an independent dataset not yet scored with the
+   formulation.*
 5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
    deployment trade-offs for the confirmed formulation, with configurations
    selected before confirmatory scoring.
