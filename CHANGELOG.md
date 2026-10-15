@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-15
+
 Runs the online pipeline on a clinical cohort for the first time, with its declared emissions, baseline and alert policy and the ten-minute step its protocol declares. The run is exploratory: the dataset's labels had been analysed before its protocol was written, and the protocol was committed before any pipeline output was compared with a label.
 
 Adds an opt-in rule for the failure that run showed, a home that reports nothing being read as a home asleep, and tests it on simulated homes under a protocol frozen before the test.
