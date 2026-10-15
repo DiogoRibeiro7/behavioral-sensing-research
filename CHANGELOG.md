@@ -31,6 +31,8 @@ Tests once, on the development panel, two hidden activity sub-states in the comm
 
 Reruns the Phase 4 uncertainty comparison once for that formulation, under a protocol frozen before any household was scored, with the rule that picks the signal an abstention rule will use.
 
+Freezes, before any household is scored, a one-shot cross-fitted selection of an abstention rule on structural disagreement, guarded for `away`, `bathroom_activity` and `kitchen_activity`.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.
