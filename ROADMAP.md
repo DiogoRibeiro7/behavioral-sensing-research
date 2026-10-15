@@ -54,7 +54,7 @@ Five kinds of evidence appear below, and they are never merged:
 | 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
 | 2. Baseline benchmark | Partly complete | Development panel; held-out CASAS; independent external, 1 resident | On held-out homes neither the diagnostic at `I3` nor the Phase 3 formulation leads in balanced accuracy |
 | 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS; independent external, 1 resident | The time prior and fitted channels succeed together in the recursion; the prior's gain holds on 43 held-out homes and for one independent resident, on whom the fitted channels do not transfer; the history state fails; activity sub-states are inconclusive |
-| 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
+| 4. Uncertainty and selective prediction | Comparison evaluated for both references | Development panel; external check inconclusive | Structural disagreement beats confidence, with the time prior too; no abstention rule yet |
 | 5. External generalisation | Two evaluations complete | Independent external: 2 homes; 1 resident | The Phase 5 model does not transfer to the UCI homes; on ContextAct the time prior's gain holds, and the declared channels with the prior beat the fitted ones in balanced accuracy |
 | 6. Sensor-information frontier | Not started | — | — |
 | 7. Reliability and failure robustness | One rule evaluated | Simulated homes, pre-specified; clinical cohort, described | An opt-in rule treats a home silent past a declared horizon as not observed; the TIHM homes are silent that long often |
@@ -555,8 +555,9 @@ families; 25 of the 43 are of the tm family.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
-**Status: diagnostics implemented; the first comparison evaluated on the
-development panel; no abstention rule selected.**
+**Status: diagnostics implemented; the comparison evaluated on the
+development panel for the reference without the time prior and again with it;
+no abstention rule selected.**
 
 Paper 1 ruled out a scalar-score swap. Four pieces of infrastructure are
 implemented. Each is diagnostic only and changes no decision:
@@ -606,11 +607,43 @@ The external check, the Phase 5 estimand S, is **inconclusive**. Structural
 disagreement beats confidence in one external home, by 0.249 [0.163, 0.340],
 and is uncertain in the other.
 
+### Measured: the comparison for the time prior
+
+The reference became the fitted channels with the time prior, so the comparison
+was run again on its predictions, once, under a protocol frozen with the code it
+ran; see `docs/PHASE4_TIME_PRIOR_RESULTS.md`. The signals, ensemble, estimands
+and decision rule are the first comparison's, and the run gave back the
+reference's published scores first. Its full-coverage error is 0.364.
+
+- **Model-structure disagreement is materially better again.**
+  - **AURC.** Household error AURC is 0.048 [0.033, 0.062] lower than
+    confidence's, lower in 18 of 20 homes.
+  - **Pooled gain over random rejection.** 0.585 [0.525, 0.647], against
+    0.383 [0.282, 0.472] for confidence.
+- **Its gain is again at low coverage.** At 50% coverage its error is lower by
+  0.028 [0.007, 0.051]; at 70% and 90% the difference is negligible, and
+  balanced accuracy is uncertain or negligible at all three. Its retained
+  predictions are better calibrated at all three.
+- **It retains less of the minority activity states than confidence does.**
+  At 50% coverage it keeps 0.55 and 0.50 of the proportional share of
+  `bathroom_activity` and `kitchen_activity`, where confidence keeps 0.83 and
+  1.29; at 90%, 0.82 and 0.79. The declared guard covers `bed_awake` alone and
+  holds; it does not cover these states. It also keeps less of `home_active`
+  and `home_inactive`, 0.44 and 0.43 at 50%, and more of `away` and
+  `sleeping`.
+- **Evidence-channel disagreement and predictive mismatch are worse.** Their
+  household AURC is 0.207 and 0.067 higher than confidence's.
+- **The abstention rule's signal.** By the rule declared before scoring, it is
+  structural disagreement.
+
 ### What remains in Phase 4
 
-- **An abstention rule.** None has been selected. A rule must be chosen on
-  development data with a guard that covers the activity states and `away`,
-  and frozen before held-out evaluation.
+- **An abstention rule.** None has been selected. Its signal is chosen,
+  structural disagreement; its coverage or threshold must be chosen on
+  development data with a guard that covers `bathroom_activity` and
+  `kitchen_activity`, which that signal under-retains with the time prior, and
+  `away`, which the first comparison under-retained, and frozen before any
+  evaluation on data this formulation has not been scored on.
 - **Other decision information.** Expected loss under an explicit decision cost
   has not been evaluated, and neither have out-of-distribution or low-support
   states as abstention signals.
@@ -1209,10 +1242,11 @@ other Phase 3 and 4 conclusion is a development-panel result.
    that the first comparison under-retained. Freeze it before any
    confirmatory evaluation, which needs data not yet scored with the
    formulation.
-   *Frozen: the Phase 4 comparison rerun for the fitted channels with the
-   time prior, with the rule that picks the abstention rule's signal
-   ([PHASE4_TIME_PRIOR_PROTOCOL](docs/PHASE4_TIME_PRIOR_PROTOCOL.md)); it has
-   not been run.*
+   *Its signal is picked: with the time prior, structural disagreement is
+   again materially better than confidence, and the declared rule picks it as
+   the rule's signal
+   ([PHASE4_TIME_PRIOR_RESULTS](docs/PHASE4_TIME_PRIOR_RESULTS.md)). The rule
+   itself is not yet selected.*
 5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
    deployment trade-offs for the confirmed formulation, with configurations
    selected before confirmatory scoring.
