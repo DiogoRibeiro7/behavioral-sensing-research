@@ -29,6 +29,8 @@ Tests that formulation once on ContextAct@A4H, a dataset collected independently
 
 Tests once, on the development panel, two hidden activity sub-states in the common states, the within-state dependence the predictive checks routed to, against that formulation in the research recursion, with `home_active` recall the declared criterion, under a protocol frozen before any household was scored.
 
+Freezes, before any household is scored, a one-shot rerun of the Phase 4 uncertainty comparison for that formulation, with the rule that picks the signal an abstention rule will use.
+
 - **Research results.**
   - **The alert layer on the TIHM cohort.** 56 homes of people living with dementia, with alerts a clinical team verified. Nothing was fitted.
     - The contract maps no label to a state, so state inference is not scored.

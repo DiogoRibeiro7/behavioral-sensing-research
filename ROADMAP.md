@@ -1209,6 +1209,10 @@ other Phase 3 and 4 conclusion is a development-panel result.
    that the first comparison under-retained. Freeze it before any
    confirmatory evaluation, which needs data not yet scored with the
    formulation.
+   *Frozen: the Phase 4 comparison rerun for the fitted channels with the
+   time prior, with the rule that picks the abstention rule's signal
+   ([PHASE4_TIME_PRIOR_PROTOCOL](docs/PHASE4_TIME_PRIOR_PROTOCOL.md)); it has
+   not been run.*
 5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
    deployment trade-offs for the confirmed formulation, with configurations
    selected before confirmatory scoring.
