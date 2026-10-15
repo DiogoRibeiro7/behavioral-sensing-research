@@ -1,0 +1,2333 @@
+{
+  "configuration": {
+    "bias_spreads": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "biases": [
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      3.0
+    ],
+    "centres": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7
+    ],
+    "confidence": 0.95,
+    "contamination": [
+      0.0,
+      0.03
+    ],
+    "days": [
+      55,
+      52,
+      64,
+      75,
+      41,
+      53,
+      59,
+      79,
+      66,
+      52,
+      17,
+      27,
+      69,
+      47
+    ],
+    "level_margin": 1.0,
+    "outlier_centre": 0.0,
+    "outlier_extra_bias": 4.0,
+    "outlier_positions": [
+      0,
+      10,
+      13
+    ],
+    "outliers": [
+      false,
+      true
+    ],
+    "replications": 1000,
+    "resamples": 2000,
+    "result_schema": "sleep-mat-planning/1",
+    "seed_root": 20261009,
+    "spreads": [
+      0.0,
+      0.3,
+      0.6
+    ],
+    "tracking_margin": 0.5,
+    "truth_homes": 4000,
+    "within_sd": 1.5
+  },
+  "data_source": "synthetic",
+  "environment": {
+    "git_commit": "69cc596110c5d791ce600fd55cc0305f9dadef83",
+    "git_dirty": "false",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+    "python": "3.13.16",
+    "scipy": "1.18.1",
+    "sensor_modeling": "0.9.0",
+    "sklearn": "1.9.1"
+  },
+  "experiment": "sleep-mat-planning",
+  "household_metrics": {},
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": false,
+      "reason": "nothing is inferred and nothing is run: each home is a row of synthetic days drawn from distributions written down here"
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [],
+  "intervals": [],
+  "mcse": {},
+  "metric_definitions": {
+    "abstention_rate": "Fraction of estimates that declined to name a state, because confidence or sensor coverage fell below threshold.",
+    "accuracy": "Fraction of scored estimates whose reported state equals the true state. A reported UNKNOWN is never correct, so abstentions count as errors.",
+    "balanced_accuracy": "Unweighted mean of per-class recall. Used in preference to accuracy because the states are heavily imbalanced and a model that always predicts the majority state scores highly on raw accuracy.",
+    "brier": "Multiclass Brier score over the full posterior, in [0, 2]. A proper scoring rule; lower is better.",
+    "calibration_error": "Expected calibration error: the bin-weighted gap between stated confidence and observed accuracy. Answers whether a confidence of 0.9 means anything.",
+    "ci_low, ci_high": "Bootstrap confidence interval on the mean paired difference. Reported instead of a p-value: with simulations, significance is a statement about how long the computer ran.",
+    "confusion": "Counts of labelled true state (rows) against reported state (columns). The final column is UNKNOWN, so abstentions stay visible.",
+    "contaminated_fraction": "Fraction of simulated time during which someone other than the monitored resident was present.",
+    "detected_changes": "Number of true changes detected across the seeds in an arm, which is the sample size behind median_delay_days.",
+    "effect_size": "Cohen's dz for the paired difference. Note that pairing removes between-household variance, so dz is larger than an unpaired field study of the same size would produce.",
+    "f1": "Harmonic mean of precision and recall.",
+    "false_positives_per_person_day": "Delivered alerts not matched to a true change, divided by monitored person-days. The alert burden a recipient experiences.",
+    "log_loss": "Mean negative log probability assigned to the true state. Punishes confident errors far more than hedged ones.",
+    "macro_f1": "Unweighted mean F1 across the classes present in the truth.",
+    "mean_difference": "Mean paired difference between two configurations evaluated on identical simulated trajectories.",
+    "mean_seed_median_delay_days": "Mean across seeds of each seed's own median delay. Reported alongside median_delay_days because it weights every seed equally regardless of how many changes it detected; it is not a median.",
+    "median_delay_days": "Median days between a true change occurring and an alert being delivered for it. A detection counts only if it falls at or after the change and within max_delay_days. Where an arm aggregates several seeds, the individual delays are pooled before taking the median, so this is a median over detections and not a mean of per-seed medians.",
+    "per_class_recall": "Recall for each state present in the ground truth.",
+    "precision": "True positives divided by predicted positives.",
+    "recall": "True positives divided by actual positives.",
+    "selective_accuracy": "Accuracy among only the estimates that committed to a state. Read together with abstention_rate."
+  },
+  "models": [],
+  "notes": [
+    "Synthetic data only. Nothing here reads TIHM or runs the pipeline, so nothing here is evidence about a home.",
+    "Made before the sleep-mat protocol was frozen, to choose its interval and to say how often each criterion's readings come out when the truth is known.",
+    "1,000 synthetic studies in each scenario, each with a generator derived from one recorded root. docs/SIMULATION_PROTOCOLS.md sets a floor of 100.",
+    "Each study resamples its homes 2,000 times for the bootstrap, fewer than a protocol would."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {},
+  "recorded_at": "2026-10-08T09:44:53.972500+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "calibrated": false,
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "home_silence_horizon": null,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "chosen": "student_t",
+    "coverage": {
+      "percentile_bootstrap": {
+        "highest": 1.0,
+        "lowest": 0.897
+      },
+      "student_t": {
+        "highest": 1.0,
+        "lowest": 0.932
+      }
+    },
+    "coverage_level": {
+      "percentile_bootstrap": {
+        "highest": 1.0,
+        "lowest": 0.905
+      },
+      "student_t": {
+        "highest": 1.0,
+        "lowest": 0.943
+      }
+    },
+    "coverage_tracking": {
+      "percentile_bootstrap": {
+        "highest": 1.0,
+        "lowest": 0.897
+      },
+      "student_t": {
+        "highest": 1.0,
+        "lowest": 0.932
+      }
+    },
+    "level": [
+      {
+        "bias": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.921,
+          "mean_width": 0.5411910703630152,
+          "verdicts": {
+            "agrees": 1.0
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 0.951,
+          "mean_width": 0.6223341227078651,
+          "verdicts": {
+            "agrees": 1.0
+          }
+        },
+        "truth": 0.0
+      },
+      {
+        "bias": 0.5,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.913,
+          "mean_width": 0.5366197701418535,
+          "verdicts": {
+            "agrees": 0.916,
+            "inconclusive": 0.084
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 0.946,
+          "mean_width": 0.617616944385581,
+          "verdicts": {
+            "agrees": 0.878,
+            "inconclusive": 0.122
+          }
+        },
+        "truth": 0.5
+      },
+      {
+        "bias": 1.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.929,
+          "mean_width": 0.5465368415986745,
+          "verdicts": {
+            "agrees": 0.029,
+            "does_not_agree": 0.042,
+            "inconclusive": 0.929
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 0.958,
+          "mean_width": 0.627829435931555,
+          "verdicts": {
+            "agrees": 0.014,
+            "does_not_agree": 0.028,
+            "inconclusive": 0.958
+          }
+        },
+        "truth": 1.0
+      },
+      {
+        "bias": 1.5,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.907,
+          "mean_width": 0.5405041593941085,
+          "verdicts": {
+            "does_not_agree": 0.926,
+            "inconclusive": 0.074
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 0.945,
+          "mean_width": 0.6215866079657376,
+          "verdicts": {
+            "does_not_agree": 0.888,
+            "inconclusive": 0.112
+          }
+        },
+        "truth": 1.5
+      },
+      {
+        "bias": 3.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.921,
+          "mean_width": 0.5392159912666391,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 0.96,
+          "mean_width": 0.6200230689862326,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "truth": 3.0
+      },
+      {
+        "bias": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.924,
+          "mean_width": 0.9987847190035961,
+          "verdicts": {
+            "agrees": 0.937,
+            "inconclusive": 0.063
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 0.954,
+          "mean_width": 1.1470598588733518,
+          "verdicts": {
+            "agrees": 0.864,
+            "inconclusive": 0.136
+          }
+        },
+        "truth": 0.0
+      },
+      {
+        "bias": 0.5,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.921,
+          "mean_width": 1.0148488533902822,
+          "verdicts": {
+            "agrees": 0.51,
+            "inconclusive": 0.49
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 0.956,
+          "mean_width": 1.1667254799697928,
+          "verdicts": {
+            "agrees": 0.395,
+            "inconclusive": 0.605
+          }
+        },
+        "truth": 0.5
+      },
+      {
+        "bias": 1.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.917,
+          "mean_width": 1.0114998996280031,
+          "verdicts": {
+            "agrees": 0.03,
+            "does_not_agree": 0.053,
+            "inconclusive": 0.917
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 0.953,
+          "mean_width": 1.1639510777829383,
+          "verdicts": {
+            "agrees": 0.017,
+            "does_not_agree": 0.03,
+            "inconclusive": 0.953
+          }
+        },
+        "truth": 1.0
+      },
+      {
+        "bias": 1.5,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.913,
+          "mean_width": 1.0060579548598592,
+          "verdicts": {
+            "does_not_agree": 0.489,
+            "inconclusive": 0.511
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 0.952,
+          "mean_width": 1.156871986388759,
+          "verdicts": {
+            "does_not_agree": 0.388,
+            "inconclusive": 0.612
+          }
+        },
+        "truth": 1.5
+      },
+      {
+        "bias": 3.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.921,
+          "mean_width": 1.003542615971752,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 0.956,
+          "mean_width": 1.153445013566314,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "truth": 3.0
+      },
+      {
+        "bias": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.926,
+          "mean_width": 2.0181996549016827,
+          "verdicts": {
+            "agrees": 0.105,
+            "does_not_agree": 0.001,
+            "inconclusive": 0.894
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.955,
+          "mean_width": 2.319701979897169,
+          "verdicts": {
+            "agrees": 0.047,
+            "inconclusive": 0.953
+          }
+        },
+        "truth": 0.0
+      },
+      {
+        "bias": 0.5,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.923,
+          "mean_width": 2.0066323160502164,
+          "verdicts": {
+            "agrees": 0.08,
+            "does_not_agree": 0.005,
+            "inconclusive": 0.915
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.952,
+          "mean_width": 2.3044598098759694,
+          "verdicts": {
+            "agrees": 0.029,
+            "does_not_agree": 0.004,
+            "inconclusive": 0.967
+          }
+        },
+        "truth": 0.5
+      },
+      {
+        "bias": 1.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.912,
+          "mean_width": 1.9770821420660076,
+          "verdicts": {
+            "agrees": 0.036,
+            "does_not_agree": 0.035,
+            "inconclusive": 0.929
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.957,
+          "mean_width": 2.271279529296414,
+          "verdicts": {
+            "agrees": 0.012,
+            "does_not_agree": 0.016,
+            "inconclusive": 0.972
+          }
+        },
+        "truth": 1.0
+      },
+      {
+        "bias": 1.5,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.905,
+          "mean_width": 1.976383482817576,
+          "verdicts": {
+            "agrees": 0.001,
+            "does_not_agree": 0.203,
+            "inconclusive": 0.796
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.943,
+          "mean_width": 2.2684491129147726,
+          "verdicts": {
+            "agrees": 0.001,
+            "does_not_agree": 0.14,
+            "inconclusive": 0.859
+          }
+        },
+        "truth": 1.5
+      },
+      {
+        "bias": 3.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.917,
+          "mean_width": 1.9694293978285848,
+          "verdicts": {
+            "does_not_agree": 0.967,
+            "inconclusive": 0.033
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.946,
+          "mean_width": 2.2626913474267427,
+          "verdicts": {
+            "does_not_agree": 0.94,
+            "inconclusive": 0.06
+          }
+        },
+        "truth": 3.0
+      },
+      {
+        "bias": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.7747411588550108,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.052665907938277,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "truth": 0.8571428571428571
+      },
+      {
+        "bias": 0.5,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.7902014262959642,
+          "verdicts": {
+            "does_not_agree": 0.001,
+            "inconclusive": 0.999
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.0678907687047796,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "truth": 1.3571428571428572
+      },
+      {
+        "bias": 1.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.7827595840920964,
+          "verdicts": {
+            "does_not_agree": 0.596,
+            "inconclusive": 0.404
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.061922676680243,
+          "verdicts": {
+            "does_not_agree": 0.153,
+            "inconclusive": 0.847
+          }
+        },
+        "truth": 1.8571428571428572
+      },
+      {
+        "bias": 1.5,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.7765093662073428,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.0552551471530838,
+          "verdicts": {
+            "does_not_agree": 0.978,
+            "inconclusive": 0.022
+          }
+        },
+        "truth": 2.357142857142857
+      },
+      {
+        "bias": 3.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.7806598178641033,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "spread": 0.5,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.05792827486686,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "truth": 3.857142857142857
+      },
+      {
+        "bias": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.9807083296807855,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.28183272057339,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "truth": 0.8571428571428571
+      },
+      {
+        "bias": 0.5,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.9689589177443314,
+          "verdicts": {
+            "does_not_agree": 0.024,
+            "inconclusive": 0.976
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.2687870606565776,
+          "verdicts": {
+            "does_not_agree": 0.006,
+            "inconclusive": 0.994
+          }
+        },
+        "truth": 1.3571428571428572
+      },
+      {
+        "bias": 1.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.999,
+          "mean_width": 1.968466368521747,
+          "verdicts": {
+            "does_not_agree": 0.376,
+            "inconclusive": 0.624
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.269754432601901,
+          "verdicts": {
+            "does_not_agree": 0.176,
+            "inconclusive": 0.824
+          }
+        },
+        "truth": 1.8571428571428572
+      },
+      {
+        "bias": 1.5,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.9733723307768152,
+          "verdicts": {
+            "does_not_agree": 0.925,
+            "inconclusive": 0.075
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.2733410662093183,
+          "verdicts": {
+            "does_not_agree": 0.766,
+            "inconclusive": 0.234
+          }
+        },
+        "truth": 2.357142857142857
+      },
+      {
+        "bias": 3.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 1.9738330999321048,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "spread": 1.0,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 2.2738847707547047,
+          "verdicts": {
+            "does_not_agree": 1.0
+          }
+        },
+        "truth": 3.857142857142857
+      },
+      {
+        "bias": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.981,
+          "mean_width": 2.596117165093107,
+          "verdicts": {
+            "agrees": 0.005,
+            "does_not_agree": 0.006,
+            "inconclusive": 0.989
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.989,
+          "mean_width": 2.9857296540508673,
+          "verdicts": {
+            "agrees": 0.002,
+            "does_not_agree": 0.003,
+            "inconclusive": 0.995
+          }
+        },
+        "truth": 0.8571428571428571
+      },
+      {
+        "bias": 0.5,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.962,
+          "mean_width": 2.5929258052361437,
+          "verdicts": {
+            "does_not_agree": 0.067,
+            "inconclusive": 0.933
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.984,
+          "mean_width": 2.983134303917387,
+          "verdicts": {
+            "does_not_agree": 0.033,
+            "inconclusive": 0.967
+          }
+        },
+        "truth": 1.3571428571428572
+      },
+      {
+        "bias": 1.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.975,
+          "mean_width": 2.59005332086777,
+          "verdicts": {
+            "does_not_agree": 0.223,
+            "inconclusive": 0.777
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.985,
+          "mean_width": 2.9776927105689155,
+          "verdicts": {
+            "does_not_agree": 0.135,
+            "inconclusive": 0.865
+          }
+        },
+        "truth": 1.8571428571428572
+      },
+      {
+        "bias": 1.5,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.975,
+          "mean_width": 2.597406102416705,
+          "verdicts": {
+            "does_not_agree": 0.562,
+            "inconclusive": 0.438
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.984,
+          "mean_width": 2.9874755479353787,
+          "verdicts": {
+            "does_not_agree": 0.402,
+            "inconclusive": 0.598
+          }
+        },
+        "truth": 2.357142857142857
+      },
+      {
+        "bias": 3.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.969,
+          "mean_width": 2.590546033578666,
+          "verdicts": {
+            "does_not_agree": 0.997,
+            "inconclusive": 0.003
+          }
+        },
+        "spread": 2.0,
+        "student_t": {
+          "coverage": 0.987,
+          "mean_width": 2.9767458966258356,
+          "verdicts": {
+            "does_not_agree": 0.99,
+            "inconclusive": 0.01
+          }
+        },
+        "truth": 3.857142857142857
+      }
+    ],
+    "rule": "the interval whose lowest coverage over every scenario is the higher is chosen",
+    "tracking": [
+      {
+        "centre": 0.3,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.911,
+          "mean_width": 0.13845567699025718,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.954,
+          "mean_width": 0.15885304481261706,
+          "verdicts": {
+            "does_not_follow": 0.999,
+            "inconclusive": 0.001
+          }
+        },
+        "truth": 0.2812799326984756
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.897,
+          "mean_width": 0.1290284749801744,
+          "verdicts": {
+            "does_not_follow": 0.957,
+            "inconclusive": 0.043
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.944,
+          "mean_width": 0.14838886196722503,
+          "verdicts": {
+            "does_not_follow": 0.921,
+            "inconclusive": 0.079
+          }
+        },
+        "truth": 0.3763104501792507
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.912,
+          "mean_width": 0.11726733082616245,
+          "verdicts": {
+            "does_not_follow": 0.154,
+            "follows": 0.006,
+            "inconclusive": 0.84
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.947,
+          "mean_width": 0.1349244608513471,
+          "verdicts": {
+            "does_not_follow": 0.085,
+            "follows": 0.004,
+            "inconclusive": 0.911
+          }
+        },
+        "truth": 0.4733368556560582
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.908,
+          "mean_width": 0.1033703659172503,
+          "verdicts": {
+            "follows": 0.727,
+            "inconclusive": 0.273
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.937,
+          "mean_width": 0.1189016275470429,
+          "verdicts": {
+            "follows": 0.675,
+            "inconclusive": 0.325
+          }
+        },
+        "truth": 0.5706508937561557
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.901,
+          "mean_width": 0.08750589887899775,
+          "verdicts": {
+            "follows": 0.999,
+            "inconclusive": 0.001
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.937,
+          "mean_width": 0.10070037832615417,
+          "verdicts": {
+            "follows": 0.999,
+            "inconclusive": 0.001
+          }
+        },
+        "truth": 0.6701689543871622
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.912,
+          "mean_width": 0.27949289041582676,
+          "verdicts": {
+            "does_not_follow": 0.928,
+            "inconclusive": 0.072
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.945,
+          "mean_width": 0.3216671506549077,
+          "verdicts": {
+            "does_not_follow": 0.875,
+            "inconclusive": 0.125
+          }
+        },
+        "truth": 0.26392473788544907
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.909,
+          "mean_width": 0.26299159301703745,
+          "verdicts": {
+            "does_not_follow": 0.585,
+            "inconclusive": 0.415
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.941,
+          "mean_width": 0.3022598709875931,
+          "verdicts": {
+            "does_not_follow": 0.444,
+            "inconclusive": 0.556
+          }
+        },
+        "truth": 0.35409066788912436
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.91,
+          "mean_width": 0.2404926936443415,
+          "verdicts": {
+            "does_not_follow": 0.157,
+            "follows": 0.014,
+            "inconclusive": 0.829
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.945,
+          "mean_width": 0.27690982230010924,
+          "verdicts": {
+            "does_not_follow": 0.097,
+            "follows": 0.01,
+            "inconclusive": 0.893
+          }
+        },
+        "truth": 0.4463811062843094
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.916,
+          "mean_width": 0.218017232968153,
+          "verdicts": {
+            "does_not_follow": 0.003,
+            "follows": 0.176,
+            "inconclusive": 0.821
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.948,
+          "mean_width": 0.2513234823961257,
+          "verdicts": {
+            "does_not_follow": 0.001,
+            "follows": 0.14,
+            "inconclusive": 0.859
+          }
+        },
+        "truth": 0.542871086097838
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.9,
+          "mean_width": 0.181267764775258,
+          "verdicts": {
+            "follows": 0.762,
+            "inconclusive": 0.238
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.934,
+          "mean_width": 0.20886752575434184,
+          "verdicts": {
+            "follows": 0.713,
+            "inconclusive": 0.287
+          }
+        },
+        "truth": 0.6433686664858163
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.922,
+          "mean_width": 0.44579004783812937,
+          "verdicts": {
+            "does_not_follow": 0.681,
+            "inconclusive": 0.319
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.95,
+          "mean_width": 0.5131942832417771,
+          "verdicts": {
+            "does_not_follow": 0.517,
+            "inconclusive": 0.483
+          }
+        },
+        "truth": 0.22627837051621702
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.919,
+          "mean_width": 0.43320412752303705,
+          "verdicts": {
+            "does_not_follow": 0.409,
+            "follows": 0.002,
+            "inconclusive": 0.589
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.942,
+          "mean_width": 0.4982860002501816,
+          "verdicts": {
+            "does_not_follow": 0.27,
+            "follows": 0.002,
+            "inconclusive": 0.728
+          }
+        },
+        "truth": 0.30490653868271583
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.919,
+          "mean_width": 0.4087702024313162,
+          "verdicts": {
+            "does_not_follow": 0.171,
+            "follows": 0.004,
+            "inconclusive": 0.825
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.944,
+          "mean_width": 0.4708158506292755,
+          "verdicts": {
+            "does_not_follow": 0.1,
+            "follows": 0.001,
+            "inconclusive": 0.899
+          }
+        },
+        "truth": 0.38997904380847187
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.912,
+          "mean_width": 0.37742997333699246,
+          "verdicts": {
+            "does_not_follow": 0.034,
+            "follows": 0.047,
+            "inconclusive": 0.919
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.935,
+          "mean_width": 0.43578331263299036,
+          "verdicts": {
+            "does_not_follow": 0.011,
+            "follows": 0.039,
+            "inconclusive": 0.95
+          }
+        },
+        "truth": 0.47694335064908033
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.0,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.913,
+          "mean_width": 0.3363232845641919,
+          "verdicts": {
+            "does_not_follow": 0.001,
+            "follows": 0.223,
+            "inconclusive": 0.776
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.934,
+          "mean_width": 0.3889203593486718,
+          "verdicts": {
+            "does_not_follow": 0.001,
+            "follows": 0.185,
+            "inconclusive": 0.814
+          }
+        },
+        "truth": 0.5746810687870147
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.911,
+          "mean_width": 0.13875846292288382,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.948,
+          "mean_width": 0.15968111385009687,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "truth": 0.2651941575209159
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.915,
+          "mean_width": 0.13236532000765158,
+          "verdicts": {
+            "does_not_follow": 0.988,
+            "inconclusive": 0.012
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.956,
+          "mean_width": 0.15220116993565022,
+          "verdicts": {
+            "does_not_follow": 0.971,
+            "inconclusive": 0.029
+          }
+        },
+        "truth": 0.35447582289178914
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.917,
+          "mean_width": 0.12358994868001777,
+          "verdicts": {
+            "does_not_follow": 0.433,
+            "follows": 0.002,
+            "inconclusive": 0.565
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.952,
+          "mean_width": 0.1421678745187956,
+          "verdicts": {
+            "does_not_follow": 0.323,
+            "follows": 0.002,
+            "inconclusive": 0.675
+          }
+        },
+        "truth": 0.44456898119144495
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.917,
+          "mean_width": 0.11254167554957835,
+          "verdicts": {
+            "follows": 0.318,
+            "inconclusive": 0.682
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.951,
+          "mean_width": 0.12955927905281706,
+          "verdicts": {
+            "follows": 0.254,
+            "inconclusive": 0.746
+          }
+        },
+        "truth": 0.5370519454290928
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.901,
+          "mean_width": 0.09878215208195905,
+          "verdicts": {
+            "follows": 0.983,
+            "inconclusive": 0.017
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.952,
+          "mean_width": 0.1137317630692666,
+          "verdicts": {
+            "follows": 0.976,
+            "inconclusive": 0.024
+          }
+        },
+        "truth": 0.6317517755426556
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.898,
+          "mean_width": 0.26373998809077454,
+          "verdicts": {
+            "does_not_follow": 0.964,
+            "inconclusive": 0.036
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.94,
+          "mean_width": 0.3032974338157321,
+          "verdicts": {
+            "does_not_follow": 0.929,
+            "inconclusive": 0.071
+          }
+        },
+        "truth": 0.24908052913069828
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.906,
+          "mean_width": 0.24979154853634497,
+          "verdicts": {
+            "does_not_follow": 0.738,
+            "inconclusive": 0.262
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.941,
+          "mean_width": 0.28706977763009345,
+          "verdicts": {
+            "does_not_follow": 0.634,
+            "inconclusive": 0.366
+          }
+        },
+        "truth": 0.33206880866555066
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.913,
+          "mean_width": 0.23406827948162193,
+          "verdicts": {
+            "does_not_follow": 0.276,
+            "follows": 0.001,
+            "inconclusive": 0.723
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.944,
+          "mean_width": 0.26933665277410274,
+          "verdicts": {
+            "does_not_follow": 0.179,
+            "follows": 0.001,
+            "inconclusive": 0.82
+          }
+        },
+        "truth": 0.4201266414891549
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.914,
+          "mean_width": 0.20982617747287827,
+          "verdicts": {
+            "does_not_follow": 0.009,
+            "follows": 0.09,
+            "inconclusive": 0.901
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.945,
+          "mean_width": 0.2414668350863094,
+          "verdicts": {
+            "does_not_follow": 0.004,
+            "follows": 0.072,
+            "inconclusive": 0.924
+          }
+        },
+        "truth": 0.5118278087366308
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.908,
+          "mean_width": 0.1817253645887549,
+          "verdicts": {
+            "follows": 0.574,
+            "inconclusive": 0.426
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.936,
+          "mean_width": 0.20941089003222052,
+          "verdicts": {
+            "follows": 0.519,
+            "inconclusive": 0.481
+          }
+        },
+        "truth": 0.6056904814099102
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.911,
+          "mean_width": 0.4213880010405089,
+          "verdicts": {
+            "does_not_follow": 0.756,
+            "inconclusive": 0.244
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.941,
+          "mean_width": 0.4844734750464818,
+          "verdicts": {
+            "does_not_follow": 0.633,
+            "inconclusive": 0.367
+          }
+        },
+        "truth": 0.21377805605192077
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.929,
+          "mean_width": 0.4109604955711553,
+          "verdicts": {
+            "does_not_follow": 0.553,
+            "follows": 0.001,
+            "inconclusive": 0.446
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.96,
+          "mean_width": 0.47237432031394666,
+          "verdicts": {
+            "does_not_follow": 0.403,
+            "follows": 0.001,
+            "inconclusive": 0.596
+          }
+        },
+        "truth": 0.2881119746227347
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.912,
+          "mean_width": 0.3878268256571928,
+          "verdicts": {
+            "does_not_follow": 0.254,
+            "follows": 0.005,
+            "inconclusive": 0.741
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.932,
+          "mean_width": 0.4468170712262106,
+          "verdicts": {
+            "does_not_follow": 0.161,
+            "follows": 0.003,
+            "inconclusive": 0.836
+          }
+        },
+        "truth": 0.36618383230461254
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.903,
+          "mean_width": 0.35735379608172646,
+          "verdicts": {
+            "does_not_follow": 0.077,
+            "follows": 0.024,
+            "inconclusive": 0.899
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.933,
+          "mean_width": 0.41214458266506926,
+          "verdicts": {
+            "does_not_follow": 0.043,
+            "follows": 0.018,
+            "inconclusive": 0.939
+          }
+        },
+        "truth": 0.4516153852467332
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.03,
+        "outliers": false,
+        "percentile_bootstrap": {
+          "coverage": 0.919,
+          "mean_width": 0.32413772227411336,
+          "verdicts": {
+            "does_not_follow": 0.006,
+            "follows": 0.151,
+            "inconclusive": 0.843
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.944,
+          "mean_width": 0.37391294824716287,
+          "verdicts": {
+            "does_not_follow": 0.002,
+            "follows": 0.135,
+            "inconclusive": 0.863
+          }
+        },
+        "truth": 0.5428685023247714
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.973,
+          "mean_width": 0.1855656516999543,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.983,
+          "mean_width": 0.2134510580465805,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "truth": 0.2224378076925203
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.992,
+          "mean_width": 0.20685138528467714,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.996,
+          "mean_width": 0.23827828047380423,
+          "verdicts": {
+            "does_not_follow": 0.992,
+            "inconclusive": 0.008
+          }
+        },
+        "truth": 0.29755177904107005
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.997,
+          "mean_width": 0.23600954420019815,
+          "verdicts": {
+            "does_not_follow": 0.691,
+            "inconclusive": 0.309
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.999,
+          "mean_width": 0.27241469381279787,
+          "verdicts": {
+            "does_not_follow": 0.376,
+            "inconclusive": 0.624
+          }
+        },
+        "truth": 0.3737038341557291
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.998,
+          "mean_width": 0.27106506042702566,
+          "verdicts": {
+            "does_not_follow": 0.004,
+            "inconclusive": 0.996
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.998,
+          "mean_width": 0.3133224636935032,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "truth": 0.449507442004536
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.999,
+          "mean_width": 0.30492570375910893,
+          "verdicts": {
+            "follows": 0.001,
+            "inconclusive": 0.999
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.999,
+          "mean_width": 0.3519146186688547,
+          "verdicts": {
+            "follows": 0.001,
+            "inconclusive": 0.999
+          }
+        },
+        "truth": 0.528584239791104
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.937,
+          "mean_width": 0.30083860034601567,
+          "verdicts": {
+            "does_not_follow": 0.984,
+            "inconclusive": 0.016
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.96,
+          "mean_width": 0.3457670773732474,
+          "verdicts": {
+            "does_not_follow": 0.953,
+            "inconclusive": 0.047
+          }
+        },
+        "truth": 0.20969184960143042
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.953,
+          "mean_width": 0.3103460544250334,
+          "verdicts": {
+            "does_not_follow": 0.861,
+            "inconclusive": 0.139
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.971,
+          "mean_width": 0.35711591594244485,
+          "verdicts": {
+            "does_not_follow": 0.738,
+            "inconclusive": 0.262
+          }
+        },
+        "truth": 0.27847934823050996
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.961,
+          "mean_width": 0.31816862390381173,
+          "verdicts": {
+            "does_not_follow": 0.44,
+            "inconclusive": 0.56
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.982,
+          "mean_width": 0.36660202805815717,
+          "verdicts": {
+            "does_not_follow": 0.277,
+            "inconclusive": 0.723
+          }
+        },
+        "truth": 0.3533989334695672
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.978,
+          "mean_width": 0.3280781236204008,
+          "verdicts": {
+            "does_not_follow": 0.07,
+            "follows": 0.001,
+            "inconclusive": 0.929
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.986,
+          "mean_width": 0.37848545235465003,
+          "verdicts": {
+            "does_not_follow": 0.03,
+            "follows": 0.001,
+            "inconclusive": 0.969
+          }
+        },
+        "truth": 0.4267331348225526
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.987,
+          "mean_width": 0.3427498955390902,
+          "verdicts": {
+            "follows": 0.014,
+            "inconclusive": 0.986
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.993,
+          "mean_width": 0.3957645651326819,
+          "verdicts": {
+            "follows": 0.011,
+            "inconclusive": 0.989
+          }
+        },
+        "truth": 0.507765253619716
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.928,
+          "mean_width": 0.4617783595462961,
+          "verdicts": {
+            "does_not_follow": 0.807,
+            "inconclusive": 0.193
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.95,
+          "mean_width": 0.531245952838787,
+          "verdicts": {
+            "does_not_follow": 0.664,
+            "inconclusive": 0.336
+          }
+        },
+        "truth": 0.17922761506656396
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.938,
+          "mean_width": 0.4538615944662396,
+          "verdicts": {
+            "does_not_follow": 0.606,
+            "inconclusive": 0.394
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.958,
+          "mean_width": 0.5218416002043504,
+          "verdicts": {
+            "does_not_follow": 0.47,
+            "inconclusive": 0.53
+          }
+        },
+        "truth": 0.241540347409097
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.935,
+          "mean_width": 0.45214118609260767,
+          "verdicts": {
+            "does_not_follow": 0.368,
+            "inconclusive": 0.632
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.957,
+          "mean_width": 0.5207529595514786,
+          "verdicts": {
+            "does_not_follow": 0.229,
+            "inconclusive": 0.771
+          }
+        },
+        "truth": 0.3074157018220818
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.924,
+          "mean_width": 0.4433972897883247,
+          "verdicts": {
+            "does_not_follow": 0.143,
+            "follows": 0.008,
+            "inconclusive": 0.849
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.948,
+          "mean_width": 0.511035034779611,
+          "verdicts": {
+            "does_not_follow": 0.078,
+            "follows": 0.007,
+            "inconclusive": 0.915
+          }
+        },
+        "truth": 0.37668368097455296
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.0,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.945,
+          "mean_width": 0.43888820142633755,
+          "verdicts": {
+            "does_not_follow": 0.035,
+            "follows": 0.02,
+            "inconclusive": 0.945
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.962,
+          "mean_width": 0.5063632830336917,
+          "verdicts": {
+            "does_not_follow": 0.013,
+            "follows": 0.014,
+            "inconclusive": 0.973
+          }
+        },
+        "truth": 0.4540740842749374
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.956,
+          "mean_width": 0.1809942208208597,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.979,
+          "mean_width": 0.20837657158205708,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "truth": 0.20920561589065675
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.985,
+          "mean_width": 0.20402090830906577,
+          "verdicts": {
+            "does_not_follow": 1.0
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.992,
+          "mean_width": 0.23514255416209504,
+          "verdicts": {
+            "does_not_follow": 0.997,
+            "inconclusive": 0.003
+          }
+        },
+        "truth": 0.27909609454380274
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.993,
+          "mean_width": 0.2273337873725862,
+          "verdicts": {
+            "does_not_follow": 0.891,
+            "inconclusive": 0.109
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.999,
+          "mean_width": 0.26272401847820515,
+          "verdicts": {
+            "does_not_follow": 0.689,
+            "inconclusive": 0.311
+          }
+        },
+        "truth": 0.35072861554945317
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.999,
+          "mean_width": 0.25834144689005434,
+          "verdicts": {
+            "does_not_follow": 0.093,
+            "inconclusive": 0.907
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 0.999,
+          "mean_width": 0.2984089373653748,
+          "verdicts": {
+            "does_not_follow": 0.014,
+            "inconclusive": 0.986
+          }
+        },
+        "truth": 0.4239309159856149
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 1.0,
+          "mean_width": 0.29211746930559956,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "spread": 0.0,
+        "student_t": {
+          "coverage": 1.0,
+          "mean_width": 0.3377500605347374,
+          "verdicts": {
+            "inconclusive": 1.0
+          }
+        },
+        "truth": 0.4964768156937901
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.942,
+          "mean_width": 0.2871373195557907,
+          "verdicts": {
+            "does_not_follow": 0.99,
+            "inconclusive": 0.01
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.963,
+          "mean_width": 0.3305230343995881,
+          "verdicts": {
+            "does_not_follow": 0.965,
+            "inconclusive": 0.035
+          }
+        },
+        "truth": 0.19690653734344848
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.958,
+          "mean_width": 0.29034747039584763,
+          "verdicts": {
+            "does_not_follow": 0.931,
+            "inconclusive": 0.069
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.972,
+          "mean_width": 0.3340232136879068,
+          "verdicts": {
+            "does_not_follow": 0.844,
+            "inconclusive": 0.156
+          }
+        },
+        "truth": 0.2621155869429759
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.961,
+          "mean_width": 0.30182040528170095,
+          "verdicts": {
+            "does_not_follow": 0.665,
+            "inconclusive": 0.335
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.978,
+          "mean_width": 0.34747973952056216,
+          "verdicts": {
+            "does_not_follow": 0.461,
+            "inconclusive": 0.539
+          }
+        },
+        "truth": 0.3302586728267615
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.97,
+          "mean_width": 0.3149522353660882,
+          "verdicts": {
+            "does_not_follow": 0.167,
+            "follows": 0.001,
+            "inconclusive": 0.832
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.984,
+          "mean_width": 0.36301774781111423,
+          "verdicts": {
+            "does_not_follow": 0.071,
+            "follows": 0.001,
+            "inconclusive": 0.928
+          }
+        },
+        "truth": 0.4017830489964023
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.985,
+          "mean_width": 0.3299658922492762,
+          "verdicts": {
+            "does_not_follow": 0.01,
+            "follows": 0.003,
+            "inconclusive": 0.987
+          }
+        },
+        "spread": 0.3,
+        "student_t": {
+          "coverage": 0.987,
+          "mean_width": 0.38059400736210136,
+          "verdicts": {
+            "does_not_follow": 0.003,
+            "follows": 0.001,
+            "inconclusive": 0.996
+          }
+        },
+        "truth": 0.47828152137255125
+      },
+      {
+        "centre": 0.3,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.923,
+          "mean_width": 0.4393228155365278,
+          "verdicts": {
+            "does_not_follow": 0.867,
+            "inconclusive": 0.133
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.948,
+          "mean_width": 0.5050848286061721,
+          "verdicts": {
+            "does_not_follow": 0.756,
+            "inconclusive": 0.244
+          }
+        },
+        "truth": 0.16512565201178248
+      },
+      {
+        "centre": 0.4,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.937,
+          "mean_width": 0.43366191990361735,
+          "verdicts": {
+            "does_not_follow": 0.717,
+            "inconclusive": 0.283
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.961,
+          "mean_width": 0.49923896514752214,
+          "verdicts": {
+            "does_not_follow": 0.552,
+            "inconclusive": 0.448
+          }
+        },
+        "truth": 0.2284061954898791
+      },
+      {
+        "centre": 0.5,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.936,
+          "mean_width": 0.42887395746498347,
+          "verdicts": {
+            "does_not_follow": 0.509,
+            "inconclusive": 0.491
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.957,
+          "mean_width": 0.4939010341880047,
+          "verdicts": {
+            "does_not_follow": 0.351,
+            "inconclusive": 0.649
+          }
+        },
+        "truth": 0.2892051271514864
+      },
+      {
+        "centre": 0.6,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.949,
+          "mean_width": 0.42825273681622683,
+          "verdicts": {
+            "does_not_follow": 0.218,
+            "inconclusive": 0.782
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.968,
+          "mean_width": 0.49340153205941784,
+          "verdicts": {
+            "does_not_follow": 0.114,
+            "inconclusive": 0.886
+          }
+        },
+        "truth": 0.35637796518276393
+      },
+      {
+        "centre": 0.7,
+        "contamination": 0.03,
+        "outliers": true,
+        "percentile_bootstrap": {
+          "coverage": 0.967,
+          "mean_width": 0.4206903536023723,
+          "verdicts": {
+            "does_not_follow": 0.063,
+            "follows": 0.01,
+            "inconclusive": 0.927
+          }
+        },
+        "spread": 0.6,
+        "student_t": {
+          "coverage": 0.974,
+          "mean_width": 0.4848247905361252,
+          "verdicts": {
+            "does_not_follow": 0.02,
+            "follows": 0.006,
+            "inconclusive": 0.974
+          }
+        },
+        "truth": 0.42583119014475945
+      }
+    ]
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    20261009
+  ],
+  "selective_prediction": null,
+  "sensor_subset": null,
+  "split": null,
+  "structural_disagreement": null
+}

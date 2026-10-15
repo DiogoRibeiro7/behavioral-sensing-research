@@ -5,6 +5,7 @@ partially missing observations, and reports the answer together with the
 evidence that produced it.
 """
 
+from .channels import HurdleChannelEmission
 from .defaults import EmissionDefaults, default_emission_for, default_emissions
 from .emissions import (
     BernoulliEmission,
@@ -85,6 +86,7 @@ __all__ = [
     "HistoryAwareBayesFilter",
     "HistoryConfig",
     "HistoryModel",
+    "HurdleChannelEmission",
     "PosteriorDecomposition",
     "MultimodalBayesFilter",
     "NonMonotonicUpdateError",

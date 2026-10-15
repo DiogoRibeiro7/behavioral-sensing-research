@@ -22,32 +22,50 @@ held-out evidence. Headline accuracy alone is not sufficient.
 
 ## Where the Programme Stands
 
-Three kinds of evidence appear below, and they are never merged:
+Five kinds of evidence appear below, and they are never merged:
 
 - **Development panel.** The 20 single-resident CASAS homes, cross-fitted on
   two frozen household folds. Every Phase 1 to 4 result uses them. They have
   been inspected many times, so none of those results is a held-out claim.
-- **Held-out CASAS.** The frozen v0.3 external test on 43 CASAS homes outside
-  the development panel. It evaluated an older model, before Phase 1.
+- **Held-out CASAS.** 43 CASAS homes outside the development panel. The
+  frozen v0.3 external test scored an older model on them once, before
+  Phase 1; the held-out confirmation then scored the Phase 3 formulation and
+  the Phase 2 baselines on them once, under its own frozen protocol. **These
+  homes are now used up for confirmation.** The Phase 3 formulation's
+  per-home scores on them are published, and they share CASAS's sensors and
+  labelling, so no new formulation can be confirmed on them.
 - **Independent external.** The Phase 5 evaluation on the two homes of the UCI
   ADL Binary dataset, collected independently of CASAS with a different
-  sensing layout.
+  sensing layout; and the ContextAct transfer test on the one resident of
+  ContextAct@A4H, 29 days in a smart apartment in France, under a protocol
+  frozen before any day was scored. Its intervals resample days of one person.
+- **Clinical cohort, exploratory.** The online pipeline, with its declared
+  emissions, baseline and alert policy, on the 56 homes of the TIHM dataset.
+  Its labels are alerts a clinical team verified, not behavioural states, so
+  it scores no state and describes only what the pipeline raises. The labels
+  had been analysed before the protocol was written.
+- **Simulated homes, pre-specified.** The silent-home rule on 100 paired
+  homes from this repository's simulator, under a protocol frozen before any
+  of them had been run with the rule on. A result on them is a statement
+  about the simulator.
 
 | Phase | Status | Evidence | Headline |
 | --- | --- | --- | --- |
 | 1. Recoverable-information gap | Evaluated, exploratory | Development panel | Part of the gap is the formulation, not only missing information |
-| 2. Baseline benchmark | Partly complete | Development panel | Baselines and a supervised diagnostic are in place; no held-out benchmark |
-| 3. Inference redesign | All five hypotheses evaluated | Development panel | The time prior and fitted channels succeed; the history state fails |
-| 4. Uncertainty and selective prediction | First comparison evaluated | Development panel; external check inconclusive | Structural disagreement beats confidence; no abstention rule |
-| 5. External generalisation | First evaluation complete | Independent external, 2 homes | The CASAS-trained model does not transfer |
+| 2. Baseline benchmark | Partly complete | Development panel; held-out CASAS; independent external, 1 resident | On held-out homes neither the diagnostic at `I3` nor the Phase 3 formulation leads in balanced accuracy |
+| 3. Inference redesign | All five hypotheses evaluated; the two successes combined and confirmed | Development panel; held-out CASAS; independent external, 1 resident | The time prior and fitted channels succeed together in the recursion; the prior's gain holds on 43 held-out homes and for one independent resident, on whom the fitted channels do not transfer; the history state fails; activity sub-states are inconclusive |
+| 4. Uncertainty and selective prediction | Comparison evaluated for both references; abstention rule selected, not supported | Development panel; external check inconclusive | Structural disagreement beats confidence, with the time prior too; the abstention rule selected on it is not supported |
+| 5. External generalisation | Two evaluations complete | Independent external: 2 homes; 1 resident | The Phase 5 model does not transfer to the UCI homes; on ContextAct the time prior's gain holds, and the declared channels with the prior beat the fitted ones in balanced accuracy |
 | 6. Sensor-information frontier | Not started | — | — |
-| 7. Reliability and failure robustness | Not started | — | — |
+| 7. Reliability and failure robustness | One rule evaluated | Simulated homes, pre-specified; clinical cohort, described | An opt-in rule treats a home silent past a declared horizon as not observed; the TIHM homes are silent that long often |
 | 8. Real-time system hardening | Deferred by its own gate | — | — |
 
-In one sentence: on the development panel the generative model has improved
-where a mechanism was tested one at a time, but no improvement has yet been
-confirmed on held-out homes, and on the first independent dataset the model is
-at chance.
+In one sentence: on the development panel the generative model has improved,
+one mechanism at a time and with its two successes together; on 43 held-out
+CASAS homes the time prior's gain over the fitted channels holds; on the
+first independent dataset the model is at chance; and for one independent
+resident the time prior's gain holds while the CASAS-fitted channels lose
+balanced accuracy to the declared ones with the prior.
 
 ## Current Stable Baseline
 
@@ -98,7 +116,9 @@ ontology or the frozen v0.3 external-validation result.
 ## The Evidence Base
 
 Household balanced accuracy. The 22-home figures are medians; the 20-home
-figures are household means with 95% household bootstrap intervals.
+figures are household means with 95% household bootstrap intervals. The
+ContextAct figures are means over 29 days of one resident, with 95% day
+bootstrap intervals.
 
 | Result | Value | Evidence |
 | --- | ---: | --- |
@@ -106,13 +126,20 @@ figures are household means with 95% household bootstrap intervals.
 | Online pipeline with declared defaults, 22-home CASAS panel | 0.420 | Development |
 | Supervised diagnostic on that panel | 0.607 | Development |
 | Generative recursion, declared rates | 0.417 [0.392, 0.442] | Development, 20 homes |
-| Generative recursion, fitted hurdle channels, the current reference | 0.456 [0.425, 0.484] | Development, 20 homes |
+| Generative recursion, fitted hurdle channels | 0.456 [0.425, 0.484] | Development, 20 homes |
 | Generative recursion, hurdle negative binomial, not adopted | 0.499 [0.470, 0.529] | Development, 20 homes |
+| Recursion with fitted channels and the time prior, the current reference | 0.517 [0.486, 0.547] | Development, 20 homes |
+| Recursion with activity sub-states and the time prior, not adopted | 0.515 [0.487, 0.545] | Development, 20 homes |
 | Generative model with the time prior, current window and hour (`I1`) | 0.509 [0.486, 0.531] | Development, 20 homes |
 | Supervised diagnostic, current window, hour and history (`I3`) | 0.590 [0.550, 0.624] | Development, 20 homes |
 | Frozen v0.3 candidate gain over `0.2.0` | +0.0091 [+0.0054, +0.0117], 37 / 43 homes | Held-out CASAS |
+| Recursion with fitted channels and the time prior | 0.567 [0.544, 0.590] | Held-out CASAS, 43 homes |
+| Supervised diagnostic at `I3`, fitted on the 20 development homes | 0.557 [0.532, 0.582] | Held-out CASAS, 43 homes |
 | Zero-shot transfer of the fitted hurdle recursion | 0.246 and 0.244, chance 0.25 | Independent external, 2 homes |
 | In-sample oracle on those homes | 0.437 and 0.559 | Independent external, descriptive |
+| Recursion with fitted channels and the time prior, as shipped | 0.385 [0.319, 0.451] | Independent external, 1 resident, 29 days |
+| Recursion with declared channels and the time prior | 0.534 [0.488, 0.580] | Independent external, 1 resident, 29 days |
+| Supervised diagnostic at `I3`, fitted on the 20 development homes | 0.566 [0.513, 0.619] | Independent external, 1 resident, 29 days |
 | Frozen five-sensor non-inferiority gap | 0.1548 | Simulator |
 | Frozen eight-sensor gap to full deployment | 0.00529 | Simulator |
 
@@ -144,7 +171,12 @@ against each other. Matched comparisons are in the phase sections.
    that sees more has not shown a modelling advantage by scoring higher, and a
    smoothing gain is not an online gain.
 7. **The development-panel model did not transfer.** On two independently
-   collected homes it is at chance.
+   collected homes the Phase 5 recursion with fitted hurdle channels is at
+   chance. On a second independent dataset, one resident over 29 days, the
+   combination with the time prior is above chance by +0.113 [+0.049,
+   +0.175], and the time prior's gain holds, +0.049 [+0.013, +0.087]; but the
+   CASAS-fitted channels lose 0.149 [0.076, 0.221] of balanced accuracy to the
+   declared ones with the prior.
    - **Labels.** Label incompatibility is small: 96% to 98% of annotated time
      is scorable.
    - **Parameters.** The transferred parameters lose 0.19 and 0.32 of balanced
@@ -250,10 +282,23 @@ Measured, on the development panel:
     negative binomial.
   - **With the hour.** At `I1` and `I3` its median log loss is 0.925 and 0.909.
 
+Measured once on 43 held-out CASAS homes, fitted on the 20 development homes,
+at `I3` (`docs/HELDOUT_CONFIRMATION_RESULTS.md`):
+
+- **Balanced accuracy.** The diagnostic scores 0.557, not distinguishable from
+  the Phase 3 formulation's 0.567 in the recursion: −0.010 [−0.033, +0.014],
+  uncertain. The tree
+  scores 0.440, logistic regression 0.343 and persistence 0.260.
+- **Probabilities.** The diagnostic has the lowest log loss, 1.577; logistic
+  regression's is 2.494.
+
 **What remains.**
 
-- **Held-out benchmark.** No benchmark comparison has been run on held-out
-  households.
+- **Held-out benchmark.** Done once, at `I3` only, on held-out CASAS homes.
+  On ContextAct, one independent resident, the baselines at `I3` were scored
+  beside the combination: the diagnostic leads it by +0.181 [+0.124, +0.239]
+  in balanced accuracy. That was not a fair test of the baselines, which read
+  the apartment's missing hall motion as a silent hall.
 - **Sequence models.** None has been added. One belongs in the benchmark only
   if it consumes exactly the permitted information and the sample size and
   protocol make the comparison meaningful. Deep learning is not added because
@@ -267,20 +312,24 @@ an external dataset.
 
 ## Phase 3 — Inference Redesign
 
-**Status: all five hypotheses evaluated on the development panel.** Each
+**Status: all five hypotheses evaluated on the development panel; the
+combination of the two successes confirmed on held-out CASAS homes.** Each
 evaluation was pre-specified, with its protocol frozen before any household was
-scored. None is a held-out claim.
+scored. Only the held-out confirmation is a held-out claim.
 
 | Hypothesis | Result | Consequence |
 | --- | --- | --- |
-| 3.1 Hierarchical time structure | Success | The time prior is the generative model's hour term; it has not been evaluated in the recursion |
+| 3.1 Hierarchical time structure | Success | The time prior is the generative model's hour term; in the recursion with the fitted channels it is a success too |
 | 3.2 Explicit recent-history state | Failure | Not adopted |
 | 3.3 Correlated silence | Weakened | Routed to fitted channel models, a success; the negative binomial is not adopted |
 | 3.4 Household adaptation | Success with current windows; inconclusive in the recursion | The declared pooling strength is too strong |
 | 3.5 Smoothing versus online inference | Contract enforced; smoothing gain measured | No smoothing result is reported as online |
 
-The current reference formulation is the online filter's recursion with fitted
-hurdle-Poisson channels and population parameters. Phases 4 and 5 use it.
+Phases 4 and 5 used the online filter's recursion with fitted hurdle-Poisson
+channels and population parameters. With the time prior's hour-dependent
+transition added it scores higher on the development panel and on 43 held-out
+CASAS homes (below), so that combination is the reference formulation from
+here.
 
 ### 3.1 Hierarchical time structure
 
@@ -366,9 +415,34 @@ hurdle-Poisson; see `docs/PHASE3_NEGATIVE_BINOMIAL.md`.
 - **Not adopted.** The rule declared in advance needed both settings, and with
   current windows the result is a trade-off.
 
-Consequence: the fitted hurdle-Poisson channels are the reference. Within-state
-temporal dependence is named but not built. The negative binomial addresses the
-dispersion but not the runs.
+Consequence: the fitted hurdle-Poisson channels are the reference. The negative
+binomial addresses the dispersion but not the runs.
+
+Within-state temporal dependence was then built as two activity sub-states,
+quiet and busy, in each common state, and tested once in the recursion with the
+time prior on the 20 development homes, under a protocol frozen before any
+household was scored. Those homes have been inspected before, so it is not a
+held-out claim; see `docs/PHASE3_ACTIVITY_SUBSTATES_RESULTS.md`.
+
+- **The primary is inconclusive.** `home_active` recall rises from 0.268 to
+  0.316, +0.048 [−0.009, +0.099], uncertain.
+- **Balanced accuracy is unchanged.** 0.515 against 0.517, −0.001 [−0.018,
+  +0.017], negligible.
+- **Probabilities improve.** Log loss improves by 0.448 [0.267, 0.686], the
+  Brier score by 0.135 [0.060, 0.233] and calibration error by 0.041 [0.003,
+  0.091].
+- **Recall moves between states.** `away` gains 0.213 [0.153, 0.281], in all
+  20 homes, and `sleeping` 0.053 [0.012, 0.095]. `bathroom_activity` and
+  `kitchen_activity`, which have no sub-states, lose 0.168 [0.125, 0.212], in
+  all 20 homes, and 0.157 [0.088, 0.233].
+- **The mechanism.** The excess of quiet runs of at least an hour falls in
+  `home_active` and `home_inactive` (M1), but remains: 3.368 and 1.804 times
+  the predicted, against 6.173 and 2.584 under the fold's population hurdle,
+  `home_active` in the 15 homes with enough runs.
+
+Consequence: the fitted hurdle-Poisson channels stay the reference. The
+negative binomial does not recover `home_active` recall, and whether two
+activity sub-states do is inconclusive.
 
 ### 3.4 Household adaptation
 
@@ -414,20 +488,76 @@ improvement.
 - **No smoother reports a new state sooner** than the online filter. Smoothing
   is no help to alerting or to any decision made when a state changes.
 
+### Measured: the two successes together
+
+The time prior entered the filter's recursion as an hour-dependent transition,
+with the declared and with the fitted hurdle channels, under a protocol frozen
+before any household was scored; see `docs/PHASE3_COMBINED_PRIOR_RESULTS.md`.
+The run first reproduced the fitted-rates record's fold fits and scores.
+
+- **The primary, K1, is a success.** The prior adds +0.061 [+0.044, +0.077]
+  balanced accuracy to the fitted channels, 0.517 against 0.456. Log loss,
+  Brier score and calibration error improve too; calibration error falls from
+  0.284 to 0.213.
+- **Both secondaries are successes.** The prior adds +0.055 to the declared
+  channels, and the fitted channels add +0.044 with the prior.
+- **Where the gain is.** `away` recall rises by 0.167 and `sleeping` by 0.110.
+  `bed_awake`, in the 5 homes that have it, falls by 0.148. `home_active` is
+  unchanged, so the fitted channels' loss there stands.
+- **No clear interaction in balanced accuracy.** K1 minus K2 is +0.005
+  [−0.009, +0.020]. In log loss and calibration error the prior gains less with
+  the fitted channels than with the declared ones.
+
+The earlier versions of the two parts, the v0.3 circadian term with fitted
+sensor rates in the production filter, did not combine on 11 held-out homes of
+the panel: 0.434 together, against 0.460 for the circadian term alone; see
+`docs/real_data.md`.
+
+### Measured: the held-out confirmation
+
+Fitted once on the 20 development homes and frozen, the formulation was scored
+once on the 43 single-resident CASAS homes of the external cohort, beside the
+Phase 2 baselines at `I3`; see `docs/HELDOUT_CONFIRMATION_RESULTS.md`. The
+homes had been scored once before, by the v0.2 and v0.3 production filter, and
+35 of them come from CASAS families other than the training homes', with other
+layouts and sensor names. The intervals resample homes and do not allow for
+families; 25 of the 43 are of the tm family.
+
+- **The primary, K1, is a success.** The prior adds +0.077 [+0.070, +0.084]
+  balanced accuracy to the fitted channels, 0.567 against 0.490, in all 43
+  homes and in each of the five families. Log loss, Brier score and
+  calibration error improve too; calibration error falls from 0.296 to 0.233.
+- **Both secondaries are successes.** The prior adds +0.043 to the declared
+  channels, and the fitted channels add +0.042 with the prior.
+- **Where the gain is.** `away` recall rises by 0.194, `sleeping` by 0.132 and
+  `home_inactive` by 0.106. `home_active` is unchanged.
+- **The interaction, described.** In balanced accuracy the prior gains more
+  with the fitted channels than with the declared ones: K1 minus K2 is +0.034
+  [+0.024, +0.044]. In log loss it gains less.
+- **The diagnostic is not distinguishable from it.** Fitted on the same 20
+  homes and given the hour and the last three windows, it scores 0.557:
+  −0.010 [−0.033, +0.014] against the combination, uncertain. Its log loss is
+  better, 1.577 against 2.262, and its Brier score worse. Cross-fitted on the
+  development homes it had scored 0.590 against 0.517. Logistic regression
+  scores 0.343, against 0.498 cross-fitted there.
+
 ### What remains in Phase 3
 
-- **Combining the two successes.** The time prior and the fitted channels have
-  not been evaluated together in the recursion.
-- **Within-state temporal dependence.** The family the predictive checks route
-  to has not been built.
-- **`home_active` recall.** The fitted channels lose 0.23 of it, and the
-  negative binomial does not recover it.
-- **Confirmation.** Every Phase 3 conclusion is on the development panel.
+- **Within-state temporal dependence.** Two activity sub-states, shared by the
+  channels, were tested once and are inconclusive. A chain per channel, exits
+  that depend on the sub-state and more than two sub-states are untested.
+- **`home_active` recall.** The fitted channels lose 0.23 of it. The negative
+  binomial does not recover it; two activity sub-states are inconclusive.
+- **Confirmation.** The time prior's gain is confirmed on held-out CASAS homes
+  and, for one resident, on an independent dataset (ContextAct, K1 a success).
+  The fitted channels did not transfer to that resident, which no result yet
+  explains. Every other Phase 3 conclusion is on the development panel.
 
 ## Phase 4 — Uncertainty and Selective Prediction Redesign
 
-**Status: diagnostics implemented; the first comparison evaluated on the
-development panel; no abstention rule selected.**
+**Status: diagnostics implemented; the comparison evaluated on the
+development panel for the reference without the time prior and again with it;
+an abstention rule selected and not supported.**
 
 Paper 1 ruled out a scalar-score swap. Four pieces of infrastructure are
 implemented. Each is diagnostic only and changes no decision:
@@ -477,11 +607,64 @@ The external check, the Phase 5 estimand S, is **inconclusive**. Structural
 disagreement beats confidence in one external home, by 0.249 [0.163, 0.340],
 and is uncertain in the other.
 
+### Measured: the comparison for the time prior
+
+The reference became the fitted channels with the time prior, so the comparison
+was run again on its predictions, once, under a protocol frozen with the code it
+ran; see `docs/PHASE4_TIME_PRIOR_RESULTS.md`. The signals, ensemble, estimands
+and decision rule are the first comparison's, and the run gave back the
+reference's published scores first. Its full-coverage error is 0.364.
+
+- **Model-structure disagreement is materially better again.**
+  - **AURC.** Household error AURC is 0.048 [0.033, 0.062] lower than
+    confidence's, lower in 18 of 20 homes.
+  - **Pooled gain over random rejection.** 0.585 [0.525, 0.647], against
+    0.383 [0.282, 0.472] for confidence.
+- **Its gain is again at low coverage.** At 50% coverage its error is lower by
+  0.028 [0.007, 0.051]; at 70% and 90% the difference is negligible, and
+  balanced accuracy is uncertain or negligible at all three. Its retained
+  predictions are better calibrated at all three.
+- **It retains less of the minority activity states than confidence does.**
+  At 50% coverage it keeps 0.55 and 0.50 of the proportional share of
+  `bathroom_activity` and `kitchen_activity`, where confidence keeps 0.83 and
+  1.29; at 90%, 0.82 and 0.79. The declared guard covers `bed_awake` alone and
+  holds; it does not cover these states. It also keeps less of `home_active`
+  and `home_inactive`, 0.44 and 0.43 at 50%, and more of `away` and
+  `sleeping`.
+- **Evidence-channel disagreement and predictive mismatch are worse.** Their
+  household AURC is 0.207 and 0.067 higher than confidence's.
+- **The abstention rule's signal.** By the rule declared before scoring, it is
+  structural disagreement.
+
+### Measured: the abstention rule
+
+Selected once, cross-fitted on the two folds, under a protocol frozen with the
+code it ran; see `docs/PHASE4_ABSTENTION_RESULTS.md`. Each fold's threshold was
+chosen on its training homes, scored leave-one-out, and applied to its held-out
+homes.
+
+- **The guard decides the coverage.** From a target of 0.8, the guard on
+  `bathroom_activity` and `kitchen_activity` first holds at 0.95, in both folds
+  and pooled over all 20 homes.
+- **The rule frozen.** Abstain when structural disagreement exceeds 0.2385.
+- **Not supported.** On the development homes it was not chosen on, the error
+  falls by 0.016 [0.012, 0.019], lower in all 20 homes, with its interval within
+  the minimal difference of 0.02: negligible. Balanced accuracy rises by 0.018
+  [0.010, 0.027], uncertain. The guard holds, and the rule keeps 0.954 of the
+  windows.
+- **Not adopted.** The online pipeline is unchanged.
+
 ### What remains in Phase 4
 
-- **An abstention rule.** None has been selected. A rule must be chosen on
-  development data with a guard that covers the activity states and `away`,
-  and frozen before held-out evaluation.
+- **An abstention rule.** One was selected and is not supported: with the
+  guard, it abstains on 5% of windows and lowers the error negligibly. A rule
+  worth confirming needs a better signal or a different trade-off, chosen on
+  development data.
+- **What a confirmation needs.** Data whose outcomes for this formulation have
+  not been seen. The 43 held-out CASAS homes are used up, its scores in each of
+  them published, and so is ContextAct, whose per-day scores of it are
+  published too. It needs another independent dataset, with the rule frozen
+  beforehand and applied once.
 - **Other decision information.** Expected loss under an explicit decision cost
   has not been evaluated, and neither have out-of-distribution or low-support
   states as abstention signals.
@@ -558,12 +741,266 @@ Consequence: no Phase 3 or Phase 4 result is supported beyond CASAS. The
 CASAS-fitted observation model is not portable to this sensing layout, and a
 week of adaptation at the declared strength does not change a decision.
 
+### Measured: the alert layer on a clinical cohort
+
+**Status: exploratory. The result is negative.**
+
+The TIHM dataset (DOI 10.5281/zenodo.7622128, CC BY 4.0) holds 56 homes of
+people living with dementia, with alerts a clinical monitoring team verified.
+Through the contract every label is unmappable, so no state is scored. The
+online pipeline was run with its declared emissions, baseline and alert
+policy, and with nothing fitted. Its step is the protocol's ten minutes, the
+one the CASAS evaluation used; the configuration's own default is five.
+
+- **The protocol.** `docs/TIHM_ALERT_BURDEN_PROTOCOL.md`, committed in
+  `b15126f` before any pipeline output was compared with a label. The labels
+  had been analysed before it was written, and it says so.
+- **The run.** `docs/TIHM_ALERT_BURDEN_RESULTS.md`, made from that clean
+  commit. Every household is reported.
+- **Alert burden.** 0.064 [0.046, 0.084] behavioural alerts per monitored
+  person-day; for `sleeping_hours` alone 0.055 [0.038, 0.073], against the
+  simulator's 0.010 in its stable arm and 0.033 in its changed arm.
+- **No positive relation to the verified labels.** Alert days are 5.3% of
+  agitation label days and 8.5% of other evaluable days, a difference of −3.2
+  points [−7.9, +1.9]. The deviation score's within-household concordance with
+  label days is 0.466 [0.410, 0.530]. Both intervals include no relation; for
+  labels of any type the differences are below zero.
+- **Two rules without a model do better.** At the pipeline's 507 flagged days
+  it catches 18 of 94 label days, where 23 are expected at random. The
+  household's own label history catches 63, and its sensor event count against
+  earlier days 53.
+
+Descriptions made after the run was read, in a record of their own made from
+the clean commit `bc2ea4e`. They change no result:
+
+- **Silent days are read as sleep.** On 128 of 2,850 monitored days no sensor
+  of the home reported an event. The pipeline counts all 128 as usable and
+  infers a median 23.8 hours of sleep on them. On 16 June 2019 all 47
+  monitored homes are silent. The dataset paper reports a failure of the data
+  collection server and dates the drop to 14 June; in the released file the
+  drop is on 15 to 17 June. That they are one event is an inference. The next
+  day holds 33 of the 183 alerts.
+- **Leaving them out.** Replaying the baseline with silent days left out of
+  the history gives 78 change verdicts, where the run gave 188. 44 of the 188
+  are on silent days themselves.
+- **The deviation threshold is not three standard deviations.** A
+  same-weekday reference is used from four days. Against a median and MAD of
+  four others, a Gaussian value reaches the threshold about 17.5% of the time,
+  where a known mean and standard deviation give 0.27%. Stationary Gaussian
+  values with each household's own centre and spread make 14.9% of days
+  deviate; the run has 24.4%.
+- **Opposite directions.** The pipeline's deviating days are quiet days, with
+  a mean event-count score of −1.17. Label days are busy ones, at +0.86.
+
+Consequence: the simulator's alert burden is not an estimate for a real
+cohort. On this one, more than half of the change verdicts go when days
+without data are left out, the share of deviating days is mostly what the
+reference's estimation gives on values with no change over time, and nothing
+the pipeline raises is more frequent on the days a clinical team confirmed.
+The dataset carries no signal that a sensor or its gateway was working, which
+is the case Phase 7 exists for.
+
+### Measured: a threshold that means what it says
+
+`BaselineConfig.calibrated` is an opt-in reference for the second failure the
+TIHM run showed, the threshold that a reference of a few days passes far more
+often than it states. Its centre stays weekday-aware; its scale is pooled over
+every retained day, from how far each fell from the centre the other days of
+its weekday gave it; the deviation is mapped through a Student t; and its
+trend is fitted to those same distances, so a weekly rhythm is not read as a
+drift. It is off by default.
+
+It was built from the TIHM run, so that run cannot be its evidence.
+
+- **On synthetic days.** `docs/THRESHOLD_CALIBRATION_NULL.md`, independent
+  Gaussian days given to the baseline directly. The default passes its
+  threshold of 3 on 6.24% of days, 23 times what it states; the calibrated
+  reference on 0.28%.
+- **The protocol.** `docs/THRESHOLD_CALIBRATION_PROTOCOL.md`, frozen and
+  pushed before any simulated home had been run with the calibrated
+  reference, after three reviews. The second found that reading two
+  multiples off a quarter of the homes would call a reference with the
+  default's own curve better, or worse, in about one run in ten; the third
+  found a grid of 13 multiples too coarse to draw a straight line across,
+  and the grid was made three times finer. It fixes one comparison: where the calibrated
+  reference's operating curve, over 42 multiples of the thresholds, has the
+  false alerts of the default as it ships, how much of a step change it
+  finds net of chance. The match is placed again in every resample of homes.
+- **The run.** `docs/THRESHOLD_CALIBRATION_RESULTS.md`, from a clean commit,
+  on 400 paired simulated homes. **The evidence is simulated.**
+- **At the same false alerts it finds more of the step.** 0.72 of homes net
+  of false detections against 0.63, +0.09 [+0.03, +0.16], Monte Carlo
+  standard error 0.03, at the default's 0.855 false alerts a home in 84 days.
+  For the smaller step and the gradual change no difference is shown, −0.02
+  [−0.09, +0.04] and −0.01 [−0.10, +0.09].
+- **Its threshold means what it says for hours of sleep on these homes.**
+  0.35% of stable days of sleep pass 3, 4.79% pass 2 and 12.75% pass 1.5,
+  each within a quarter of a standard deviation of the threshold it states;
+  the default passes 3 on 7.91%. On hours away, where no criterion was
+  stated, it passes 3 on 1.66% of days, as often as a Gaussian value passes
+  2.40.
+- **It is not a drop-in replacement.** At the declared thresholds it raises 3
+  false alerts in the 400 homes against the default's 342, and finds the step
+  net of chance in 0.04 of them against 0.63. Its thresholds have to be set
+  lower, about 0.59 times the declared ones on these homes, and where that is
+  on a real home is not known.
+
+On TIHM, as a description and not a test: with the silent-home rule off the
+calibrated reference passes 3 on 8.1% of evaluable days of sleep, against the
+default's 17.4%, and with the rule on at 12 hours on 1.7%, against 10.9%. A
+real day is far from the independent Gaussian draw its score assumes, so its
+threshold says less there than on the simulated homes.
+
+Consequence: in simulation the calibrated reference keeps its threshold's
+meaning and, at the default's false alerts, finds more of a step change; it
+shows no gain for a smaller or a slower change. The default stays the default.
+A change of default needs evidence from real homes on where to set its
+thresholds, which this run cannot give.
+
+### Measured: the pipeline's hours of sleep beside a sleep mat
+
+`sleeping_hours`, the feature every alerting study counts its detections on,
+had never been set beside a measurement of sleep. In 17 TIHM homes a mat under
+the mattress recorded each minute in bed, with a sleep stage computed by the
+device.
+
+- **The protocol.** `docs/SLEEP_MAT_PROTOCOL.md`, frozen and pushed before any
+  value of the pipeline was set beside any record of the mat, after two
+  reviews, which moved every day touched by a silence of the whole home of
+  12 hours or more out of the primary analysis: 16 June, when every monitored home was silent, is a
+  mat-observed day in 11 of the 14 homes, and the partial days around it are
+  too.
+- **The run.** From clean commit `c42d69a`, with both runs reproducing the
+  published records home by home; `docs/SLEEP_MAT_RESULTS.md` is generated from
+  its records. A measurement on a real cohort; nothing was fitted.
+- **Within a home it does not follow the mat.** A mean Spearman correlation of
+  0.11 [0.03, 0.19] over 14 homes, against a margin of 0.5; against the hours
+  in bed, 0.14 [0.01, 0.27]. The deviations a personal baseline gives the two
+  correlate at 0.03 [−0.04, 0.11], over 12 homes.
+- **In level it does not agree.** It gives 3.95 hours a day more sleep than the
+  mat [+1.54, +6.37], and 1.97 more than its hours in bed [−0.01, +3.94].
+- **Leaving out the mat's odd homes, or moving its clock an hour, does not
+  change the reading.** Without the three homes in which the mat stages less
+  than 60% of the time in bed as asleep, 0.07 [−0.01, 0.16]. With the mat's
+  clock an hour earlier, 0.10 [0.02, 0.17]; an hour later, 0.13 [0.04, 0.21],
+  over 13 homes. Hourly activity is most opposed to time in bed with the
+  mat's clock an hour later, which would fit a mat clock in UTC.
+- **In simulation it does follow.** Against the simulator's true hours of
+  sleep, 0.70 [0.68, 0.71], with a bias of −0.23 hours. **That evidence is
+  simulated.**
+
+Consequence: on this evidence, `sleeping_hours`, which follows sleep in the
+simulator, does not follow a sleep mat in these homes; the disagreement may
+be the pipeline's or the mat's. A detection counted on that feature in
+simulation is a statement about the simulator's sleep. The mat is not
+validated and these are homes of people living with dementia, so what is
+missing is a sleep reference in homes where the pipeline is meant to run,
+before an alert about sleep is read as one about a person's sleep. TIHM is by
+Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0; Surrey and
+Borders Partnership NHS Foundation Trust and Howz are acknowledged, as the
+dataset asks.
+
+### Measured: the simulator's homes with TIHM's sensors
+
+Until this study every detection in simulation came from event sensors
+cleaner than TIHM's. Two activations of one of TIHM's motion sensors are never
+less than 61 seconds apart, 54 of its 56 homes have hallway records, its
+contacts log an opening twice, and 63% of its motion activations follow
+another room's, against 7% in the simulator.
+
+- **The protocol.** `docs/MATCHED_SENSORS_PROTOCOL.md`, frozen before any of
+  the study's homes was run with the matched profile, after two reviews. The profile's
+  hold-off is TIHM's; its presence scale and spill-over rate are the grid
+  point whose eight moments of the sensor records were nearest TIHM's, in a
+  planning record that runs no pipeline. The second-nearest point is run on
+  100 homes as a sensitivity profile.
+- **The run.** From clean commit `e7d41db`, with the standard profile's runs
+  reproducing the published threshold-calibration alerts home by home;
+  `docs/MATCHED_SENSORS_RESULTS.md` is generated from its record. Nothing in
+  the pipeline was changed or fitted.
+- **The detection survives (C1).** Excess detection 0.70 against 0.63,
+  +0.07 [+0.01, +0.13], against a margin of −0.10. False alerts 1.02 a home
+  against 0.86. The sensitivity profile gives +0.14 [+0.02, +0.26].
+- **The hours of sleep still follow the truth (C2).** 0.71 [0.70, 0.71],
+  against 0.67 with the simulator's own sensors and a margin of 0.5.
+- **The kitchen and bathroom collapse is not reproduced (C3).** The bathroom's
+  pooled-day median falls to 0.01 hours against a true 0.28, under its
+  ceiling of 0.05; the kitchen's to 0.68 against a true 1.96, over its
+  ceiling of 0.25. After steps with only the kitchen's motion activations,
+  belief in kitchen activity is 0.28 against 0.71.
+- **The profile is nearer TIHM's records than the simulator's own, not on
+  them.** 158 living-room activations a day against TIHM's 77, 50 hallway
+  activations against 67, and 57% of motion activations after another room's
+  against 63%. **That evidence is
+  simulated.**
+
+Consequence: in simulation the detection does not rest on the sensors
+lacking the properties the profile matches. In the simulator those properties
+do not make the hours of sleep stop following the truth, so they do not by
+themselves bring it near TIHM's 0.11 against the sleep mat; the gap may lie in
+what the profile does not model, in the homes' days or in the mat. In the
+simulator they do take the bathroom's hours to TIHM's level, and the
+kitchen's to about a third of the truth.
+
+### Described: where the pipeline's sleep parts from the sleep mat
+
+The sleep-mat comparison said that `sleeping_hours` does not follow the mat
+within a home; the matched-sensor study said the sensor properties its matched
+profile reproduces do not explain it in the simulator. Neither said where in a
+day the two part.
+
+- **The plan.** `docs/SLEEP_GAP_PLAN.md`, frozen and pushed before any value
+  was computed, after an independent review of the draft, which the plan
+  records, and a second of its revision, which it does not. It sets each
+  step's belief beside the mat's class of each minute, under the mat's clock
+  as recorded and an hour later, on the sleep-mat comparison's primary days
+  and homes. Exploratory: no criterion, no margin.
+- **The run.** From clean commit `1e46865`; both runs and the matched days
+  reproduced the published records, the repeat the first run's daily hours,
+  and the mat's minutes its daily hours. `docs/SLEEP_GAP_RESULTS.md` is
+  generated from its record.
+- **The extra sleep.** Of the 3.95 hours a day, 4.10 are counted when the mat
+  has no record, 3.20 of them by day; 1.34 while the mat says awake in bed;
+  and 1.48 hours of the mat's sleep are not counted.
+- **A quiet home is read as a sleeping one.** With no mat record the belief in
+  sleep is 0.90 one to three hours after the last activation and 0.99 after
+  three, and 0.39 between ten minutes and an hour; 2.29 of the 4.10 hours fall
+  within the hour. 1.40 hours a day follow the bedroom's sensor and 1.07 an
+  exit door.
+- **That part moves the daily number.** It carries 0.68 [0.54, 0.83] of the
+  daily variance and follows the mat no better than a swapped-mask reference;
+  the sleep counted on the mat follows it by +0.10 [+0.05, +0.15] beyond the
+  reference, above zero in all 14 homes, and by +0.18 [+0.09, +0.26], above
+  zero in 12, with the mat's clock an hour later.
+
+Consequence: in these homes the pipeline's daily hours of sleep are consistent
+with a measure of how quiet the day was, more than of the night the mat
+records: the part counted with no mat record moves them and does not follow
+the mat. They correlate at −0.71 with the day's activations, which the way the
+pipeline infers sleep partly builds in. Telling rest by day, absence and sleep
+apart may need what these event sensors do not give, such as a door's
+direction or a bed sensor, or a model that gives more weight to the resident
+being out after a silence that follows an exit door; that is a conjecture, and
+any such change would need its own frozen test on homes other than these. TIHM
+is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0;
+Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged,
+as the dataset asks.
+
 ### What remains in Phase 5
 
-- **More independent evidence.** Two homes are two case studies. A
-  confirmatory claim needs an independent dataset with more homes.
+- **More independent evidence.** Two homes and one resident are three case
+  studies. A claim about homes in general needs an independent dataset with
+  more homes.
+- **Why the fitted channels did not transfer to ContextAct.** The apartment's
+  open ground floor, its pooled living-room channel, the missing hall motion,
+  the different annotation conventions and the resident's own routine cannot
+  be separated from it.
 - **The Ordóñez homes are now inspected.** Any further analysis of them,
   including another adaptation strength, is exploratory.
+- **A reference for sleep.** `sleeping_hours` does not follow a sleep mat in
+  the 14 TIHM homes with enough days on one. The alerting studies' detections are counted
+  on it, so a real-home sleep reference is needed before they say anything
+  about a person.
 
 ## Phase 6 — Sensor-Information Frontier
 
@@ -588,7 +1025,8 @@ model scored, so it follows a confirmed reference formulation.
 
 ## Phase 7 — Reliability and Failure Robustness
 
-**Status: not started as statistical modelling.** Related infrastructure exists:
+**Status: one rule evaluated; not started as statistical modelling.** Related
+infrastructure exists:
 
 - online sensor health tempers each sensor's likelihood;
 - the observation-mismatch diagnostics exclude known failures rather than
@@ -597,7 +1035,12 @@ model scored, so it follows a confirmed reference formulation.
 
 The failure-aware weighting result showed that improving one metric can harm
 others, so sensor reliability should be treated as a statistical modelling
-problem rather than a heuristic multiplier. Priorities:
+problem rather than a heuristic multiplier.
+
+The TIHM run is a measured case. Its event-only streams give the health layer
+nothing to judge: it raised no system-health alert in 2,850 monitored days,
+and counted as usable every one of the 128 days on which no sensor reported,
+a day on which no home reports among them. See the Phase 5 section. Priorities:
 
 1. estimate failure/missingness processes separately from behavioural state;
 2. distinguish sensor absence, communication failure and genuine zero-event
@@ -606,11 +1049,103 @@ problem rather than a heuristic multiplier. Priorities:
 4. evaluate recovery after transient failures;
 5. propagate reliability uncertainty into state uncertainty where feasible.
 
+### Measured: a home that reports nothing
+
+`HealthConfig.home_silence_horizon` is an opt-in rule for a deployment with no
+sensor that promises to report. When no sensor of a home has reported for the
+horizon, the home is treated as not observed from its last observation on, the
+days that lost any time are refused by the baseline, and an alert about the
+silence is raised and repeated once per cooldown, which does not say why.
+`sensor_modeling.health.fleet` recognises a silence that most homes share. The
+rule is off by default, so by default a silent home is read as before.
+
+It was designed from the TIHM run, so that run cannot be its evidence.
+
+- **The protocol.** `docs/SILENT_HOME_PROTOCOL.md`, frozen and pushed before
+  any simulated home had been run with the rule on. It fixes eleven estimands
+  and eight criteria on 100 paired simulated homes reduced to their event
+  sensors, and declares the run on TIHM a description.
+- **The run.** `docs/SILENT_HOME_RESULTS.md`, from a clean commit. **The
+  evidence is simulated.**
+- **An outage raises alerts, and the rule removes them.** With the rule off a
+  60-hour outage raises 2.76 behavioural alerts per home more than the same
+  home without it, [2.36, 3.15], Monte Carlo standard error 0.20. At 12 hours
+  the excess is −0.28 [−0.44, −0.13], standard error 0.08, and the rule
+  removes 3.04 [2.68, 3.39], standard error 0.18.
+- **With the rule on, the outage arm raises fewer alerts than the home left
+  alone.** 30 against 58 in the window, in 30 homes fewer and in 9 more. The
+  criterion asks only that the excess lie below its margin and counts this as
+  success. One alert against 16 is raised up to a day after the outage ends,
+  when most of those days are refused and a refused day raises nothing; 29
+  against 42 in the rest of the window. Whether the second is a loss of
+  sensitivity after an outage is not settled. The nearest evidence is the two
+  detection arms set side by side after the run: with the rule on, 76 of 100
+  homes are detected after an outage and 75 with none, at a median 11.0
+  against 10.0 days.
+- **Nothing changes where no home is silent.** In 8,400 person-days of stable
+  homes the rule changes no alert and raises none. A real change is detected
+  in 75 of 100 homes with and without it; in that arm no home was silent for
+  the horizon, so the rule never acted and the two are one finding.
+- **After an outage, fewer homes meet the detection definition with the rule
+  on.** 76 of 100 against 91: −0.15 [−0.23, −0.07], standard error 0.04. The
+  interval
+  excludes zero and lies on both sides of the −0.10 margin, so the
+  pre-specified verdict is inconclusive: the loss is shown neither to be
+  within the margin nor to exceed it. Beside it, and not as a criterion: with
+  the rule off 38 of 100 homes with an outage and no change also meet the
+  definition, 8 with it on, and with no outage 75 of the 100 homes are
+  detected. A reading, not tested, is that part of the 91 are alerts the
+  outage itself raises; one home outside the protocol had suggested it before
+  the run, which the record says. The 76 are not the 75: with the rule on, 67
+  homes are detected both with and without an outage, 8 only without and 9
+  only after.
+- **The silence is reported.** Every outage, a median 12.0 hours after it
+  began, in three alerts, with three or four days refused. A shared outage is
+  one stretch for the fleet check, 12.0 hours after it began, and outages each
+  home has on its own are none.
+- **The rule saw more than its stated limits in three places.** A silence is
+  dated from the home's last observation, which precedes an outage by minutes
+  to hours, and a day is closed by the first step after midnight. So the day
+  an outage began on was refused in 4 of the 43 homes whose outage began at
+  noon or later; at 24 hours it was refused in 8 of 100, where the protocol
+  expected none; and an 8-hour outage was reported in one home in 100. The
+  homes whose outage began at noon or later show no excess, −0.19
+  [−0.47, 0.07].
+
+On TIHM, as a description and not a test:
+
+- **Fewer behavioural alerts, some of them new.** At 12 hours 147 of the 183
+  alerts are no longer raised and 13 are raised that were not, leaving 49;
+  the day that held 33 has none. The record does not say which of the 147
+  were on days with no report; the alert-burden description counted 44 alerts
+  on such days.
+- **The TIHM homes are silent often.** The rule refuses 322 of the 2,850
+  monitored days, in 48 of the 56 homes, and raises 324 alerts about silence,
+  which repeat while a silence lasts. 145 of them fall inside the two
+  stretches the fleet check calls common: the first days of the dataset, when
+  three homes were monitored, and 15 to 17 June, in which all 47 monitored
+  homes were silent at once. At 24 hours it refuses 205 days and raises 205.
+
+Consequence: in simulation the rule removes the alerts it was built to
+remove; whether that costs detection after an outage the test left undecided.
+On a real cohort it exchanges alerts about behaviour for more alerts about
+silence: 373 alerts of both kinds where there were 183. A simulated home is
+not silent for twelve hours unless a fault makes it so, so the simulator could
+not have shown that. Which horizon a real home needs, and what an alert about
+silence is worth to the person who receives it, are open. Priorities 1 and 2
+above are what would answer them.
+
+TIHM is by Palermo et al., *Scientific Data* 10, 606 (2023), under CC BY 4.0;
+Surrey and Borders Partnership NHS Foundation Trust and Howz are acknowledged,
+as the dataset asks.
+
 ## Phase 8 — Real-Time System Hardening
 
-**Status: deferred.** Its gate is not met: no inference improvement has
-survived held-out or external evaluation, and the first external evaluation was
-negative.
+**Status: deferred.** Its gate is not met. One inference improvement, the time
+prior, has survived held-out CASAS evaluation and, for one resident, an
+independent external one; but on that resident the fitted channels it is
+shipped with did not transfer, and the first external evaluation, on two
+homes, was negative.
 
 Only after the inference improvements survive held-out and external evaluation
 should the project expand its production surface. Potential work includes:
@@ -671,42 +1206,82 @@ the single source of truth for release notes.
 ## Immediate Order of Work
 
 Each item is an open question that a measured result left, in the order that
-lets each answer inform the next.
+lets each answer inform the next. The 43 held-out CASAS homes are used up for
+confirmation: a formulation or rule chosen after the held-out confirmation
+needs data whose outcomes have not been seen.
 
-1. **Evaluate the reference formulation with the time prior, then confirm it
-   on held-out homes.**
-   - **The combination.** The time prior (3.1) and the fitted hurdle channels
-     (3.3) are the two Phase 3 successes, and they have never been evaluated
-     together in the recursion. Evaluate the combination on the development
-     panel under a frozen protocol.
-   - **The confirmation.** Freeze the resulting formulation, with the Phase 2
-     baselines under matched information. Score it on CASAS households outside
-     the development panel, under a protocol frozen before scoring.
+**Done: the combination, then its confirmation.** The time prior (3.1) and the
+fitted hurdle channels (3.3), the two Phase 3 successes, were evaluated
+together in the recursion on the development panel under a frozen protocol: a
+success, +0.061 [+0.044, +0.077] balanced accuracy over the fitted channels
+alone ([PHASE3_COMBINED_PRIOR_RESULTS](docs/PHASE3_COMBINED_PRIOR_RESULTS.md)). The
+formulation was then fitted once on the 20 development homes and scored once
+on the 43 homes of the external cohort, beside the Phase 2 baselines under
+matched information: a success again, +0.077 [+0.070, +0.084] over the
+fitted channels alone, in all 43 homes
+([HELDOUT_CONFIRMATION_RESULTS](docs/HELDOUT_CONFIRMATION_RESULTS.md)). Every
+other Phase 3 and 4 conclusion is a development-panel result.
 
-   Until then, every Phase 3 and 4 conclusion is a development-panel result.
-2. **Explain the external transfer failure (Phase 5).**
+1. **Offer the confirmed formulation in the online pipeline, as an opt-in.**
+   The fitted hurdle channels and the time prior exist only in research code,
+   so a user of the package cannot run the formulation the held-out homes
+   confirmed. Ship its parameters, fitted once on the 20 development homes,
+   behind an opt-in of the online pipeline whose beliefs equal the research
+   recursion's. No default changes, and the opt-in claims nothing beyond the
+   two existing records. *Done: `PipelineConfig(formulation="phase3")`, off by
+   default, with the parameters the held-out record digests.*
+2. **An independent dataset, and the external transfer failure (Phase 5).**
+   - **The data.** The Ordóñez homes are now exploratory only, and the held-out
+     CASAS homes are not independent of CASAS. A confirmatory answer needs a
+     public dataset that nobody on this project has inspected, with its
+     adapter, ontology mapping and transfer protocol frozen before any outcome
+     is seen. It tests the confirmed formulation as the opt-in ships it.
+     *Done: ContextAct@A4H, one resident of a smart apartment in France over
+     two periods, under a protocol frozen with its inputs report. K1 is a
+     success, +0.049 [+0.013, +0.087], 0.385 against 0.336 over 29 days; but
+     the declared channels with the prior scored 0.534, so the CASAS-fitted
+     channels did not transfer to this resident
+     ([CONTEXTACT_TRANSFER_RESULTS](docs/CONTEXTACT_TRANSFER_RESULTS.md)).*
    - **The questions.** The transferred parameters lose 0.19 to 0.32 of
      balanced accuracy against an in-sample oracle, and adaptation at the
      declared strength changes no decision. Whether adaptation permitted before
      scoring can recover part of that loss is open. Phase 3.4 found the
      declared strength stronger than the data need. Whether the event-rate
      mismatch is a property of the sensing layout is also open.
-   - **The data.** The Ordóñez homes are now exploratory only. A confirmatory
-     answer needs an independent dataset not yet inspected.
 3. **Within-state temporal dependence (Phase 3.3).**
    - **The model family.** The predictive checks route to activity sub-states
      or a Markov-modulated emission. These would produce the long quiet runs
      that no marginal count distribution can.
    - **What it must recover.** `home_active` recall, lost to the fitted
      channels, is the test it must pass.
+     *Done: two activity sub-states in each common state are inconclusive.
+     `home_active` recall gains +0.048 [−0.009, +0.099], uncertain, with
+     balanced accuracy unchanged and log loss and calibration improved
+     ([PHASE3_ACTIVITY_SUBSTATES_RESULTS](docs/PHASE3_ACTIVITY_SUBSTATES_RESULTS.md)).*
 4. **An abstention rule (Phase 4).** Select a selective-prediction rule on
    development data, with a guard covering the activity states and `away`
-   that the first comparison under-retained. Freeze it before any held-out
-   evaluation.
+   that the first comparison under-retained. Freeze it before any
+   confirmatory evaluation, which needs data not yet scored with the
+   formulation.
+   *Its signal is picked: with the time prior, structural disagreement is
+   again materially better than confidence, and the declared rule picks it as
+   the rule's signal
+   ([PHASE4_TIME_PRIOR_RESULTS](docs/PHASE4_TIME_PRIOR_RESULTS.md)).*
+   *Done: the rule selected, abstaining above 0.2385 on 5% of windows, is not
+   supported; its error gain on the development homes it was not chosen on,
+   0.016 [0.012, 0.019], is negligible
+   ([PHASE4_ABSTENTION_RESULTS](docs/PHASE4_ABSTENTION_RESULTS.md)). A
+   confirmation needs an independent dataset not yet scored with the
+   formulation.*
 5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
    deployment trade-offs for the confirmed formulation, with configurations
    selected before confirmatory scoring.
 6. **Reliability modelling (Phase 7).** Separate failure processes from
    behavioural state, and quantify robustness under realistic missingness.
+   The silent-home rule is a declared rule with a declared horizon. How long
+   a real home is silent when nothing is wrong is the measurement it lacks.
+   The calibrated baseline reference is opt-in for a similar reason: where
+   its thresholds belong on a real home, which the simulated homes put at
+   about 0.59 times the declared ones, is not known.
 7. **System hardening (Phase 8).** Only after an improvement survives held-out
    and external evaluation.

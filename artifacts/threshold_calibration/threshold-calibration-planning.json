@@ -1,0 +1,5017 @@
+{
+  "configuration": {
+    "a_trial": {
+      "detection": "a home is found at a multiple when a latent uniform value is below the curve there, and falsely detected likewise with another. The latent values of the two references are correlated. A home's false detection is drawn apart from its false alerts, although in a home it is one of them",
+      "excess_detection": "found, minus falsely detected",
+      "false_alerts": "a home's false alerts at the smallest multiple are Poisson with the curve's mean times a rate that is gamma-distributed over homes with mean one. The same rate serves both references, so a home that raises many under one raises many under the other. At each larger multiple a home keeps each of its false alerts with the probability that takes one mean to the next, so its counts fall as the thresholds rise",
+      "the_calibrated_reference": "at a multiple s it is the default at s over the offset, with its false alerts and its false detections multiplied by the ratio",
+      "the_criterion": "the scoring's own `crossing`, `read_at` and `matched_estimate`, on the cohort and on every resample of it. Better when the interval at the same false alerts lies above zero, worse when it lies below, not bracketed when the match is not on the cohort as it is, and not shown otherwise",
+      "the_other_match": "the largest multiple that finds at least as much as the default, and the false alerts read there, minus the default's. Better when that interval lies below zero and worse when it lies above. The protocol states no estimand on it"
+    },
+    "cells": [
+      "most/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "nearly_all/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+      "few/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+      "most/ratio=1/offset=0.6/correlation=0.2/dispersion=1.9/alerts=1",
+      "most/ratio=1/offset=0.6/correlation=0.6/dispersion=0.6/alerts=1",
+      "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=0.25",
+      "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=4"
+    ],
+    "confidence": 0.95,
+    "curves": {
+      "between_two_multiples": "a straight line, for false alerts in their logarithm",
+      "detection": {
+        "few": [
+          0.97,
+          0.95,
+          0.9,
+          0.82,
+          0.74,
+          0.66,
+          0.58,
+          0.5,
+          0.42,
+          0.26,
+          0.15,
+          0.05,
+          0.0
+        ],
+        "most": [
+          1.0,
+          1.0,
+          1.0,
+          0.99,
+          0.97,
+          0.94,
+          0.9,
+          0.83,
+          0.75,
+          0.55,
+          0.38,
+          0.17,
+          0.01
+        ],
+        "nearly_all": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.99,
+          0.98,
+          0.97,
+          0.95,
+          0.85,
+          0.65,
+          0.3,
+          0.02
+        ]
+      },
+      "false_alerts_per_home": [
+        36.0,
+        24.0,
+        16.0,
+        10.0,
+        6.5,
+        4.3,
+        2.6,
+        1.7,
+        1.0,
+        0.3,
+        0.08,
+        0.01,
+        0.0005
+      ],
+      "false_detection": [
+        0.9,
+        0.8,
+        0.7,
+        0.52,
+        0.4,
+        0.3,
+        0.22,
+        0.16,
+        0.12,
+        0.04,
+        0.01,
+        0.002,
+        0.0
+      ],
+      "multiples": [
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0,
+        1.25,
+        1.5,
+        2.0,
+        3.5
+      ],
+      "where_the_sizes_come_from": "the silent-home record gives the default reference, at its declared thresholds, one false alert a home with a standard deviation of 1.2, the step found in 75 homes of 100 and 12 of 100 stable homes alerted on in its window. The rest of each curve is an assumption"
+    },
+    "evidence": "drawn from operating curves written down by hand. No home is simulated and no reference is run, so nothing here is evidence about a home or about the calibrated reference",
+    "homes": 400,
+    "name": "threshold-calibration-planning",
+    "offsets": [
+      0.45,
+      0.6,
+      0.75,
+      0.9,
+      1.1
+    ],
+    "ratios": [
+      1.0,
+      0.5,
+      0.75,
+      1.5
+    ],
+    "replications": 1000,
+    "resamples": 1000,
+    "result_schema": "threshold-calibration-planning/1",
+    "scales": [
+      0.3,
+      0.325,
+      0.35,
+      0.375,
+      0.4,
+      0.425,
+      0.45,
+      0.475,
+      0.5,
+      0.525,
+      0.55,
+      0.575,
+      0.6,
+      0.625,
+      0.65,
+      0.675,
+      0.7,
+      0.725,
+      0.75,
+      0.775,
+      0.8,
+      0.825,
+      0.85,
+      0.875,
+      0.9,
+      0.925,
+      0.95,
+      0.975,
+      1.0,
+      1.05,
+      1.1,
+      1.15,
+      1.2,
+      1.25,
+      1.3,
+      1.35,
+      1.4,
+      1.45,
+      1.5,
+      1.6,
+      1.8,
+      2.0
+    ],
+    "schema": "threshold-calibration-planning-settings/1",
+    "scoring_functions": {
+      "crossing": "4a6ea9287c45025dcdadd244ccd602d2e4b2add4e75f6a06cf00865097b0269d",
+      "matched_estimate": "0f6dff5eb28e94e22f6c85f37f810b0643093471dcfa72f6be29c2669f1e8ed3",
+      "read_at": "5c4b61b9a382498bae7da033f40fa23ca4bc010fbb6d1f0b173762d9af771f96"
+    },
+    "seed_root": 20261011,
+    "seeds": "cell k of `cells`, in order, has the generator of `numpy.random.SeedSequence(seed_root).spawn(len(cells))[k]`"
+  },
+  "data_source": "synthetic",
+  "environment": {
+    "git_commit": "64fd6835a06dc3a09d364c875605d1a001f9cd93",
+    "git_dirty": "false",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+    "python": "3.13.16",
+    "scipy": "1.18.1",
+    "sensor_modeling": "0.9.0",
+    "sklearn": "1.9.1"
+  },
+  "experiment": "threshold-calibration-planning",
+  "household_metrics": {},
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": false,
+      "reason": "nothing is inferred and nothing is run: each home is a row of counts and flags drawn from curves written down by hand"
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [],
+  "intervals": [],
+  "mcse": {
+    "few/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0035820385257559714,
+    "few/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0035820385257559714,
+    "few/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0032983329122452166,
+    "few/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.003443254274665176,
+    "few/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.003443254274665176,
+    "few/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0035820385257559714,
+    "few/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.003443254274665176,
+    "few/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0035820385257559714,
+    "few/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.00396787096564392,
+    "few/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004204283529925166,
+    "few/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015607690412101338,
+    "few/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.01558666096378567,
+    "few/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015478888849009803,
+    "few/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015416841440450765,
+    "few/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015547314880711717,
+    "few/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015416841440450765,
+    "few/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015409607392792329,
+    "few/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015349267083479915,
+    "few/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0009994998749374609,
+    "few/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015445096309184997,
+    "few/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015372410351015223,
+    "few/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "few/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "few/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "few/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015372410351015223,
+    "few/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "few/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "few/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015333492752794452,
+    "few/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "few/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "few/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015309310892394862,
+    "few/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0009994998749374609,
+    "few/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "few/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015458816254810716,
+    "few/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "few/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "few/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.01523299051401267,
+    "few/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.005811626278418116,
+    "few/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.005811626278418116,
+    "few/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.00512552436341883,
+    "few/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0050322956987840055,
+    "few/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0046385342512479085,
+    "few/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.00512552436341883,
+    "few/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.005891010100144117,
+    "few/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.005306505441436953,
+    "few/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.005730968504537431,
+    "few/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0054807846153630225,
+    "few/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "few/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0049371044145328745,
+    "few/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.004740358636221525,
+    "few/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.005306505441436953,
+    "few/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0009994998749374609,
+    "few/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.00512552436341883,
+    "few/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.004839834707921336,
+    "most/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0019959959919799443,
+    "most/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0019959959919799443,
+    "most/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.002230470802319547,
+    "most/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.002230470802319547,
+    "most/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0017294507798720387,
+    "most/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.002230470802319547,
+    "most/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0019959959919799443,
+    "most/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.002230470802319547,
+    "most/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0028170906978654425,
+    "most/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0029864694875387575,
+    "most/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015811388300841896,
+    "most/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015809364313595912,
+    "most/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015810249839898167,
+    "most/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.01581088232832058,
+    "most/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015776913513105152,
+    "most/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015752809273269323,
+    "most/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015782902141241326,
+    "most/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015755506973753653,
+    "most/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.01578999683343857,
+    "most/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.015768037290671277,
+    "most/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "most/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "most/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "most/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.012812142677944232,
+    "most/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "most/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "most/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.013142145943490354,
+    "most/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "most/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "most/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.013246546719805883,
+    "most/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "most/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "most/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.01312093746650749,
+    "most/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "most/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "most/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.012577400367325513,
+    "most/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.005216895628628198,
+    "most/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0050322956987840055,
+    "most/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.006046155803483731,
+    "most/ratio=1/offset=0.6/correlation=0.2/dispersion=1.9/alerts=1/same_detection/better": 0.004427188724235731,
+    "most/ratio=1/offset=0.6/correlation=0.2/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1/offset=0.6/correlation=0.2/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004427188724235731,
+    "most/ratio=1/offset=0.6/correlation=0.2/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.005811626278418116,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=0.6/alerts=1/same_detection/better": 0.004534203347888138,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=0.6/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=0.6/alerts=1/same_false_alerts/better": 0.004317290817167636,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=0.6/alerts=1/same_false_alerts/worse": 0.005648982209212559,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=0.25/same_detection/better": 0.004317290817167636,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=0.25/same_detection/worse": 0.0,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=0.25/same_false_alerts/better": 0.004317290817167636,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=0.25/same_false_alerts/worse": 0.005394441583704471,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.005306505441436953,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.00512552436341883,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.006046155803483731,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=4/same_detection/better": 0.004204283529925164,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=4/same_detection/worse": 0.0,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=4/same_false_alerts/better": 0.004204283529925164,
+    "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=4/same_false_alerts/worse": 0.0054807846153630225,
+    "most/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.004839834707921336,
+    "most/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0046385342512479085,
+    "most/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.00512552436341883,
+    "most/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.004839834707921336,
+    "most/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0009994998749374609,
+    "most/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004534203347888138,
+    "most/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.004534203347888138,
+    "most/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.005216895628628198,
+    "most/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "most/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004839834707921336,
+    "most/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.003967870965643918,
+    "nearly_all/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.008277922444671728,
+    "nearly_all/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.014714312760030622,
+    "nearly_all/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.008676174272108645,
+    "nearly_all/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.014834790190629592,
+    "nearly_all/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.008226238508577293,
+    "nearly_all/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.014857960829131297,
+    "nearly_all/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.008430361795320529,
+    "nearly_all/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.014392741226048637,
+    "nearly_all/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.008379976133617564,
+    "nearly_all/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.014799459449588015,
+    "nearly_all/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "nearly_all/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015349267083479915,
+    "nearly_all/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.01264911064067352,
+    "nearly_all/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0009994998749374609,
+    "nearly_all/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.01551099609954177,
+    "nearly_all/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.012096115078817662,
+    "nearly_all/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0009994998749374609,
+    "nearly_all/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015451990163082553,
+    "nearly_all/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.012553246592017541,
+    "nearly_all/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0009994998749374609,
+    "nearly_all/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015564575162849772,
+    "nearly_all/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.012504559168559283,
+    "nearly_all/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0014127986409959489,
+    "nearly_all/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.015409607392792329,
+    "nearly_all/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.012480024038438387,
+    "nearly_all/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0,
+    "nearly_all/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0014127986409959489,
+    "nearly_all/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0009994998749374609,
+    "nearly_all/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015309310892394862,
+    "nearly_all/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0009994998749374609,
+    "nearly_all/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "nearly_all/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015547314880711718,
+    "nearly_all/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0009994998749374609,
+    "nearly_all/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "nearly_all/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015597307459943206,
+    "nearly_all/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0014127986409959489,
+    "nearly_all/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "nearly_all/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.015478888849009803,
+    "nearly_all/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.0,
+    "nearly_all/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.0,
+    "nearly_all/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.01555313473226539,
+    "nearly_all/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.00708456067798138,
+    "nearly_all/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004317290817167636,
+    "nearly_all/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.005648982209212559,
+    "nearly_all/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.007795832219846705,
+    "nearly_all/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004317290817167636,
+    "nearly_all/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.005306505441436953,
+    "nearly_all/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.007626008130076967,
+    "nearly_all/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004427188724235731,
+    "nearly_all/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.005891010100144117,
+    "nearly_all/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.007147307185227175,
+    "nearly_all/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004087909000944126,
+    "nearly_all/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.0049371044145328745,
+    "nearly_all/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/better": 0.007451107300260815,
+    "nearly_all/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_detection/worse": 0.0,
+    "nearly_all/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/better": 0.004534203347888138,
+    "nearly_all/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1/same_false_alerts/worse": 0.005648982209212559
+  },
+  "metric_definitions": {
+    "detection": "a home is found at a multiple when a latent uniform value is below the curve there, and falsely detected likewise with another. The latent values of the two references are correlated. A home's false detection is drawn apart from its false alerts, although in a home it is one of them",
+    "excess_detection": "found, minus falsely detected",
+    "false_alerts": "a home's false alerts at the smallest multiple are Poisson with the curve's mean times a rate that is gamma-distributed over homes with mean one. The same rate serves both references, so a home that raises many under one raises many under the other. At each larger multiple a home keeps each of its false alerts with the probability that takes one mean to the next, so its counts fall as the thresholds rise",
+    "the_calibrated_reference": "at a multiple s it is the default at s over the offset, with its false alerts and its false detections multiplied by the ratio",
+    "the_criterion": "the scoring's own `crossing`, `read_at` and `matched_estimate`, on the cohort and on every resample of it. Better when the interval at the same false alerts lies above zero, worse when it lies below, not bracketed when the match is not on the cohort as it is, and not shown otherwise",
+    "the_other_match": "the largest multiple that finds at least as much as the default, and the false alerts read there, minus the default's. Better when that interval lies below zero and worse when it lies above. The protocol states no estimand on it"
+  },
+  "models": [],
+  "notes": [
+    "Drawn from operating curves written down by hand. No home is simulated and no reference is run, so nothing here is evidence about a home or about the calibrated reference.",
+    "Made to plan the threshold-calibration protocol before it was frozen: to see how often its criterion is wrong when the two references have one curve, and what it can show when they have not.",
+    "1,000 trials in each cell, each with its own generator derived from one recorded root. docs/SIMULATION_PROTOCOLS.md sets a floor of 100, and every share is given with its standard error.",
+    "Each trial resamples its homes 1,000 times, fewer than the protocol does."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {},
+  "recorded_at": "2026-10-08T03:20:56.683853+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "calibrated": false,
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "home_silence_horizon": null,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "cells": [
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.005216895628628198,
+            "share": 0.028
+          },
+          "mean_bootstrap_error": 0.3828408127128385,
+          "mean_estimate": 0.07790147929183368,
+          "not_bracketed": {
+            "se": 0.006892024376045111,
+            "share": 0.05
+          },
+          "not_shown": {
+            "se": 0.008480330182251158,
+            "share": 0.922
+          },
+          "resamples_bracketed": 0.912972,
+          "sd_of_estimates": 0.39265447124481817,
+          "trials_with_an_estimate": 950,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0050322956987840055,
+            "share": 0.026
+          },
+          "mean_bootstrap_error": 0.030704212375788815,
+          "mean_estimate": -0.0017941816215465034,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.007739767438366605,
+            "share": 0.936
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03164464166108654,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.006046155803483731,
+            "share": 0.038
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.005306505441436953,
+            "share": 0.029
+          },
+          "mean_bootstrap_error": 0.3860777158846372,
+          "mean_estimate": 0.09130235687596448,
+          "not_bracketed": {
+            "se": 0.0054807846153630225,
+            "share": 0.031
+          },
+          "not_shown": {
+            "se": 0.007509993342207438,
+            "share": 0.94
+          },
+          "resamples_bracketed": 0.922067,
+          "sd_of_estimates": 0.409281439764468,
+          "trials_with_an_estimate": 969,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.00512552436341883,
+            "share": 0.027
+          },
+          "mean_bootstrap_error": 0.03080357982250893,
+          "mean_estimate": -0.002100388417794565,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.0077958322198467015,
+            "share": 0.935
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.031473766471243884,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.006046155803483731,
+            "share": 0.038
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.004839834707921336,
+            "share": 0.024
+          },
+          "mean_bootstrap_error": 0.379975202177571,
+          "mean_estimate": 0.07931887912149584,
+          "not_bracketed": {
+            "se": 0.004839834707921336,
+            "share": 0.024
+          },
+          "not_shown": {
+            "se": 0.006759881655768837,
+            "share": 0.952
+          },
+          "resamples_bracketed": 0.934078,
+          "sd_of_estimates": 0.38811916819886016,
+          "trials_with_an_estimate": 976,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0046385342512479085,
+            "share": 0.022
+          },
+          "mean_bootstrap_error": 0.030909932245869427,
+          "mean_estimate": -0.0015799231221275396,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006826346021115546,
+            "share": 0.951
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.030314656159650517,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.00512552436341883,
+            "share": 0.027
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.004839834707921336,
+            "share": 0.024
+          },
+          "mean_bootstrap_error": 0.37650078579625057,
+          "mean_estimate": 0.06671305705206376,
+          "not_bracketed": {
+            "se": 0.0050322956987840055,
+            "share": 0.026
+          },
+          "not_shown": {
+            "se": 0.006956938982052382,
+            "share": 0.949
+          },
+          "resamples_bracketed": 0.933988,
+          "sd_of_estimates": 0.3779807598463672,
+          "trials_with_an_estimate": 974,
+          "worse": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004534203347888138,
+            "share": 0.021
+          },
+          "mean_bootstrap_error": 0.031003767911860356,
+          "mean_estimate": -0.0004390256444407166,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006343185319695463,
+            "share": 0.958
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.030263649156288003,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.004534203347888138,
+            "share": 0.021
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.005216895628628198,
+            "share": 0.028
+          },
+          "mean_bootstrap_error": 0.3815557958804977,
+          "mean_estimate": 0.07854681529846311,
+          "not_bracketed": {
+            "se": 0.0050322956987840055,
+            "share": 0.026
+          },
+          "not_shown": {
+            "se": 0.0071473071852271785,
+            "share": 0.946
+          },
+          "resamples_bracketed": 0.93288,
+          "sd_of_estimates": 0.3813531246160224,
+          "trials_with_an_estimate": 974,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004839834707921336,
+            "share": 0.024
+          },
+          "mean_bootstrap_error": 0.030877262850662286,
+          "mean_estimate": -0.0008053039248303242,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.00619677335393187,
+            "share": 0.96
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.029551745379672315,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.003967870965643918,
+            "share": 0.016
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0019959959919799443,
+            "share": 0.996
+          },
+          "mean_bootstrap_error": 0.0999184235569702,
+          "mean_estimate": -0.6738433097380754,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.001995995991979944,
+            "share": 0.004
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.09342446132256768,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0019959959919799443,
+            "share": 0.996
+          },
+          "mean_bootstrap_error": 0.029150427768460916,
+          "mean_estimate": 0.13496737259142652,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.001995995991979944,
+            "share": 0.004
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02825150218461563,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.002230470802319547,
+            "share": 0.995
+          },
+          "mean_bootstrap_error": 0.10117347039636278,
+          "mean_estimate": -0.6708457300808492,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.0022304708023195463,
+            "share": 0.005
+          },
+          "resamples_bracketed": 0.999992,
+          "sd_of_estimates": 0.09979746973390337,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.002230470802319547,
+            "share": 0.995
+          },
+          "mean_bootstrap_error": 0.029434204147261844,
+          "mean_estimate": 0.13478024329981714,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.0022304708023195463,
+            "share": 0.005
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02966583783116918,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0017294507798720387,
+            "share": 0.997
+          },
+          "mean_bootstrap_error": 0.10097962927334203,
+          "mean_estimate": -0.6747470003202959,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.001729450779872038,
+            "share": 0.003
+          },
+          "resamples_bracketed": 0.999993,
+          "sd_of_estimates": 0.09734254168127014,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.002230470802319547,
+            "share": 0.995
+          },
+          "mean_bootstrap_error": 0.029354649753208385,
+          "mean_estimate": 0.13455407174126352,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.0022304708023195463,
+            "share": 0.005
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.031006624389695352,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0019959959919799443,
+            "share": 0.996
+          },
+          "mean_bootstrap_error": 0.10075857703772624,
+          "mean_estimate": -0.6769167452480956,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.001995995991979944,
+            "share": 0.004
+          },
+          "resamples_bracketed": 0.9999969999999999,
+          "sd_of_estimates": 0.09429971510491401,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.002230470802319547,
+            "share": 0.995
+          },
+          "mean_bootstrap_error": 0.029474636336937674,
+          "mean_estimate": 0.1355890501101187,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.0022304708023195463,
+            "share": 0.005
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.0297917691883615,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0028170906978654425,
+            "share": 0.992
+          },
+          "mean_bootstrap_error": 0.10074422337134831,
+          "mean_estimate": -0.6754672722006185,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.0028170906978654416,
+            "share": 0.008
+          },
+          "resamples_bracketed": 0.999994,
+          "sd_of_estimates": 0.10133200826073456,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0029864694875387575,
+            "share": 0.991
+          },
+          "mean_bootstrap_error": 0.02956811955206821,
+          "mean_estimate": 0.1356731671348013,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.002986469487538756,
+            "share": 0.009
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02971911925319585,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015811388300841896,
+            "share": 0.5
+          },
+          "mean_bootstrap_error": 0.19021613973441867,
+          "mean_estimate": -0.40594101291086804,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015811388300841896,
+            "share": 0.5
+          },
+          "resamples_bracketed": 0.997684,
+          "sd_of_estimates": 0.1766222751350074,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015809364313595912,
+            "share": 0.492
+          },
+          "mean_bootstrap_error": 0.030128633468747147,
+          "mean_estimate": 0.05831744692727299,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015809364313595912,
+            "share": 0.508
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.029973705823034824,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015810249839898167,
+            "share": 0.506
+          },
+          "mean_bootstrap_error": 0.19173344098804604,
+          "mean_estimate": -0.4017422125275797,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015810249839898167,
+            "share": 0.494
+          },
+          "resamples_bracketed": 0.997798,
+          "sd_of_estimates": 0.17626248705224842,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.01581088232832058,
+            "share": 0.496
+          },
+          "mean_bootstrap_error": 0.030085207817897947,
+          "mean_estimate": 0.05769854650414564,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.01581088232832058,
+            "share": 0.504
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.029737268330458498,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015776913513105152,
+            "share": 0.467
+          },
+          "mean_bootstrap_error": 0.19662974087281185,
+          "mean_estimate": -0.3904920006412254,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015776913513105152,
+            "share": 0.533
+          },
+          "resamples_bracketed": 0.9976649999999999,
+          "sd_of_estimates": 0.1822541323844244,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015752809273269323,
+            "share": 0.457
+          },
+          "mean_bootstrap_error": 0.03035483345331245,
+          "mean_estimate": 0.05525431358296696,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015752809273269323,
+            "share": 0.543
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03011923697410943,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015782902141241326,
+            "share": 0.47
+          },
+          "mean_bootstrap_error": 0.19469177949915312,
+          "mean_estimate": -0.39462609542992005,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015782902141241326,
+            "share": 0.53
+          },
+          "resamples_bracketed": 0.997385,
+          "sd_of_estimates": 0.1800992819013148,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015755506973753653,
+            "share": 0.458
+          },
+          "mean_bootstrap_error": 0.030344872889600253,
+          "mean_estimate": 0.05622386678938244,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015755506973753653,
+            "share": 0.542
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03044807067848623,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.01578999683343857,
+            "share": 0.474
+          },
+          "mean_bootstrap_error": 0.19516442809527812,
+          "mean_estimate": -0.39907059713891935,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.01578999683343857,
+            "share": 0.526
+          },
+          "resamples_bracketed": 0.997528,
+          "sd_of_estimates": 0.17987736430073728,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015768037290671277,
+            "share": 0.463
+          },
+          "mean_bootstrap_error": 0.03017178264092614,
+          "mean_estimate": 0.0566900885455142,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015768037290671277,
+            "share": 0.537
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.029599391030362018,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.5763225197408978,
+          "mean_estimate": 1.0452672797350624,
+          "not_bracketed": {
+            "se": 0.010939789760319894,
+            "share": 0.861
+          },
+          "not_shown": {
+            "se": 0.010939789760319894,
+            "share": 0.139
+          },
+          "resamples_bracketed": 0.24737399999999998,
+          "sd_of_estimates": 0.5980612744891728,
+          "trials_with_an_estimate": 139,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.03150618657244333,
+          "mean_estimate": -0.08649880403019583,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.012812142677944232,
+            "share": 0.207
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03127575337792828,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.012812142677944232,
+            "share": 0.793
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.5810414448014738,
+          "mean_estimate": 0.9799216186132509,
+          "not_bracketed": {
+            "se": 0.010313049985334114,
+            "share": 0.879
+          },
+          "not_shown": {
+            "se": 0.010313049985334114,
+            "share": 0.121
+          },
+          "resamples_bracketed": 0.24806,
+          "sd_of_estimates": 0.6204169286084358,
+          "trials_with_an_estimate": 121,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.031681280051967894,
+          "mean_estimate": -0.08655632738174747,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.013142145943490356,
+            "share": 0.222
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.032417757184328176,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.013142145943490354,
+            "share": 0.778
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.5859470626988234,
+          "mean_estimate": 0.9776164114655184,
+          "not_bracketed": {
+            "se": 0.010972693379476163,
+            "share": 0.86
+          },
+          "not_shown": {
+            "se": 0.010972693379476163,
+            "share": 0.14
+          },
+          "resamples_bracketed": 0.263374,
+          "sd_of_estimates": 0.6031538290746447,
+          "trials_with_an_estimate": 140,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.03168354210658106,
+          "mean_estimate": -0.08641293887371285,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.013246546719805883,
+            "share": 0.227
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03259734148829821,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.013246546719805883,
+            "share": 0.773
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.5849686321818413,
+          "mean_estimate": 1.0145899566061438,
+          "not_bracketed": {
+            "se": 0.010939789760319894,
+            "share": 0.861
+          },
+          "not_shown": {
+            "se": 0.010939789760319894,
+            "share": 0.139
+          },
+          "resamples_bracketed": 0.262453,
+          "sd_of_estimates": 0.5962495725497726,
+          "trials_with_an_estimate": 139,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.03176127885398139,
+          "mean_estimate": -0.08668553117720755,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.013120937466507492,
+            "share": 0.221
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03247395096587238,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.01312093746650749,
+            "share": 0.779
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.5934441368656639,
+          "mean_estimate": 1.1385900247567984,
+          "not_bracketed": {
+            "se": 0.010704017937204702,
+            "share": 0.868
+          },
+          "not_shown": {
+            "se": 0.010704017937204702,
+            "share": 0.132
+          },
+          "resamples_bracketed": 0.26323399999999997,
+          "sd_of_estimates": 0.6266590637347237,
+          "trials_with_an_estimate": 132,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.031573841015633,
+          "mean_estimate": -0.08736454366026289,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.012577400367325514,
+            "share": 0.197
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03070310492263172,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.012577400367325513,
+            "share": 0.803
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.00708456067798138,
+            "share": 0.053
+          },
+          "mean_bootstrap_error": 0.22053549081001597,
+          "mean_estimate": -0.5167715441956872,
+          "not_bracketed": {
+            "se": 0.015372410351015223,
+            "share": 0.383
+          },
+          "not_shown": {
+            "se": 0.015681326474504636,
+            "share": 0.564
+          },
+          "resamples_bracketed": 0.628678,
+          "sd_of_estimates": 0.23974634908792308,
+          "trials_with_an_estimate": 617,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004317290817167636,
+            "share": 0.019
+          },
+          "mean_bootstrap_error": 0.022720698575064188,
+          "mean_estimate": -0.0016684412447156914,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.007021111023192843,
+            "share": 0.948
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.022983304562361438,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005648982209212559,
+            "share": 0.033
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.007795832219846705,
+            "share": 0.065
+          },
+          "mean_bootstrap_error": 0.22251199458097737,
+          "mean_estimate": -0.507543763448716,
+          "not_bracketed": {
+            "se": 0.015402305022301045,
+            "share": 0.387
+          },
+          "not_shown": {
+            "se": 0.015738360778683402,
+            "share": 0.548
+          },
+          "resamples_bracketed": 0.6408039999999999,
+          "sd_of_estimates": 0.25184524367673294,
+          "trials_with_an_estimate": 613,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004317290817167636,
+            "share": 0.019
+          },
+          "mean_bootstrap_error": 0.022822827192054775,
+          "mean_estimate": -0.0017511847912207474,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006759881655768837,
+            "share": 0.952
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02243782244956684,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005306505441436953,
+            "share": 0.029
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.007626008130076967,
+            "share": 0.062
+          },
+          "mean_bootstrap_error": 0.22829931460302785,
+          "mean_estimate": -0.5111773687403283,
+          "not_bracketed": {
+            "se": 0.015317441039547044,
+            "share": 0.376
+          },
+          "not_shown": {
+            "se": 0.01568935945155187,
+            "share": 0.562
+          },
+          "resamples_bracketed": 0.651085,
+          "sd_of_estimates": 0.2527202962373595,
+          "trials_with_an_estimate": 624,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004427188724235731,
+            "share": 0.02
+          },
+          "mean_bootstrap_error": 0.022862296647093744,
+          "mean_estimate": -0.0012450910408292708,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.007270763371201131,
+            "share": 0.944
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.022914717627493097,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005891010100144117,
+            "share": 0.036
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.007147307185227175,
+            "share": 0.054
+          },
+          "mean_bootstrap_error": 0.22707269067170846,
+          "mean_estimate": -0.46945934737513006,
+          "not_bracketed": {
+            "se": 0.015387494922826133,
+            "share": 0.385
+          },
+          "not_shown": {
+            "se": 0.015693278816104682,
+            "share": 0.561
+          },
+          "resamples_bracketed": 0.640202,
+          "sd_of_estimates": 0.26231276796303576,
+          "trials_with_an_estimate": 615,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004087909000944126,
+            "share": 0.017
+          },
+          "mean_bootstrap_error": 0.02294903746919931,
+          "mean_estimate": -0.0020768519546759128,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006343185319695463,
+            "share": 0.958
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02251122097300528,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0049371044145328745,
+            "share": 0.025
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.007451107300260815,
+            "share": 0.059
+          },
+          "mean_bootstrap_error": 0.22234985643149563,
+          "mean_estimate": -0.4936709616661832,
+          "not_bracketed": {
+            "se": 0.01542400726140908,
+            "share": 0.39
+          },
+          "not_shown": {
+            "se": 0.015728922404284407,
+            "share": 0.551
+          },
+          "resamples_bracketed": 0.63459,
+          "sd_of_estimates": 0.2632380486834424,
+          "trials_with_an_estimate": 610,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004534203347888138,
+            "share": 0.021
+          },
+          "mean_bootstrap_error": 0.022788307116397764,
+          "mean_estimate": -0.00177060081383155,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.0071473071852271785,
+            "share": 0.946
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.022923576119349063,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005648982209212559,
+            "share": 0.033
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.008277922444671728,
+            "share": 0.926
+          },
+          "mean_bootstrap_error": 0.09550654774218142,
+          "mean_estimate": -0.8219290982352916,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.00827792244467173,
+            "share": 0.074
+          },
+          "resamples_bracketed": 0.992008,
+          "sd_of_estimates": 0.08529220108250823,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.014714312760030622,
+            "share": 0.683
+          },
+          "mean_bootstrap_error": 0.021461340158819137,
+          "mean_estimate": 0.05185325337439548,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.014714312760030624,
+            "share": 0.317
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.020613888811377136,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.008676174272108645,
+            "share": 0.918
+          },
+          "mean_bootstrap_error": 0.09722647038475232,
+          "mean_estimate": -0.8246873110532309,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.008676174272108648,
+            "share": 0.082
+          },
+          "resamples_bracketed": 0.991895,
+          "sd_of_estimates": 0.0907337687166027,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.014834790190629592,
+            "share": 0.673
+          },
+          "mean_bootstrap_error": 0.021504544875070877,
+          "mean_estimate": 0.05182950115738647,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.014834790190629594,
+            "share": 0.327
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.021149989459641406,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.008226238508577293,
+            "share": 0.927
+          },
+          "mean_bootstrap_error": 0.09575369738439105,
+          "mean_estimate": -0.8225405375964167,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.008226238508577295,
+            "share": 0.073
+          },
+          "resamples_bracketed": 0.993078,
+          "sd_of_estimates": 0.09062735213151961,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.014857960829131297,
+            "share": 0.671
+          },
+          "mean_bootstrap_error": 0.021618422384006894,
+          "mean_estimate": 0.05217544692400537,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.014857960829131298,
+            "share": 0.329
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02213693103534781,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.008430361795320529,
+            "share": 0.923
+          },
+          "mean_bootstrap_error": 0.09504175556160371,
+          "mean_estimate": -0.8234761216617248,
+          "not_bracketed": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          },
+          "not_shown": {
+            "se": 0.008379976133617566,
+            "share": 0.076
+          },
+          "resamples_bracketed": 0.9920019999999999,
+          "sd_of_estimates": 0.0927430829349501,
+          "trials_with_an_estimate": 999,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.014392741226048637,
+            "share": 0.707
+          },
+          "mean_bootstrap_error": 0.021639798615262988,
+          "mean_estimate": 0.05320880725091556,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.014392741226048637,
+            "share": 0.293
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.021687384458807336,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.008379976133617564,
+            "share": 0.924
+          },
+          "mean_bootstrap_error": 0.09601950318297486,
+          "mean_estimate": -0.8169601228691195,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.008379976133617566,
+            "share": 0.076
+          },
+          "resamples_bracketed": 0.991592,
+          "sd_of_estimates": 0.0939766495675781,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.014799459449588015,
+            "share": 0.676
+          },
+          "mean_bootstrap_error": 0.021573421458154458,
+          "mean_estimate": 0.0520053339600877,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.014799459449588015,
+            "share": 0.324
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.022007105742715333,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015349267083479915,
+            "share": 0.38
+          },
+          "mean_bootstrap_error": 0.1648214732446031,
+          "mean_estimate": -0.6533688354009914,
+          "not_bracketed": {
+            "se": 0.006892024376045111,
+            "share": 0.05
+          },
+          "not_shown": {
+            "se": 0.015655669899432602,
+            "share": 0.57
+          },
+          "resamples_bracketed": 0.894728,
+          "sd_of_estimates": 0.17786227072074115,
+          "trials_with_an_estimate": 950,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.01264911064067352,
+            "share": 0.2
+          },
+          "mean_bootstrap_error": 0.02205945794623342,
+          "mean_estimate": 0.024664508651555287,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.01267276607532862,
+            "share": 0.799
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.021924738823963497,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.01551099609954177,
+            "share": 0.403
+          },
+          "mean_bootstrap_error": 0.1664525745244379,
+          "mean_estimate": -0.661365556814459,
+          "not_bracketed": {
+            "se": 0.0065555320150236475,
+            "share": 0.045
+          },
+          "not_shown": {
+            "se": 0.015725647840391186,
+            "share": 0.552
+          },
+          "resamples_bracketed": 0.902813,
+          "sd_of_estimates": 0.17223050688191743,
+          "trials_with_an_estimate": 955,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.012096115078817662,
+            "share": 0.178
+          },
+          "mean_bootstrap_error": 0.02206897590758991,
+          "mean_estimate": 0.024565125112011983,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.012122664723566351,
+            "share": 0.821
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.021040166743189464,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015451990163082553,
+            "share": 0.394
+          },
+          "mean_bootstrap_error": 0.1666323576641476,
+          "mean_estimate": -0.6663859924126714,
+          "not_bracketed": {
+            "se": 0.007683163410991596,
+            "share": 0.063
+          },
+          "not_shown": {
+            "se": 0.015752809273269323,
+            "share": 0.543
+          },
+          "resamples_bracketed": 0.8965700000000001,
+          "sd_of_estimates": 0.18039909888311823,
+          "trials_with_an_estimate": 937,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.012553246592017541,
+            "share": 0.196
+          },
+          "mean_bootstrap_error": 0.0221776112688362,
+          "mean_estimate": 0.024428427968113554,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.012577400367325513,
+            "share": 0.803
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02231343194174435,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015564575162849772,
+            "share": 0.412
+          },
+          "mean_bootstrap_error": 0.16539027026605804,
+          "mean_estimate": -0.6504231639560898,
+          "not_bracketed": {
+            "se": 0.007851369307324678,
+            "share": 0.066
+          },
+          "not_shown": {
+            "se": 0.015796075461962062,
+            "share": 0.522
+          },
+          "resamples_bracketed": 0.89042,
+          "sd_of_estimates": 0.18674828017867637,
+          "trials_with_an_estimate": 934,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.012504559168559283,
+            "share": 0.194
+          },
+          "mean_bootstrap_error": 0.022193141789766835,
+          "mean_estimate": 0.023603256852638817,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.01255324659201754,
+            "share": 0.804
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02324077764188232,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0014127986409959489,
+            "share": 0.002
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015409607392792329,
+            "share": 0.388
+          },
+          "mean_bootstrap_error": 0.16808963973337446,
+          "mean_estimate": -0.6541748074638762,
+          "not_bracketed": {
+            "se": 0.007391616873188166,
+            "share": 0.058
+          },
+          "not_shown": {
+            "se": 0.01571890581433708,
+            "share": 0.554
+          },
+          "resamples_bracketed": 0.892163,
+          "sd_of_estimates": 0.17937998555029055,
+          "trials_with_an_estimate": 942,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.012480024038438387,
+            "share": 0.193
+          },
+          "mean_bootstrap_error": 0.022086355556842588,
+          "mean_estimate": 0.02435130817482104,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.012480024038438387,
+            "share": 0.807
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.022592371931658882,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0014127986409959489,
+            "share": 0.002
+          },
+          "mean_bootstrap_error": 0.21005623377167845,
+          "mean_estimate": -0.4603814665272998,
+          "not_bracketed": {
+            "se": 0.00655553201502365,
+            "share": 0.955
+          },
+          "not_shown": {
+            "se": 0.006414904519944158,
+            "share": 0.043
+          },
+          "resamples_bracketed": 0.160111,
+          "sd_of_estimates": 0.2697249553563124,
+          "trials_with_an_estimate": 45,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          },
+          "mean_bootstrap_error": 0.02406267831475711,
+          "mean_estimate": -0.05462769127414751,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015301111070768685,
+            "share": 0.374
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.02448424099488602,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015309310892394862,
+            "share": 0.625
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          },
+          "mean_bootstrap_error": 0.2044404318830418,
+          "mean_estimate": -0.5068273613565015,
+          "not_bracketed": {
+            "se": 0.008819013550278736,
+            "share": 0.915
+          },
+          "not_shown": {
+            "se": 0.008771772910877254,
+            "share": 0.084
+          },
+          "resamples_bracketed": 0.196983,
+          "sd_of_estimates": 0.21034099853547358,
+          "trials_with_an_estimate": 85,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.024228599876107305,
+          "mean_estimate": -0.053166973734376136,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015547314880711717,
+            "share": 0.409
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.023572149899704634,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015547314880711718,
+            "share": 0.591
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          },
+          "mean_bootstrap_error": 0.2132465181244725,
+          "mean_estimate": -0.4729969170490004,
+          "not_bracketed": {
+            "se": 0.00817410545564467,
+            "share": 0.928
+          },
+          "not_shown": {
+            "se": 0.008121514637061242,
+            "share": 0.071
+          },
+          "resamples_bracketed": 0.19034399999999999,
+          "sd_of_estimates": 0.17549420605504787,
+          "trials_with_an_estimate": 72,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.024274836193796973,
+          "mean_estimate": -0.05318251173120585,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015597307459943206,
+            "share": 0.418
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.024593250063968744,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015597307459943206,
+            "share": 0.582
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0014127986409959489,
+            "share": 0.002
+          },
+          "mean_bootstrap_error": 0.2254276717637718,
+          "mean_estimate": -0.48005086678342,
+          "not_bracketed": {
+            "se": 0.007739767438366605,
+            "share": 0.936
+          },
+          "not_shown": {
+            "se": 0.007626008130076967,
+            "share": 0.062
+          },
+          "resamples_bracketed": 0.169452,
+          "sd_of_estimates": 0.2225332037440833,
+          "trials_with_an_estimate": 64,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.024416739468167782,
+          "mean_estimate": -0.053825323894963216,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015478888849009803,
+            "share": 0.398
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.024300908867223314,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015478888849009803,
+            "share": 0.602
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "nearly_all/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.2090882901615783,
+          "mean_estimate": -0.4911729323520635,
+          "not_bracketed": {
+            "se": 0.008724161850859943,
+            "share": 0.917
+          },
+          "not_shown": {
+            "se": 0.008724161850859944,
+            "share": 0.083
+          },
+          "resamples_bracketed": 0.19089799999999998,
+          "sd_of_estimates": 0.2117407329641269,
+          "trials_with_an_estimate": 83,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.024153550818843864,
+          "mean_estimate": -0.05251329594996748,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.01555313473226539,
+            "share": 0.41
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.024517401654442526,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.01555313473226539,
+            "share": 0.59
+          }
+        },
+        "shape": "nearly_all"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.005811626278418116,
+            "share": 0.035
+          },
+          "mean_bootstrap_error": 0.5383469453505693,
+          "mean_estimate": 0.08476511936796446,
+          "not_bracketed": {
+            "se": 0.003967870965643918,
+            "share": 0.016
+          },
+          "not_shown": {
+            "se": 0.006956938982052382,
+            "share": 0.949
+          },
+          "resamples_bracketed": 0.9498840000000001,
+          "sd_of_estimates": 0.5354006817000831,
+          "trials_with_an_estimate": 984,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.005811626278418116,
+            "share": 0.035
+          },
+          "mean_bootstrap_error": 0.032790063660046616,
+          "mean_estimate": 0.0006042056666903963,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.00762600813007697,
+            "share": 0.938
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03341615962801612,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.00512552436341883,
+            "share": 0.027
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0050322956987840055,
+            "share": 0.026
+          },
+          "mean_bootstrap_error": 0.5993462119872848,
+          "mean_estimate": 0.10251349376689084,
+          "not_bracketed": {
+            "se": 0.0022304708023195463,
+            "share": 0.005
+          },
+          "not_shown": {
+            "se": 0.005480784615363026,
+            "share": 0.969
+          },
+          "resamples_bracketed": 0.964748,
+          "sd_of_estimates": 0.5574767846339831,
+          "trials_with_an_estimate": 995,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0046385342512479085,
+            "share": 0.022
+          },
+          "mean_bootstrap_error": 0.03284138754468401,
+          "mean_estimate": -4.0030987881614105e-05,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006826346021115546,
+            "share": 0.951
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03308434685404172,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.00512552436341883,
+            "share": 0.027
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.005891010100144117,
+            "share": 0.036
+          },
+          "mean_bootstrap_error": 0.6101491546693923,
+          "mean_estimate": 0.089179217166441,
+          "not_bracketed": {
+            "se": 0.002986469487538756,
+            "share": 0.009
+          },
+          "not_shown": {
+            "se": 0.00655553201502365,
+            "share": 0.955
+          },
+          "resamples_bracketed": 0.963915,
+          "sd_of_estimates": 0.5862590525314659,
+          "trials_with_an_estimate": 991,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.005306505441436953,
+            "share": 0.029
+          },
+          "mean_bootstrap_error": 0.0330097211561381,
+          "mean_estimate": 0.00021822422950667136,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.007683163410991592,
+            "share": 0.937
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.0340554693186744,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005730968504537431,
+            "share": 0.034
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0054807846153630225,
+            "share": 0.031
+          },
+          "mean_bootstrap_error": 0.6101640288860967,
+          "mean_estimate": 0.08539248879373976,
+          "not_bracketed": {
+            "se": 0.003843826218756514,
+            "share": 0.015
+          },
+          "not_shown": {
+            "se": 0.006624499981130654,
+            "share": 0.954
+          },
+          "resamples_bracketed": 0.96388,
+          "sd_of_estimates": 0.567199169845485,
+          "trials_with_an_estimate": 985,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0049371044145328745,
+            "share": 0.025
+          },
+          "mean_bootstrap_error": 0.033037407286502375,
+          "mean_estimate": 0.0002140225641100435,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006759881655768837,
+            "share": 0.952
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03232817554363059,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.004740358636221525,
+            "share": 0.023
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.005306505441436953,
+            "share": 0.029
+          },
+          "mean_bootstrap_error": 0.6110797991437912,
+          "mean_estimate": 0.08640251619996071,
+          "not_bracketed": {
+            "se": 0.003298332912245215,
+            "share": 0.011
+          },
+          "not_shown": {
+            "se": 0.006270486424512857,
+            "share": 0.959
+          },
+          "resamples_bracketed": 0.9629260000000001,
+          "sd_of_estimates": 0.571584109249686,
+          "trials_with_an_estimate": 989,
+          "worse": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.00512552436341883,
+            "share": 0.027
+          },
+          "mean_bootstrap_error": 0.032930361038477074,
+          "mean_estimate": 0.00019770279482847722,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006956938982052382,
+            "share": 0.949
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03265484630312956,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.004839834707921336,
+            "share": 0.024
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0035820385257559714,
+            "share": 0.987
+          },
+          "mean_bootstrap_error": 0.11766807028163728,
+          "mean_estimate": -0.7098014269784477,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003582038525755969,
+            "share": 0.013
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.11103831453639297,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0035820385257559714,
+            "share": 0.987
+          },
+          "mean_bootstrap_error": 0.03319496362643098,
+          "mean_estimate": 0.1370805208221033,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003582038525755969,
+            "share": 0.013
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03304440523408713,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0032983329122452166,
+            "share": 0.989
+          },
+          "mean_bootstrap_error": 0.1171785932600161,
+          "mean_estimate": -0.7057125262840229,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003298332912245215,
+            "share": 0.011
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.11039450276133993,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.003443254274665176,
+            "share": 0.988
+          },
+          "mean_bootstrap_error": 0.03334600273722579,
+          "mean_estimate": 0.13727324262732274,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003443254274665175,
+            "share": 0.012
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.032542180221105145,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.003443254274665176,
+            "share": 0.988
+          },
+          "mean_bootstrap_error": 0.11587538140387602,
+          "mean_estimate": -0.7101281734970826,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003443254274665175,
+            "share": 0.012
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.11081819152911367,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0035820385257559714,
+            "share": 0.987
+          },
+          "mean_bootstrap_error": 0.03343962000455336,
+          "mean_estimate": 0.1383418705484401,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003582038525755969,
+            "share": 0.013
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03252106694258001,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.003443254274665176,
+            "share": 0.988
+          },
+          "mean_bootstrap_error": 0.11592133419657279,
+          "mean_estimate": -0.709591233340665,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003443254274665175,
+            "share": 0.012
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.11431144326423097,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0035820385257559714,
+            "share": 0.987
+          },
+          "mean_bootstrap_error": 0.03353315946602106,
+          "mean_estimate": 0.13853298034459038,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003582038525755969,
+            "share": 0.013
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03391044593911571,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 0.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.00396787096564392,
+            "share": 0.984
+          },
+          "mean_bootstrap_error": 0.11867163594165257,
+          "mean_estimate": -0.7094662703328788,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.003967870965643918,
+            "share": 0.016
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.11225559988415253,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004204283529925166,
+            "share": 0.982
+          },
+          "mean_bootstrap_error": 0.03362758793911277,
+          "mean_estimate": 0.1384067972148197,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.004204283529925164,
+            "share": 0.018
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.035640246767065946,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.75/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015607690412101338,
+            "share": 0.42
+          },
+          "mean_bootstrap_error": 0.24801455677296438,
+          "mean_estimate": -0.4334794100768255,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015607690412101338,
+            "share": 0.58
+          },
+          "resamples_bracketed": 0.99899,
+          "sd_of_estimates": 0.23840831795757875,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.01558666096378567,
+            "share": 0.416
+          },
+          "mean_bootstrap_error": 0.03301288836227298,
+          "mean_estimate": 0.05668819000346715,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015586660963785668,
+            "share": 0.584
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03369737620389782,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.75/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015478888849009803,
+            "share": 0.398
+          },
+          "mean_bootstrap_error": 0.2538582386910989,
+          "mean_estimate": -0.4301336456658559,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015478888849009803,
+            "share": 0.602
+          },
+          "resamples_bracketed": 0.999713,
+          "sd_of_estimates": 0.2251151365790428,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015416841440450765,
+            "share": 0.389
+          },
+          "mean_bootstrap_error": 0.03308372533940772,
+          "mean_estimate": 0.05513754446191945,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015416841440450765,
+            "share": 0.611
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.032383738718198066,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.75/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015547314880711717,
+            "share": 0.409
+          },
+          "mean_bootstrap_error": 0.25138244336382526,
+          "mean_estimate": -0.4356030395692951,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015547314880711718,
+            "share": 0.591
+          },
+          "resamples_bracketed": 0.9997670000000001,
+          "sd_of_estimates": 0.2255957155785919,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015416841440450765,
+            "share": 0.389
+          },
+          "mean_bootstrap_error": 0.03311029384153113,
+          "mean_estimate": 0.0564686727661967,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015416841440450765,
+            "share": 0.611
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03277503241225154,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.75/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015409607392792329,
+            "share": 0.388
+          },
+          "mean_bootstrap_error": 0.2539368851931489,
+          "mean_estimate": -0.42845884300698917,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015409607392792329,
+            "share": 0.612
+          },
+          "resamples_bracketed": 0.999792,
+          "sd_of_estimates": 0.24195950078819817,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015349267083479915,
+            "share": 0.38
+          },
+          "mean_bootstrap_error": 0.03323211143469075,
+          "mean_estimate": 0.05581366683033747,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015357050498061143,
+            "share": 0.619
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.034257174343935624,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=0.75/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 0.75,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.015445096309184997,
+            "share": 0.393
+          },
+          "mean_bootstrap_error": 0.25587929514343627,
+          "mean_estimate": -0.43234572127877074,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015445096309184997,
+            "share": 0.607
+          },
+          "resamples_bracketed": 0.999823,
+          "sd_of_estimates": 0.2297568714555775,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.015372410351015223,
+            "share": 0.383
+          },
+          "mean_bootstrap_error": 0.033081482724380266,
+          "mean_estimate": 0.05515695754300288,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015372410351015223,
+            "share": 0.617
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03313053961465637,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1.5/offset=0.45/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.45,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.8008965450676457,
+          "mean_estimate": 1.0256193213636822,
+          "not_bracketed": {
+            "se": 0.011414201680362933,
+            "share": 0.846
+          },
+          "not_shown": {
+            "se": 0.011414201680362931,
+            "share": 0.154
+          },
+          "resamples_bracketed": 0.290483,
+          "sd_of_estimates": 0.7465454803150877,
+          "trials_with_an_estimate": 154,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.03257308826344982,
+          "mean_estimate": -0.07328903378771537,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015372410351015223,
+            "share": 0.383
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.031888072776494095,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015372410351015223,
+            "share": 0.617
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1.5/offset=0.6/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.8409889345663164,
+          "mean_estimate": 1.1284022936886906,
+          "not_bracketed": {
+            "se": 0.012279047194306243,
+            "share": 0.815
+          },
+          "not_shown": {
+            "se": 0.012279047194306243,
+            "share": 0.185
+          },
+          "resamples_bracketed": 0.302825,
+          "sd_of_estimates": 0.8446947192173974,
+          "trials_with_an_estimate": 185,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.032759126515955465,
+          "mean_estimate": -0.07300005589391574,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015333492752794452,
+            "share": 0.378
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03260182644250566,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015333492752794452,
+            "share": 0.622
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1.5/offset=0.75/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.75,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.8372559780088319,
+          "mean_estimate": 1.002381004040789,
+          "not_bracketed": {
+            "se": 0.012528966437819202,
+            "share": 0.805
+          },
+          "not_shown": {
+            "se": 0.012528966437819204,
+            "share": 0.195
+          },
+          "resamples_bracketed": 0.316348,
+          "sd_of_estimates": 0.7251228301748928,
+          "trials_with_an_estimate": 195,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.03287807081176174,
+          "mean_estimate": -0.07418541693343089,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015309310892394862,
+            "share": 0.375
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03287734596974943,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015309310892394862,
+            "share": 0.625
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1.5/offset=0.9/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.9,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0009994998749374609,
+            "share": 0.001
+          },
+          "mean_bootstrap_error": 0.8321869382245408,
+          "mean_estimate": 1.0368876837557777,
+          "not_bracketed": {
+            "se": 0.012175343937647102,
+            "share": 0.819
+          },
+          "not_shown": {
+            "se": 0.012149074038789953,
+            "share": 0.18
+          },
+          "resamples_bracketed": 0.311015,
+          "sd_of_estimates": 0.7812510303452516,
+          "trials_with_an_estimate": 181,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.03283846210901345,
+          "mean_estimate": -0.0740301197246246,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.015458816254810716,
+            "share": 0.395
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03380156695661947,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.015458816254810716,
+            "share": 0.605
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "few/ratio=1.5/offset=1.1/correlation=0.6/dispersion=1.9/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 1.1,
+        "ratio": 1.5,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.8383960661984312,
+          "mean_estimate": 1.2149162879981095,
+          "not_bracketed": {
+            "se": 0.012253326079069309,
+            "share": 0.816
+          },
+          "not_shown": {
+            "se": 0.012253326079069307,
+            "share": 0.184
+          },
+          "resamples_bracketed": 0.317639,
+          "sd_of_estimates": 0.8008586075601822,
+          "trials_with_an_estimate": 184,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "mean_bootstrap_error": 0.03278187485294996,
+          "mean_estimate": -0.07311597958540875,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.01523299051401267,
+            "share": 0.366
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03125844207649159,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.01523299051401267,
+            "share": 0.634
+          }
+        },
+        "shape": "few"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1/offset=0.6/correlation=0.2/dispersion=1.9/alerts=1",
+        "correlation": 0.2,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.004427188724235731,
+            "share": 0.02
+          },
+          "mean_bootstrap_error": 0.4197802760501752,
+          "mean_estimate": 0.10508530578407815,
+          "not_bracketed": {
+            "se": 0.0075682891065286355,
+            "share": 0.061
+          },
+          "not_shown": {
+            "se": 0.008627803892068941,
+            "share": 0.919
+          },
+          "resamples_bracketed": 0.88242,
+          "sd_of_estimates": 0.45985888385566875,
+          "trials_with_an_estimate": 939,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004427188724235731,
+            "share": 0.02
+          },
+          "mean_bootstrap_error": 0.03658096272016102,
+          "mean_estimate": -0.002782545821513541,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.007209368904418752,
+            "share": 0.945
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.036566435136005805,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005811626278418116,
+            "share": 0.035
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 1.0,
+        "cell": "most/ratio=1/offset=0.6/correlation=0.6/dispersion=0.6/alerts=1",
+        "correlation": 0.6,
+        "dispersion": 0.6,
+        "offset": 0.6,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.004534203347888138,
+            "share": 0.021
+          },
+          "mean_bootstrap_error": 0.3822546458557575,
+          "mean_estimate": 0.09123664200705568,
+          "not_bracketed": {
+            "se": 0.005565608681896348,
+            "share": 0.032
+          },
+          "not_shown": {
+            "se": 0.007084560677981384,
+            "share": 0.947
+          },
+          "resamples_bracketed": 0.923567,
+          "sd_of_estimates": 0.39754122280346166,
+          "trials_with_an_estimate": 968,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004317290817167636,
+            "share": 0.019
+          },
+          "mean_bootstrap_error": 0.030947229829707677,
+          "mean_estimate": -0.002401084671244112,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.007021111023192843,
+            "share": 0.948
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.030461257881947527,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005648982209212559,
+            "share": 0.033
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 0.25,
+        "cell": "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=0.25",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.004317290817167636,
+            "share": 0.019
+          },
+          "mean_bootstrap_error": 0.10016420253213527,
+          "mean_estimate": 0.01782125047641858,
+          "not_bracketed": {
+            "se": 0.005394441583704471,
+            "share": 0.03
+          },
+          "not_shown": {
+            "se": 0.006826346021115546,
+            "share": 0.951
+          },
+          "resamples_bracketed": 0.924529,
+          "sd_of_estimates": 0.10052089665145002,
+          "trials_with_an_estimate": 970,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004317290817167636,
+            "share": 0.019
+          },
+          "mean_bootstrap_error": 0.03324720169547963,
+          "mean_estimate": -0.001763653513577743,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006826346021115546,
+            "share": 0.951
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.03261206636360159,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.005394441583704471,
+            "share": 0.03
+          }
+        },
+        "shape": "most"
+      },
+      {
+        "alerts": 4.0,
+        "cell": "most/ratio=1/offset=0.6/correlation=0.6/dispersion=1.9/alerts=4",
+        "correlation": 0.6,
+        "dispersion": 1.9,
+        "offset": 0.6,
+        "ratio": 1.0,
+        "replications": 1000,
+        "same_detection": {
+          "better": {
+            "se": 0.004204283529925164,
+            "share": 0.018
+          },
+          "mean_bootstrap_error": 1.5326255462968148,
+          "mean_estimate": 0.37652190716938855,
+          "not_bracketed": {
+            "se": 0.005730968504537431,
+            "share": 0.034
+          },
+          "not_shown": {
+            "se": 0.007021111023192843,
+            "share": 0.948
+          },
+          "resamples_bracketed": 0.920327,
+          "sd_of_estimates": 1.525724115995851,
+          "trials_with_an_estimate": 966,
+          "worse": {
+            "se": 0.0,
+            "share": 0.0
+          }
+        },
+        "same_false_alerts": {
+          "better": {
+            "se": 0.004204283529925164,
+            "share": 0.018
+          },
+          "mean_bootstrap_error": 0.030302421037289497,
+          "mean_estimate": -0.002478960168843086,
+          "not_bracketed": {
+            "se": 0.0,
+            "share": 0.0
+          },
+          "not_shown": {
+            "se": 0.006826346021115546,
+            "share": 0.951
+          },
+          "resamples_bracketed": 1.0,
+          "sd_of_estimates": 0.0305739717695713,
+          "trials_with_an_estimate": 1000,
+          "worse": {
+            "se": 0.0054807846153630225,
+            "share": 0.031
+          }
+        },
+        "shape": "most"
+      }
+    ],
+    "result_schema": "threshold-calibration-planning/1",
+    "summary": {
+      "same_detection": {
+        "by_shape": {
+          "few": {
+            "0.5": {
+              "better": {
+                "high": 0.989,
+                "low": 0.984
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.7057125262840229,
+                "low": -0.7101281734970826
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.016,
+                "low": 0.011
+              },
+              "sd_of_estimates": {
+                "high": 0.11431144326423097,
+                "low": 0.11039450276133993
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "0.75": {
+              "better": {
+                "high": 0.42,
+                "low": 0.388
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.42845884300698917,
+                "low": -0.4356030395692951
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.612,
+                "low": 0.58
+              },
+              "sd_of_estimates": {
+                "high": 0.24195950078819817,
+                "low": 0.2251151365790428
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "1": {
+              "better": {
+                "high": 0.036,
+                "low": 0.026
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.10251349376689084,
+                "low": 0.08476511936796446
+              },
+              "not_bracketed": {
+                "high": 0.016,
+                "low": 0.005
+              },
+              "not_shown": {
+                "high": 0.969,
+                "low": 0.949
+              },
+              "sd_of_estimates": {
+                "high": 0.5862590525314659,
+                "low": 0.5354006817000831
+              },
+              "worse": {
+                "high": 0.001,
+                "low": 0.0
+              }
+            },
+            "1.5": {
+              "better": {
+                "high": 0.001,
+                "low": 0.0
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 1.2149162879981095,
+                "low": 1.002381004040789
+              },
+              "not_bracketed": {
+                "high": 0.846,
+                "low": 0.805
+              },
+              "not_shown": {
+                "high": 0.195,
+                "low": 0.154
+              },
+              "sd_of_estimates": {
+                "high": 0.8446947192173974,
+                "low": 0.7251228301748928
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            }
+          },
+          "most": {
+            "0.5": {
+              "better": {
+                "high": 0.997,
+                "low": 0.992
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.6708457300808492,
+                "low": -0.6769167452480956
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.008,
+                "low": 0.003
+              },
+              "sd_of_estimates": {
+                "high": 0.10133200826073456,
+                "low": 0.09342446132256768
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "0.75": {
+              "better": {
+                "high": 0.506,
+                "low": 0.467
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.3904920006412254,
+                "low": -0.40594101291086804
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.533,
+                "low": 0.494
+              },
+              "sd_of_estimates": {
+                "high": 0.1822541323844244,
+                "low": 0.17626248705224842
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "1": {
+              "better": {
+                "high": 0.029,
+                "low": 0.024
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.09130235687596448,
+                "low": 0.06671305705206376
+              },
+              "not_bracketed": {
+                "high": 0.05,
+                "low": 0.024
+              },
+              "not_shown": {
+                "high": 0.952,
+                "low": 0.922
+              },
+              "sd_of_estimates": {
+                "high": 0.409281439764468,
+                "low": 0.3779807598463672
+              },
+              "worse": {
+                "high": 0.001,
+                "low": 0.0
+              }
+            },
+            "1.5": {
+              "better": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 1.1385900247567984,
+                "low": 0.9776164114655184
+              },
+              "not_bracketed": {
+                "high": 0.879,
+                "low": 0.86
+              },
+              "not_shown": {
+                "high": 0.14,
+                "low": 0.121
+              },
+              "sd_of_estimates": {
+                "high": 0.6266590637347237,
+                "low": 0.5962495725497726
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            }
+          },
+          "nearly_all": {
+            "0.5": {
+              "better": {
+                "high": 0.927,
+                "low": 0.918
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.8169601228691195,
+                "low": -0.8246873110532309
+              },
+              "not_bracketed": {
+                "high": 0.001,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.082,
+                "low": 0.073
+              },
+              "sd_of_estimates": {
+                "high": 0.0939766495675781,
+                "low": 0.08529220108250823
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "0.75": {
+              "better": {
+                "high": 0.412,
+                "low": 0.38
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.6504231639560898,
+                "low": -0.6663859924126714
+              },
+              "not_bracketed": {
+                "high": 0.066,
+                "low": 0.045
+              },
+              "not_shown": {
+                "high": 0.57,
+                "low": 0.522
+              },
+              "sd_of_estimates": {
+                "high": 0.18674828017867637,
+                "low": 0.17223050688191743
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "1": {
+              "better": {
+                "high": 0.065,
+                "low": 0.053
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.46945934737513006,
+                "low": -0.5167715441956872
+              },
+              "not_bracketed": {
+                "high": 0.39,
+                "low": 0.376
+              },
+              "not_shown": {
+                "high": 0.564,
+                "low": 0.548
+              },
+              "sd_of_estimates": {
+                "high": 0.2632380486834424,
+                "low": 0.23974634908792308
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "1.5": {
+              "better": {
+                "high": 0.002,
+                "low": 0.0
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.4603814665272998,
+                "low": -0.5068273613565015
+              },
+              "not_bracketed": {
+                "high": 0.955,
+                "low": 0.915
+              },
+              "not_shown": {
+                "high": 0.084,
+                "low": 0.043
+              },
+              "sd_of_estimates": {
+                "high": 0.2697249553563124,
+                "low": 0.17549420605504787
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            }
+          }
+        }
+      },
+      "same_false_alerts": {
+        "0.5": {
+          "better": {
+            "high": 0.996,
+            "low": 0.671
+          },
+          "cells": 15,
+          "mean_estimate": {
+            "high": 0.13853298034459038,
+            "low": 0.05182950115738647
+          },
+          "not_bracketed": {
+            "high": 0.0,
+            "low": 0.0
+          },
+          "not_shown": {
+            "high": 0.329,
+            "low": 0.004
+          },
+          "sd_of_estimates": {
+            "high": 0.035640246767065946,
+            "low": 0.020613888811377136
+          },
+          "worse": {
+            "high": 0.0,
+            "low": 0.0
+          }
+        },
+        "0.75": {
+          "better": {
+            "high": 0.496,
+            "low": 0.178
+          },
+          "cells": 15,
+          "mean_estimate": {
+            "high": 0.05831744692727299,
+            "low": 0.023603256852638817
+          },
+          "not_bracketed": {
+            "high": 0.0,
+            "low": 0.0
+          },
+          "not_shown": {
+            "high": 0.821,
+            "low": 0.504
+          },
+          "sd_of_estimates": {
+            "high": 0.034257174343935624,
+            "low": 0.021040166743189464
+          },
+          "worse": {
+            "high": 0.002,
+            "low": 0.0
+          }
+        },
+        "1": {
+          "better": {
+            "high": 0.035,
+            "low": 0.017
+          },
+          "cells": 19,
+          "mean_estimate": {
+            "high": 0.0006042056666903963,
+            "low": -0.002782545821513541
+          },
+          "not_bracketed": {
+            "high": 0.0,
+            "low": 0.0
+          },
+          "not_shown": {
+            "high": 0.96,
+            "low": 0.935
+          },
+          "sd_of_estimates": {
+            "high": 0.036566435136005805,
+            "low": 0.02243782244956684
+          },
+          "worse": {
+            "high": 0.038,
+            "low": 0.016
+          }
+        },
+        "1.5": {
+          "better": {
+            "high": 0.001,
+            "low": 0.0
+          },
+          "cells": 15,
+          "mean_estimate": {
+            "high": -0.05251329594996748,
+            "low": -0.08736454366026289
+          },
+          "not_bracketed": {
+            "high": 0.0,
+            "low": 0.0
+          },
+          "not_shown": {
+            "high": 0.418,
+            "low": 0.197
+          },
+          "sd_of_estimates": {
+            "high": 0.03380156695661947,
+            "low": 0.023572149899704634
+          },
+          "worse": {
+            "high": 0.803,
+            "low": 0.582
+          }
+        },
+        "by_shape": {
+          "few": {
+            "0.5": {
+              "better": {
+                "high": 0.988,
+                "low": 0.982
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.13853298034459038,
+                "low": 0.1370805208221033
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.018,
+                "low": 0.012
+              },
+              "sd_of_estimates": {
+                "high": 0.035640246767065946,
+                "low": 0.03252106694258001
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "0.75": {
+              "better": {
+                "high": 0.416,
+                "low": 0.38
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.05668819000346715,
+                "low": 0.05513754446191945
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.619,
+                "low": 0.584
+              },
+              "sd_of_estimates": {
+                "high": 0.034257174343935624,
+                "low": 0.032383738718198066
+              },
+              "worse": {
+                "high": 0.001,
+                "low": 0.0
+              }
+            },
+            "1": {
+              "better": {
+                "high": 0.035,
+                "low": 0.022
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.0006042056666903963,
+                "low": -4.0030987881614105e-05
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.952,
+                "low": 0.937
+              },
+              "sd_of_estimates": {
+                "high": 0.0340554693186744,
+                "low": 0.03232817554363059
+              },
+              "worse": {
+                "high": 0.034,
+                "low": 0.023
+              }
+            },
+            "1.5": {
+              "better": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.07300005589391574,
+                "low": -0.07418541693343089
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.395,
+                "low": 0.366
+              },
+              "sd_of_estimates": {
+                "high": 0.03380156695661947,
+                "low": 0.03125844207649159
+              },
+              "worse": {
+                "high": 0.634,
+                "low": 0.605
+              }
+            }
+          },
+          "most": {
+            "0.5": {
+              "better": {
+                "high": 0.996,
+                "low": 0.991
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.1356731671348013,
+                "low": 0.13455407174126352
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.009,
+                "low": 0.004
+              },
+              "sd_of_estimates": {
+                "high": 0.031006624389695352,
+                "low": 0.02825150218461563
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "0.75": {
+              "better": {
+                "high": 0.496,
+                "low": 0.457
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.05831744692727299,
+                "low": 0.05525431358296696
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.543,
+                "low": 0.504
+              },
+              "sd_of_estimates": {
+                "high": 0.03044807067848623,
+                "low": 0.029599391030362018
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "1": {
+              "better": {
+                "high": 0.027,
+                "low": 0.021
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.0004390256444407166,
+                "low": -0.002100388417794565
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.96,
+                "low": 0.935
+              },
+              "sd_of_estimates": {
+                "high": 0.03164464166108654,
+                "low": 0.029551745379672315
+              },
+              "worse": {
+                "high": 0.038,
+                "low": 0.016
+              }
+            },
+            "1.5": {
+              "better": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.08641293887371285,
+                "low": -0.08736454366026289
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.227,
+                "low": 0.197
+              },
+              "sd_of_estimates": {
+                "high": 0.03259734148829821,
+                "low": 0.03070310492263172
+              },
+              "worse": {
+                "high": 0.803,
+                "low": 0.773
+              }
+            }
+          },
+          "nearly_all": {
+            "0.5": {
+              "better": {
+                "high": 0.707,
+                "low": 0.671
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.05320880725091556,
+                "low": 0.05182950115738647
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.329,
+                "low": 0.293
+              },
+              "sd_of_estimates": {
+                "high": 0.02213693103534781,
+                "low": 0.020613888811377136
+              },
+              "worse": {
+                "high": 0.0,
+                "low": 0.0
+              }
+            },
+            "0.75": {
+              "better": {
+                "high": 0.2,
+                "low": 0.178
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": 0.024664508651555287,
+                "low": 0.023603256852638817
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.821,
+                "low": 0.799
+              },
+              "sd_of_estimates": {
+                "high": 0.02324077764188232,
+                "low": 0.021040166743189464
+              },
+              "worse": {
+                "high": 0.002,
+                "low": 0.0
+              }
+            },
+            "1": {
+              "better": {
+                "high": 0.021,
+                "low": 0.017
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.0012450910408292708,
+                "low": -0.0020768519546759128
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.958,
+                "low": 0.944
+              },
+              "sd_of_estimates": {
+                "high": 0.022983304562361438,
+                "low": 0.02243782244956684
+              },
+              "worse": {
+                "high": 0.036,
+                "low": 0.025
+              }
+            },
+            "1.5": {
+              "better": {
+                "high": 0.001,
+                "low": 0.0
+              },
+              "cells": 5,
+              "mean_estimate": {
+                "high": -0.05251329594996748,
+                "low": -0.05462769127414751
+              },
+              "not_bracketed": {
+                "high": 0.0,
+                "low": 0.0
+              },
+              "not_shown": {
+                "high": 0.418,
+                "low": 0.374
+              },
+              "sd_of_estimates": {
+                "high": 0.024593250063968744,
+                "low": 0.023572149899704634
+              },
+              "worse": {
+                "high": 0.625,
+                "low": 0.582
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    20261011
+  ],
+  "selective_prediction": null,
+  "sensor_subset": null,
+  "split": null,
+  "structural_disagreement": null
+}

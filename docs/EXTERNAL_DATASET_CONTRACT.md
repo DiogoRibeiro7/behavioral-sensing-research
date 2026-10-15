@@ -55,7 +55,38 @@ CASAS readers.
   the provenance.
 
 A new dataset needs its own adapter only when it cannot be exported to that
-layout.
+layout. Three datasets have one:
+
+- **`OrdonezAdapter`**, in `sensor_modeling.external.ordonez`. The UCI ADL
+  Binary dataset, used by the [Phase 5 external
+  evaluation](PHASE5_EXTERNAL_PROTOCOL.md).
+- **`ContextActAdapter`**, in `sensor_modeling.external.contextact`. The
+  ContextAct@A4H dataset: one resident of the Amiqual4Home apartment, recorded
+  for 7 days in July 2016 and 21 in November 2016, as its README gives them,
+  read as two periods that are not independent homes; their labelled windows
+  fall on 29 calendar days, 7 and 22. Its labels are the resident's own
+  annotations, each with a start and an end, and its motion sensors feed five of
+  the six channels of the CASAS-trained model; it has no hall motion. The
+  mapping was written from the documentation and the dataset paper, before any
+  model was run on the data. It is the dataset of the
+  [ContextAct transfer test](CONTEXTACT_TRANSFER_PROTOCOL.md); see
+  [its results](CONTEXTACT_TRANSFER_RESULTS.md).
+- **`TihmAdapter`**, in `sensor_modeling.external.tihm`. The TIHM dataset of
+  56 homes of people living with dementia. Its labels are alerts a clinical
+  team verified, stamped at a moment, so they are point annotations and every
+  one is declared unmappable: the contract converts the sensor events and
+  scores nothing against a state. It is used by the [TIHM alert-burden
+  protocol](TIHM_ALERT_BURDEN_PROTOCOL.md), and by the description of the
+  silent-home rule on the same homes in the [silent-home
+  results](SILENT_HOME_RESULTS.md), and of the calibrated baseline reference
+  in the [threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md).
+  The [sleep-mat comparison](SLEEP_MAT_RESULTS.md) reads the dataset's
+  `Sleep.csv` itself, beside the adapter, which still does not. The planning record of the
+  [matched-sensor protocol](MATCHED_SENSORS_PROTOCOL.md) reads `Activity.csv`
+  itself for its sensors alone, the gaps between activations and eight
+  moments of each home's records, and maps no record to a state. The
+  [sleep-gap description](SLEEP_GAP_RESULTS.md) reads `Sleep.csv` minute by
+  minute, beside the adapter, and records per-home summaries only.
 
 ## The mapping layer
 

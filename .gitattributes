@@ -10,7 +10,17 @@ artifacts/phase1/*.json text eol=lf
 # The frozen Phase 3 protocol is verified the same way, by its recorded digest.
 artifacts/phase3/*.json text eol=lf
 
+# The ContextAct mapping and transfer protocol are pinned by their digests too.
+artifacts/contextact/*.json text eol=lf
+
 # Figures are drawn from their published records, and each SVG carries the
 # digest of the data it plots. Matplotlib writes path data with trailing
 # spaces, so the files are not diffed as text.
 docs/figures/*.svg text eol=lf -diff
+
+# Records, frozen protocols and figures are written by scripts, and they are
+# most of the lines in a typical pull request. Marking them generated collapses
+# them in GitHub's diffs and leaves them out of the language statistics; a
+# reviewer can still open each one.
+artifacts/**/*.json linguist-generated=true
+docs/figures/*.svg linguist-generated=true

@@ -8,16 +8,19 @@ rather than collapsed into a single anomaly score.
 """
 
 from .adaptive import (
+    DOF_PER_RESIDUAL,
     MAD_TO_SIGMA,
     AdaptiveBaseline,
     BaselineConfig,
     BaselineReference,
     BehaviouralChange,
     ChangeKind,
+    normal_equivalent,
 )
 from .features import DailySummary, feature_series, summarise_days
 
 __all__ = [
+    "DOF_PER_RESIDUAL",
     "MAD_TO_SIGMA",
     "AdaptiveBaseline",
     "BaselineConfig",
@@ -26,5 +29,6 @@ __all__ = [
     "ChangeKind",
     "DailySummary",
     "feature_series",
+    "normal_equivalent",
     "summarise_days",
 ]

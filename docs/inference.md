@@ -74,6 +74,56 @@ event sensors silent over the same period are downgraded too, so their silence
 stops being read as observed inactivity. Only silence counts as a canary
 signal, since a stuck sensor is still delivering records.
 
+**A home with no canary can still stop reporting.** A deployment of event
+sensors alone has no sensor that promised anything, so the rule above can never
+fire, and a home that reports nothing is read as a home in which nothing
+happened. `HealthConfig.home_silence_horizon` covers that case and is off by
+default. When it is set and *no* sensor of the home has reported for that
+long:
+
+- every sensor that has ever reported is downgraded to `DROPOUT`, and the
+  report carries `silent_since`, the last observation of any sensor;
+- the pipeline leaves the silent time out of the day's summary, from the
+  moment the silence began, and records the fraction of the day it took as
+  `DailySummary.silent`;
+- a day that lost any time this way is refused by the baseline, however much
+  of it was left. The hours of a state are sums over the time that was
+  watched, so a day whose night was silent would otherwise arrive as a day of
+  little sleep;
+- one `data_quality` alert about `home_silence` is raised, and repeated once
+  per cooldown while the silence lasts. It replaces the apparatus alert for the
+  same period, because it makes no claim about the apparatus.
+
+The rule says what is known and no more. The home may be empty, its resident
+may need help, or nothing may be being delivered, and a stream of activations
+cannot tell these apart. Two limits follow from its being causal. A silence is
+recognised only once it has lasted the horizon, so the day on which it begins
+is closed normally if it has not yet lasted that long, with its silent
+evening read as it would be without the rule. And a silence shorter than the
+horizon is never seen at all. The horizon has to be longer than the
+longest stretch a resident at home can pass without tripping any sensor, which
+is a property of the home and its sensors, not of this code.
+
+Two more follow from what a day's summary is. The day on which a silence ends
+is refused however early in the day it ends, because the hours before a
+sensor is heard again were not observed. And a restart forgets the estimates
+of the day in progress, as it always has, and with them a silence that had
+already ended that day: the day is then judged on what was observed after the
+restart. A silence that is still open at the restart is kept.
+
+What the rule does was measured on simulated homes under
+[a protocol frozen before the test](SILENT_HOME_PROTOCOL.md), and described on
+the TIHM homes it was designed from: see
+[the silent-home results](SILENT_HOME_RESULTS.md).
+
+**Silence across homes has a different cause.** `sensor_modeling.health.fleet`
+applies the canary argument one level up. A home's own monitor cannot tell a
+silent home from a service that has stopped collecting; from above, most of
+the monitored homes silent together points at what they share.
+`assess_fleet` makes that call at one moment from each home's last
+observation, and `common_silences` finds such stretches in a recorded fleet.
+It reports a common cause without naming one.
+
 **Drift is reported, never corrected.** Without redundant sensing the monitor
 cannot separate sensor drift from genuine environmental change, so it flags
 the shift and leaves the judgement to the analyst.
@@ -229,6 +279,36 @@ redefine normal) and **weekday-aware** (Sundays are compared against Sundays,
 so ordinary weekly rhythm is not reported as behavioural change). History is
 bounded, so the definition of normal moves with the person.
 
+A weekday-aware reference rests on few days: four Sundays, then five. The
+spread of four values is so uncertain that a day with nothing unusual in it
+lies three of their robust standard deviations out about one time in six,
+where three standard deviations state one in 370. `BaselineConfig.calibrated`
+is an opt-in answer to that, and it is off by default:
+
+* the centre stays weekday-aware;
+* the scale is pooled over every retained day. It is the robust spread of how
+  far each day fell from the centre the other days of its weekday would have
+  given it, so it rests on all the days and already holds the uncertainty of
+  a centre drawn from a few;
+* the deviation is reported as the Gaussian value that is as unusual as the
+  day is under the Student t that scale has, with 0.368 degrees of freedom
+  for each day behind it, so `deviation_threshold` keeps the meaning a
+  Gaussian threshold has;
+* the trend is fitted to those same distances and not to the days as they
+  are, so a weekly rhythm is no more read as a drift than as a deviation;
+* the trend's movement is measured against the same pooled scale. It is not
+  mapped: `trend_threshold` is a size of movement, not a probability.
+
+A threshold that means what it says is passed far less often, so it is not a
+drop-in replacement: at the declared thresholds the calibrated reference
+reports much less, of what is there as well as of what is not.
+[The baseline's thresholds on days with nothing in them](THRESHOLD_CALIBRATION_NULL.md)
+measures both references on synthetic days, where the answer is known, and
+[the threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md) test the
+calibrated one on simulated homes, under a protocol frozen before the test:
+at the default's false alerts it finds more of a step change, and its
+threshold means what it says there on the hours of sleep.
+
 Poorly observed days go through
 `skip`, which records the
 verdict but deliberately keeps the day **out** of the history. Letting a
@@ -268,6 +348,33 @@ must never surface as a finding about a person.
 
 Alert text is phrased as observation, never diagnosis. The platform is a
 research toolkit and is not a medical device.
+
+### Asking what another threshold would have raised
+
+Nothing upstream of a day's summary depends on how the baseline or the alert
+policy is configured. `sensor_modeling.online.replay_days` uses that: it takes
+the steps a pipeline produced and passes the same days, at the same moments,
+through fresh baselines and a fresh alert engine under another configuration,
+so a threshold can be examined without running the home again.
+
+```python
+from sensor_modeling.baseline import BaselineConfig
+from sensor_modeling.online import replay_days, reproduces
+
+steps = pipeline.run(observations)
+assert reproduces(steps, replay_days(steps, pipeline.config))
+
+stricter = replay_days(
+    steps, pipeline.config, baseline_config=BaselineConfig(deviation_threshold=4.0)
+)
+alerts = [alert for step in stricter for alert in step.alerts]
+```
+
+The replay calls the function the pipeline itself calls when it closes a day,
+and reviews every health report in the pipeline's order, since the alert
+engine counts its recent alerts of every kind. It answers a question about
+thresholds only. A different step, another emission model or the rule for a
+silent home changes the summaries, and the home must be run again.
 
 ## Interoperability
 

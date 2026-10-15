@@ -36,7 +36,12 @@ instantaneous per-room counts the best achievable is 0.397; the pipeline scores
 had.
 
 **The three additions made in response do not combine.** Use one, chosen by what
-the output feeds; see [What to actually use](#what-to-actually-use).
+the output feeds; see [What to actually use](#what-to-actually-use). The Phase 3
+successors of fitted rates and the circadian prior, fitted hurdle channels and a
+hierarchical time prior, do combine in the filter's recursion, on the development
+homes and on 43 held-out CASAS homes, which are not independent of CASAS; see
+[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
+[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
 
 
 ## What is implemented
@@ -557,6 +562,32 @@ what the output feeds.
 
 Stacking them is the one thing to avoid, and it is exactly what a reader would
 do by default given three separate features each documented as an improvement.
+
+This holds for these three components in the production filter, on these 11
+homes. The Phase 3 successors of fitted rates and the circadian prior are
+different models: a hurdle model fitted for each evidence channel and state, and
+a hierarchical periodic prior entering the recursion as an hour-dependent
+transition. Under a frozen protocol on the 20 development homes, cross-fitted on
+two folds, they combine: 0.517 balanced accuracy, against 0.456 with the fitted
+channels alone, and calibration error 0.213 against 0.284. Fitted on those 20
+homes and scored once on the 43 held-out homes of the external cohort, they
+score 0.567 against 0.490, and the prior's gain holds in all 43. Those homes
+share CASAS's sensors and labelling, so they are not an independent dataset;
+see [the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md) and
+[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md).
+
+The online pipeline offers this combination as an opt-in,
+`PipelineConfig(formulation="phase3")`, with its parameters fitted once on the
+20 development homes and shipped with the package; its defaults are unchanged.
+On simulated homes its beliefs equal the research recursion's. It was fitted on
+CASAS `hh` homes. On ContextAct@A4H, one resident outside CASAS, its beliefs
+equal the recursion's and it scored 0.385 balanced accuracy over 29 days,
+below the declared channels with the time prior at 0.534; the prior's gain held
+there, but the fitted channels did not transfer
+([the ContextAct results](CONTEXTACT_TRANSFER_RESULTS.md)). It has not been run on TIHM. It needs a five-minute step, reads only the CASAS channels' motion and
+hall-door sensors, and reads the hour from timestamps that must carry the home's
+local zone. Its channels are not weighted by sensor health or attribution, as in
+the evaluations above, so a sensor that stops reporting reads as silence.
 
 ### Why abstention does not fire, and why raising the threshold will not fix it
 

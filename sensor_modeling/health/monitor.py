@@ -14,6 +14,14 @@ sensor makes no such promise, and its silence is genuinely ambiguous between
 "broken" and "nobody opened the cupboard". For those sensors the monitor
 declines to call a failure and leaves the status at ``UNKNOWN``.
 
+A deployment of event sensors alone has no sensor that promised anything, so
+nothing above can ever notice that the whole home has stopped reporting. One
+rule covers that case, and it is off unless a horizon is declared: when *no*
+sensor of the home has reported for at least ``home_silence_horizon``, the
+home is not being observed. The monitor does not say why. The home may be
+empty, its resident may need help, or the apparatus may not be reporting, and
+an event stream cannot tell these apart.
+
 *Verdicts are separated from behaviour.* The monitor reads values but never
 interprets them as activity. Its output is consumed by fusion as an evidence
 weight, which is what stops a dead sensor from being read as a quiet resident.
@@ -93,10 +101,30 @@ class SensorHealthReport:
 
 @dataclass(frozen=True)
 class SystemHealthReport:
-    """Deployment-wide health, observable independently of behaviour."""
+    """Deployment-wide health, observable independently of behaviour.
+
+    Attributes
+    ----------
+    at
+        When the report was made.
+    sensors
+        The verdict for each registered sensor.
+    silent_since
+        The last observation from any sensor, when the home has been silent
+        for at least the configured horizon; ``None`` otherwise, and always
+        ``None`` when no horizon is configured.
+    """
 
     at: datetime
     sensors: dict[str, SensorHealthReport]
+    silent_since: datetime | None = None
+
+    @property
+    def silence(self) -> timedelta | None:
+        """How long the whole home has been silent, when it counts as silent."""
+        if self.silent_since is None:
+            return None
+        return max(self.at - self.silent_since, timedelta(0))
 
     @property
     def faulty(self) -> list[str]:
@@ -124,6 +152,9 @@ class SystemHealthReport:
             "at": self.at.isoformat(),
             "coverage": self.coverage,
             "faulty": self.faulty,
+            "silent_since": (
+                self.silent_since.isoformat() if self.silent_since else None
+            ),
             "sensors": {sid: r.to_dict() for sid, r in self.sensors.items()},
         }
 
@@ -176,6 +207,14 @@ class HealthConfig:
         like a dropout, yet a large part of the evidence never arrives.
     delivery_window
         Inter-arrival samples retained for the delivery-rate estimate.
+    home_silence_horizon
+        How long every sensor of the home may be silent before the home is
+        treated as not observed. ``None``, the default, leaves the rule off:
+        the silence of an event sensor is then never read as anything. It is
+        meant for deployments with no sensor that reports on a cadence, and
+        it must be longer than the longest stretch a resident at home can
+        plausibly pass without tripping any sensor. See
+        :meth:`SensorHealthMonitor.report`.
     """
 
     degraded_after: float = 2.0
@@ -193,6 +232,7 @@ class HealthConfig:
     outage_canary_fraction: float = 0.6
     delivery_floor: float = 0.6
     delivery_window: int = 32
+    home_silence_horizon: timedelta | None = None
 
     def __post_init__(self) -> None:
         """Validate threshold configuration."""
@@ -223,6 +263,10 @@ class HealthConfig:
             raise ValueError("delivery_floor must lie in (0, 1]")
         if self.delivery_window < 2:
             raise ValueError("delivery_window must be at least 2")
+        if self.home_silence_horizon is not None and (
+            self.home_silence_horizon <= timedelta(0)
+        ):
+            raise ValueError("home_silence_horizon must be positive")
 
 
 @dataclass
@@ -468,28 +512,81 @@ class SensorHealthMonitor:
     def report(self, now: datetime) -> SystemHealthReport:
         """Return the deployment-wide health verdict as of *now*.
 
-        Individual verdicts are then corrected for one failure mode no single
-        sensor can detect on its own. A purely event-driven sensor makes no
+        Individual verdicts are then corrected for two failure modes no single
+        sensor can detect on its own.
+
+        *A broken delivery path.* A purely event-driven sensor makes no
         promise to report, so its silence is normally uninformative about its
         health -- but if every sensor that *did* promise has simultaneously
         gone missing, the most likely explanation is that the pathway
         carrying all of them has failed, not that the resident stopped using
-        every room at once.
+        every room at once. The sensors with a declared cadence therefore act
+        as canaries for the whole delivery path. When enough of them fail,
+        event sensors that have been silent for the same period are
+        downgraded to ``DROPOUT``, so their silence stops being read as
+        observed inactivity.
 
-        The sensors with a declared cadence therefore act as canaries for the
-        whole delivery path. When enough of them fail, event sensors that
-        have been silent for the same period are downgraded to ``DROPOUT``,
-        so their silence stops being read as observed inactivity.
+        *A home that has stopped reporting altogether.* Without canaries the
+        rule above can never fire. When ``home_silence_horizon`` is set and no
+        sensor at all has reported for that long, every sensor that has ever
+        reported is downgraded to ``DROPOUT`` in the same way, and the report
+        carries the moment the silence began. This is a statement about the
+        evidence, not about its cause.
         """
         reports = {sid: self.report_for(sid, now) for sid in self._states}
+        self._distrust_silence_behind_dead_canaries(reports)
+        silent_since = self._home_silent_since(now)
+        if silent_since is not None:
+            for sid, state in self._states.items():
+                if state.last_seen is None or reports[sid].status in (
+                    SensorStatus.DROPOUT,
+                    SensorStatus.MISSING,
+                ):
+                    continue
+                reports[sid] = replace(
+                    reports[sid],
+                    status=SensorStatus.DROPOUT,
+                    reliability=state.spec.prior_reliability
+                    * state.quality
+                    * status_reliability(SensorStatus.DROPOUT),
+                    detail=(
+                        "silent while no sensor of the home reported; its "
+                        "silence cannot be read as an absence of activity"
+                    ),
+                )
+        return SystemHealthReport(at=now, sensors=reports, silent_since=silent_since)
 
+    def _home_silent_since(self, now: datetime) -> datetime | None:
+        """Return when the home fell silent, if it has been for the horizon.
+
+        The silence is dated from the last observation of any registered
+        sensor. A home that has never reported is not silent: there is
+        nothing yet to have stopped.
+        """
+        horizon = self.config.home_silence_horizon
+        if horizon is None:
+            return None
+        seen = [
+            state.last_seen
+            for state in self._states.values()
+            if state.last_seen is not None
+        ]
+        if not seen:
+            return None
+        latest = max(seen)
+        return latest if now - latest >= horizon else None
+
+    def _distrust_silence_behind_dead_canaries(
+        self, reports: dict[str, SensorHealthReport]
+    ) -> None:
+        """Downgrade silent event sensors when the cadence sensors have failed."""
         verifiable = [
             sid
             for sid, state in self._states.items()
             if state.spec.expected_interval is not None
         ]
         if not verifiable:
-            return SystemHealthReport(at=now, sensors=reports)
+            return
 
         # Only *silence* indicates a broken delivery path. A stuck or
         # out-of-range sensor is still delivering records, so it says nothing
@@ -503,14 +600,14 @@ class SensorHealthMonitor:
         if len(failing) < 2 or len(failing) < self.config.outage_canary_fraction * len(
             verifiable
         ):
-            return SystemHealthReport(at=now, sensors=reports)
+            return
 
         # The outage can only have begun after the last canary still speaking.
         last_heard: list[datetime] = [
             seen for sid in failing if (seen := reports[sid].last_seen) is not None
         ]
         if not last_heard:
-            return SystemHealthReport(at=now, sensors=reports)
+            return
         outage_since = max(last_heard)
 
         for sid, state in self._states.items():
@@ -529,7 +626,6 @@ class SensorHealthMonitor:
                     "cannot be read as an absence of activity"
                 ),
             )
-        return SystemHealthReport(at=now, sensors=reports)
 
     def reliabilities(self, now: datetime) -> dict[str, float]:
         """Return per-sensor evidence weights, the fusion layer's input."""

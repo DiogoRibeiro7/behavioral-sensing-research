@@ -1,0 +1,1621 @@
+{
+  "at_freeze": {
+    "distributions": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.6",
+      "python": "3.13.16",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    },
+    "sources": {
+      "pyproject.toml": "4e1061d1852722e87ef501c3fc0c50505e9e1766616d93a90c2e76b0886ebc94",
+      "scripts/freeze_heldout_confirmation.py": "c4b3c41e22b290f9158fd24ed03e14040ad7eba21f2c5d992d8763a6b684968b",
+      "scripts/run_heldout_confirmation.py": "e633eea8f960e36cf6c3b80347f54fefe0e5d46623052f15eb835ccd78e63fac",
+      "sensor_modeling/__init__.py": "15c3d7a2e4077cbe1f97a7e71d6ecb4dfb9674b12043406077a40d995bc5aecb",
+      "sensor_modeling/alerts/__init__.py": "c9b119030b994ac4e9213f7c281cf83aadd686aa0b6571518f629c05191842b5",
+      "sensor_modeling/alerts/alert.py": "8c95e350189ec80f52dc8e3f8e17887627c9fa7593bcd2f00711988a6b5467a5",
+      "sensor_modeling/analysis/__init__.py": "9426703af99965039d0c2317c6237a565c822c9a0105e896886ff37f8bbe8d1d",
+      "sensor_modeling/analysis/_frame.py": "030df2b32c997ad36a8a9a0ab34e183990833d1ac3d11a6fa07662a9c8b51a9a",
+      "sensor_modeling/analysis/behavioral_analysis.py": "9c5523de8ce412df6fe436ac2d715004a1bd10bd577b94acf350428e6dbb42e8",
+      "sensor_modeling/analysis/behavioral_metrics.py": "9da8a8146325bc2d58cacd03f15474690c8f566581641419763dec75b85e2842",
+      "sensor_modeling/analysis/comparison.py": "a34a669a02b59cc1b4b3be196067932c21d4bf2daecfd7c11395906aed77e805",
+      "sensor_modeling/analysis/dependency_network.py": "f114dd9385ca72f5bf1560b5b8db6ab1d1dd28a0fc304e7ce1683c9aa82cf2c1",
+      "sensor_modeling/analysis/granger_causality.py": "cc94bf1040e1c091052b6886b8ccdc731fa4168a6e2803aec73d0162e3fdd375",
+      "sensor_modeling/analysis/pipeline.py": "c15ee77076c1db2ee70afd51800613d7e9650d9c4c0f1c66c1ba02d1b5a12911",
+      "sensor_modeling/analysis/reporting.py": "f2dd190ddc350edf27aa4d13877f9e842c077e6030a6017abfe87f132c58b608",
+      "sensor_modeling/baseline/__init__.py": "4002a7d96962c348b89cc48f4f9e6789d617dde2174d8ecfa8f943090eb24ecd",
+      "sensor_modeling/baseline/adaptive.py": "85d3d25aef93c9b89fcde2c79cd88c5cd15774741221e0e7858721195167859d",
+      "sensor_modeling/baseline/features.py": "c23bba405c4f50444d82c45dc04fc8e69567100c78b3a1ff4f3f18a5a89f0c12",
+      "sensor_modeling/change_point/__init__.py": "fd57f9c92a0d826edc94a757915140759cdc7f5f10a0c37924ca71ff7ce53920",
+      "sensor_modeling/change_point/_validation.py": "1c914aac434a34c3ab251295fb7655ec0e8e6444a3e42d907980fe70b252846a",
+      "sensor_modeling/change_point/adaptive_normalization.py": "6f0ac221c263e22373fd607f8d305f16e9a72dd8a3b6dd8a68512eb9c7b6292d",
+      "sensor_modeling/change_point/embedding_cpd.py": "ccccb842663d37d4c9ac5cc4460ae6e1e4f11f77ce633e8e463c225d4b2789e9",
+      "sensor_modeling/change_point/energy_efficient.py": "78129fab14c37ddafdfca0aaf702f3514c4d68b3a7cfcc0a8f6b03adf2ca9cb1",
+      "sensor_modeling/change_point/genetic_optimization.py": "99dfa1eb22f29f4af73d81401944d11f2abe99f5b8febfb6681f555822071ed8",
+      "sensor_modeling/cli.py": "8d9b9bd0227edbd700120d2459c64fb2142375d984e7c374cfc7dad13589e0de",
+      "sensor_modeling/context/__init__.py": "bd3365f8363cd8a8c654c68e1ad070dc2177d80c629860a9b4e106ea876a1245",
+      "sensor_modeling/context/occupancy.py": "9c9957784c646f1694af92833d167dffdb460cf9c179b1d454113cae92eb940c",
+      "sensor_modeling/data/__init__.py": "1e39f0488b61bdaba34d0ff2b06ea7e4aa41f33ead1d62dabf8e00106c0f08eb",
+      "sensor_modeling/data/exceptions.py": "4ad289b9320a70696c9a0786b7e10203c086d11934ce5fb5e490c82833e80f69",
+      "sensor_modeling/data/loaders.py": "32a0af2395899e44fcd07f8b4b5a228d680dc8ba3dfbcf733a11c43103250e9d",
+      "sensor_modeling/data/preprocessing.py": "f82ad32a879064e740e1d1b6c59c006e4d44bed11eff17966fb760ddc46e8943",
+      "sensor_modeling/data/synthetic.py": "73d728cac9b3498d9de250c5b74f14c37e93e3edaa42e74502f3adaa680d923a",
+      "sensor_modeling/data/validation.py": "d0435fd316c61ef213f655af27aed29934b952fc5e8905e875066a31f4eeef8a",
+      "sensor_modeling/datasets/__init__.py": "86218b88aadca0f43c7a509c2ba064e7a97d699a29fcc1d97f9eb34d9ee1be00",
+      "sensor_modeling/datasets/baseline_models.py": "ce59b057faa12467b7450c2dc4c67bc5b95a0e438b4278d2c89c9f7d40814a3b",
+      "sensor_modeling/datasets/casas.py": "06e98d929e9f4d1cbcab23a3c8ab5542fca4d3ba7ce25437f2a103f8f61c1b5b",
+      "sensor_modeling/datasets/casas_hh.py": "144c7f8d068e072f0c959b0dc02b2cf72d13d2e2407c0b298537517670a60042",
+      "sensor_modeling/datasets/channel_models.py": "68655d77b8a58e296362248624c7554dcef14058040abca6f2a4c0a9a50c6ace",
+      "sensor_modeling/datasets/circadian.py": "d56b855fa6d14dfe57d8c92270325e30b9add7f233ba4e2259cb67ed72716d81",
+      "sensor_modeling/datasets/combined_prior_experiment.py": "268ac5f9abf01cf935f966472c6b75f1744530070747a61d3d04fcf4923f10c4",
+      "sensor_modeling/datasets/combined_prior_summary.py": "c15dd04c1ecdee53538f735a96bbc8d6bdb3dd001c7c08f0bcd7369ad0371729",
+      "sensor_modeling/datasets/dispersion_experiment.py": "2ae774c00460ac86cefe938cf7654718ec70af1201b97e5f6b3fdd1bc80dcae8",
+      "sensor_modeling/datasets/dispersion_summary.py": "a167651b2bfa7cfe0ae1f2ab60bea31f5bfcbd614349fbd71f69b07040b0a8bf",
+      "sensor_modeling/datasets/evaluate.py": "3c85d157a72ab7841098d504cd0b6579631acd3d2c87792b0b6b3906a915d35c",
+      "sensor_modeling/datasets/external_experiment.py": "3c73a6b769e42d133d7a5c88e1ee13b99b32ef614810c5ae02214882c123cdb1",
+      "sensor_modeling/datasets/external_figures.py": "bc27f8b5610476432d341adabfc61109ee6671b2d5829752be9186e1ba86bd8c",
+      "sensor_modeling/datasets/external_protocol.py": "f89bbcdc531830fbf42754aa20a4379c63d90af337be44c533038ed2e9c6fed4",
+      "sensor_modeling/datasets/external_protocol_summary.py": "e3cada962a1f02a7f9de74105e11a6091c2103b63a7116aeff38c89eaf4d3300",
+      "sensor_modeling/datasets/external_summary.py": "aa118909afa17281a6f66b0f8f9ea1f4de5afeb07021b9fd05b6b27cebc82f20",
+      "sensor_modeling/datasets/gap_summary.py": "424a81bcf6526e3bca645cebeb039660b6d1aca0ed9b5082ccbf4070c7141e01",
+      "sensor_modeling/datasets/heldout_experiment.py": "c6d662264158c3b4ea81bbfe4bdc0cfcfb3f467d021789ca390303a3209200fe",
+      "sensor_modeling/datasets/heldout_summary.py": "4f8c6bde1d204c8738181b5c491869d59f1811bdaebd808f308d16429285846e",
+      "sensor_modeling/datasets/history_experiment.py": "215580346a28c812035ee2a6c347c9ea7e5513224c9c4d30497eac8e49ab77fa",
+      "sensor_modeling/datasets/history_fit.py": "efcd9cf574bfff1e75ebe7db98ea055600fa8d0548ff1db1f187eae113e1c610",
+      "sensor_modeling/datasets/history_summary.py": "e6117c414b23930e0ef3fb5b4a89ae30e40d7fd3f9515a19a23b724323e04b3f",
+      "sensor_modeling/datasets/information_sets.py": "672053f3ef294c7df7c4952f7ff6a8a57c2889bcaaadcbe3a5418c29ba86c88b",
+      "sensor_modeling/datasets/matched_evaluation.py": "3799579263b34894afc3154df8fc5be9bdecdc3734dc836d568fc9a0b8156e5e",
+      "sensor_modeling/datasets/matched_sensors_experiment.py": "3d46e66c760d454521705a47140747441c7ab88eaee0dcd8b146b4a5b35ccec4",
+      "sensor_modeling/datasets/matched_sensors_figures.py": "872df96820df301dbdf77caa4273960813f3778897b2d55a0f6251c85160cb33",
+      "sensor_modeling/datasets/matched_sensors_planning.py": "6abdfb5888652232c4a335883e06b35bc3f1990d9a833a3e68b949f6dbdbdd8e",
+      "sensor_modeling/datasets/matched_sensors_protocol.py": "b8efd072ff787da5960863ca02d5512de7ff3479b02395930ab6b672970b2cbf",
+      "sensor_modeling/datasets/matched_sensors_summary.py": "26d2e881921f2c51482b9ee68ab2237437a587e53f4f9d95877459f18bb849d2",
+      "sensor_modeling/datasets/observation_mismatch.py": "48bc2a7e06776ae9ebefdd17ef120968f127afb972e0a6259fee10c2f9031bda",
+      "sensor_modeling/datasets/partial_pooling.py": "d73bec94b994d1ff7040eea8dedd716d18641253df6b66aa47c690a48f7a600e",
+      "sensor_modeling/datasets/periodic_prior.py": "6e57974f7f48db0c2da1fa8ebae52e56bd17b7cdf2dfc99ec82f097f4a1b545a",
+      "sensor_modeling/datasets/pooling_experiment.py": "74fb7995fd66b994da745fb5ea5a15c9d40fdb7f46473fbadcb3f863bf764a6e",
+      "sensor_modeling/datasets/pooling_summary.py": "5b797628476507435e24a246fa624abfefdfa451c2e84836e7d747b392a061f1",
+      "sensor_modeling/datasets/predictive_checks.py": "6bdd2bdeaa97fe1d692afcfb46ef8ff9aa07b19caccea418ec548e0aecda8a41",
+      "sensor_modeling/datasets/predictive_figures.py": "fe85262b9a23f6e44ded9826013942f6f6c3a823c193820d110269c452edb500",
+      "sensor_modeling/datasets/predictive_summary.py": "f095ccda3309483d23763be89e355985f2d55c9bbcb7873c472289fc4493b1aa",
+      "sensor_modeling/datasets/rates.py": "58e22fb8ce74769feadae86fdc83327c8f5231ab2efc6a3a909dbdc7c8b27ab0",
+      "sensor_modeling/datasets/rates_experiment.py": "820cc6a1c6c551ab16ecf63d2da35cca798db85a3255094028bb11301c1d6ba9",
+      "sensor_modeling/datasets/rates_summary.py": "e4dfb593a68283d469921653eeea1b8d8575f7ac392e72b430cdf28257abe8ed",
+      "sensor_modeling/datasets/recoverable_gap.py": "c8a4dc9074822465463d308af73eb9eec71b6fc4429c4f3b54b84ec148cd0a14",
+      "sensor_modeling/datasets/restricted_filter.py": "b8b4cb3000b001431f6309205388c3a0d8cb88b7bec4927952a099e60447db5d",
+      "sensor_modeling/datasets/silence_dependence.py": "50343f891b6f67a2041b1735bed886ded846cd93fdab659db706e94952c74775",
+      "sensor_modeling/datasets/silence_figures.py": "df4387dd51ac54e78cec93a20115a315c4a4759802c03e045e223e7bfa4a08a3",
+      "sensor_modeling/datasets/silence_summary.py": "2dede655ed3a59f816978a77666d9764e9dd0d7eee4857dc473c46fbc2f223aa",
+      "sensor_modeling/datasets/silent_home_experiment.py": "510622b126a4e038bb11d7e97190025159f5e3f5eb9d41b1d49bf184a1983258",
+      "sensor_modeling/datasets/silent_home_figures.py": "0e3b3098e8b5a0702fc2e6999141ab010658b417ead2cf3975a2aeac051146be",
+      "sensor_modeling/datasets/silent_home_protocol.py": "89d2051b9ed0bda1acb44a83c939962f1348797e39d478245f056c774003689d",
+      "sensor_modeling/datasets/silent_home_summary.py": "e70251d4a60eeb7911782256eb6cc6850cfeb97cfddbfa6766670a7506fd5b7c",
+      "sensor_modeling/datasets/sleep_gap_experiment.py": "554bdf1a756d8f7c9ed16a1f6d8295dcafb363b7220caaa908c1c1d3cfbba719",
+      "sensor_modeling/datasets/sleep_gap_figures.py": "97baa54ecd2c5c1cddf2cc4812ecceff9bc77b7100baef1b71146bde58fac183",
+      "sensor_modeling/datasets/sleep_gap_plan.py": "1eba829f0d1b4223b05b80ff793fb53a98059fb39257e552284a62987c33f9a8",
+      "sensor_modeling/datasets/sleep_gap_summary.py": "0799bc02aaaf6549b3f3978eb39bcb72d857a17e949d8c8135faad5cf344bf60",
+      "sensor_modeling/datasets/sleep_mat_experiment.py": "7fa2d5bc449f996de41872c0c58c9c6ca95ffec8c916fec56f4a695b7b24e149",
+      "sensor_modeling/datasets/sleep_mat_figures.py": "eb6e0ac8895589a8d0ac19d41299b2f440ae656e2324f760d3aa9d66f2c642c9",
+      "sensor_modeling/datasets/sleep_mat_planning.py": "a7fd4c613a7d72695d08ad060f91fb9093cd48f070e4c1bf3ec8f1a553fa2d79",
+      "sensor_modeling/datasets/sleep_mat_protocol.py": "a5b3e0336831a6ba3e9b46dd595006d2c0f4705e78ee6164e4ced9582dda949b",
+      "sensor_modeling/datasets/sleep_mat_summary.py": "8874b327a4357f3abfa6454f227d3fb2a3afb822d90891b85d93c43dd97732c1",
+      "sensor_modeling/datasets/smoothing_experiment.py": "5d54ac9262011d623bd0914e0df857c2310ced67e845a801710646e129dc6efc",
+      "sensor_modeling/datasets/smoothing_summary.py": "2175481e133aaee1a92d2543044bbb79ad5792a91e24ba632d2f1efc4e885d59",
+      "sensor_modeling/datasets/structural_models.py": "694893fa9ff4b57624bf350647b6b6875e96f6dc187bf63d1ce37d6623904fd7",
+      "sensor_modeling/datasets/threshold_calibration_experiment.py": "9aa0c82230b1df0fe0605ffd8557c2c7f0f8ab8522c3f09b56f06a5ecb3b8d49",
+      "sensor_modeling/datasets/threshold_calibration_figures.py": "816166a6f8dbc2d6cf868ad9854bab151a3cee95489c1cb331f42e20d646144f",
+      "sensor_modeling/datasets/threshold_calibration_planning.py": "0c7a91dc33e7733bf88d6617e931c5a49f5978e287297e1091f3fe59afa133bc",
+      "sensor_modeling/datasets/threshold_calibration_protocol.py": "8d6be9af601e92bd7a221bdc371fc01b3b41b66cb94a8914dd3d0291973555ba",
+      "sensor_modeling/datasets/threshold_calibration_summary.py": "6a1efdd8b37fdde1c4d2a94347cb1ccee48727a0d9e9fe09fbbff39b26f1d071",
+      "sensor_modeling/datasets/threshold_null.py": "6b79860199990d98ea6ca736eb1d52b2db5cbec4cd728d604cd992d3d4c552c1",
+      "sensor_modeling/datasets/threshold_null_summary.py": "f8f7de3e97858c2baa0b350ea5294c569bfeff52bca9e5a63adfb4f93a72a7ab",
+      "sensor_modeling/datasets/tihm_experiment.py": "8ad2254c60d7e4247c71e3b6170690b6f8bdc8a1dca780fc2e359ce0814d53b7",
+      "sensor_modeling/datasets/tihm_figures.py": "36c1d0a582d6c501d4038898bd951656416657967c3f35b562ed5be9783471b8",
+      "sensor_modeling/datasets/tihm_post_hoc.py": "4fb4d860636677618dcd83da9aa0762c372e2781d3db59bb2af48cfe91b2647c",
+      "sensor_modeling/datasets/tihm_protocol.py": "0c9d386d0d69248faf2f851c7cafd029954eb7415e22e4309418e1259c14c774",
+      "sensor_modeling/datasets/tihm_summary.py": "55587fd4f7994037c31a2ecdcd3ab2308202aa65d39d819249b1cadd014b75c0",
+      "sensor_modeling/datasets/time_features.py": "6d9273c8c229ae02497865aedb82bda76c2ef2448a424934534b096185026f10",
+      "sensor_modeling/datasets/time_prior_experiment.py": "17f607e1d5ed08f76ba9243b3a77d27c333982d45c2ca6ef5fe5865645ce9158",
+      "sensor_modeling/datasets/time_prior_summary.py": "8bc215f974817de304436de9e694ffedadef3e3ae9124d1dc8406633c75f8ca4",
+      "sensor_modeling/datasets/uncertainty_experiment.py": "345cf8dec84a814eabc3567acf23215e2a3d704b2c56586640a07d0e3e2a3fa9",
+      "sensor_modeling/datasets/uncertainty_figures.py": "9a58c18ecd757a42813d89f79e677784a312f25c475fc33e7a3804c8ceaf256d",
+      "sensor_modeling/datasets/uncertainty_summary.py": "0353094a3585fe5fcac2bf5e93e21edfd10b12bf2a631a27dfef137c281ef3a6",
+      "sensor_modeling/evaluation/__init__.py": "12d62d1df26f17d5908af3b3e31a8a6841aa9a711a6515e4c74751b8328423d7",
+      "sensor_modeling/evaluation/ablation.py": "0b5ada1d924228fec594f5e4ab1ef1532ea7ce9119314cee57dd0920dc4a97e2",
+      "sensor_modeling/evaluation/attribution.py": "f19bc5cc9d69061c9067787ca2acb90faff3c888eb142427e553f92028c4815f",
+      "sensor_modeling/evaluation/detection.py": "e67cd0ca69c5120a6749455ce2f11007b04beeae8658336bac83f019cdeea84d",
+      "sensor_modeling/evaluation/disagreement.py": "2fe022cd08deb119067d5cc484d8d039b9297ddaa47846eb2167c8f7ab0f00d5",
+      "sensor_modeling/evaluation/evidence_groups.py": "5253a00abe0f1d41558117b8afaa96ee05d947fac4994d684751f8cf410e8744",
+      "sensor_modeling/evaluation/households.py": "fc7071b3f268d584094985fe9b9c3a7269e1f3d540fe99b8c1f94d022f4a2301",
+      "sensor_modeling/evaluation/metrics.py": "b47aaf6a27e0fb9b2740637e2fbd4708832a0bfc0d2fde970f628de639db27fe",
+      "sensor_modeling/evaluation/mismatch.py": "cac2b0a3f13f9ef956e6f53c4a57e266dd59629eff592d89d8e3030ac9524574",
+      "sensor_modeling/evaluation/provenance.py": "b777d2c3f7c9934cfc47296a22ae0bf2155b45d4bf86ec392b09828a6d035a8e",
+      "sensor_modeling/evaluation/regime_results.py": "d4e5de9401f7f806b91afc7729b829738d2ff64c063a05f5c99a466c22fb2e6e",
+      "sensor_modeling/evaluation/resampling.py": "e3936a2f4be1d399a3cdbadb5c09bbff243023b6012fe604728ec6d42c953435",
+      "sensor_modeling/evaluation/selective.py": "2682b2cb5a921841b1eb972b2bddfbbc3a9bcc14c0e88015df14951d9e0dc0f2",
+      "sensor_modeling/examples/__init__.py": "7d06c8fe7342a59e329abd2c5b54275f45c4215c4d9b8c442ac9a61486ee62b3",
+      "sensor_modeling/examples/demos/__init__.py": "0913c4ed6d1a8f093ee4c1c47d6d7350a10c66a4d29dfe76194fc43bd67726df",
+      "sensor_modeling/examples/demos/ambient_pipeline_demo.py": "38cafa30b4ed97d0fd3e05f910aea345b222d7e853675254694d03fbc7a32599",
+      "sensor_modeling/examples/demos/bernoulli_ar_demo.py": "e5d980e7e0f95c157dbdbf36aa001d320b8e06d7e080aaa9a393c9fb80174dc4",
+      "sensor_modeling/examples/demos/cpd_ar_demo.py": "881fe9eb1581ae516341367a5a395da5118b98c20358d008725f6746bcc9bd3e",
+      "sensor_modeling/examples/demos/cpd_benchmark.py": "7c7534ad110ed7225c960fb955bb7ade330a7025a330bd7d2c956bf7a1af8073",
+      "sensor_modeling/examples/demos/hmm_granger_demo.py": "7342ede2f1debecf002dd02495ecd42e4f5afffc5cf349a46794d40f5e7e5598",
+      "sensor_modeling/examples/demos/nhpp_pelt_demo.py": "ee520d5c694d8b1574a525aa5a19fb9078908afbf58a31463b1e47e3ee076676",
+      "sensor_modeling/examples/tutorials/__init__.py": "d091784978c6929e308a58fa36320ee98a23546585f202f1344df04d24a54994",
+      "sensor_modeling/external/__init__.py": "7df7c7d7c17c0355b942d52f65a563e3f0c0b8561a0f3fef569aac27a18ac499",
+      "sensor_modeling/external/canonical.py": "81863093f4251c211a1b227c06ca165405d8e1fe0af62ac037fdc65d05c494c5",
+      "sensor_modeling/external/contract.py": "d2e0204523716dc2707382eda22fcfb30fb14b55507f8fcd7baaa6a91e18c047",
+      "sensor_modeling/external/mapping.py": "1ef6f7045365d17b29314bbf65ac2acb55b2ed81da71c1bab124fdef608dba29",
+      "sensor_modeling/external/ordonez.py": "af8f9a53cbe5eba8a4372f859b89867a54981499b14da12ef1e06c889096f26f",
+      "sensor_modeling/external/tihm.py": "5eece4178e93117a32d8bfcc3734aa70ef71477ebaaca871b54394a3fa0d5297",
+      "sensor_modeling/external/validation.py": "a0a731bd7cf4d4f831fa1233f07ec0ccbf7392b13ecf8b0e601b6ad5b41e0ef4",
+      "sensor_modeling/fusion/__init__.py": "4b53362989c8903c0dd7f5e28dbb5b8d1bda822b92c4708a445422824fe8bbb2",
+      "sensor_modeling/fusion/defaults.py": "7d10c93f00a217937d264bdea987124ad4bd7cdf0360bf7f0445afb1cc0d0b7f",
+      "sensor_modeling/fusion/emissions.py": "425e1f54000d81dcf948ee486fcb0721fae85c036408b8a06fe8c36de7be69db",
+      "sensor_modeling/fusion/estimate.py": "fa14aa218861c56ecf10a0ed80c34248b9a8dc53d0295502807a8ce828040a03",
+      "sensor_modeling/fusion/filter.py": "48e752dce07d80d945802864bba35c2de09f4724e79f84bc1f70b9a870b47868",
+      "sensor_modeling/fusion/history.py": "6e45e42602866c61f069c3b8efc13a3aaf43ebfd8c7650a4a278422293d64395",
+      "sensor_modeling/fusion/regime.py": "c7704a86544249968d7060401558c794a0b581a9cca7da57432ad010ffb8ffd6",
+      "sensor_modeling/fusion/smoothing.py": "95ac934060312d4c00de8118f369db81c63259734335ea7a172a9fa78f6e765f",
+      "sensor_modeling/health/__init__.py": "4104971a0f9b9eb926db65500d82a5861b142af7445a8a325b6e98414988df4f",
+      "sensor_modeling/health/fleet.py": "2e2b1c87ddd5bf4757dabbc848458870bbb0b5becb7186269013dae5ff87930f",
+      "sensor_modeling/health/monitor.py": "ef7e718fd04045ad79553586ea92a431e5561326691b54cca64e1c3099796724",
+      "sensor_modeling/health/status.py": "925bb71244dc30b180eeea343975a194b871a4ddb4086caf406ed4d30952daa4",
+      "sensor_modeling/hmm/__init__.py": "5880f2b973a45d82b2857be6b70baefc2b57b314e63b68d28c8df15db8bf65db",
+      "sensor_modeling/hmm/adaptive_hmm.py": "06b7d4eccfb1578b2318ff858773b4a1d8575ea762af7564be3fde205aa3301b",
+      "sensor_modeling/hmm/base.py": "e7cd4f362e1c76caca745042bb54f497f4942803762f6c7824baea6168b95ffe",
+      "sensor_modeling/hmm/circadian_hmm.py": "bf88a7264cdc309d44bd974007e9423fa7cebc04dd9cbd6070f894c1f661fc08",
+      "sensor_modeling/hmm/heterogeneous_hmm.py": "d3588184cbde4b697902ff3c3b92daeee9de52d7801eb245251a87080f9b0223",
+      "sensor_modeling/hmm/hierarchical_hmm.py": "aa4a618db7f8971c349df496d028806adccbf5e08036e9e77e54aad6e16410ab",
+      "sensor_modeling/hmm/scaled_dirichlet_hmm.py": "76c80126200443e2a6cded164d2da4f9d5aa8a6113a189ec78ef25f71cde65db",
+      "sensor_modeling/interop/__init__.py": "fb8badabcfa821be1c7bfe7974e92441be9d8a554e6e989d205ae900c23e3f50",
+      "sensor_modeling/interop/fhir.py": "121180a5c15693b44c51cb43e6c698ea70ecfd11930c573f7749a8813e1f2b7f",
+      "sensor_modeling/interop/privacy.py": "a8deb9e8844265c5d223ee2b245ea086e8ee05b63afd85204b63355c7667c14c",
+      "sensor_modeling/models/__init__.py": "eaaea2935de191029d866826fdb33e6be44895bd891ec520ba783e87db1d314b",
+      "sensor_modeling/models/bernoulli_ar/__init__.py": "869b8598a7e94f4e9d4bccd623ae774ccfedb64914720e7883bd474a81548b0b",
+      "sensor_modeling/models/bernoulli_ar/base_model.py": "cbf8d3d7ae3746b2b8804971eac0fc3aedb16f746fa9dbeb2467517477385868",
+      "sensor_modeling/models/bernoulli_ar/multivariate_model.py": "c2fe4d26fdeb92e9699a77162672a5b1959a454fa72d07905824366d5a673cb3",
+      "sensor_modeling/models/change_point_detection/__init__.py": "3e2e37be1203a836c96193a085f180fb6a44885301e3e6a29df0f1165fe07dc4",
+      "sensor_modeling/models/change_point_detection/deep.py": "ffe61de85e613873566483728f21bc0bddca8aedede7aa052f41ee0a73541329",
+      "sensor_modeling/models/change_point_detection/pelt.py": "d9e48bbbf7eea662dda39776f11e4d423621323f77b90d6656a87ff4179a6c3c",
+      "sensor_modeling/models/nhpp_pelt/__init__.py": "86a5e5610091653778f0202f2aad91062e7818ff1dca237df97c480a8e9e0dcb",
+      "sensor_modeling/models/nhpp_pelt/bspline.py": "1b4ebd95f1c8e93834101ab0b0c96c68d6b9690fe2916643c84c92a0305cdb85",
+      "sensor_modeling/models/nhpp_pelt/cli.py": "1ab95333a99f9aa97f65402df02783a012ed7dfacd55df1d7138b4a110b2663d",
+      "sensor_modeling/models/nhpp_pelt/diagnostics.py": "db087fdba4f68a15fe4e3df313f50d0e09c0e4d5e84fb9b39f91c26020c6fc94",
+      "sensor_modeling/models/nhpp_pelt/io.py": "f70bb79ef8459415f837bd29a8a94a28594564c3a0a4d02a33884c62fc25c669",
+      "sensor_modeling/models/nhpp_pelt/model.py": "69add9cd4abc0b19367a912bdd8b3702e655922740fd8a2b1ebd0e122c3ffbad",
+      "sensor_modeling/models/nhpp_pelt/optimizer.py": "fab355e4ddc6e4042acdffe565f2cc00a13c50b443e7f122a5bbb15bd108cd98",
+      "sensor_modeling/models/nhpp_pelt/plotting.py": "acf381ffeb2f33a09d3ff79da72f9a2ebee12db450e1a353034672f796c1ac92",
+      "sensor_modeling/models/nhpp_pelt/quad.py": "65a70548ae2354f386e79e451c3865b64a75dfadeade2dbb09ba9caf084c955c",
+      "sensor_modeling/models/nhpp_pelt/regularization.py": "fb44f45f7f117d2d2802073ca065cde633786018df0b0c8224d90c7db076bd2f",
+      "sensor_modeling/models/nhpp_pelt/utils.py": "9319c7a8c009e356d6a1252018323322e52c3a6f0e9e668a1a5375ca08f52455",
+      "sensor_modeling/observations/__init__.py": "15e627eb107c7dca9334d895ff024d6187e8a200871329dca6431ec2e5b0f960",
+      "sensor_modeling/observations/adapters.py": "11fbb3c3e71b530f0c749fb28a75c48f784e4cb51e6822192797e9cab3dbd5c1",
+      "sensor_modeling/observations/ingest.py": "c7082ae833d5cf23afcf9cc2159e73c71a2bc13fff421cab72e779ab64ef67c9",
+      "sensor_modeling/observations/observation.py": "e008f8c192b22b9059e36c4ce0e4fa531b88c1aa2c37145d28a39f56e07884df",
+      "sensor_modeling/observations/registry.py": "f72b6d471b8598288d8c8e905af90a729f12f654b22048d8d510da17b9c3e86c",
+      "sensor_modeling/observations/stream.py": "0339df6a3a33fa0750946625cb47d967f4dab3ddf527de2ff7de080c7e66dd8f",
+      "sensor_modeling/observations/types.py": "737074b1ae2a7ee1d02503e69d5db0e15224a6e7b45acacc01e64b474e12cc18",
+      "sensor_modeling/observations/units.py": "f122c4013bbc4ef8b4d611529ff15994701aba3100a91f0d93cab72c53524512",
+      "sensor_modeling/online/__init__.py": "88e2d0c735c07c0c7bddb6f8559a7a6452109c933ed9cb01945dd14454feb883",
+      "sensor_modeling/online/benchmarks.py": "792f37250b37d36873f5c63bfcdbc79758da8dd0ae4a784e779d2311a70df9f8",
+      "sensor_modeling/online/pipeline.py": "16288a13b412f94d9228b18e13ee8775f6da93d3db36a950888727ae6f73b9a4",
+      "sensor_modeling/online/replay.py": "2d947f5c5308e350feddad1893974e0eaa907069b302f472f75116a3ab6afb05",
+      "sensor_modeling/simulation/__init__.py": "2cc5a46dc737e04cd02340a7a2fe5110848c6e96356521ac88515d5bde0c20d6",
+      "sensor_modeling/simulation/faults.py": "66fa666ce49dda01a05fa1568877c3d9acc27c95ad36d16c8c0feb21c5fd14b9",
+      "sensor_modeling/simulation/household.py": "afd88ec67d6162ec2be14506eb1491713f7fabaaa22f3ea7a11747b1a35b7344",
+      "sensor_modeling/simulation/sensor_profile.py": "ab26c4b6097b444486e28c7582c91a67f79a89749bcfd70190de671a018e8f66",
+      "sensor_modeling/states/__init__.py": "ac12fcd1d37c9fff4d65cff8668e8f5ae0ff5a20d444e07e812ce7a385a8fa59",
+      "sensor_modeling/states/markov.py": "f2014ea7f794dda7589d424e4859b431c1afec2668caa7cebca488781964915d",
+      "sensor_modeling/states/ontology.py": "aa6a16873bf576516d58280446b4577d3ffe93b5d9ba76e8a1677584268f8256",
+      "sensor_modeling/utils/__init__.py": "1e737651a5b673a9def0271d8bf8153b0b4df6af2c47cded0815aa673f41c601",
+      "sensor_modeling/utils/data_io.py": "3fc117fa679235310df179d173f5c922ea88310b4f73ca4363b5186d5ed49769",
+      "sensor_modeling/utils/digests.py": "b293467b225c23fc3a79c155f61cfa31b8db71a485cb39b3a051f2d26e5f6a9f",
+      "sensor_modeling/utils/logging_config.py": "df7ba42f3d970f1f7fbb5075e9acf12e436ecee52f8600897f9a65e4b17bc837",
+      "sensor_modeling/utils/missing.py": "dba7af7d1e23c5022a0f3bb5b418b48c05bc26361bcb4cc18a1a00a17e3470ea",
+      "sensor_modeling/utils/plotting.py": "15e9a213932e98ef7dd8b5fe7b84d720de84cd4fa967cd5a9a27caf50f3ba506",
+      "sensor_modeling/utils/validation.py": "0098ef97918e55487571708943507b551cc164a783e19f1128b312b261982e85",
+      "sensor_modeling/visualization/__init__.py": "c5d93b47cb60c19fd9be44404eb0898ba0c465dd5507b840b6f8e5eb3b8e34f4",
+      "sensor_modeling/visualization/clinical.py": "3fd904aed9c62575274e1f06e41608df5c07659d38cae15721c3c92785852f78",
+      "sensor_modeling/visualization/interactive.py": "d55b9695458cdd2c55d846fe852ac43f3f2e5c80f88bbb526e37e8a942cc3dff",
+      "sensor_modeling/visualization/research.py": "3d3419a02dd44f476cdc8f57579376a769b7f5bd361507efff7221a4d67fdde6",
+      "sensor_modeling/visualization/web_app.py": "811dd995b2b4669b9fbbd53cdb11fa8b8260c26ff2eea5d0b43a4f9da9af1682"
+    }
+  },
+  "base_protocol": {
+    "file": "artifacts/phase3/fitted_rates_protocol.json",
+    "protocol_sha256": "4f5db165af7eb9178b6154b3f01db806094955571cec1b07a92623f1e8cfc8d6",
+    "used": "its channel families and shrinkage, its time prior, its information sets, metrics, minimal differences and household bootstrap; not its folds"
+  },
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "resamples": 10000,
+    "seed": 0,
+    "statistics": "mean and median paired differences",
+    "unit": "household"
+  },
+  "by_family": "each family's mean of every recursion's balanced accuracy and of K1, described, not judged",
+  "criteria": {
+    "fitted channels": "success when calibration error favours the model and neither log loss nor balanced accuracy favours the reference; trade-off when calibration error favours the model and balanced accuracy the reference; failure when calibration error is negligible or favours the reference; inconclusive otherwise",
+    "gap": "read by balanced accuracy: the baseline leads, the combination leads, no gap, or uncertain; every metric's verdict is reported",
+    "multiplicity": "K2, K3, G1 and G2 are secondary; nothing is adjusted",
+    "primary": "K1 alone decides: success confirms that the time prior adds to the fitted hurdle channels on held-out CASAS homes; failure does not; inconclusive is reported as such",
+    "time prior": "success when balanced accuracy favours the model and neither log loss nor calibration error favours the reference; failure when balanced accuracy is negligible or favours the reference; inconclusive otherwise",
+    "verdicts": "favours model: mean >= delta and lower bound > 0; favours reference: mean <= -delta and upper bound < 0; negligible: the whole interval within (-delta, delta); uncertain: anything else"
+  },
+  "estimands": [
+    {
+      "key": "K1",
+      "kind": "formulation",
+      "model": "filter_periodic_hurdle@R",
+      "question": "what the time prior adds to the reference formulation, the fitted hurdle channels, in the recursion",
+      "reference": "filter_hurdle@R",
+      "role": "primary",
+      "rule": "time prior"
+    },
+    {
+      "key": "K2",
+      "kind": "formulation",
+      "model": "filter_periodic@R",
+      "question": "what the time prior adds to the declared channels in the recursion",
+      "reference": "filter_declared@R",
+      "role": "secondary",
+      "rule": "time prior"
+    },
+    {
+      "key": "K3",
+      "kind": "formulation",
+      "model": "filter_periodic_hurdle@R",
+      "question": "what the fitted channels add with the time prior in the recursion",
+      "reference": "filter_periodic@R",
+      "role": "secondary",
+      "rule": "fitted channels"
+    },
+    {
+      "key": "G1",
+      "kind": "gap",
+      "model": "diagnostic@I3",
+      "question": "how far the supervised diagnostic, given the hour and the last three windows only, is from the combination in the recursion",
+      "reference": "filter_periodic_hurdle@R",
+      "role": "secondary",
+      "rule": "gap"
+    },
+    {
+      "key": "G2",
+      "kind": "gap",
+      "model": "logistic@I3",
+      "question": "how far regularised logistic regression, given the hour and the last three windows only, is from the combination in the recursion",
+      "reference": "filter_periodic_hurdle@R",
+      "role": "secondary",
+      "rule": "gap"
+    }
+  ],
+  "frozen_at": "2026-10-11T08:03:16+00:00",
+  "households": {
+    "test": {
+      "families": {
+        "hh": 8,
+        "ihs": 2,
+        "mn": 3,
+        "rw": 5,
+        "tm": 25
+      },
+      "homes": [
+        {
+          "filename": "hh104.csv",
+          "id": "hh104",
+          "sha256": "36650c4b30feb8f843943041611aa4f22e85ae8f79d40b4bb33f294bd0bf4f84"
+        },
+        {
+          "filename": "hh109.csv",
+          "id": "hh109",
+          "sha256": "ac02a6f32d26d7d0298b5d710606ce5964acadf84e2fd2eb0734c91a36f1f618"
+        },
+        {
+          "filename": "hh112.csv",
+          "id": "hh112",
+          "sha256": "aa47b69edbe6592d40d943bd7cda17cc737ecebcf29d87874ed0341575e0f70a"
+        },
+        {
+          "filename": "hh113.csv",
+          "id": "hh113",
+          "sha256": "712edaa2ef121b09a67e3c441837b02e7785546d50b21b972a265ecb6ac7e630"
+        },
+        {
+          "filename": "hh115.csv",
+          "id": "hh115",
+          "sha256": "d1d4a1ba4a8eab1f7b298ef55decdd7ece4050ac9bd2f6f346eebd62b4cb4ac2"
+        },
+        {
+          "filename": "hh116.csv",
+          "id": "hh116",
+          "sha256": "7ed93e07555521a0f905b8b65f0556b72fc71719528ef92adc42448faeaea6e1"
+        },
+        {
+          "filename": "hh117.csv",
+          "id": "hh117",
+          "sha256": "6f9f83d085de9d98c870f1c5c54be70ccdacc2428919893b5b74faaf56e8f0f7"
+        },
+        {
+          "filename": "hh128.csv",
+          "id": "hh128",
+          "sha256": "050a529c7defea2437c1109a4ad68b4871e4fffb5f59329ee01b77e4507c5660"
+        },
+        {
+          "filename": "ihs07.csv",
+          "id": "ihs07",
+          "sha256": "8c746628f124d2d64674197aa44da74ed01054bdf0fea2b0e3e760b851e534fd"
+        },
+        {
+          "filename": "ihs11.csv",
+          "id": "ihs11",
+          "sha256": "1e6a432c2463536ad0e59cc1983ccb451958453b8d7d3786af99c9f660435a03"
+        },
+        {
+          "filename": "mn57.csv",
+          "id": "mn57",
+          "sha256": "7170078f24402f4206c138c022d77998faf34ece1be9432be764abb89fada54a"
+        },
+        {
+          "filename": "mn77.csv",
+          "id": "mn77",
+          "sha256": "5f9ada69087967a7cac56d90fa9825fba5fb2006dff441f82612c42d6562a790"
+        },
+        {
+          "filename": "mn82.csv",
+          "id": "mn82",
+          "sha256": "6872198314eb64f0ab91074253440c9b7603e141051a7c1876889ef88444da10"
+        },
+        {
+          "filename": "rw101.csv",
+          "id": "rw101",
+          "sha256": "55fa73172241d8ead58084482ab5063a7094a9f64464df0766d321ac7eb44136"
+        },
+        {
+          "filename": "rw103.csv",
+          "id": "rw103",
+          "sha256": "88789edaf20e00ba062c5c283b23ede776f3e00f67b291e5c3966f6c11bb0eb9"
+        },
+        {
+          "filename": "rw105.csv",
+          "id": "rw105",
+          "sha256": "a17e204ebd003dd94230958080362472c7398d598d67b91eda1ba75f002dbf84"
+        },
+        {
+          "filename": "rw106.csv",
+          "id": "rw106",
+          "sha256": "1659f9ef7e2a3cf787a7e147dc89119700b52e2b939f428f5e833bb3fa0d8bc0"
+        },
+        {
+          "filename": "rw107.csv",
+          "id": "rw107",
+          "sha256": "26aaef53144447344f0bfd45e72e8c89bdd90a5c03d34218f567475780364f8c"
+        },
+        {
+          "filename": "tm001.csv",
+          "id": "tm001",
+          "sha256": "f4ba921dbf6452ff9802b7a53e6b56214d5886e85e67890a54ba290fa24a6742"
+        },
+        {
+          "filename": "tm002.csv",
+          "id": "tm002",
+          "sha256": "c267195dc51de6d07fa58eaeca942adfcf9bcccfc5479e4a8e337c34457f1f6f"
+        },
+        {
+          "filename": "tm003.csv",
+          "id": "tm003",
+          "sha256": "0d38b61e162a46a25aafd17c602f6872604ad33dc8e6878df8a7f39f7cbf409c"
+        },
+        {
+          "filename": "tm005.csv",
+          "id": "tm005",
+          "sha256": "41b7e4b0020ffe29ad373017f9115de8d054c8669bbe939a3179346f70022686"
+        },
+        {
+          "filename": "tm006.csv",
+          "id": "tm006",
+          "sha256": "e41c1327d9e5d518e7f3276379dfacb5194b968ed660db4213e854b0e8b1eeff"
+        },
+        {
+          "filename": "tm007.csv",
+          "id": "tm007",
+          "sha256": "324f3933f68ad0055071962372b446a69eab0712f54f9a922f24ef1cefc8e8ba"
+        },
+        {
+          "filename": "tm008.csv",
+          "id": "tm008",
+          "sha256": "dcc54bdb8b72763d4f49dc7000843c9aa435b84e866863e631c4763747dca198"
+        },
+        {
+          "filename": "tm009.csv",
+          "id": "tm009",
+          "sha256": "b9ae3466bcbff9918f17528fe15214247ed839d87febea651e6f313e112cfd58"
+        },
+        {
+          "filename": "tm010.csv",
+          "id": "tm010",
+          "sha256": "2da1b045cc6008d4b6c098fb0091be0c5e44719e225116188ad8a037ed9362a9"
+        },
+        {
+          "filename": "tm011.csv",
+          "id": "tm011",
+          "sha256": "57ecc899f108ea0f7a75238c66da2af25306a832a38195ecfa22558ea0c7397a"
+        },
+        {
+          "filename": "tm013.csv",
+          "id": "tm013",
+          "sha256": "8f7721a11add3188367e611e7efb4c979e0812e8bba3f1f46359a5a3089f9a92"
+        },
+        {
+          "filename": "tm014.csv",
+          "id": "tm014",
+          "sha256": "604b76ffe5f363afb52d040d52da90c3f7c5ca03d0b8b32ebbe94c4bca26c379"
+        },
+        {
+          "filename": "tm015.csv",
+          "id": "tm015",
+          "sha256": "f97cfb62ff1b7f8cb0ba296abbe732e480150a6e68bbf034c66321d04fba9938"
+        },
+        {
+          "filename": "tm016.csv",
+          "id": "tm016",
+          "sha256": "c067ea601d90b0c799cc5d29c729e12c30bf9a28f93e385e0aa6bf8750fc2dd6"
+        },
+        {
+          "filename": "tm017.csv",
+          "id": "tm017",
+          "sha256": "587406cffc2917005bdbf9492c13c572baa58d79d78b7a38e4101820541a85b5"
+        },
+        {
+          "filename": "tm018.csv",
+          "id": "tm018",
+          "sha256": "86bfc9e11af8c664da4b22d6c78c9565880c66d45b74b0c6aa19b18ef1d1ee57"
+        },
+        {
+          "filename": "tm019.csv",
+          "id": "tm019",
+          "sha256": "5bfebafef622d10a7cfa7a2174deb06e9d71362c6fbb0f997d4fc909f6b58bf0"
+        },
+        {
+          "filename": "tm020.csv",
+          "id": "tm020",
+          "sha256": "2d945faf779f67430c871713acef6afbfee9efd89cd1f7e89f484436334abf02"
+        },
+        {
+          "filename": "tm021.csv",
+          "id": "tm021",
+          "sha256": "2e225897d7f479b32a19a33ff5ac9a26d88e336479b1bc87d8c443d8bd6451e2"
+        },
+        {
+          "filename": "tm022.csv",
+          "id": "tm022",
+          "sha256": "36a706e608a481ff4c132953a08b0f12bd6cf8620e5af82474bb3766f84cbc66"
+        },
+        {
+          "filename": "tm026.csv",
+          "id": "tm026",
+          "sha256": "c6e06702b80a019d2be6ef45ab6342da2203b12a1f837d11f5c682d14ce6fcde"
+        },
+        {
+          "filename": "tm029.csv",
+          "id": "tm029",
+          "sha256": "f33a7286fa4dbeb11ca726863ee392e62ac206857ace1173804be7578dde0c1c"
+        },
+        {
+          "filename": "tm035.csv",
+          "id": "tm035",
+          "sha256": "3c65aa2de3e3c30b2c7f2fffa9b78d6d7954789510a1c13e29be2c49cbd99b64"
+        },
+        {
+          "filename": "tm037.csv",
+          "id": "tm037",
+          "sha256": "bee4460da31dec3251134a1a9a0a832d992d21fb0a55ed30e855ad1d9a84dc2d"
+        },
+        {
+          "filename": "tm038.csv",
+          "id": "tm038",
+          "sha256": "aa28cb045458fbefeca9a37533621b2fa71f0a09e1200b2325dff070a3fc2619"
+        }
+      ],
+      "manifest": "artifacts/v03/external_cohort_manifest.json",
+      "reading": "every recording is verified against its frozen digest and read with the America/Los_Angeles zone, as every CASAS result here was; the hour the time prior reads is the recorded wall-clock hour"
+    },
+    "training": {
+      "fitted": "the channels, the time prior and every baseline are fitted once, on all 20 development homes",
+      "homes": [
+        "hh101",
+        "hh102",
+        "hh103",
+        "hh105",
+        "hh106",
+        "hh108",
+        "hh110",
+        "hh111",
+        "hh114",
+        "hh118",
+        "hh119",
+        "hh120",
+        "hh122",
+        "hh123",
+        "hh124",
+        "hh125",
+        "hh126",
+        "hh127",
+        "hh129",
+        "hh130"
+      ],
+      "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21"
+    }
+  },
+  "inspected_before": [
+    "The 43 homes were scored once, in the frozen v0.3 external test, by the v0.2 production filter and the v0.3 candidate with its circadian profile: a median paired gain of +0.0091 [+0.0054, +0.0117] balanced accuracy, 37 of 43 homes improved; pooled balanced accuracy 0.496 and 0.504, log loss 4.30 and 4.17. Every per-home metric of those two models was seen, in artifacts/v03/external_primary_result.json.",
+    "The adapter learned to read the sensor names and activities of the tm, rw, mn and ihs families while the cohort was screened, before that test; see docs/EXTERNAL_COHORT_COMPOSITION.md.",
+    "Neither Phase 3 part, the fitted hurdle channels or the hierarchical time prior, nor any baseline or the diagnostic, has been scored on any of the 43 homes; the v0.3 candidate's time-of-day term was its circadian profile.",
+    "Before this protocol was frozen, every recording was read once to write the inputs report it declares: each home's instrumented channels, windows, labelled windows and the states that occur. The recursions were run on the held-out homes only to check that every posterior is finite; no prediction was compared with a label.",
+    "The development result this confirms: on the 20 development homes the time prior adds +0.061 [+0.044, +0.077] balanced accuracy to the fitted hurdle channels in the recursion, 0.517 against 0.456 (K1, a success); K2 and K3 are successes too.",
+    "On the development homes, cross-fitted, the diagnostic at I3 scored a mean household balanced accuracy of 0.590 and a mean log loss of 2.455, logistic regression at I3 0.498 and 1.314, and the combination 0.517 and 1.728."
+  ],
+  "instrumentation": {
+    "channels_every_training_home_instruments": [
+      "bedroom_motion",
+      "hall_door",
+      "kitchen_motion",
+      "living_motion"
+    ],
+    "held_out_homes_lacking_one": {
+      "ihs11": [
+        "hall_door"
+      ],
+      "tm029": [
+        "hall_door"
+      ]
+    },
+    "held_out_homes_with_each_state": {
+      "away": 43,
+      "bathroom_activity": 43,
+      "bed_awake": 3,
+      "home_active": 43,
+      "home_inactive": 43,
+      "kitchen_activity": 41,
+      "sleeping": 43
+    },
+    "homes_instrumenting_each_channel": {
+      "bathroom_motion": {
+        "held_out": 43,
+        "training": 19
+      },
+      "bedroom_motion": {
+        "held_out": 43,
+        "training": 20
+      },
+      "hall_door": {
+        "held_out": 41,
+        "training": 20
+      },
+      "hall_motion": {
+        "held_out": 36,
+        "training": 2
+      },
+      "kitchen_motion": {
+        "held_out": 43,
+        "training": 20
+      },
+      "living_motion": {
+        "held_out": 43,
+        "training": 20
+      }
+    },
+    "report": {
+      "file": "artifacts/heldout/heldout_inputs.json",
+      "sha256": "8865f8998c4f336861a63565203ec4610e5be2a0b3da92f687a33d78ced30b4d"
+    },
+    "shifted_channels": {
+      "channels": [
+        "hall_motion"
+      ],
+      "reading": "instrumented by fewer than half of the training homes and at least half of the held-out ones: the recursion's fitted channel rests on the few training homes that have it, and the baselines saw its columns mostly missing in training"
+    },
+    "test": {
+      "hh104": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 11788,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "bed_awake",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17566
+      },
+      "hh109": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 15924,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17562
+      },
+      "hh112": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 28968,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 31104
+      },
+      "hh113": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 128512,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 146696
+      },
+      "hh115": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 83246,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 92147
+      },
+      "hh116": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 14806,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17677
+      },
+      "hh117": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 77216,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 99534
+      },
+      "hh128": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 11643,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17563
+      },
+      "ihs07": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 14325,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 20368
+      },
+      "ihs11": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 9477,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 15091
+      },
+      "mn57": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6293,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 7599
+      },
+      "mn77": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 5699,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9198
+      },
+      "mn82": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 3684,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 4189
+      },
+      "rw101": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 7312,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8634
+      },
+      "rw103": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6525,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8619
+      },
+      "rw105": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6725,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8910
+      },
+      "rw106": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 4296,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 7339
+      },
+      "rw107": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 7722,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8898
+      },
+      "tm001": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 13340,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17560
+      },
+      "tm002": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 31678,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 46506
+      },
+      "tm003": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 12245,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 20249
+      },
+      "tm005": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 5010,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8894
+      },
+      "tm006": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6486,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8631
+      },
+      "tm007": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6660,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8615
+      },
+      "tm008": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 7125,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8634
+      },
+      "tm009": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 16970,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "bed_awake",
+          "home_active",
+          "home_inactive",
+          "sleeping"
+        ],
+        "windows": 17533
+      },
+      "tm010": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 15049,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17554
+      },
+      "tm011": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 12278,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17542
+      },
+      "tm013": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 16950,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "bed_awake",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17557
+      },
+      "tm014": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 9311,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 17841
+      },
+      "tm015": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6332,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "sleeping"
+        ],
+        "windows": 8919
+      },
+      "tm016": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 1380,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9216
+      },
+      "tm017": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 1775,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9206
+      },
+      "tm018": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6208,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9154
+      },
+      "tm019": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 8051,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8877
+      },
+      "tm020": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 5261,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8208
+      },
+      "tm021": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 7187,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9215
+      },
+      "tm022": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 7013,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9210
+      },
+      "tm026": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 7174,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9214
+      },
+      "tm029": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 4626,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9213
+      },
+      "tm035": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 4622,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 8923
+      },
+      "tm037": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 8336,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9213
+      },
+      "tm038": {
+        "instrumented": [
+          "bathroom_motion",
+          "bedroom_motion",
+          "hall_door",
+          "hall_motion",
+          "kitchen_motion",
+          "living_motion"
+        ],
+        "labelled": 6281,
+        "states": [
+          "away",
+          "bathroom_activity",
+          "home_active",
+          "home_inactive",
+          "kitchen_activity",
+          "sleeping"
+        ],
+        "windows": 9209
+      }
+    }
+  },
+  "interaction": "K1 minus K2 per household, described as in the combined-prior protocol",
+  "metrics": [
+    "balanced_accuracy",
+    "log_loss",
+    "brier",
+    "calibration_error"
+  ],
+  "minimal_differences": {
+    "balanced_accuracy": 0.02,
+    "brier": 0.01,
+    "calibration_error": 0.02,
+    "log_loss": 0.05,
+    "recall": 0.05
+  },
+  "models": {
+    "baselines": {
+      "information_set": "I3",
+      "models": [
+        {
+          "build": "sensor_modeling.datasets.baseline_models._build_state_frequency",
+          "configuration": {
+            "model": "StateFrequencyBaseline",
+            "smoothing": "add-one"
+          },
+          "name": "state_frequency"
+        },
+        {
+          "build": "sensor_modeling.datasets.baseline_models._build_persistence",
+          "configuration": {
+            "carried_from": "previous window (lag 1)",
+            "inner": {
+              "C": 1.0,
+              "hour_of_day": "one-hot",
+              "max_iter": 1000,
+              "missing": "zero plus indicator",
+              "model": "LogisticBaseline",
+              "penalty": "l2",
+              "solver": "lbfgs",
+              "standardised": true,
+              "states_without_training_rows": "add-one probability"
+            },
+            "model": "PersistenceBaseline",
+            "random_state": "run seed",
+            "without_previous_window": "training state frequencies"
+          },
+          "name": "persistence"
+        },
+        {
+          "build": "sensor_modeling.datasets.baseline_models._build_logistic",
+          "configuration": {
+            "C": 1.0,
+            "hour_of_day": "one-hot",
+            "max_iter": 1000,
+            "missing": "zero plus indicator",
+            "model": "LogisticBaseline",
+            "penalty": "l2",
+            "random_state": "run seed",
+            "solver": "lbfgs",
+            "standardised": true,
+            "states_without_training_rows": "add-one probability"
+          },
+          "name": "logistic"
+        },
+        {
+          "build": "sensor_modeling.datasets.baseline_models._build_tree",
+          "configuration": {
+            "hour_of_day": "ordinal",
+            "leaf_probabilities": "add-one",
+            "max_depth": 6,
+            "min_samples_leaf": 20,
+            "missing": "zero plus indicator",
+            "model": "TreeBaseline",
+            "random_state": "run seed"
+          },
+          "name": "tree"
+        },
+        {
+          "build": "sensor_modeling.datasets.recoverable_gap._build_diagnostic",
+          "configuration": {
+            "early_stopping": false,
+            "estimator": "HistGradientBoostingClassifier",
+            "hour_of_day": "ordinal",
+            "l2_regularization": 0.0,
+            "learning_rate": 0.1,
+            "loss": "log_loss",
+            "max_iter": 100,
+            "max_leaf_nodes": 31,
+            "min_samples_leaf": 20,
+            "missing": "zero plus indicator",
+            "model": "GradientBoostingBaseline",
+            "random_state": "run seed",
+            "states_without_training_rows": "add-one probability"
+          },
+          "name": "diagnostic"
+        }
+      ],
+      "why": "the richest declared information set, the hour and the last three windows, is strictly less than the recursion reads"
+    },
+    "missing_channels": "a channel a home does not instrument has no term in the recursion; the baselines see its columns as missing, encoded as zero beside a missing indicator, and where every training home instruments the channel that indicator never varied in training, so the baselines read the absent channel as silence. The homes this affects are listed under instrumentation",
+    "recursion": {
+      "filter_declared": {
+        "channels": "declared",
+        "time_prior": false
+      },
+      "filter_hurdle": {
+        "channels": "hurdle",
+        "time_prior": false
+      },
+      "filter_periodic": {
+        "channels": "declared",
+        "time_prior": true
+      },
+      "filter_periodic_hurdle": {
+        "channels": "hurdle",
+        "time_prior": true
+      }
+    }
+  },
+  "name": "casas-heldout-confirmation",
+  "one_shot": "the run refuses if its record exists, in the repository or on its results branch, and if any pinned source file differs from the freeze; whatever it reports stands, and nothing may be changed in response and rescored as the same confirmation. A run that stops before writing its record reports nothing; a fix that leaves this declaration unchanged, made without seeing any outcome, is disclosed beside the record and the run repeated",
+  "per_state_recall": {
+    "estimands": [
+      "K1"
+    ],
+    "verdict": "the same verdicts with the recall minimal difference, for a state that occurs in at least 5 held-out homes; for fewer the difference is described, not judged"
+  },
+  "pinned_records": {
+    "artifacts/phase3/combined_prior_protocol.json": "3a0c5cad58187609601181ae841099b9144707ba2327af4173c9442812dc52a5",
+    "artifacts/phase3/fitted_rates_protocol.json": "f695f972fcfcd11266a8a1a720932442e8b7d455bdec7dd6304ecab41843075d",
+    "artifacts/phase3/phase3-combined-prior.json": "57db137f57f5b298054d7a4cfe8c837d854ca9a8793329857d7803401477db59",
+    "artifacts/v03/external_cohort_manifest.json": "6e3e157327c6eb40edfae498c2c4cc679a9e7c5b999899cf31683ed8161bc332",
+    "artifacts/v03/external_primary_result.json": "66501d48099f48ce7c834839988830090812414b24ce76b193f84ed70783f23f"
+  },
+  "protocol_sha256": "ffe1d932a477ef68d3d81bf797017c3d26eeab35158c344002d31379f0054bef",
+  "question": "whether the time prior's gain over the fitted hurdle channels in the recursion, a success on the development panel, holds on CASAS homes outside it",
+  "schema": "heldout-protocol/1",
+  "status": "pre-specified, one-shot, on CASAS homes outside the development panel; the homes were scored once before, by the v0.2 and v0.3 production filter",
+  "tuning": "none: every setting is the base protocol's or declared here",
+  "unscored": "a held-out home with no labelled window is listed as unscored and enters no estimand; any other home without a score from every model stops the run",
+  "what_this_cannot_show": [
+    "Independence from CASAS: the homes share its sensors, labelling and annotation, and 8 of them its hh family.",
+    "Why a failure happened: training is all hh, and 35 of the 43 homes come from families with other instrumentation and sensor names the adapter learned while screening them, so non-transfer and the mapping cannot be separated.",
+    "A first look at these homes: they were scored once before, by the production filter.",
+    "Intervals that allow for families: the bootstrap resamples homes, and 25 of the 43 are of the tm family.",
+    "Anything about the online pipeline as shipped: it offers neither the fitted channels nor the time prior."
+  ],
+  "windows": "every window at the base protocol's step of 300 seconds; only labelled windows are scored; in every home every model must score the same number of windows in each true state, or nothing is reported"
+}

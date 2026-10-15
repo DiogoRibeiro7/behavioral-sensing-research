@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sensor-modeling"
-version = "0.9.0"
+version = "0.10.0"
 description = "Interpretable, probabilistic, privacy-preserving multimodal ambient sensing for behavioural research"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "MIT"
@@ -129,9 +129,12 @@ dev = [
     "setuptools-scm>=7.0.0",
 ]
 
-# Documentation dependencies
+# Documentation dependencies. MkDocs 2.0 removes the plugin system that
+# Material, mkdocstrings and mkdocs-jupyter rely on, so MkDocs stays below 2.
+# Material declares the same bound from 9.7.5 on; the bound here also covers
+# the earlier Material releases that its floor allows.
 docs = [
-    "mkdocs>=1.6.0",
+    "mkdocs>=1.6.0,<2",
     "mkdocs-material>=9.5.0",
     "mkdocstrings[python]>=0.24.0",
     "mkdocs-jupyter>=0.24.0",
@@ -381,7 +384,7 @@ ignore = [
 
 # Version bumping configuration
 [tool.bumpversion]
-current_version = "0.9.0"
+current_version = "0.10.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"

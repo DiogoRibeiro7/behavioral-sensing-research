@@ -1,0 +1,648 @@
+{
+  "channels": {
+    "channels": {
+      "bathroom_motion": {
+        "away": {
+          "active_mean": 7.619528619528619,
+          "active_variance": 53.29741106657703,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.12000888252528867,
+          "rate": 7.549419738851359,
+          "silence": 0.9842481132403442,
+          "silent": 74229,
+          "total": 9052,
+          "windows": 75417
+        },
+        "bathroom_activity": {
+          "active_mean": 14.016504994932678,
+          "active_variance": 166.1983953707758,
+          "declared_mean": 3.333333333333333,
+          "mean": 12.514795193177413,
+          "rate": 13.99817879245643,
+          "silence": 0.10601215763279068,
+          "silent": 820,
+          "total": 96812,
+          "windows": 7727
+        },
+        "bed_awake": {
+          "active_mean": 11.272727272727273,
+          "active_variance": 56.41818181818182,
+          "declared_mean": 0.012499999999999997,
+          "mean": 1.5518750000000001,
+          "rate": 5.900105442239746,
+          "silence": 0.8606366700740822,
+          "silent": 57,
+          "total": 124,
+          "windows": 68
+        },
+        "home_active": {
+          "active_mean": 11.452063106796116,
+          "active_variance": 122.70847525671435,
+          "declared_mean": 0.8333333333333335,
+          "mean": 1.5407467863701285,
+          "rate": 11.415740736865464,
+          "silence": 0.8652199623955145,
+          "silent": 21197,
+          "total": 37746,
+          "windows": 24493
+        },
+        "home_inactive": {
+          "active_mean": 7.705410821643286,
+          "active_variance": 49.42853353766356,
+          "declared_mean": 0.20833333333333334,
+          "mean": 0.29176360509811855,
+          "rate": 7.649298885638197,
+          "silence": 0.9620863654702055,
+          "silent": 38035,
+          "total": 11535,
+          "windows": 39532
+        },
+        "kitchen_activity": {
+          "active_mean": 7.6068821689259645,
+          "active_variance": 50.835902481925984,
+          "declared_mean": 0.012499999999999999,
+          "mean": 1.271818340306834,
+          "rate": 7.521234438659926,
+          "silence": 0.8327843329159565,
+          "silent": 4765,
+          "total": 7295,
+          "windows": 5724
+        },
+        "sleeping": {
+          "active_mean": 8.936624416277517,
+          "active_variance": 58.96594080076526,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.17764185596265797,
+          "rate": 8.872399249776109,
+          "silence": 0.9801202866107852,
+          "silent": 73900,
+          "total": 13396,
+          "windows": 75399
+        }
+      },
+      "bedroom_motion": {
+        "away": {
+          "active_mean": 6.935764833968427,
+          "active_variance": 54.242058959917365,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.16835780071089734,
+          "rate": 6.89026340916,
+          "silence": 0.9757244537270038,
+          "silent": 73830,
+          "total": 12741,
+          "windows": 75667
+        },
+        "bathroom_activity": {
+          "active_mean": 9.835140562248997,
+          "active_variance": 98.90011054460864,
+          "declared_mean": 0.012499999999999999,
+          "mean": 6.146981676706828,
+          "rate": 9.813380334562343,
+          "silence": 0.37498129186821366,
+          "silent": 2976,
+          "total": 48979,
+          "windows": 7956
+        },
+        "bed_awake": {
+          "active_mean": 9.277777777777779,
+          "active_variance": 95.38888888888889,
+          "declared_mean": 1.1666666666666667,
+          "mean": 2.2625,
+          "rate": 6.232101213238405,
+          "silence": 0.6717104835871897,
+          "silent": 50,
+          "total": 167,
+          "windows": 68
+        },
+        "home_active": {
+          "active_mean": 13.497428865272541,
+          "active_variance": 209.42541769809344,
+          "declared_mean": 0.8333333333333335,
+          "mean": 3.169302587629281,
+          "rate": 13.472729314623273,
+          "silence": 0.7649488984869445,
+          "silent": 19003,
+          "total": 78744,
+          "windows": 24837
+        },
+        "home_inactive": {
+          "active_mean": 7.938874944633102,
+          "active_variance": 90.4894705001592,
+          "declared_mean": 0.20833333333333334,
+          "mean": 1.3196677055979582,
+          "rate": 7.923924088932489,
+          "silence": 0.8337237891416254,
+          "silent": 33962,
+          "total": 53770,
+          "windows": 40735
+        },
+        "kitchen_activity": {
+          "active_mean": 8.005818181818182,
+          "active_variance": 67.48904909355564,
+          "declared_mean": 0.012499999999999999,
+          "mean": 1.843602411656339,
+          "rate": 7.942436399670865,
+          "silence": 0.7696953497916474,
+          "silent": 4584,
+          "total": 11008,
+          "windows": 5959
+        },
+        "sleeping": {
+          "active_mean": 5.351938831239759,
+          "active_variance": 51.0898026093233,
+          "declared_mean": 0.06666666666666667,
+          "mean": 0.6300752266443773,
+          "rate": 5.32013145159641,
+          "silence": 0.8822635643775526,
+          "silent": 68598,
+          "total": 48997,
+          "windows": 77753
+        }
+      },
+      "hall_door": {
+        "away": {
+          "active_mean": 4.727146814404432,
+          "active_variance": 9.3387570799275,
+          "declared_mean": 0.3333333333333333,
+          "mean": 0.18044635896351696,
+          "rate": 4.668206376990877,
+          "silence": 0.9617938711627649,
+          "silent": 72779,
+          "total": 13652,
+          "windows": 75667
+        },
+        "bathroom_activity": {
+          "active_mean": 2.8766937669376693,
+          "active_variance": 6.753598824123835,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.5329003514056224,
+          "rate": 2.661806390746173,
+          "silence": 0.8147403280127921,
+          "silent": 6480,
+          "total": 4246,
+          "windows": 7956
+        },
+        "bed_awake": {
+          "active_mean": 2.0,
+          "active_variance": null,
+          "declared_mean": 0.012499999999999997,
+          "mean": 0.026875,
+          "rate": 0.16108575302122538,
+          "silence": 0.9856366700740822,
+          "silent": 67,
+          "total": 2,
+          "windows": 68
+        },
+        "home_active": {
+          "active_mean": 4.135294117647059,
+          "active_variance": 15.299136424207811,
+          "declared_mean": 0.3333333333333333,
+          "mean": 0.5659785102016178,
+          "rate": 4.0532541336752,
+          "silence": 0.8630366765554705,
+          "silent": 21437,
+          "total": 14060,
+          "windows": 24837
+        },
+        "home_inactive": {
+          "active_mean": 3.341813437703849,
+          "active_variance": 7.097186526529494,
+          "declared_mean": 0.0125,
+          "mean": 0.12573072864259946,
+          "rate": 3.1863279856851308,
+          "silence": 0.962373940010453,
+          "silent": 39202,
+          "total": 5123,
+          "windows": 40735
+        },
+        "kitchen_activity": {
+          "active_mean": 4.161257606490873,
+          "active_variance": 13.581076183317716,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.6871797018924802,
+          "rate": 4.051598482867168,
+          "silence": 0.8348435661708135,
+          "silent": 4973,
+          "total": 4103,
+          "windows": 5959
+        },
+        "sleeping": {
+          "active_mean": 2.176656151419558,
+          "active_variance": 3.8104659984826097,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.008874815148202918,
+          "rate": 1.7707571731491274,
+          "silence": 0.995921699139792,
+          "silent": 77436,
+          "total": 690,
+          "windows": 77753
+        }
+      },
+      "hall_motion": {
+        "away": {
+          "active_mean": 2.142857142857143,
+          "active_variance": 3.9166666666666665,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.0062578111051597935,
+          "rate": 1.484198160193232,
+          "silence": 0.9970749826582114,
+          "silent": 16742,
+          "total": 105,
+          "windows": 16791
+        },
+        "bathroom_activity": {
+          "active_mean": 1.6764705882352942,
+          "active_variance": 1.1345811051693404,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.22065637065637064,
+          "rate": 0.8767612400799104,
+          "silence": 0.8681503228028052,
+          "silent": 213,
+          "total": 57,
+          "windows": 247
+        },
+        "bed_awake": {
+          "active_mean": null,
+          "active_variance": null,
+          "declared_mean": null,
+          "mean": null,
+          "rate": null,
+          "silence": null,
+          "silent": 0,
+          "total": 0,
+          "windows": 0
+        },
+        "home_active": {
+          "active_mean": 2.8869565217391306,
+          "active_variance": 11.25903890160183,
+          "declared_mean": 0.8333333333333334,
+          "mean": 0.6895161290322581,
+          "rate": 2.535249593885672,
+          "silence": 0.7544660856896874,
+          "silent": 369,
+          "total": 332,
+          "windows": 484
+        },
+        "home_inactive": {
+          "active_mean": 1.5238095238095237,
+          "active_variance": 0.9908675799086759,
+          "declared_mean": 0.20833333333333334,
+          "mean": 0.1761275272161742,
+          "rate": 0.8623816038397425,
+          "silence": 0.8839371976312657,
+          "silent": 1127,
+          "total": 224,
+          "windows": 1274
+        },
+        "kitchen_activity": {
+          "active_mean": 1.6593406593406594,
+          "active_variance": 1.3826617826617826,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.5998015873015873,
+          "rate": 1.001930969169604,
+          "silence": 0.6382973555790737,
+          "silent": 149,
+          "total": 151,
+          "windows": 240
+        },
+        "sleeping": {
+          "active_mean": 1.2083333333333333,
+          "active_variance": 0.17210144927536242,
+          "declared_mean": 0.012499999999999997,
+          "mean": 0.010979284369114876,
+          "rate": 0.2698328629091287,
+          "silence": 0.9909043064429102,
+          "silent": 2619,
+          "total": 29,
+          "windows": 2643
+        }
+      },
+      "kitchen_motion": {
+        "away": {
+          "active_mean": 8.125774473358117,
+          "active_variance": 102.75230488648995,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.1732997264763012,
+          "rate": 8.070708570061347,
+          "silence": 0.9786711099988891,
+          "silent": 74053,
+          "total": 13115,
+          "windows": 75667
+        },
+        "bathroom_activity": {
+          "active_mean": 10.030251141552512,
+          "active_variance": 121.53706264391646,
+          "declared_mean": 0.012499999999999999,
+          "mean": 2.2054656124497996,
+          "rate": 9.968396349781054,
+          "silence": 0.7801017737959246,
+          "silent": 6204,
+          "total": 17573,
+          "windows": 7956
+        },
+        "bed_awake": {
+          "active_mean": 1.0,
+          "active_variance": null,
+          "declared_mean": 0.012499999999999997,
+          "mean": 0.014374999999999999,
+          "rate": 0.011540303552321237,
+          "silence": 0.9856366700740822,
+          "silent": 67,
+          "total": 1,
+          "windows": 68
+        },
+        "home_active": {
+          "active_mean": 15.188900747065102,
+          "active_variance": 250.1753046444791,
+          "declared_mean": 0.8333333333333335,
+          "mean": 3.4368385045675884,
+          "rate": 15.159684818339427,
+          "silence": 0.7734804289308255,
+          "silent": 19215,
+          "total": 85392,
+          "windows": 24837
+        },
+        "home_inactive": {
+          "active_mean": 11.376052727938484,
+          "active_variance": 135.14607833274988,
+          "declared_mean": 0.20833333333333334,
+          "mean": 0.762522394286696,
+          "rate": 11.330995458222036,
+          "silence": 0.9329212760731787,
+          "silent": 38004,
+          "total": 31068,
+          "windows": 40735
+        },
+        "kitchen_activity": {
+          "active_mean": 32.673458540042525,
+          "active_variance": 515.4370342174903,
+          "declared_mean": 3.333333333333333,
+          "mean": 30.89080556020767,
+          "rate": 32.611470959735435,
+          "silence": 0.052826676925166134,
+          "silent": 315,
+          "total": 184409,
+          "windows": 5959
+        },
+        "sleeping": {
+          "active_mean": 4.14,
+          "active_variance": 29.579559118236475,
+          "declared_mean": 0.012499999999999999,
+          "mean": 0.026620587667974024,
+          "rate": 3.991430511398687,
+          "silence": 0.993568455392605,
+          "silent": 77253,
+          "total": 2070,
+          "windows": 77753
+        }
+      },
+      "living_motion": {
+        "away": {
+          "active_mean": 8.434893928310169,
+          "active_variance": 69.96850022657856,
+          "declared_mean": 0.03462093779322557,
+          "mean": 0.3047267465380557,
+          "rate": 8.400591252810225,
+          "silence": 0.9638683341233619,
+          "silent": 72933,
+          "total": 23061,
+          "windows": 75667
+        },
+        "bathroom_activity": {
+          "active_mean": 8.804454634785458,
+          "active_variance": 60.76024227292495,
+          "declared_mean": 0.03363342131724485,
+          "mean": 3.3735446286465622,
+          "rate": 8.772605810357552,
+          "silence": 0.6167925590774573,
+          "silent": 4903,
+          "total": 26880,
+          "windows": 7956
+        },
+        "bed_awake": {
+          "active_mean": 1.0,
+          "active_variance": 0.0,
+          "declared_mean": 0.046691176470588236,
+          "mean": 0.04450367647058824,
+          "rate": 0.037410355731508665,
+          "silence": 0.9556573131593717,
+          "silent": 65,
+          "total": 3,
+          "windows": 68
+        },
+        "home_active": {
+          "active_mean": 11.277160696680907,
+          "active_variance": 144.25359624964486,
+          "declared_mean": 2.110929929809022,
+          "mean": 6.906005519705328,
+          "rate": 11.270022612506217,
+          "silence": 0.3872772949942644,
+          "silent": 9622,
+          "total": 171582,
+          "windows": 24837
+        },
+        "home_inactive": {
+          "active_mean": 6.7679600461006535,
+          "active_variance": 47.820137491648126,
+          "declared_mean": 0.4875976842191399,
+          "mean": 2.5942486851108213,
+          "rate": 6.7558607591153645,
+          "silence": 0.6165943308372422,
+          "silent": 25117,
+          "total": 105702,
+          "windows": 40735
+        },
+        "kitchen_activity": {
+          "active_mean": 9.449932157394844,
+          "active_variance": 67.12812499539613,
+          "declared_mean": 0.03216772948481288,
+          "mean": 5.832086084869172,
+          "rate": 9.42179455189135,
+          "silence": 0.38278682461616204,
+          "silent": 2274,
+          "total": 34823,
+          "windows": 5959
+        },
+        "sleeping": {
+          "active_mean": 3.6721311475409837,
+          "active_variance": 18.34724117387043,
+          "declared_mean": 0.03121840957905162,
+          "mean": 0.040331442434449284,
+          "rate": 3.5286440030024098,
+          "silence": 0.9890134529189397,
+          "silent": 76899,
+          "total": 3136,
+          "windows": 77753
+        }
+      }
+    },
+    "fitted_on": [
+      "hh101",
+      "hh102",
+      "hh103",
+      "hh105",
+      "hh106",
+      "hh108",
+      "hh110",
+      "hh111",
+      "hh114",
+      "hh118",
+      "hh119",
+      "hh120",
+      "hh122",
+      "hh123",
+      "hh124",
+      "hh125",
+      "hh126",
+      "hh127",
+      "hh129",
+      "hh130"
+    ],
+    "model": "hurdle and Poisson channel observation models, fitted",
+    "pseudo_windows": 12.0
+  },
+  "channels_sha256": "15a63d668737ede83e3c8b10d7c97917b60849e2e253285c84a27a775b352ed6",
+  "formulation": "fitted hurdle channels with the hierarchical time prior as an hour-dependent transition, in the filter's recursion",
+  "periodic_prior": {
+    "config": {
+      "basis": "1, sin(k theta), cos(k theta); theta = 2 pi (hour + 1/2) / 24",
+      "harmonics": 2,
+      "household_precision": 24.0,
+      "population_precision": 1.0,
+      "unit": "labelled hours"
+    },
+    "deviations": {},
+    "fitted_on": [
+      "hh101",
+      "hh102",
+      "hh103",
+      "hh105",
+      "hh106",
+      "hh108",
+      "hh110",
+      "hh111",
+      "hh114",
+      "hh118",
+      "hh119",
+      "hh120",
+      "hh122",
+      "hh123",
+      "hh124",
+      "hh125",
+      "hh126",
+      "hh127",
+      "hh129",
+      "hh130"
+    ],
+    "labelled_hours": 19414.58333333335,
+    "model": "periodic state prior",
+    "population": [
+      [
+        2.113520988940157,
+        -0.26543616765691014,
+        -0.41063649654132417,
+        0.22958058691738326,
+        0.022907379892464597
+      ],
+      [
+        0.7470496392808319,
+        -0.7090058087752209,
+        -0.7584638005992033,
+        -0.25613625564057524,
+        0.10112818035005611
+      ],
+      [
+        1.3389844336266743,
+        -0.8651454347411763,
+        -0.029888616180544978,
+        -0.05575001902091084,
+        0.26689715014431964
+      ],
+      [
+        1.2178858713490746,
+        1.9622355124880217,
+        1.877172432382971,
+        0.4183247775240193,
+        -0.04214445120732448
+      ],
+      [
+        -4.291944549749252,
+        0.5508129435193669,
+        0.7793181396578197,
+        0.39835774120173545,
+        0.03566395428867207
+      ],
+      [
+        -0.1446478140459693,
+        0.1972594290070733,
+        -0.1774910922361263,
+        -0.18749892088856893,
+        0.10816249626996896
+      ],
+      [
+        -0.9808485694012865,
+        -0.8707204738416391,
+        -1.2800105664826367,
+        -0.5468779100926822,
+        -0.4926147097386099
+      ]
+    ],
+    "states": [
+      "away",
+      "home_active",
+      "home_inactive",
+      "sleeping",
+      "bed_awake",
+      "bathroom_activity",
+      "kitchen_activity"
+    ]
+  },
+  "periodic_prior_sha256": "99f979d697985d9bfe056cbeb66dbd56bf5a623af0427e780c75cfa511409b7b",
+  "schema": "phase3-parameters/1",
+  "source": {
+    "cpu": {
+      "avx512f": true,
+      "model": "AMD EPYC 9V45 96-Core Processor"
+    },
+    "data": "zenodo:15708568 labeled_data.zip",
+    "distributions": {
+      "numpy": "2.3.5",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.6.1",
+      "scipy": "1.15.3"
+    },
+    "fit": "sensor_modeling.datasets.heldout_experiment.training_fit",
+    "git_commit": "d427101576dfa2f73511d1d5c1166a7ca5c25cc0",
+    "protocol": "artifacts/heldout/heldout_protocol.json",
+    "protocol_sha256": "a1196911c9f07ded4e06ddad4e2df56aff344ef8223695e456bdb657ae77b23a",
+    "python": "3.13.16",
+    "record": "artifacts/heldout/casas-heldout-confirmation.json",
+    "record_sha256": "785f6757ed9e9890dc7dfbf471660403779cc7dcc6a246586a87fd2323e2c97a",
+    "recordings": {
+      "hh101": "3f4d4a53ef4940670ef855c66cd9dee0a458700656afb112f2c80b703b65666d",
+      "hh102": "3720812ee71d89f230149cc0b6562f308eb8658e9198ff69d27be9a1d77b29d2",
+      "hh103": "bb589e6e350d971533a1e75eff4a960a590eb034d54b5e76855ee55e04d0e18b",
+      "hh105": "e50b80bab18551ae365c259b5b19210833cdbfecdf85fa6a2e760018e12e5f85",
+      "hh106": "d7bc4b7d43e24dc7d826c06c618a2206a2290302da6998dba9a5e7d23b5186a4",
+      "hh108": "02dc7a30cf16fd82605084bae34e8b1c2929fe306afef6dd75fc13c316151c6b",
+      "hh110": "c89fbf594549cd749d83e1b57c3d4b424d519211456c45d74c691e3bfe476c33",
+      "hh111": "10cdf20436acf834fea9d4b3bd40e6bd634050da7e1cff89ee4d79f817532b38",
+      "hh114": "51dace896e9e8ebb0dd62fafcadc7319c0b54ef60aacf8d62630fd45401d85d1",
+      "hh118": "5fa3f1e2b3c4dde5ce251f635abea710aadc382c6c554595eec8f2e80011ee36",
+      "hh119": "8bf08d3568c4eec3d236bd62ef5c0e9ad38ea03a2ddd79e32db7324db11f10f6",
+      "hh120": "3d2b52061cd1f6660fe1f2bb1ac84f7784756a756ee8d6b6fcb7c9bfbaad6b1a",
+      "hh122": "d4143027bc742e0c7dbdeb16d7095fafa5c69b8f5026aceb22954b8b50d17ac9",
+      "hh123": "05f149f788bd4d42fc4314a955f1dd6e55742aa366e3f2fa5fdf334ba2a4a5fb",
+      "hh124": "9c944a1460d194bde94a617ba8d4818ffa80cfb3adf67fb70fb2960fb1b6a5ce",
+      "hh125": "6723cce771fd0f41e088f23bc59f02a45b275303bcf1bbf5ceff569e4822d4b4",
+      "hh126": "c315fb1549522a6dfcd7d4b90540c8c780e27bf3dca0ea3b039825995e0e66d1",
+      "hh127": "d3d91e4d08600deabff70ae2fbb63e4aff763ff9c194d643a081920f7d36fe84",
+      "hh129": "a6065cbec7a1f9e2bc14cb9a63a2697f3010b9427cebc5338ad90d4925e5d37f",
+      "hh130": "34f48db608acea7a325721a4f81a71fc8fda3c6069f32ed4964a0c7023824103"
+    },
+    "splits": "artifacts/phase1/household_splits.json",
+    "splits_sha256": "d9d52fae4415b306206717ccd942ff07a1faa039126561054d3b3f81f91feb21",
+    "timezone": "America/Los_Angeles"
+  },
+  "step_seconds": 300
+}

@@ -79,11 +79,21 @@ nav:
       - Partial pooling: PARTIAL_POOLING.md
       - "Phase 3.4: partial pooling": PHASE3_PARTIAL_POOLING.md
       - "Phase 3.5: fixed-lag smoothing": PHASE3_SMOOTHING.md
+      - "Phase 3: time prior with fitted channels, protocol": PHASE3_COMBINED_PRIOR_PROTOCOL.md
+      - "Phase 3: time prior with fitted channels, results": PHASE3_COMBINED_PRIOR_RESULTS.md
+      - "Held-out confirmation: protocol": HELDOUT_CONFIRMATION_PROTOCOL.md
+      - "Held-out confirmation: results": HELDOUT_CONFIRMATION_RESULTS.md
+      - "Phase 3.3 follow-up: activity sub-states, protocol": PHASE3_ACTIVITY_SUBSTATES_PROTOCOL.md
+      - "Phase 3.3 follow-up: activity sub-states, results": PHASE3_ACTIVITY_SUBSTATES_RESULTS.md
       - Structural disagreement: STRUCTURAL_DISAGREEMENT.md
       - Evidence-group disagreement: EVIDENCE_GROUP_DISAGREEMENT.md
       - Observation mismatch: OBSERVATION_MISMATCH.md
       - Selective prediction: SELECTIVE_PREDICTION.md
       - "Phase 4: uncertainty diagnostics": PHASE4_UNCERTAINTY_DIAGNOSTICS.md
+      - "Phase 4 for the time prior: protocol": PHASE4_TIME_PRIOR_PROTOCOL.md
+      - "Phase 4 for the time prior: results": PHASE4_TIME_PRIOR_RESULTS.md
+      - "Phase 4: abstention rule, protocol": PHASE4_ABSTENTION_PROTOCOL.md
+      - "Phase 4: abstention rule, results": PHASE4_ABSTENTION_RESULTS.md
       - Experiment artifacts: EXPERIMENT_ARTIFACTS.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md
@@ -92,6 +102,21 @@ nav:
       - External dataset contract: EXTERNAL_DATASET_CONTRACT.md
       - "Phase 5: external protocol": PHASE5_EXTERNAL_PROTOCOL.md
       - "Phase 5: external results": PHASE5_EXTERNAL_RESULTS.md
+      - "ContextAct transfer: protocol": CONTEXTACT_TRANSFER_PROTOCOL.md
+      - "ContextAct transfer: results": CONTEXTACT_TRANSFER_RESULTS.md
+      - "TIHM: alert-burden protocol": TIHM_ALERT_BURDEN_PROTOCOL.md
+      - "TIHM: alert-burden results": TIHM_ALERT_BURDEN_RESULTS.md
+      - "Silent homes: protocol": SILENT_HOME_PROTOCOL.md
+      - "Silent homes: results": SILENT_HOME_RESULTS.md
+      - "Thresholds on synthetic days": THRESHOLD_CALIBRATION_NULL.md
+      - "Threshold calibration: protocol": THRESHOLD_CALIBRATION_PROTOCOL.md
+      - "Threshold calibration: results": THRESHOLD_CALIBRATION_RESULTS.md
+      - "Sleep mat: protocol": SLEEP_MAT_PROTOCOL.md
+      - "Sleep mat: results": SLEEP_MAT_RESULTS.md
+      - "Matched sensors: protocol": MATCHED_SENSORS_PROTOCOL.md
+      - "Matched sensors: results": MATCHED_SENSORS_RESULTS.md
+      - "Sleep gap: plan": SLEEP_GAP_PLAN.md
+      - "Sleep gap: results": SLEEP_GAP_RESULTS.md
       - Adversarial review: ADVERSARIAL_REVIEW.md
       - Release readiness: RELEASE_READINESS.md
   - Modelling core:

@@ -1,0 +1,118 @@
+name: Fit phase3 parameters
+
+# Fits the phase3 formulation's parameters once on the 20 CASAS development
+# homes, exactly as the held-out confirmation fitted them, and commits the
+# parameter file to a run-artifacts branch. Nothing is scored. The script
+# refuses unless the fit has the digests the held-out record gives.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fit-phase3-parameters
+  cancel-in-progress: false
+
+jobs:
+  fit:
+    name: fit the phase3 parameters on the development panel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out the revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      # The versions the held-out confirmation fitted with, so the fit
+      # reproduces the digests its record gives.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . "numpy==2.3.5" "pandas==2.3.3" "scipy==1.15.3" \
+            "scikit-learn==1.6.1"
+
+      - name: Download and verify public CASAS archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Outside the checkout, so the working tree stays clean.
+          mkdir -p "$RUNNER_TEMP/casas"
+          python - <<'PY'
+          import os
+          import hashlib
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          record = "15708568"
+          with urllib.request.urlopen(f"https://zenodo.org/api/records/{record}") as response:
+              meta = json.load(response)
+          candidates = [f for f in meta.get("files", []) if f.get("key") == "labeled_data.zip"]
+          if len(candidates) != 1:
+              raise SystemExit(f"expected one labeled_data.zip, got {len(candidates)}")
+          item = candidates[0]
+          target = Path(os.environ["RUNNER_TEMP"]) / "casas" / "labeled_data.zip"
+          urllib.request.urlretrieve(item["links"]["self"], target)
+          algorithm, expected = item["checksum"].split(":", 1)
+          digest = hashlib.new(algorithm)
+          with target.open("rb") as handle:
+              for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(chunk)
+          if digest.hexdigest() != expected:
+              raise SystemExit(f"archive checksum mismatch: {digest.hexdigest()} != {expected}")
+          PY
+          unzip -q "$RUNNER_TEMP/casas/labeled_data.zip" -d "$RUNNER_TEMP/casas/extracted"
+
+      # The time prior's fit can round differently on another CPU, and may
+      # reproduce the record's digest only on one like the held-out run's.
+      # If the fit refuses, dispatch again.
+      - name: Describe the runner's CPU
+        shell: bash
+        run: |
+          grep -m1 "model name" /proc/cpuinfo
+          if grep -qw avx512f /proc/cpuinfo; then echo "AVX-512: yes"; else echo "AVX-512: no"; fi
+
+      - name: Fit the parameters
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)"
+          python scripts/fit_phase3_parameters.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/phase3"
+
+      - name: Commit the parameters to a results branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="run-artifacts/$GITHUB_RUN_ID"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          mkdir -p "$branch"
+          cp -r "$RUNNER_TEMP/phase3/." "$branch/"
+          git add "$branch"
+          git commit -m "run artifact $GITHUB_RUN_ID"
+          git push origin "$branch"
+
+      - name: Upload the parameters
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase3-parameters
+          path: ${{ runner.temp }}/phase3/
+          retention-days: 90
+          if-no-files-found: error

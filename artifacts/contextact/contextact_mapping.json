@@ -1,0 +1,847 @@
+{
+  "dataset": "contextact-a4h",
+  "description": "Written from the README, the description file and the dataset paper, with the value tokens of the motion, presence, door and bed sensors and the distinct activity labels and markers read from the change logs, before any model was run on the data. No annotation's time, duration or count was read.",
+  "labels": [
+    {
+      "native": "Cuisine",
+      "outcome": "approximate",
+      "rationale": "cooking, one kitchen activity",
+      "targets": [
+        "kitchen_activity"
+      ]
+    },
+    {
+      "native": "Dormir",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "sleeping"
+      ]
+    },
+    {
+      "native": "Douche",
+      "outcome": "approximate",
+      "rationale": "showering, one bathroom activity",
+      "targets": [
+        "bathroom_activity"
+      ]
+    },
+    {
+      "native": "Loisir",
+      "outcome": "ambiguous",
+      "rationale": "leisure, an option of the annotation interface that the README does not list; active or not",
+      "targets": [
+        "home_active",
+        "home_inactive"
+      ]
+    },
+    {
+      "native": "Manger",
+      "outcome": "approximate",
+      "rationale": "eating; as in the CASAS labels, a meal is activity at home rather than kitchen activity, and the dining table is in the open living space",
+      "targets": [
+        "home_active"
+      ]
+    },
+    {
+      "native": "Musique",
+      "outcome": "ambiguous",
+      "rationale": "listening to music, an option of the annotation interface that the README does not list; at rest or while doing something else",
+      "targets": [
+        "home_active",
+        "home_inactive"
+      ]
+    },
+    {
+      "native": "Sortir",
+      "outcome": "approximate",
+      "rationale": "going out, annotated from leaving to returning: the paper's Fig. 3 gives time out of home as 34% of the November period and 5% of July's",
+      "targets": [
+        "away"
+      ]
+    },
+    {
+      "native": "TV",
+      "outcome": "approximate",
+      "rationale": "watching television, an option of the annotation interface (the paper's Fig. 2) that the README does not list; as CASAS's Watch_TV",
+      "targets": [
+        "home_inactive"
+      ]
+    },
+    {
+      "native": "Toilettes",
+      "outcome": "approximate",
+      "rationale": "using the toilet, one bathroom activity",
+      "targets": [
+        "bathroom_activity"
+      ]
+    },
+    {
+      "native": "Travail",
+      "outcome": "approximate",
+      "rationale": "working at home, annotated in July only; CASAS's work labels are activity at home",
+      "targets": [
+        "home_active"
+      ]
+    },
+    {
+      "native": "Vaisselle",
+      "outcome": "approximate",
+      "rationale": "washing the dishes, one kitchen activity",
+      "targets": [
+        "kitchen_activity"
+      ]
+    }
+  ],
+  "locations": [
+    {
+      "native": "Bathroom",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "bathroom"
+      ]
+    },
+    {
+      "native": "Bedroom",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "bedroom"
+      ]
+    },
+    {
+      "native": "Dining Room",
+      "outcome": "approximate",
+      "rationale": "the dining area of the ground floor's open space; CASAS's dining rooms are mapped to living space too",
+      "targets": [
+        "living"
+      ]
+    },
+    {
+      "native": "First Floor",
+      "outcome": "ambiguous",
+      "rationale": "the ground floor as a whole, one open space holding the kitchen, the dining room and the living room",
+      "targets": [
+        "kitchen",
+        "living",
+        "hall"
+      ]
+    },
+    {
+      "native": "Hallway",
+      "outcome": "approximate",
+      "rationale": "a hallway",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Hallway First Floor",
+      "outcome": "approximate",
+      "rationale": "the ground floor's hallway",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Hallway Second Floor",
+      "outcome": "approximate",
+      "rationale": "the upstairs hallway",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Hallway, First Floor",
+      "outcome": "approximate",
+      "rationale": "the ground floor's hallway",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Hallway, Second Floor",
+      "outcome": "approximate",
+      "rationale": "the upstairs hallway",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Kitchen",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "kitchen"
+      ]
+    },
+    {
+      "native": "Living Room",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        "living"
+      ]
+    },
+    {
+      "native": "Main Entrance",
+      "outcome": "approximate",
+      "rationale": "the entrance, where the main door is",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "OpenWeather API",
+      "outcome": "unmappable",
+      "rationale": "a web service outside the home",
+      "targets": []
+    },
+    {
+      "native": "Stairway",
+      "outcome": "approximate",
+      "rationale": "the stairs between the two floors",
+      "targets": [
+        "hall"
+      ]
+    },
+    {
+      "native": "Stove",
+      "outcome": "approximate",
+      "rationale": "the stove, in the kitchen",
+      "targets": [
+        "kitchen"
+      ]
+    },
+    {
+      "native": "Study Room",
+      "outcome": "approximate",
+      "rationale": "a study upstairs; the ontology has no office, and CASAS's offices are mapped to living space",
+      "targets": [
+        "living"
+      ]
+    }
+  ],
+  "mapping_sha256": "d292c3a3368f7cb8aef0d37e4b4c1fc3c90e2fa409f59c92f8354bc12364de58",
+  "schema": "external-ontology-mapping/1",
+  "sensor_types": [
+    {
+      "native": "Base mode for radiator",
+      "outcome": "unmappable",
+      "rationale": "a radiator's heating mode, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Battery Level",
+      "outcome": "unmappable",
+      "rationale": "a controller's battery level, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Brightness Sensor",
+      "outcome": "approximate",
+      "rationale": "a room's ambient level; the description file gives no unit for most of these, so values are carried without one",
+      "targets": [
+        {
+          "activation": [],
+          "deactivation": [],
+          "kind": "sample",
+          "modality": "environmental",
+          "numeric": true,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Carbon Dioxide Meter",
+      "outcome": "approximate",
+      "rationale": "a room's ambient level; the description file gives no unit for most of these, so values are carried without one",
+      "targets": [
+        {
+          "activation": [],
+          "deactivation": [],
+          "kind": "sample",
+          "modality": "environmental",
+          "numeric": true,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Bathroom Door Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Bedroom Door Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Dining Room Window Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Drawer 1 Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Drawer 2 Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Dressing Door Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Fridge Door Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Garden Door Opening",
+      "outcome": "approximate",
+      "rationale": "the door from the ground floor to the terrace and garden, an outside door that is not the entrance",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "door",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Kitchen Gabinet Door Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Living Room Window Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Opening Main Entrance Door",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "door",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Shower Door Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Study Room Door Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/Study Room Window Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Contact Sensor/bedroom window Opening",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "OPEN"
+          ],
+          "deactivation": [
+            "CLOSED"
+          ],
+          "kind": "event",
+          "modality": "contact",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Controller",
+      "outcome": "unmappable",
+      "rationale": "a controller's state, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Dimmer",
+      "outcome": "unmappable",
+      "rationale": "a lamp's dimming level, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Effective Mode for Radiator",
+      "outcome": "unmappable",
+      "rationale": "a radiator's heating mode, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Energy Sensor",
+      "outcome": "unmappable",
+      "rationale": "appliance or circuit energy use, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Hue Bulb Color",
+      "outcome": "unmappable",
+      "rationale": "a lamp's colour, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Hue Bulb Dimming",
+      "outcome": "unmappable",
+      "rationale": "a lamp's dimming level, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Hue Bulb Toggleing",
+      "outcome": "unmappable",
+      "rationale": "a lamp's on-off state, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Humidity Sensor",
+      "outcome": "approximate",
+      "rationale": "a room's ambient level; the description file gives no unit for most of these, so values are carried without one",
+      "targets": [
+        {
+          "activation": [],
+          "deactivation": [],
+          "kind": "sample",
+          "modality": "environmental",
+          "numeric": true,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Infrared Movement Sensor",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [
+            "ON"
+          ],
+          "deactivation": [
+            "OFF"
+          ],
+          "kind": "event",
+          "modality": "motion",
+          "numeric": false,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Music",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music  Play",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music Artist",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music File",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music Genre",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music Play",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music PlayList",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music Power",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music Title",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Music Volume",
+      "outcome": "unmappable",
+      "rationale": "music player metadata, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Noise Level Sensor",
+      "outcome": "approximate",
+      "rationale": "a room's ambient level; the description file gives no unit for most of these, so values are carried without one",
+      "targets": [
+        {
+          "activation": [],
+          "deactivation": [],
+          "kind": "sample",
+          "modality": "environmental",
+          "numeric": true,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Power Factor",
+      "outcome": "unmappable",
+      "rationale": "the circuit's power factor, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Power Sensor",
+      "outcome": "unmappable",
+      "rationale": "appliance or circuit power, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Presence Sensor",
+      "outcome": "unmappable",
+      "rationale": "a radiator controller's presence variable: the documentation gives neither how it detects presence nor its values, and each change log records it once, as OFF",
+      "targets": []
+    },
+    {
+      "native": "Pressure Sensor",
+      "outcome": "exact",
+      "rationale": "",
+      "targets": [
+        {
+          "activation": [],
+          "deactivation": [],
+          "kind": "sample",
+          "modality": "bed_pressure",
+          "numeric": true,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "Remote Controller",
+      "outcome": "unmappable",
+      "rationale": "a remote control's state, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Rollershutter",
+      "outcome": "unmappable",
+      "rationale": "a curtain's opening, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Smart electrical outlet",
+      "outcome": "unmappable",
+      "rationale": "an outlet's on-off state, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Speed",
+      "outcome": "unmappable",
+      "rationale": "a fan's speed, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Switch",
+      "outcome": "unmappable",
+      "rationale": "a wall switch or appliance on-off state, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Temperature",
+      "outcome": "unmappable",
+      "rationale": "the kettle's water temperature, not the room's, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Temperature Sensor",
+      "outcome": "approximate",
+      "rationale": "a room's ambient level; the description file gives no unit for most of these, so values are carried without one",
+      "targets": [
+        {
+          "activation": [],
+          "deactivation": [],
+          "kind": "sample",
+          "modality": "environmental",
+          "numeric": true,
+          "unit": "none"
+        }
+      ]
+    },
+    {
+      "native": "TemperatureController",
+      "outcome": "unmappable",
+      "rationale": "a radiator's set-point, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Tension Sensor",
+      "outcome": "unmappable",
+      "rationale": "a circuit's voltage, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Voltage",
+      "outcome": "unmappable",
+      "rationale": "the supply voltage, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Water Meter",
+      "outcome": "unmappable",
+      "rationale": "water use at a tap or fixture, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Weather Condition",
+      "outcome": "unmappable",
+      "rationale": "outdoor weather from a web service, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "Window for temperature",
+      "outcome": "unmappable",
+      "rationale": "a radiator's window-open setting, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "electric intensity",
+      "outcome": "unmappable",
+      "rationale": "a circuit's current, which has no modality in the observation model",
+      "targets": []
+    },
+    {
+      "native": "undocumented",
+      "outcome": "unmappable",
+      "rationale": "a variable the description file does not list",
+      "targets": []
+    },
+    {
+      "native": "unspecified",
+      "outcome": "unmappable",
+      "rationale": "the description file gives the variable no type",
+      "targets": []
+    }
+  ],
+  "version": "3"
+}

@@ -1,0 +1,222 @@
+name: Run ContextAct transfer
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_inputs:
+        description: Write the inputs report the protocol declares; score nothing
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: run-contextact-transfer
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: fit on the development panel, score ContextAct once
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+
+    steps:
+      - name: Require manual develop dispatch
+        shell: bash
+        run: |
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/develop"
+
+      - name: Check out the frozen revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      # The versions the held-out confirmation fitted with.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . "numpy==2.3.5" "pandas==2.3.3" "scipy==1.15.3" \
+            "scikit-learn==1.6.1"
+
+      - name: Refuse a second transfer test
+        if: ${{ !inputs.check_inputs }}
+        shell: bash
+        run: |
+          if git ls-remote --exit-code --heads origin run-artifacts/contextact-transfer; then
+            echo "run-artifacts/contextact-transfer exists: the transfer test has been run"
+            exit 1
+          fi
+
+      - name: Describe the runner's CPU
+        shell: bash
+        run: |
+          grep -m1 "model name" /proc/cpuinfo
+          if grep -qw avx512f /proc/cpuinfo; then echo "AVX-512: yes"; else echo "AVX-512: no"; fi
+
+      # The verified archive is kept in this repository's Actions cache, keyed by
+      # its published checksum, so a run need not wait on Zenodo. A restored
+      # archive is still checked against the checksum Zenodo publishes.
+      - name: Restore the CASAS archive from the cache
+        id: casas-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/casas/labeled_data.zip
+          key: casas-labeled-data-md5-ec37d679e85a6ae39e84994888afd514
+
+      - name: Download and verify public CASAS archive
+        shell: bash
+        timeout-minutes: 90
+        run: |
+          set -euo pipefail
+          # Outside the checkout, so the working tree stays clean for the record.
+          mkdir -p "$RUNNER_TEMP/casas"
+          python - <<'PY'
+          import os
+          import hashlib
+          import json
+          import subprocess
+          import urllib.request
+          from pathlib import Path
+
+          # A dropped or stalled connection, under 1 KB/s for a minute, is retried
+          # and resumed where it stopped; the checksum below decides whether the
+          # file is the published one.
+          def fetch(url, target):
+              subprocess.run(
+                  ["curl", "-fsSL", "--retry", "8", "--retry-delay", "15",
+                   "--retry-all-errors", "--connect-timeout", "30",
+                   "--speed-limit", "1024", "--speed-time", "60",
+                   "-C", "-", "-o", str(target), url],
+                  check=True,
+              )
+
+          record = "15708568"
+          request = urllib.request.Request(
+              f"https://zenodo.org/api/records/{record}",
+              headers={"User-Agent": "behavioral-sensing-research workflow"},
+          )
+          with urllib.request.urlopen(request, timeout=60) as response:
+              meta = json.load(response)
+          candidates = [f for f in meta.get("files", []) if f.get("key") == "labeled_data.zip"]
+          if len(candidates) != 1:
+              raise SystemExit(f"expected one labeled_data.zip, got {len(candidates)}")
+          item = candidates[0]
+          target = Path(os.environ["RUNNER_TEMP"]) / "casas" / "labeled_data.zip"
+          if target.exists():
+              print("restored from the cache; verifying")
+          else:
+              fetch(item["links"]["self"], target)
+          algorithm, expected = item["checksum"].split(":", 1)
+          digest = hashlib.new(algorithm)
+          with target.open("rb") as handle:
+              for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                  digest.update(chunk)
+          if digest.hexdigest() != expected:
+              raise SystemExit(f"archive checksum mismatch: {digest.hexdigest()} != {expected}")
+          PY
+          unzip -q "$RUNNER_TEMP/casas/labeled_data.zip" -d "$RUNNER_TEMP/casas/extracted"
+
+      - name: Keep the verified CASAS archive in the cache
+        if: steps.casas-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/casas/labeled_data.zip
+          key: casas-labeled-data-md5-ec37d679e85a6ae39e84994888afd514
+
+      - name: Download and verify ContextAct@A4H
+        shell: bash
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/contextact"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import urllib.request
+          from pathlib import Path
+
+          base = "https://data.mendeley.com/public-api/datasets/fcj2hmz5kb"
+          root = Path(os.environ["RUNNER_TEMP"]) / "contextact"
+
+          # Mendeley's API refuses Python's default user agent with 403.
+          agent = {"User-Agent": "behavioral-sensing-research workflow"}
+
+          def get(url):
+              request = urllib.request.Request(url, headers=agent)
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  return json.load(response)
+
+          folders = [{"id": "root", "name": ""}, *get(f"{base}/folders/3")]
+          for folder in folders:
+              for item in get(f"{base}/files?folder_id={folder['id']}&version=3"):
+                  details = item["content_details"]
+                  target = root / folder["name"] / item["filename"]
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  subprocess.run(
+                      ["curl", "-fsSL", "--retry", "8", "--retry-delay", "15",
+                       "--retry-all-errors", "--connect-timeout", "30",
+                       "--speed-limit", "1024", "--speed-time", "60",
+                       "-C", "-", "-o", str(target),
+                       details["download_url"]],
+                      check=True,
+                  )
+                  digest = hashlib.sha256(target.read_bytes()).hexdigest()
+                  if digest != details["sha256_hash"]:
+                      raise SystemExit(f"{target.name}: sha256 mismatch")
+                  print(f"verified {target.relative_to(root)}")
+          PY
+
+      - name: Write the inputs report, scoring nothing
+        if: inputs.check_inputs
+        shell: bash
+        run: |
+          python scripts/run_contextact_transfer.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/contextact" \
+            "$RUNNER_TEMP/transfer" --check-inputs
+
+      - name: Run the frozen protocol
+        if: ${{ !inputs.check_inputs }}
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)"
+          python scripts/run_contextact_transfer.py \
+            "$RUNNER_TEMP/casas/extracted" "$RUNNER_TEMP/contextact" \
+            "$RUNNER_TEMP/transfer"
+
+      - name: Commit the outputs to a results branch
+        shell: bash
+        env:
+          CHECK: ${{ inputs.check_inputs }}
+        run: |
+          set -euo pipefail
+          if [ "$CHECK" = "true" ]; then
+            branch="run-artifacts/$GITHUB_RUN_ID"
+          else
+            branch="run-artifacts/contextact-transfer"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          mkdir -p "$branch"
+          cp -r "$RUNNER_TEMP/transfer/." "$branch/"
+          git add "$branch"
+          git commit -m "run artifact $GITHUB_RUN_ID"
+          git push origin "$branch"
+
+      - name: Upload the outputs
+        uses: actions/upload-artifact@v7
+        with:
+          name: contextact-transfer
+          path: ${{ runner.temp }}/transfer/
+          retention-days: 90
+          if-no-files-found: error

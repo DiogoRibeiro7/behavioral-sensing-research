@@ -4,11 +4,15 @@
 experiment record: the protocol as the record declares it, every curve summary,
 every paired comparison, the rejection bias by state, and the decisions. Nothing
 on the page is typed by hand, so the page cannot disagree with the record.
+
+A later experiment with the same record layout renders its page with its own
+:class:`PageText`; the default is the Phase 4 page's.
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 from .uncertainty_experiment import COMPARATOR, DECISIONS, RESULT_SCHEMA, SIGNALS
@@ -25,6 +29,41 @@ ESTIMAND_LABELS = {
     "state_coverage": "Retained share of each state",
     "pairing": "Pairing",
 }
+
+
+@dataclass(frozen=True)
+class PageText:
+    """What differs between pages of records with this layout.
+
+    *checks* and *not_shown* return the lines of those sections, and
+    *after_answer* lines added after the answer; ``None`` gives the Phase 4
+    page's.
+    """
+
+    title: str = "Phase 4: richer uncertainty diagnostics against confidence"
+    intro: str = (
+        "Paper 1 found that confidence, entropy, margin, evidence strength and "
+        "information gain fail as standalone uncertainty signals. Phase 4 built "
+        "three structural diagnostics: model-structure disagreement, "
+        "evidence-channel disagreement and predictive mismatch. This "
+        "pre-specified experiment compares them with posterior confidence and "
+        "entropy as signals for rejecting the same predictions, on the "
+        "development households."
+    )
+    record_file: str = RECORD_FILE
+    protocol_file: str = PROTOCOL_FILE
+    module: str = "uncertainty_summary"
+    figure_prefix: str = "phase4-uncertainty"
+    held_out: str = (
+        "The development homes have been inspected in earlier work. The frozen "
+        "external cohort is not touched."
+    )
+    checks: Callable[[Mapping[str, Any]], list[str]] | None = None
+    after_answer: Callable[[Mapping[str, Any]], list[str]] | None = None
+    not_shown: Callable[[Mapping[str, Any]], list[str]] | None = None
+
+
+PHASE4 = PageText()
 
 
 def _sentence(text: str) -> str:
@@ -97,7 +136,7 @@ def _index(grid: Sequence[float], level: float) -> int:
     return min(range(len(grid)), key=lambda k: abs(grid[k] - level))
 
 
-def render_page(payload: Mapping[str, Any]) -> str:
+def render_page(payload: Mapping[str, Any], text: PageText = PHASE4) -> str:
     """The whole documentation page, from the record alone."""
     results = payload["results"]
     if results.get("result_schema") != RESULT_SCHEMA:
@@ -115,22 +154,14 @@ def render_page(payload: Mapping[str, Any]) -> str:
     lines: list[str] = []
     add = lines.append
 
-    add("# Phase 4: richer uncertainty diagnostics against confidence")
+    add(f"# {text.title}")
     add("")
-    add(
-        "Paper 1 found that confidence, entropy, margin, evidence strength and "
-        "information gain fail as standalone uncertainty signals. Phase 4 built "
-        "three structural diagnostics: model-structure disagreement, "
-        "evidence-channel disagreement and predictive mismatch. This "
-        "pre-specified experiment compares them with posterior confidence and "
-        "entropy as signals for rejecting the same predictions, on the "
-        "development households."
-    )
+    add(text.intro)
     add("")
     add(
         "This page is generated entirely from the experiment record, "
-        f"`{RECORD_FILE}`, by "
-        "`sensor_modeling.datasets.uncertainty_summary.render_page`, and the "
+        f"`{text.record_file}`, by "
+        f"`sensor_modeling.datasets.{text.module}.render_page`, and the "
         "figures by `sensor_modeling.datasets.uncertainty_figures.draw_figures`. "
         "A test checks that the committed page is exactly that rendering."
     )
@@ -141,10 +172,7 @@ def render_page(payload: Mapping[str, Any]) -> str:
         "- **Protocol.** Every signal, estimand, minimal difference and decision "
         "rule was frozen before any household was scored."
     )
-    add(
-        "- **Not a held-out claim.** The development homes have been inspected in "
-        "earlier work. The frozen external cohort is not touched."
-    )
+    add(f"- **Not a held-out claim.** {text.held_out}")
     add(f"- **Thresholds.** {_sentence(config['thresholds'])}.")
     add("")
 
@@ -251,12 +279,17 @@ def render_page(payload: Mapping[str, Any]) -> str:
                 + ": minority states the guard does not cover."
             )
     add("")
+    if text.after_answer is not None:
+        lines += text.after_answer(payload)
 
     # ------------------------------------------------------------------
     add("## Protocol")
     add("")
     households = config["households"]
-    add(f"The protocol is `{PROTOCOL_FILE}`, SHA-256 `{config['protocol_sha256']}`.")
+    add(
+        f"The protocol is `{text.protocol_file}`, SHA-256 "
+        f"`{config['protocol_sha256']}`."
+    )
     add("")
     add(
         f"- **Households.** {len(results['households'])} development homes in the "
@@ -326,18 +359,17 @@ def render_page(payload: Mapping[str, Any]) -> str:
     # ------------------------------------------------------------------
     add("## Selective-risk curves")
     add("")
-    add(
-        f"![Selective error against coverage]({FIGURE_DIR}/phase4-uncertainty-error.svg)"
-    )
+    figures = f"{FIGURE_DIR}/{text.figure_prefix}"
+    add(f"![Selective error against coverage]({figures}-error.svg)")
     add("")
     add(
         f"![Selective balanced accuracy against coverage]"
-        f"({FIGURE_DIR}/phase4-uncertainty-balanced-accuracy.svg)"
+        f"({figures}-balanced-accuracy.svg)"
     )
     add("")
     add(
         f"![Calibration error of retained predictions against coverage]"
-        f"({FIGURE_DIR}/phase4-uncertainty-calibration.svg)"
+        f"({figures}-calibration.svg)"
     )
     add("")
     random = section["reference"]["random"]
@@ -494,7 +526,7 @@ def render_page(payload: Mapping[str, Any]) -> str:
     add("")
     add(
         f"![Retained share of each minority state over coverage]"
-        f"({FIGURE_DIR}/phase4-uncertainty-retention.svg)"
+        f"({figures}-retention.svg)"
     )
     add("")
     add("### The states")
@@ -627,7 +659,9 @@ def render_page(payload: Mapping[str, Any]) -> str:
     add("## Checks")
     add("")
     reproduction = results["reproduction"]["published"]
-    if reproduction is not None:
+    if text.checks is not None:
+        lines += text.checks(payload)
+    elif reproduction is not None:
         add(
             f"- **Reproduction.** At full coverage, every household's accuracy, "
             f"balanced accuracy and calibration error differ from the "
@@ -652,6 +686,10 @@ def render_page(payload: Mapping[str, Any]) -> str:
 
     add("## What this does not show")
     add("")
+    if text.not_shown is not None:
+        lines += text.not_shown(payload)
+        add("")
+        return "\n".join(lines)
     add(
         "- **No threshold.** No coverage level or signal value is chosen for "
         "deployment."

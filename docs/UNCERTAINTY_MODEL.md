@@ -174,6 +174,13 @@ where enough same-weekday history exists. `min_scale` floors the denominator
 so an extremely regular person does not have every ordinary hour of variation
 reported as an enormous deviation.
 
+That z-score is not a number of standard deviations in the sense a threshold
+needs. Its scale is estimated from as few as four days, and the uncertainty
+of that estimate is not carried into the score. With
+`BaselineConfig.calibrated`, which is off by default, the scale is pooled over
+every retained day and the score is mapped through the Student t that scale
+has, so that it can be read against a Gaussian threshold.
+
 Poorly observed days are excluded from the history entirely, not entered as
 low values.
 

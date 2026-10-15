@@ -6,6 +6,14 @@ sensor that the fusion layer applies, which is what prevents a broken sensor
 from being read as a resident who has stopped moving.
 """
 
+from .fleet import (
+    CommonSilence,
+    FleetConfig,
+    FleetSilence,
+    assess_fleet,
+    common_silences,
+    replay_fleet,
+)
 from .monitor import (
     HealthConfig,
     SensorHealthMonitor,
@@ -22,10 +30,16 @@ from .status import (
 __all__ = [
     "FAULTY_STATUSES",
     "STATUS_RELIABILITY",
+    "CommonSilence",
+    "FleetConfig",
+    "FleetSilence",
     "HealthConfig",
     "SensorHealthMonitor",
     "SensorHealthReport",
     "SensorStatus",
     "SystemHealthReport",
+    "assess_fleet",
+    "common_silences",
+    "replay_fleet",
     "status_reliability",
 ]

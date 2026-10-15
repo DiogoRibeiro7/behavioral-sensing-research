@@ -1,0 +1,3920 @@
+{
+  "configuration": {
+    "contacts_in_the_simulator": [
+      "fridge_contact",
+      "front_door"
+    ],
+    "days": 42,
+    "homes": 30,
+    "moments": [
+      "kitchen_per_day",
+      "bathroom_per_day",
+      "bedroom_per_day",
+      "living_per_day",
+      "hall_per_day",
+      "switch_share",
+      "night_bedroom",
+      "retrigger_gap_seconds"
+    ],
+    "night_hours": [
+      0,
+      6
+    ],
+    "presence_scales": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.8,
+      1.0,
+      1.25,
+      1.5,
+      2.0
+    ],
+    "result_schema": "matched-sensors-planning/1",
+    "retrigger_window_seconds": 600.0,
+    "seed_root": 20261009,
+    "spill_rates": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      8.0
+    ]
+  },
+  "data_source": "TIHM Activity.csv and simulated",
+  "environment": {
+    "git_commit": "63959e551a558b6fafe1ff6716b56bd60a284c88",
+    "git_dirty": "false",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+    "python": "3.13.16",
+    "scipy": "1.18.1",
+    "sensor_modeling": "0.9.0",
+    "sklearn": "1.9.1"
+  },
+  "experiment": "matched-sensors-planning",
+  "household_metrics": {},
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": false,
+      "reason": "no pipeline is run: the moments are counts and gaps of sensor records, TIHM's and the simulator's"
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [],
+  "intervals": [],
+  "mcse": {},
+  "metric_definitions": {
+    "abstention_rate": "Fraction of estimates that declined to name a state, because confidence or sensor coverage fell below threshold.",
+    "accuracy": "Fraction of scored estimates whose reported state equals the true state. A reported UNKNOWN is never correct, so abstentions count as errors.",
+    "balanced_accuracy": "Unweighted mean of per-class recall. Used in preference to accuracy because the states are heavily imbalanced and a model that always predicts the majority state scores highly on raw accuracy.",
+    "brier": "Multiclass Brier score over the full posterior, in [0, 2]. A proper scoring rule; lower is better.",
+    "calibration_error": "Expected calibration error: the bin-weighted gap between stated confidence and observed accuracy. Answers whether a confidence of 0.9 means anything.",
+    "ci_low, ci_high": "Bootstrap confidence interval on the mean paired difference. Reported instead of a p-value: with simulations, significance is a statement about how long the computer ran.",
+    "confusion": "Counts of labelled true state (rows) against reported state (columns). The final column is UNKNOWN, so abstentions stay visible.",
+    "contaminated_fraction": "Fraction of simulated time during which someone other than the monitored resident was present.",
+    "detected_changes": "Number of true changes detected across the seeds in an arm, which is the sample size behind median_delay_days.",
+    "effect_size": "Cohen's dz for the paired difference. Note that pairing removes between-household variance, so dz is larger than an unpaired field study of the same size would produce.",
+    "f1": "Harmonic mean of precision and recall.",
+    "false_positives_per_person_day": "Delivered alerts not matched to a true change, divided by monitored person-days. The alert burden a recipient experiences.",
+    "log_loss": "Mean negative log probability assigned to the true state. Punishes confident errors far more than hedged ones.",
+    "macro_f1": "Unweighted mean F1 across the classes present in the truth.",
+    "mean_difference": "Mean paired difference between two configurations evaluated on identical simulated trajectories.",
+    "mean_seed_median_delay_days": "Mean across seeds of each seed's own median delay. Reported alongside median_delay_days because it weights every seed equally regardless of how many changes it detected; it is not a median.",
+    "median_delay_days": "Median days between a true change occurring and an alert being delivered for it. A detection counts only if it falls at or after the change and within max_delay_days. Where an arm aggregates several seeds, the individual delays are pooled before taking the median, so this is a median over detections and not a mean of per-seed medians.",
+    "per_class_recall": "Recall for each state present in the ground truth.",
+    "precision": "True positives divided by predicted positives.",
+    "recall": "True positives divided by actual positives.",
+    "selective_accuracy": "Accuracy among only the estimates that committed to a state. Read together with abstention_rate."
+  },
+  "models": [],
+  "notes": [
+    "Reads TIHM's Activity.csv only. No label, physiology, sleep-mat record or output of the pipeline is read.",
+    "Made before the matched-sensor protocol was frozen, to choose the profile it declares.",
+    "The simulated homes' seeds belong to no protocol. Each home's plan is simulated once and its event sensors are drawn again under each point of the grid.",
+    "The record holds medians over homes and per-location gap counts, never a home's records, so the dataset is not redistributed."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {},
+  "recorded_at": "2026-10-09T17:32:52.697143+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "calibrated": false,
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "home_silence_horizon": null,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "chosen": {
+      "at_the_edge_of_the_grid": false,
+      "distance": 0.8945554439028458,
+      "hallway": true,
+      "hold_off_seconds": 61.0,
+      "moments": {
+        "bathroom_per_day": {
+          "homes": 30,
+          "median": 36.3625
+        },
+        "bedroom_per_day": {
+          "homes": 30,
+          "median": 38.474999999999994
+        },
+        "hall_per_day": {
+          "homes": 30,
+          "median": 49.875
+        },
+        "kitchen_per_day": {
+          "homes": 30,
+          "median": 79.85
+        },
+        "living_per_day": {
+          "homes": 30,
+          "median": 158.6
+        },
+        "night_bedroom": {
+          "homes": 30,
+          "median": 3.675
+        },
+        "retrigger_gap_seconds": {
+          "homes": 30,
+          "median": 136.94932550000001
+        },
+        "switch_share": {
+          "homes": 30,
+          "median": 0.570817064911997
+        }
+      },
+      "paired_contacts": true,
+      "presence_scale": 1.0,
+      "spill_rate": 2.0
+    },
+    "grid": [
+      {
+        "distance": 7.302183726410208,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 11.325
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 11.2375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 25.5125
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 30.325000000000003
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 63.425
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.175
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 216.5011725
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5085103077462819
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 4.863520294550214,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 18.299999999999997
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 18.1375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 32.3125
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 36.575
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 65.15
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.1625
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 223.67456675
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6216118006937013
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 3.993025716655373,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 24.9625
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 24.825
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 39.162499999999994
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 42.525
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 65.8125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.1
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 231.69641825
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6901011081090598
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 3.096840858890179,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 31.6375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 31.275
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 45.775
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 48.162499999999994
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 66.6625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.2625
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 238.7140845
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7343060399310717
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 2.8321933065325866,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 38.0
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 38.075
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 52.1
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 54.1875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 68.075
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.3
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 244.56621575
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7647797979188493
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 3.0183365807885405,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 44.4875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 43.9625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 58.775
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 59.8375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 69.05
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.225
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 249.07148825
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.785055277467418
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 3.0340027808136516,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 56.8625
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 57.3625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 70.6375
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 70.5375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 71.19999999999999
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.35
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 254.73885775000002
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8159757946624313
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 3.2514275911471238,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 68.9375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 69.1375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 82.9625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 80.8
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 73.4625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.475
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 253.3702045
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8332378478318414
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 3.918662749205766,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 81.0875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 81.3875
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 93.675
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 91.575
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 75.625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.4249999999999998
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 251.86626125
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8471434775353438
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.77907524793968,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 103.25
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 103.4
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 115.61250000000001
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 111.6875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 79.55
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.6
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 243.149568
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8649831983559693
+          }
+        },
+        "presence_scale": 0.3,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 5.854986868509182,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 12.2375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 12.3125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 26.862499999999997
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 36.375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 80.2
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.4375
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 192.5705715
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.4516623967512523
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 3.5017947377111156,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 19.612499999999997
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 19.3375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 33.175
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 42.625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 81.13749999999999
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.55
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 198.83203425
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5715452583332128
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 2.4787200126938744,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 25.45
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 26.1125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 39.8625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 48.7625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 82.125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.6375
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 205.585167
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6471178871649444
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 2.203334722569398,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 32.9625
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 32.837500000000006
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 46.7625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 54.3625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 83.30000000000001
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.575
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 212.60944375
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6987555808872423
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 1.969501289758071,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 38.8
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 39.0375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 53.025
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 60.125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 83.8375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.6625
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 220.36775725
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7348100687334583
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.941115767598106,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 45.3375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 45.4625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 59.1625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 65.75
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 85.1375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.725
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 225.721258
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7633102702625337
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 2.1566069169984132,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 58.125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 58.075
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 71.44999999999999
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 77.15
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 87.4625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.85
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 234.30365875
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7994526756762219
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 2.756181660397294,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 69.8125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 69.9125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 84.0625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 87.3125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 89.475
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.7875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 237.17647725
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8254338816982048
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 3.232182057374798,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 81.82499999999999
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 82.2625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 95.175
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 97.5
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 91.7375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.9
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 238.27470075
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8420105467164161
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.377793235488523,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 104.69999999999999
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 104.7125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 117.69999999999999
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 116.9
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 96.2875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.0
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 233.3296005
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.864958339750193
+          }
+        },
+        "presence_scale": 0.4,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 4.7974731492519735,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 13.0125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 13.337499999999999
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 27.4625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 41.837500000000006
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 94.6125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.8125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 173.33097800000002
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.40913185075123115
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 2.7833962269958965,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 19.8125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 20.1
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 33.925
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 47.9375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 95.85
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.9
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 178.95119549999998
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5342398663055647
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 1.8828112055828286,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 26.4875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 26.8375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 40.625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 54.037499999999994
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 96.65
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.975
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 185.056152
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6132359817678859
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 1.6365458343851085,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 33.2
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 33.837500000000006
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 47.2125
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 59.5875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 98.35
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 1.9125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 191.9432905
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.670059194655571
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 1.4573175909146043,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 39.725
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 40.2625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 53.7875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 65.2875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 99.675
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.025
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 198.0343235
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7095170883447752
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.580509861461721,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 46.15
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 46.5125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 60.4
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 70.525
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 100.625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.0
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 206.06528725
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7402529320154978
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 1.816161512400763,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 58.3
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 59.55
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 72.725
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 81.85
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 101.7875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.1875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 216.97022950000002
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.786228622007798
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 2.3884801818436294,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 70.0125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 72.19999999999999
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 84.7875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 92.3125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 104.975
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.1875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 221.9667245
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.813834328542353
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 3.050908018977731,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 82.35
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 83.225
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 96.2625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 102.7875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 106.8375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.15
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 224.451044
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8343703575060736
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.18619113754111,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 105.425
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 106.2625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 117.8625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 122.5375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 110.9125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.35
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 222.8121505
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.860666352374831
+          }
+        },
+        "presence_scale": 0.5,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 3.967598819008,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 13.7
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 14.6875
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 27.975
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 46.925
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 108.6875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.2874999999999996
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 158.7542295
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.3828599057258652
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 2.3033854849459767,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 20.675
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 21.2
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 34.912499999999994
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 52.975
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 110.0
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.2125000000000004
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 164.38459999999998
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5050245556356593
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 1.5713001396226753,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 27.2375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 28.4625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 41.6125
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 58.7375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 110.975
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.2125000000000004
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 170.0685155
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5846893547662584
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 1.228219048808928,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 33.925
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 34.7875
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 48.0625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 64.625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 112.6625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.325
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 176.579993
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.642932093001088
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 1.1389497274940923,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 40.0875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 41.25
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 54.625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 70.3125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 113.4
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.4
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 183.15715624999999
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6872229520730042
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.2583927889612456,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 46.7875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 47.55
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 61.125
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 75.725
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 114.2625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.4
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 189.95147875
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.722242756348494
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 1.642790333521511,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 59.55
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 60.15
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 72.725
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 86.7125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 115.725
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.5
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 200.44494824999998
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7708295611708109
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 2.2496310867634133,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 71.42500000000001
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 72.65
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 85.35
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 96.9625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 118.3875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.4875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 207.45376549999997
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8033767511098392
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 2.8132647446249264,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 83.1125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 84.6625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 96.5625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 107.55000000000001
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 121.8125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.6375
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 211.82983325
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8262019796349962
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.018928275776658,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 105.6875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 106.9375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 118.875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 127.0
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 124.4
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.8125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 213.8806865
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8574138508908685
+          }
+        },
+        "presence_scale": 0.6,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 3.285514591817736,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 15.0375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 16.3875
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 29.7875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 55.212500000000006
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 133.6875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 2.8875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 139.067674
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.3440780071264883
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 1.7116553081850123,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 21.5625
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 23.2375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 36.224999999999994
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 61.375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 134.0875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.075
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 142.96047875
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.4576142031262875
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 1.1078929411708909,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 28.174999999999997
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 30.075000000000003
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 43.0
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 66.475
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 135.4875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.05
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 147.565429
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5405270639802701
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 0.9046134267632729,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 34.975
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 36.3125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 49.225
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 72.5
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 136.85
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.0625
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 152.7237245
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6021994692658057
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 0.9402415855197326,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 41.6125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 43.45
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 55.2625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 78.3625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 137.3625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.0
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 158.5805915
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6501596849259079
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.0204876839543786,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 47.625
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 49.6375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 62.1375
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 83.57499999999999
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 138.75
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 164.09569249999998
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6872851209374857
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 1.5046670488689133,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 60.087500000000006
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 62.0125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 74.2875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 95.25
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 141.1125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 174.2427265
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.740544789795184
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 2.112291071862354,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 72.475
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 74.1375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 86.19999999999999
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 106.075
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 143.28750000000002
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.1875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 184.3867965
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7817855194597811
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 2.748874344768213,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 84.4125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 86.55
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 97.825
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 115.5
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 145.3625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.3125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 190.87858725
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8081910602377854
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.036657379547387,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 107.375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 108.8375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 119.425
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 135.5125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 149.275
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.525
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 196.92874825
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8472352601070567
+          }
+        },
+        "presence_scale": 0.8,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 2.9774482318467514,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 15.962499999999999
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 17.8625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 30.95
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 62.025
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 154.6125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.5875000000000004
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 126.43626775
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.3163143106218246
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 1.593747284990688,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 22.725
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 25.025
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 37.3
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 67.5625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 155.75
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.6375
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 129.00540075
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.42797538519455064
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 1.0204061936238633,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 29.7
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 31.5125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 44.150000000000006
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 73.4625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 156.025
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.7375
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 133.071845
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5100368545469838
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 0.8945554439028458,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 36.3625
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 38.474999999999994
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 49.875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 79.85
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 158.6
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.675
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 136.94932550000001
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.570817064911997
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 0.8952385945177801,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 42.35
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 44.7125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 56.6875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 85.175
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 159.575
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.775
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 141.63942974999998
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6195166300354888
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.057411399378598,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 48.975
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 50.675
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 63.1125
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 91.23750000000001
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 160.2375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.725
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 146.94351500000002
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6603746608122023
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 1.5319121232960033,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 61.5
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 63.8625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 75.25
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 101.9625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 162.7375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.9124999999999996
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 157.39773925
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7188985145251598
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 2.156370526476802,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 73.4
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 75.975
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 87.17500000000001
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 113.0375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 164.83749999999998
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.925
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 166.29466774999997
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7619231843250942
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 2.8237798423047216,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 85.0875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 87.475
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 98.94999999999999
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 122.92500000000001
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 165.8625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 3.9
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 174.00941175000003
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7948418627482783
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.133003148846012,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 107.3375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 110.4
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 120.94999999999999
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 142.25
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 170.8
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.275
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 182.946253
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8372314023462006
+          }
+        },
+        "presence_scale": 1.0,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 2.834639336976825,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 16.925
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 19.925
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 32.2625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 69.025
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 177.6125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.475
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 115.82932674999999
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.29168673144099067
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 1.5953064440614655,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 23.737499999999997
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 26.8
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 38.75
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 74.9
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 179.1875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.525
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 117.7900895
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.39854293362629084
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 1.1108491544124208,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 30.6375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 33.775
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 45.75
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 80.875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 181.1125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.574999999999999
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 120.81467025
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.4781088142494184
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 0.9746840022424171,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 36.9125
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 40.225
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 51.462500000000006
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 87.0375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 181.125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.6625
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 124.3219905
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.540345946521454
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 1.0563096848548232,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 43.650000000000006
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 46.4375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 57.2375
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 92.55
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 183.5
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.6
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 127.7789675
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5926711723288915
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.2064903801647207,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 50.225
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 53.425
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 64.625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 97.875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 183.25
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.7
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 132.3404205
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6330218859925052
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 1.7300406753490636,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 62.6875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 66.05
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 76.9
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 108.0
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 186.45
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.75
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 142.038815
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.697464374990548
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 2.363123565427837,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 74.98750000000001
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 77.95
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 88.525
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 119.5375
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 188.3125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.8125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 149.69022575
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7425491405614582
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 3.037439729710149,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 86.48750000000001
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 90.0125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 99.9625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 129.45
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 189.925
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.775
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 157.954601
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7777431205378804
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.397408814264565,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 109.73750000000001
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 111.9125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 122.225
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 148.4875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 193.83749999999998
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 4.9875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 168.58095600000001
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8261958827521336
+          }
+        },
+        "presence_scale": 1.25,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 2.8989090838290075,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 17.6
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 21.6625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 33.037499999999994
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 74.8625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 198.375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.4375
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 108.34397874999999
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.27384351951173547
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 1.724194563552897,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 24.775
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 28.725
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 39.925
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 80.9
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 200.1625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.4
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 109.988367
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.3756703226499966
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 1.2966399688439716,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 31.2875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 35.7375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 46.2625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 86.9125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 201.35
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.55
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 112.3413165
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.4539342707878155
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 1.1866261968394514,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 37.7375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 41.849999999999994
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 52.662499999999994
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 92.5
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 201.3
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.425000000000001
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 115.04689775
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.515896811320496
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 1.27083915381875,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 44.275000000000006
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 48.8625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 59.325
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 98.3125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 203.4625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.4875
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 118.2368185
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5683252259127269
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.4594968807452557,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 51.087500000000006
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 55.2
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 64.4625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 103.2625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 204.8875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.7
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 121.782835
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.610536473300223
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 1.9734750307142641,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 63.4
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 67.5125
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 77.6625
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 114.6
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 206.3
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.6625
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 129.3922485
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6759550743618741
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 2.6069501306038374,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 75.65
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 79.475
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 89.85
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 125.1875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 207.96249999999998
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.612500000000001
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 138.0356415
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7261390037411131
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 3.3049456018485723,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 87.75
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 91.5375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 100.875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 135.4875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 211.1375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 5.7
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 146.0505275
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7620706935277077
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 4.6364231630254205,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 109.15
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 114.11250000000001
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 123.01249999999999
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 154.21249999999998
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 214.1375
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 6.1
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 157.605037
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.8157713999864062
+          }
+        },
+        "presence_scale": 1.5,
+        "spill_rate": 8.0
+      },
+      {
+        "distance": 3.1203971494563842,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 19.275
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 25.4
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 35.25
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 83.8875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 233.05
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.1375
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 98.6728755
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.2530794697064017
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 0.5
+      },
+      {
+        "distance": 2.157526461715011,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 25.775
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 32.1375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 41.2375
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 89.9625
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 234.6125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.2
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 99.9128245
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.3450150188653182
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 1.0
+      },
+      {
+        "distance": 1.7820355819754956,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 32.975
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 38.625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 48.224999999999994
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 95.8125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 235.8875
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.225
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 101.5720525
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.42239663244394243
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 1.5
+      },
+      {
+        "distance": 1.7104895024805837,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 39.3375
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 45.4625
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 54.412499999999994
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 101.4
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 236.52499999999998
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.2
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 103.66663525
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.48622523007447155
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 2.0
+      },
+      {
+        "distance": 1.8205252622049095,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 45.9
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 51.8875
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 61.0875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 106.825
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 237.5
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.4
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 106.35561
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5349909999276183
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 2.5
+      },
+      {
+        "distance": 1.9964141654611858,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 52.2875
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 57.925
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 67.23750000000001
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 112.425
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 238.4125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.199999999999999
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 108.85873724999999
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.5784840638119895
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 3.0
+      },
+      {
+        "distance": 2.555817512257618,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 64.63749999999999
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 70.8
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 79.225
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 123.9125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 241.0625
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.4
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 115.223603
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6486262662571181
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 4.0
+      },
+      {
+        "distance": 3.209783433325458,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 76.5
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 83.775
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 91.0875
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 134.60000000000002
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 243.2125
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.512499999999999
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 121.78362375
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.6994942207063419
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 5.0
+      },
+      {
+        "distance": 3.8810339691518165,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 88.82499999999999
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 94.8375
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 102.8125
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 144.3875
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 245.14999999999998
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.5125
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 129.29807200000002
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7403306934673866
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 6.0
+      },
+      {
+        "distance": 5.227963762472012,
+        "moments": {
+          "bathroom_per_day": {
+            "homes": 30,
+            "median": 110.67500000000001
+          },
+          "bedroom_per_day": {
+            "homes": 30,
+            "median": 117.76249999999999
+          },
+          "hall_per_day": {
+            "homes": 30,
+            "median": 124.30000000000001
+          },
+          "kitchen_per_day": {
+            "homes": 30,
+            "median": 164.0125
+          },
+          "living_per_day": {
+            "homes": 30,
+            "median": 249.45
+          },
+          "night_bedroom": {
+            "homes": 30,
+            "median": 7.525
+          },
+          "retrigger_gap_seconds": {
+            "homes": 30,
+            "median": 141.28424625000002
+          },
+          "switch_share": {
+            "homes": 30,
+            "median": 0.7980650787467468
+          }
+        },
+        "presence_scale": 2.0,
+        "spill_rate": 8.0
+      }
+    ],
+    "seeds": [
+      15150,
+      32067,
+      63096,
+      75864,
+      97038,
+      128433,
+      135833,
+      136803,
+      209673,
+      277084,
+      312456,
+      332754,
+      342215,
+      403504,
+      413631,
+      478732,
+      488452,
+      528885,
+      546663,
+      626346,
+      675294,
+      750430,
+      803678,
+      803882,
+      822799,
+      855409,
+      869168,
+      882455,
+      899965,
+      969146
+    ],
+    "standard": {
+      "distance": 131.3353976159574,
+      "moments": {
+        "bathroom_per_day": {
+          "homes": 30,
+          "median": 16.4125
+        },
+        "bedroom_per_day": {
+          "homes": 30,
+          "median": 17.1875
+        },
+        "hall_per_day": {
+          "homes": 0,
+          "median": null
+        },
+        "kitchen_per_day": {
+          "homes": 30,
+          "median": 97.6125
+        },
+        "living_per_day": {
+          "homes": 30,
+          "median": 242.33749999999998
+        },
+        "night_bedroom": {
+          "homes": 30,
+          "median": 3.7375
+        },
+        "retrigger_gap_seconds": {
+          "homes": 30,
+          "median": 59.772740999999996
+        },
+        "switch_share": {
+          "homes": 30,
+          "median": 0.07582548476539537
+        }
+      }
+    },
+    "tihm": {
+      "files": {
+        "Activity.csv": "ead7b1e3c2a91fbd679a909bff3a309a6465ae1ad18528dae57a4cf8599cafca"
+      },
+      "homes": 56,
+      "moments": {
+        "bathroom_per_day": {
+          "homes": 54,
+          "median": 29.041339612768184
+        },
+        "bedroom_per_day": {
+          "homes": 56,
+          "median": 41.00396825396825
+        },
+        "hall_per_day": {
+          "homes": 54,
+          "median": 66.57556935817806
+        },
+        "kitchen_per_day": {
+          "homes": 54,
+          "median": 86.57142857142857
+        },
+        "living_per_day": {
+          "homes": 52,
+          "median": 76.60087719298247
+        },
+        "night_bedroom": {
+          "homes": 56,
+          "median": 5.733954451345756
+        },
+        "retrigger_gap_seconds": {
+          "homes": 56,
+          "median": 152.5
+        },
+        "switch_share": {
+          "homes": 56,
+          "median": 0.6336094752474986
+        }
+      },
+      "sensor_facts": {
+        "contacts": {
+          "Back Door": {
+            "gaps": 48192,
+            "median_gap_under_a_minute_seconds": 7.0,
+            "share_under_a_minute": 0.462234395750332
+          },
+          "Fridge Door": {
+            "gaps": 108748,
+            "median_gap_under_a_minute_seconds": 9.0,
+            "share_under_a_minute": 0.5891970427042337
+          },
+          "Front Door": {
+            "gaps": 58234,
+            "median_gap_under_a_minute_seconds": 9.0,
+            "share_under_a_minute": 0.4404986777483944
+          }
+        },
+        "hold_off_seconds": 61.0,
+        "motion": {
+          "Bathroom": {
+            "gaps": 81973,
+            "shortest_seconds": 61.0
+          },
+          "Bedroom": {
+            "gaps": 131077,
+            "shortest_seconds": 61.0
+          },
+          "Hallway": {
+            "gaps": 193930,
+            "shortest_seconds": 61.0
+          },
+          "Kitchen": {
+            "gaps": 227258,
+            "shortest_seconds": 61.0
+          },
+          "Lounge": {
+            "gaps": 180715,
+            "shortest_seconds": 61.0
+          }
+        }
+      }
+    }
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    20261009
+  ],
+  "selective_prediction": null,
+  "sensor_subset": null,
+  "split": null,
+  "structural_disagreement": null
+}

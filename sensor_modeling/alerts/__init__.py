@@ -8,6 +8,7 @@ the resident.
 """
 
 from .alert import (
+    HOME_SILENCE,
     Alert,
     AlertEngine,
     AlertKind,
@@ -17,6 +18,7 @@ from .alert import (
 )
 
 __all__ = [
+    "HOME_SILENCE",
     "Alert",
     "AlertEngine",
     "AlertKind",

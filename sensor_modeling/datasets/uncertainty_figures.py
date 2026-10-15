@@ -140,8 +140,18 @@ def _retention(plt: Any, data: Mapping[str, Any]) -> Any:
     return figure
 
 
-def draw_figures(payload: Mapping[str, Any], out_dir: Path) -> dict[str, Path]:
-    """Draw every figure as SVG into *out_dir*; returns each figure's path."""
+def draw_figures(
+    payload: Mapping[str, Any],
+    out_dir: Path,
+    prefix: str = "phase4-uncertainty",
+    salt: str = "phase4-uncertainty-diagnostics",
+    title: str = "Phase 4 uncertainty diagnostics",
+) -> dict[str, Path]:
+    """Draw every figure as SVG into *out_dir*; returns each figure's path.
+
+    *prefix* starts each file's name, *salt* fixes the SVG identifiers and
+    *title* starts each figure's metadata title.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
@@ -164,7 +174,7 @@ def draw_figures(payload: Mapping[str, Any], out_dir: Path) -> dict[str, Path]:
     paths: dict[str, Path] = {}
     with plt.rc_context(
         {
-            "svg.hashsalt": "phase4-uncertainty-diagnostics",
+            "svg.hashsalt": salt,
             "font.size": 9,
             "axes.spines.top": False,
             "axes.spines.right": False,
@@ -172,14 +182,14 @@ def draw_figures(payload: Mapping[str, Any], out_dir: Path) -> dict[str, Path]:
     ):
         for name in FIGURES:
             figure = drawers[name](data[name])
-            path = out_dir / f"phase4-uncertainty-{name}.svg"
+            path = out_dir / f"{prefix}-{name}.svg"
             figure.savefig(
                 path,
                 format="svg",
                 metadata={
                     "Date": None,
                     "Creator": None,
-                    "Title": f"Phase 4 uncertainty diagnostics: {name}",
+                    "Title": f"{title}: {name}",
                     "Source": source,
                     "Description": f"data sha256 {data_sha256(data[name])}",
                 },

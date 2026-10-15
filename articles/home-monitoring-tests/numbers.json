@@ -1,0 +1,367 @@
+{
+  "alert_burden": {
+    "A1": {
+      "difference": [
+        -0.032118959906344315,
+        -0.07875763730119446,
+        0.018651796777194658
+      ],
+      "label_days": 94,
+      "label_days_with_an_alert": 5.0,
+      "share_of_label_days": 0.05319148936170213,
+      "share_of_other_days": 0.08531044926804644
+    },
+    "A3_concordance": [
+      0.46573571243858286,
+      0.4103157092755904,
+      0.5303577716297787
+    ],
+    "agitation_labels": {
+      "five_largest_homes_share": 0.5478260869565217,
+      "label_days_in_the_dataset": 115,
+      "share_labelled_after_a_label_day": 0.25217391304347825,
+      "share_labelled_after_another_day": 0.03210153042179918
+    },
+    "behavioural_alerts": 183,
+    "data_quality_alerts": 0,
+    "homes": 56,
+    "monitored_days": 2850,
+    "per_monitored_day": [
+      0.06421052631578947,
+      0.0461130632008922,
+      0.08397715764799193
+    ],
+    "post_hoc": {
+      "day_after": {
+        "behavioural_alerts": 33,
+        "date": "2019-06-17",
+        "events": 8906,
+        "monitored_households": 47,
+        "silent_households": 2
+      },
+      "deviating_days_mean_event_count_z": -1.1685235998265335,
+      "label_days_mean_event_count_z": 0.8553294136487036,
+      "median_home_sleeping_hours": 10.838699512402489,
+      "median_sleeping_hours_on_silent_days": 23.766190294866078,
+      "most_silent_date": {
+        "behavioural_alerts": 6,
+        "date": "2019-06-16",
+        "events": 0,
+        "monitored_households": 47,
+        "silent_households": 47
+      },
+      "silent_days": 128,
+      "silent_days_counted_usable": 128,
+      "silent_share_of_deviating_days": {
+        "days": 507,
+        "share": 0.1814595660749507,
+        "silent": 92
+      },
+      "status": "post hoc: every description here was chosen after the protocol's results had been read; none is part of the protocol, enters an estimand or changes a result"
+    },
+    "protocol_simulator_reference": {
+      "changed_arm": 0.033,
+      "feature": "sleeping_hours",
+      "ratio_to_changed_arm": 1.6586921850079746,
+      "ratio_to_stable_arm": 5.473684210526316,
+      "source": "docs/ADVERSARIAL_REVIEW.md, item i4; docs/RESEARCH_QUESTIONS.md, RQ4",
+      "stable_arm": 0.01
+    },
+    "records": [
+      "artifacts/tihm/tihm-alert-burden.json",
+      "artifacts/tihm/tihm-alert-burden-post-hoc.json"
+    ],
+    "sleep_per_monitored_day": [
+      0.05473684210526316,
+      0.03767239419271107,
+      0.07298096938242578
+    ],
+    "sleep_rate_over_the_simulators_changed_arm": 2.0503432494279177,
+    "sleep_rate_over_the_simulators_stable_arm": 7.356631578947369,
+    "sleeping_hours_alerts": 156,
+    "system_health_alerts": 0
+  },
+  "calendar": {
+    "off_total": 183,
+    "on_max": 3,
+    "on_total": 49,
+    "peak": 33,
+    "peak_day": "2019-06-17",
+    "record": "artifacts/silent_home/silent-home-tihm.json"
+  },
+  "rules": {
+    "chance": 22.967710843373492,
+    "event_count": 53.0,
+    "flags": 507,
+    "label_days": 94,
+    "label_history": 63.0,
+    "pipeline": 18.0,
+    "record": "artifacts/tihm/tihm-alert-burden.json"
+  },
+  "silent_home": {
+    "E1_extra_alerts_with_the_rule_off": [
+      2.76,
+      2.36,
+      3.15
+    ],
+    "E2_extra_alerts_with_the_rule_on": [
+      -0.28,
+      -0.44,
+      -0.13
+    ],
+    "E3_alerts_removed_from_the_window": [
+      3.04,
+      2.68,
+      3.39
+    ],
+    "cooldown_hours": 20.0,
+    "detected_after_an_outage": {
+      "C5_verdict": "inconclusive",
+      "rule_off": 91,
+      "rule_on": 76
+    },
+    "detected_without_an_outage": 75,
+    "homes": 100,
+    "outage": "no sensor of the home reports for 60 hours. Each home has its own outage: the day, between day 28 and day 45, and the local hour it begins at, from 0 to 23, are drawn from `numpy.random.default_rng([seed_root, 1])`, the days first",
+    "outage_alone_meets_the_detection_definition": {
+      "rule_off": 38,
+      "rule_on": 8
+    },
+    "records": [
+      "artifacts/silent_home/silent-home.json",
+      "artifacts/silent_home/silent-home-tihm.json"
+    ],
+    "rule_conditions": {
+      "h12": "the rule on at 12 hours",
+      "h24": "the rule on at 24 hours",
+      "off": "the rule off: the pipeline's default"
+    },
+    "rule_horizon_hours": 12.0,
+    "silence_alerts_per_outage_home": 3.0,
+    "stable_homes_in_which_the_rule_changes_an_alert": 0,
+    "stable_person_days": 8400,
+    "stable_silence_alerts_at_12_hours": 0,
+    "tihm_rule_at_12_hours": {
+      "added": 13,
+      "common_silences": [
+        {
+          "homes": 3,
+          "monitored": 3,
+          "since": "2019-04-01T14:01:48+01:00",
+          "until": "2019-04-03T15:05:46+01:00"
+        },
+        {
+          "homes": 47,
+          "monitored": 47,
+          "since": "2019-06-15T04:04:55+01:00",
+          "until": "2019-06-17T14:05:46+01:00"
+        }
+      ],
+      "days_refused": 322,
+      "homes_with_a_refused_day": 48,
+      "left": 49,
+      "removed": 147,
+      "silence_alerts": 324,
+      "silence_alerts_inside_a_common_silence": 145,
+      "silence_alerts_per_monitored_day": 0.11368421052631579
+    }
+  },
+  "simulator": {
+    "at_the_same_false_alerts": {
+      "calibrated": 0.7211946902654867,
+      "default": 0.6275,
+      "difference": [
+        0.09369469026548671,
+        0.029444444444444495,
+        0.15540909090909094
+      ],
+      "false_alerts_per_home": 0.855,
+      "gradual_change_difference": [
+        -0.00586283185840708,
+        -0.09770642201834862,
+        0.08926829268292685
+      ],
+      "small_change_difference": [
+        -0.021504424778761078,
+        -0.08512195121951222,
+        0.04403846153846158
+      ]
+    },
+    "calibrated_at_the_declared_thresholds": {
+      "default_excess_detection": 0.6275,
+      "excess_detection": 0.04,
+      "false_alerts": 3,
+      "share_past_3_on_simulated_sleep": [
+        0.0035357142857142857,
+        0.00275,
+        0.004428571428571428
+      ]
+    },
+    "changed_arm": {
+      "sleep_per_person_day": 0.026696428571428572,
+      "sleeping_hours_alerts": 897
+    },
+    "days": 84,
+    "detected": {
+      "count": 293,
+      "median_delay_days": 11.000611921238425,
+      "share": [
+        0.7325,
+        0.6870591672528669,
+        0.7735176158816853
+      ]
+    },
+    "false_detections": {
+      "count": 42,
+      "share": [
+        0.105,
+        0.07862372743733602,
+        0.13889098508675818
+      ]
+    },
+    "homes": 400,
+    "person_days": 33600,
+    "record": "artifacts/threshold_calibration/threshold-calibration.json",
+    "stable_arm": {
+      "behavioural_alerts": 342,
+      "false_alerts_per_home": 0.855,
+      "per_person_day": 0.01017857142857143,
+      "sleep_per_person_day": 0.00744047619047619,
+      "sleeping_hours_alerts": 250
+    },
+    "step_change": "the detection study's step change from day 56: the resident wakes 1.6 hours earlier, with 1.2 more night-time bathroom trips expected a night",
+    "window": "from local midnight at the end of the first changed day, for 21 days, or 42 days for the gradual change; closed on the left and open on the right. The pipeline raises behavioural alerts when a day closes, so an alert raised at the close of a day that holds none of the change is outside it"
+  },
+  "sleep_mat": {
+    "e1": [
+      0.10987159862425792,
+      0.028415261321203464,
+      0.1913279359273124
+    ],
+    "e10_mat_clock": {
+      "+1": {
+        "homes": 13,
+        "spearman": 0.12713298103511875
+      },
+      "-1": {
+        "homes": 14,
+        "spearman": 0.09753798394735426
+      }
+    },
+    "e11_hourly": {
+      "at_zero": [
+        -0.5424686161941984,
+        -0.6210862604078105,
+        -0.46385097198058634
+      ],
+      "most_negative": -0.584834642129299,
+      "most_negative_lag": "+1"
+    },
+    "e12_without_the_staged_awake_homes": {
+      "left_out": {
+        "16f4b": 0.4383915228909116,
+        "d7a46": 0.48227675528289027,
+        "f220c": 0.32562254542315827
+      },
+      "mean_difference": [
+        2.5455110172872404,
+        1.8592300416411658,
+        3.231791992933315
+      ],
+      "share": 0.6,
+      "spearman": [
+        0.07339458876822356,
+        -0.012452927393083332,
+        0.15924210492953045
+      ]
+    },
+    "e2_sleep_mean_difference": [
+      3.953098596057025,
+      1.5381333414989249,
+      6.368063850615124
+    ],
+    "e3_in_bed_mean_difference": [
+      1.9656986745322065,
+      -0.01319301271348361,
+      3.9445903617778963
+    ],
+    "e6_deviations": {
+      "also_past_threshold": 4,
+      "homes": 12,
+      "pipeline_past_threshold": 46,
+      "same_sign": 31,
+      "spearman": [
+        0.03041832177100534,
+        -0.04483733642291525,
+        0.10567397996492593
+      ]
+    },
+    "e8_silent_days": {
+      "mat_observed": 19,
+      "mat_sleep_median": 8.35,
+      "pipeline_median": 23.76618955155989
+    },
+    "extreme_home": {
+      "home": "f220c",
+      "mat_in_bed_median": 8.083333333333332,
+      "mat_sleep_median": 2.2083333333333335,
+      "mean_difference": 17.19717061479344,
+      "pipeline_median": 19.919299030396125,
+      "staged_asleep_share": 0.32562254542315827
+    },
+    "included_home": "a mat home with at least 14 matched days in the analysis. Inclusion is decided in each analysis, and again at each shift of E10. E6 counts days with a verdict from both baselines instead; E7 and E8 read every mat home",
+    "margin": 0.5,
+    "mat_homes": 17,
+    "median_home_mean_difference": 2.3818535172002155,
+    "real_homes": 14,
+    "real_min_max": [
+      -0.15153979723875927,
+      0.367032967032967
+    ],
+    "records": [
+      "artifacts/sleep_mat/sleep-mat.json",
+      "artifacts/sleep_mat/sleep-mat-simulated.json"
+    ],
+    "reviews_before_the_freeze": [
+      "the interval was chosen on synthetic data, in the planning record, before the protocol was frozen. The planning was run twice: the second run added the outlying homes after the review below",
+      "an independent review of the draft read the mat's file alone, the published TIHM records and pages, and the first and last activity timestamp of each mat home; it ran no pipeline on TIHM. It found that the outage of 16 June falls on mat-observed days in 11 of the 14 homes, and the draft's primary was changed to leave days with no activity record out",
+      "a second review of the revision read the mat's file alone and, from the activity file, each mat home's activity timestamps, to find gaps of 12 hours or more on mat-observed days; it ran no pipeline on TIHM and read no value of the pipeline. Counted again from the same inputs: in the 14 homes with at least 14 mat-observed days, 737 mat-observed days have an activity record and are neither a home's first nor its last activity day, and 37 of them hold such a gap, 18 on 15 or 17 June, the edges of the server failure, in 11 homes. The primary was changed again to leave out every day the run with the rule on flags as touched by a home-wide silence. The review also ran simulated homes from seeds 1 to 14, which are not seeds of the reference, without the pipeline"
+    ],
+    "s1": [
+      0.6952804170611987,
+      0.6814409071686967,
+      0.7091199269537007
+    ],
+    "simulated_homes": 100,
+    "simulated_min_max": [
+      0.5102360662160839,
+      0.8450822259226608
+    ],
+    "three_deviations_at_e1": 0.32961479587277376,
+    "three_deviations_at_the_margin": 1.5
+  },
+  "thresholds": {
+    "calibrated_at_3": 0.0028273584905660377,
+    "default_at_3": 0.062352830188679244,
+    "default_at_3_with_four_days_of_the_weekday": 0.1602,
+    "gaussian_threshold_passed_at_the_default_rate": 1.8637784005378708,
+    "ratio_default_to_stated": 23.095385254167496,
+    "record": "artifacts/threshold_calibration/threshold-null.json",
+    "recorded_at": "2026-10-08T02:13:14.078513+00:00",
+    "stated_at_3": 0.002699796063260207,
+    "tihm_sleep_share_past_3": {
+      "calibrated_over_stated_rule_off": 29.988878242868758,
+      "calibrated_over_stated_rule_on": 6.335205484805412,
+      "record": "artifacts/threshold_calibration/threshold-calibration-tihm.json",
+      "rule_off": {
+        "calibrated": 0.08096385542168674,
+        "default": 0.1744578313253012
+      },
+      "rule_on_at_12_hours": {
+        "calibrated": 0.01710376282782212,
+        "default": 0.1088939566704675
+      }
+    },
+    "weekday_min_samples": 4
+  }
+}

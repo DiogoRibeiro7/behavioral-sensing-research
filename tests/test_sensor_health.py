@@ -115,6 +115,113 @@ class TestSilence:
         assert report.silence is None
 
 
+def event_home() -> SensorRegistry:
+    """A deployment of event sensors alone: nothing in it promises to report."""
+    return SensorRegistry.from_specs(
+        [
+            SensorSpec("fridge_contact", Modality.CONTACT, room="kitchen"),
+            SensorSpec("hall_motion", Modality.MOTION, room="hall"),
+            SensorSpec("spare_motion", Modality.MOTION, room="bedroom"),
+        ]
+    )
+
+
+def motion(minute: int) -> Observation:
+    """A hall motion activation *minute* minutes after the epoch."""
+    return Observation(
+        timestamp=T0 + timedelta(minutes=minute),
+        sensor_id="hall_motion",
+        modality=Modality.MOTION,
+        kind=ObservationKind.EVENT,
+        value=1.0,
+    )
+
+
+class TestHomeSilence:
+    """A home with no sensor that promised to report, and then no report at all."""
+
+    HORIZON = timedelta(hours=12)
+
+    def monitor(self, horizon: timedelta | None = HORIZON) -> SensorHealthMonitor:
+        monitor = SensorHealthMonitor(
+            event_home(), HealthConfig(home_silence_horizon=horizon)
+        )
+        monitor.observe(fridge(0))
+        monitor.observe(motion(30))
+        return monitor
+
+    def test_the_rule_is_off_unless_a_horizon_is_declared(self) -> None:
+        report = self.monitor(horizon=None).report(T0 + timedelta(days=3))
+        assert report.silent_since is None
+        assert report.silence is None
+        assert report.sensors["hall_motion"].status is SensorStatus.HEALTHY
+        assert not report.faulty
+
+    def test_a_home_is_not_silent_before_the_horizon(self) -> None:
+        last = T0 + timedelta(minutes=30)
+        report = self.monitor().report(last + self.HORIZON - timedelta(minutes=1))
+        assert report.silent_since is None
+        assert report.sensors["hall_motion"].status is SensorStatus.HEALTHY
+
+    def test_a_home_silent_for_the_horizon_is_not_being_observed(self) -> None:
+        last = T0 + timedelta(minutes=30)
+        report = self.monitor().report(last + self.HORIZON)
+        assert report.silent_since == last
+        assert report.silence == self.HORIZON
+        for sensor_id in ("fridge_contact", "hall_motion"):
+            verdict = report.sensors[sensor_id]
+            assert verdict.status is SensorStatus.DROPOUT
+            assert "cannot be read as an absence of activity" in verdict.detail
+        assert report.faulty == ["fridge_contact", "hall_motion"]
+        assert report.to_dict()["silent_since"] == last.isoformat()
+
+    def test_the_silence_is_dated_from_the_last_observation_of_any_sensor(
+        self,
+    ) -> None:
+        monitor = self.monitor()
+        monitor.observe(fridge(600))
+        report = monitor.report(T0 + timedelta(hours=23))
+        assert report.silent_since == T0 + timedelta(minutes=600)
+        assert report.silence == timedelta(hours=13)
+
+    def test_a_sensor_that_never_reported_stays_unknown(self) -> None:
+        report = self.monitor().report(T0 + timedelta(days=2))
+        assert report.sensors["spare_motion"].status is SensorStatus.UNKNOWN
+        assert "spare_motion" not in report.faulty
+
+    def test_a_home_that_never_reported_is_not_silent(self) -> None:
+        monitor = SensorHealthMonitor(
+            event_home(), HealthConfig(home_silence_horizon=self.HORIZON)
+        )
+        assert monitor.report(T0 + timedelta(days=30)).silent_since is None
+
+    def test_one_observation_ends_the_silence(self) -> None:
+        monitor = self.monitor()
+        assert monitor.report(T0 + timedelta(days=2)).silent_since is not None
+        monitor.observe(motion(2 * 24 * 60 + 5))
+        report = monitor.report(T0 + timedelta(days=2, minutes=10))
+        assert report.silent_since is None
+        assert report.sensors["hall_motion"].status is SensorStatus.HEALTHY
+        assert report.sensors["fridge_contact"].status is SensorStatus.HEALTHY
+
+    def test_a_reporting_cadence_sensor_keeps_the_home_from_being_silent(
+        self,
+    ) -> None:
+        monitor = SensorHealthMonitor(
+            registry(), HealthConfig(home_silence_horizon=self.HORIZON)
+        )
+        monitor.observe(fridge(0))
+        for minute in range(0, 24 * 60, 5):
+            monitor.observe(temperature(minute, 20.0 + minute * 0.001))
+        report = monitor.report(T0 + timedelta(hours=24))
+        assert report.silent_since is None
+        assert report.sensors["fridge_contact"].status is SensorStatus.HEALTHY
+
+    def test_a_horizon_must_be_positive(self) -> None:
+        with pytest.raises(ValueError, match="home_silence_horizon"):
+            HealthConfig(home_silence_horizon=timedelta(0))
+
+
 class TestValueVerdicts:
     def test_a_stuck_sampled_sensor_is_detected(self) -> None:
         monitor = SensorHealthMonitor(registry(), HealthConfig(stuck_samples=5))

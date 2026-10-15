@@ -1,0 +1,839 @@
+{
+  "bootstrap": {
+    "confidence": 0.95,
+    "interval": "percentile",
+    "monte_carlo_error": "the standard deviation of the paired differences over the square root of the number of homes, reported for every mean paired difference",
+    "resamples": 5000,
+    "seed": 0,
+    "share_detected": "a Wilson interval, since homes are independent; its paired difference is resampled over homes",
+    "unit": "homes"
+  },
+  "criteria": {
+    "C1_the_outage_raises_alerts": "reproduced when E1's interval lies above zero; otherwise not reproduced in the simulator, and C2 is not testable",
+    "C2_the_rule_removes_them": "success when E3's interval lies above zero and E2's interval lies below 0.25 alerts per home; failure when E3's interval does not lie above zero; partial otherwise",
+    "C3_no_harm_when_nothing_is_wrong": "success when, in `stable`, the rule changes no behavioural alert in any home and raises no silence alert; failure otherwise",
+    "C4_detection_is_kept": "in `change`: uninformative when the share detected with the rule off is below 0.2; otherwise non-inferior when the interval of the paired difference, on minus off, lies above -0.1, inferior when it lies below it, and inconclusive otherwise",
+    "C5_detection_after_an_outage": "the same rule applied to `change_after_outage`",
+    "C6_the_silence_is_reported": "success when at least 0.95 of the homes are reported; failure otherwise",
+    "C7_a_shared_silence_is_told_from_scattered_ones": "success when exactly one stretch is found in `outage_common` and it overlaps the outage, and none in `stable` or `outage`; failure otherwise",
+    "C8_a_short_silence_is_not_seen": "the rule cannot see a silence shorter than its horizon. Confirmed when, in `outage_short`, the rule changes no behavioural alert and raises no silence alert. Otherwise the outage joined a quiet stretch of the home and passed the horizon, and the homes in which it did are counted. Either way this is a limit of the rule and not a success"
+  },
+  "definitions": {
+    "behavioural_alert": "an alert of kind behavioural_change, dated by the moment it was raised",
+    "delay": "days from local midnight at the start of day 56 to the first such alert",
+    "detected": "a home with a behavioural alert about `sleeping_hours` raised once the change day has closed and less than 21 days after that: from local midnight at the end of day 56. The pipeline raises behavioural alerts when a day closes, so these are the alerts that 21 days of changed behaviour can raise, and the alert raised at the close of the day before the change is not among them",
+    "excess_alerts": "a home's behavioural alerts in its outage window in an outage arm, minus the same home's in the same window in the stable arm, under the same condition",
+    "false_detection": "the same definition met in the arm that has no change: `stable` for `change`, and `outage` for `change_after_outage`",
+    "outage_window": "from the moment a home's outage begins until 28 days after it ends, which covers the baseline's trend window",
+    "person_days": "homes times days",
+    "reported": "a home with a silence alert dated between its outage's beginning and its end",
+    "silence_alert": "an alert of kind data_quality about `home_silence`",
+    "the_rule_changes_an_alert": "the behavioural alerts of a home with the rule on are not the same alerts, by subject and moment, as with it off"
+  },
+  "estimands": {
+    "E1": "mean excess alerts per home in `outage` with the rule off",
+    "E2": "the same with the rule on at the primary horizon",
+    "E2_by_group": "E1, E2 and E3 within each outage group. No criterion is stated on them: they measure what the rule leaves when it sees a silence only after a day has closed",
+    "E3": "E1 minus E2, paired by home",
+    "E4": "in `stable`: behavioural alerts per person-day with the rule off and on, the homes in which the rule changes an alert, and silence alerts per person-day with the rule on",
+    "E5": "in `change`: the share of homes detected with the rule off and on, their paired difference, the pooled median delay, and the share of false detections",
+    "E6": "the same in `change_after_outage`",
+    "E7": "in `outage` with the rule on: the share of homes reported, the hours from the outage's beginning to the first silence alert, the silence alerts per home, and the days the baseline refused in each home",
+    "E8": "the stretches of common silence the fleet check finds in `stable`, `outage` and `outage_common`, and the largest share of homes silent at one assessment in each; for `outage_common`, the hours from the outage's beginning to the first assessment that calls it common",
+    "E9": "mean excess alerts per home in `outage_short` with the rule off and on, the homes in which the rule changes an alert, and the homes with a silence alert",
+    "S1": "E2, E3 and E7 at each other horizon, with E4's counts there. At a horizon of a whole day no outage is seen before the day it begins on has closed"
+  },
+  "fleet": {
+    "every_hours": 1.0,
+    "fraction": 0.6,
+    "horizon_hours": 12.0,
+    "min_homes": 3,
+    "what": "`sensor_modeling.health.fleet.common_silences` over the times of each home's delivered observations",
+    "what_it_does_not_test": "in `outage` the homes' outages are spread over 18 days, so few homes are silent at once and the fraction is far away. C7 says the check is not tripped by outages that merely overlap, and nothing about where the fraction should be set"
+  },
+  "inspected_before": [
+    "the TIHM alert-burden run and the descriptions made after it had been read: the silent days, the calendar, and the replay of the baseline with silent days left out. The rule was designed from them, which is why nothing on TIHM here is a test",
+    "the rule had been exercised in unit tests on a hand-built home of three event sensors and on hand-built fleets. No simulated household had been run with the rule on",
+    "the rule was changed once before this protocol was frozen, from reading the code and not from any run: a day that lost any time to a silence is refused by the baseline, where at first only a mostly silent day was",
+    "one simulated household, seed 999, which is not a home of this protocol, had been run with the rule off and with its event sensors alone to measure run time; its numbers of observations and of steps were read, and none of its alerts, verdicts or summaries",
+    "the simulator's source had been read, including the rates at which its sensors fire. How long a simulated or a TIHM home goes without an event had not been measured; the horizons were declared, not estimated"
+  ],
+  "name": "silent-home",
+  "protocol_sha256": "52d6e6804657f6aaf0c3f921309f33f2d48b88598f38c83251944bb03a660fa6",
+  "question": "whether, when a home of event sensors stops reporting, the opt-in rule keeps the silence out of the personal baseline and reports it, without changing anything when nothing is wrong and without costing the detection of a real change",
+  "reporting": "every estimand, criterion, arm and home, whatever it shows; no horizon, margin or window is changed after scoring",
+  "schema": "silent-home-protocol/1",
+  "simulator": {
+    "arms": {
+      "change": "the detection study's step change from day 56: the resident wakes 1.6 hours earlier, with 1.2 more night-time bathroom trips expected a night",
+      "change_after_outage": "the home's own long outage and then the change, which begins at least a week after the outage has ended",
+      "outage": "no sensor of the home reports for 60 hours. Each home has its own outage: the day, between day 28 and day 45, and the local hour it begins at, from 0 to 23, are drawn from `numpy.random.default_rng([seed_root, 1])`, the days first",
+      "outage_common": "no sensor of any home reports from 2024-04-15T03:00:00+00:00 to 2024-04-17T15:00:00+00:00: 60 hours from 04:00 local on day 42. Only the fleet check reads this arm. To one home it is the same as an outage of its own, so it is not run through the pipeline",
+      "outage_short": "no sensor of the home reports for 8 hours from the same moment, which is shorter than every horizon",
+      "stable": "nothing is injected"
+    },
+    "days": 84,
+    "delivery": "every arm passes through `sensor_modeling.simulation.faults.degrade` with no loss, lateness or duplication. An outage is a dropout fault on every sensor over the same window",
+    "evidence": "simulated: every home comes from this repository's simulator, so every result is a statement about the simulator",
+    "homes": 100,
+    "household": "`HouseholdConfig` defaults apart from days, seed and the injected change",
+    "outage_days": {
+      "first": 28,
+      "last": 45
+    },
+    "outage_groups": {
+      "homes": {
+        "seen_after_the_day_closes": 43,
+        "seen_before_the_day_closes": 57
+      },
+      "seen_after_the_day_closes": "it begins later than that",
+      "seen_before_the_day_closes": "the outage begins more than the primary horizon before local midnight",
+      "why": "the rule sees a silence once it has lasted the horizon. If the day on which an outage begins is closed before that, the day is closed as it would be without the rule, with the silent hours read as observed. The hour is drawn so that both cases are in the homes"
+    },
+    "outages": [
+      {
+        "day": 42,
+        "group": "seen_after_the_day_closes",
+        "hour": 20,
+        "seed": 13526
+      },
+      {
+        "day": 40,
+        "group": "seen_after_the_day_closes",
+        "hour": 16,
+        "seed": 20039
+      },
+      {
+        "day": 40,
+        "group": "seen_before_the_day_closes",
+        "hour": 3,
+        "seed": 28983
+      },
+      {
+        "day": 45,
+        "group": "seen_before_the_day_closes",
+        "hour": 4,
+        "seed": 30333
+      },
+      {
+        "day": 36,
+        "group": "seen_before_the_day_closes",
+        "hour": 1,
+        "seed": 40041
+      },
+      {
+        "day": 30,
+        "group": "seen_before_the_day_closes",
+        "hour": 6,
+        "seed": 40360
+      },
+      {
+        "day": 30,
+        "group": "seen_before_the_day_closes",
+        "hour": 7,
+        "seed": 44530
+      },
+      {
+        "day": 35,
+        "group": "seen_before_the_day_closes",
+        "hour": 11,
+        "seed": 46280
+      },
+      {
+        "day": 45,
+        "group": "seen_before_the_day_closes",
+        "hour": 7,
+        "seed": 78794
+      },
+      {
+        "day": 39,
+        "group": "seen_before_the_day_closes",
+        "hour": 1,
+        "seed": 83654
+      },
+      {
+        "day": 37,
+        "group": "seen_before_the_day_closes",
+        "hour": 0,
+        "seed": 91149
+      },
+      {
+        "day": 29,
+        "group": "seen_after_the_day_closes",
+        "hour": 12,
+        "seed": 94759
+      },
+      {
+        "day": 41,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 121658
+      },
+      {
+        "day": 42,
+        "group": "seen_before_the_day_closes",
+        "hour": 3,
+        "seed": 128148
+      },
+      {
+        "day": 42,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 133269
+      },
+      {
+        "day": 43,
+        "group": "seen_before_the_day_closes",
+        "hour": 4,
+        "seed": 143550
+      },
+      {
+        "day": 29,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 152418
+      },
+      {
+        "day": 37,
+        "group": "seen_before_the_day_closes",
+        "hour": 7,
+        "seed": 155015
+      },
+      {
+        "day": 42,
+        "group": "seen_before_the_day_closes",
+        "hour": 0,
+        "seed": 171009
+      },
+      {
+        "day": 30,
+        "group": "seen_after_the_day_closes",
+        "hour": 20,
+        "seed": 173407
+      },
+      {
+        "day": 43,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 188647
+      },
+      {
+        "day": 31,
+        "group": "seen_after_the_day_closes",
+        "hour": 16,
+        "seed": 214903
+      },
+      {
+        "day": 43,
+        "group": "seen_before_the_day_closes",
+        "hour": 2,
+        "seed": 217565
+      },
+      {
+        "day": 40,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 220206
+      },
+      {
+        "day": 29,
+        "group": "seen_after_the_day_closes",
+        "hour": 15,
+        "seed": 246969
+      },
+      {
+        "day": 44,
+        "group": "seen_after_the_day_closes",
+        "hour": 20,
+        "seed": 259594
+      },
+      {
+        "day": 41,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 263821
+      },
+      {
+        "day": 42,
+        "group": "seen_before_the_day_closes",
+        "hour": 3,
+        "seed": 273073
+      },
+      {
+        "day": 37,
+        "group": "seen_before_the_day_closes",
+        "hour": 8,
+        "seed": 276573
+      },
+      {
+        "day": 42,
+        "group": "seen_before_the_day_closes",
+        "hour": 10,
+        "seed": 278446
+      },
+      {
+        "day": 37,
+        "group": "seen_after_the_day_closes",
+        "hour": 22,
+        "seed": 310941
+      },
+      {
+        "day": 41,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 316264
+      },
+      {
+        "day": 43,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 320700
+      },
+      {
+        "day": 33,
+        "group": "seen_before_the_day_closes",
+        "hour": 1,
+        "seed": 333164
+      },
+      {
+        "day": 45,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 346595
+      },
+      {
+        "day": 28,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 347479
+      },
+      {
+        "day": 36,
+        "group": "seen_before_the_day_closes",
+        "hour": 2,
+        "seed": 376909
+      },
+      {
+        "day": 43,
+        "group": "seen_after_the_day_closes",
+        "hour": 19,
+        "seed": 389460
+      },
+      {
+        "day": 43,
+        "group": "seen_before_the_day_closes",
+        "hour": 5,
+        "seed": 400728
+      },
+      {
+        "day": 38,
+        "group": "seen_before_the_day_closes",
+        "hour": 11,
+        "seed": 419532
+      },
+      {
+        "day": 31,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 420985
+      },
+      {
+        "day": 40,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 424842
+      },
+      {
+        "day": 36,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 426479
+      },
+      {
+        "day": 37,
+        "group": "seen_after_the_day_closes",
+        "hour": 17,
+        "seed": 442394
+      },
+      {
+        "day": 40,
+        "group": "seen_before_the_day_closes",
+        "hour": 6,
+        "seed": 442747
+      },
+      {
+        "day": 33,
+        "group": "seen_before_the_day_closes",
+        "hour": 2,
+        "seed": 447916
+      },
+      {
+        "day": 34,
+        "group": "seen_before_the_day_closes",
+        "hour": 7,
+        "seed": 457526
+      },
+      {
+        "day": 35,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 463575
+      },
+      {
+        "day": 41,
+        "group": "seen_before_the_day_closes",
+        "hour": 1,
+        "seed": 475808
+      },
+      {
+        "day": 44,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 486028
+      },
+      {
+        "day": 44,
+        "group": "seen_after_the_day_closes",
+        "hour": 22,
+        "seed": 492826
+      },
+      {
+        "day": 41,
+        "group": "seen_before_the_day_closes",
+        "hour": 10,
+        "seed": 496673
+      },
+      {
+        "day": 45,
+        "group": "seen_before_the_day_closes",
+        "hour": 10,
+        "seed": 507993
+      },
+      {
+        "day": 44,
+        "group": "seen_after_the_day_closes",
+        "hour": 15,
+        "seed": 508959
+      },
+      {
+        "day": 43,
+        "group": "seen_after_the_day_closes",
+        "hour": 19,
+        "seed": 511611
+      },
+      {
+        "day": 39,
+        "group": "seen_after_the_day_closes",
+        "hour": 23,
+        "seed": 540332
+      },
+      {
+        "day": 30,
+        "group": "seen_before_the_day_closes",
+        "hour": 11,
+        "seed": 541550
+      },
+      {
+        "day": 38,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 543583
+      },
+      {
+        "day": 38,
+        "group": "seen_after_the_day_closes",
+        "hour": 16,
+        "seed": 546733
+      },
+      {
+        "day": 32,
+        "group": "seen_before_the_day_closes",
+        "hour": 3,
+        "seed": 566782
+      },
+      {
+        "day": 35,
+        "group": "seen_before_the_day_closes",
+        "hour": 6,
+        "seed": 580416
+      },
+      {
+        "day": 35,
+        "group": "seen_before_the_day_closes",
+        "hour": 2,
+        "seed": 582268
+      },
+      {
+        "day": 36,
+        "group": "seen_before_the_day_closes",
+        "hour": 8,
+        "seed": 622795
+      },
+      {
+        "day": 32,
+        "group": "seen_after_the_day_closes",
+        "hour": 19,
+        "seed": 636584
+      },
+      {
+        "day": 30,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 638168
+      },
+      {
+        "day": 30,
+        "group": "seen_after_the_day_closes",
+        "hour": 16,
+        "seed": 643046
+      },
+      {
+        "day": 37,
+        "group": "seen_after_the_day_closes",
+        "hour": 20,
+        "seed": 652792
+      },
+      {
+        "day": 44,
+        "group": "seen_after_the_day_closes",
+        "hour": 19,
+        "seed": 660800
+      },
+      {
+        "day": 37,
+        "group": "seen_after_the_day_closes",
+        "hour": 12,
+        "seed": 669761
+      },
+      {
+        "day": 40,
+        "group": "seen_after_the_day_closes",
+        "hour": 22,
+        "seed": 671038
+      },
+      {
+        "day": 37,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 688693
+      },
+      {
+        "day": 32,
+        "group": "seen_before_the_day_closes",
+        "hour": 8,
+        "seed": 690795
+      },
+      {
+        "day": 36,
+        "group": "seen_before_the_day_closes",
+        "hour": 2,
+        "seed": 718017
+      },
+      {
+        "day": 44,
+        "group": "seen_before_the_day_closes",
+        "hour": 10,
+        "seed": 735148
+      },
+      {
+        "day": 33,
+        "group": "seen_before_the_day_closes",
+        "hour": 4,
+        "seed": 761663
+      },
+      {
+        "day": 34,
+        "group": "seen_after_the_day_closes",
+        "hour": 12,
+        "seed": 777270
+      },
+      {
+        "day": 44,
+        "group": "seen_after_the_day_closes",
+        "hour": 22,
+        "seed": 784723
+      },
+      {
+        "day": 35,
+        "group": "seen_after_the_day_closes",
+        "hour": 22,
+        "seed": 795734
+      },
+      {
+        "day": 44,
+        "group": "seen_before_the_day_closes",
+        "hour": 4,
+        "seed": 800441
+      },
+      {
+        "day": 43,
+        "group": "seen_before_the_day_closes",
+        "hour": 2,
+        "seed": 812236
+      },
+      {
+        "day": 35,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 824245
+      },
+      {
+        "day": 41,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 829927
+      },
+      {
+        "day": 28,
+        "group": "seen_after_the_day_closes",
+        "hour": 20,
+        "seed": 832781
+      },
+      {
+        "day": 35,
+        "group": "seen_before_the_day_closes",
+        "hour": 8,
+        "seed": 833416
+      },
+      {
+        "day": 32,
+        "group": "seen_before_the_day_closes",
+        "hour": 8,
+        "seed": 838462
+      },
+      {
+        "day": 29,
+        "group": "seen_after_the_day_closes",
+        "hour": 19,
+        "seed": 869948
+      },
+      {
+        "day": 33,
+        "group": "seen_before_the_day_closes",
+        "hour": 11,
+        "seed": 875901
+      },
+      {
+        "day": 32,
+        "group": "seen_before_the_day_closes",
+        "hour": 9,
+        "seed": 879234
+      },
+      {
+        "day": 34,
+        "group": "seen_after_the_day_closes",
+        "hour": 16,
+        "seed": 879321
+      },
+      {
+        "day": 29,
+        "group": "seen_before_the_day_closes",
+        "hour": 11,
+        "seed": 881942
+      },
+      {
+        "day": 39,
+        "group": "seen_before_the_day_closes",
+        "hour": 0,
+        "seed": 900784
+      },
+      {
+        "day": 43,
+        "group": "seen_before_the_day_closes",
+        "hour": 3,
+        "seed": 902483
+      },
+      {
+        "day": 28,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 902607
+      },
+      {
+        "day": 37,
+        "group": "seen_before_the_day_closes",
+        "hour": 10,
+        "seed": 933983
+      },
+      {
+        "day": 29,
+        "group": "seen_before_the_day_closes",
+        "hour": 0,
+        "seed": 938034
+      },
+      {
+        "day": 34,
+        "group": "seen_before_the_day_closes",
+        "hour": 0,
+        "seed": 940923
+      },
+      {
+        "day": 41,
+        "group": "seen_before_the_day_closes",
+        "hour": 5,
+        "seed": 976067
+      },
+      {
+        "day": 37,
+        "group": "seen_after_the_day_closes",
+        "hour": 13,
+        "seed": 976826
+      },
+      {
+        "day": 29,
+        "group": "seen_after_the_day_closes",
+        "hour": 21,
+        "seed": 982391
+      },
+      {
+        "day": 38,
+        "group": "seen_before_the_day_closes",
+        "hour": 10,
+        "seed": 988242
+      }
+    ],
+    "pairing": "every arm and condition is run on every home, so a home with a fault differs from the same home without it in the fault alone, and the rule on differs from the rule off in the rule alone",
+    "pipeline": {
+      "alert_policy": {
+        "cooldown_hours": 20.0,
+        "min_confidence": 0.4,
+        "min_score": 0.25
+      },
+      "baseline": {
+        "deviation_threshold": 3.0,
+        "min_samples": 14,
+        "persistence_days": 3,
+        "trend_threshold": 3.5,
+        "trend_window": 28
+      },
+      "features": [
+        "sleeping_hours",
+        "kitchen_activity_hours",
+        "bathroom_activity_hours",
+        "away_hours"
+      ],
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step_minutes": 15,
+      "what": "`BehaviouralSensingPipeline` over the event sensors' registry, with default emissions derived from it; nothing is fitted"
+    },
+    "replications": "100 paired homes; `docs/SIMULATION_PROTOCOLS.md` sets a floor of 100 for a simulation study",
+    "runs": [
+      [
+        "stable",
+        "off"
+      ],
+      [
+        "stable",
+        "h12"
+      ],
+      [
+        "outage",
+        "off"
+      ],
+      [
+        "outage",
+        "h12"
+      ],
+      [
+        "outage_short",
+        "off"
+      ],
+      [
+        "outage_short",
+        "h12"
+      ],
+      [
+        "change",
+        "off"
+      ],
+      [
+        "change",
+        "h12"
+      ],
+      [
+        "change_after_outage",
+        "off"
+      ],
+      [
+        "change_after_outage",
+        "h12"
+      ],
+      [
+        "stable",
+        "h24"
+      ],
+      [
+        "outage",
+        "h24"
+      ]
+    ],
+    "seed_root": 20261007,
+    "seeds": "the first distinct values of `numpy.random.SeedSequence(seed_root).generate_state(4 * homes, uint32)` modulo 1,000,000, sorted",
+    "sensors": [
+      "front_door",
+      "bedroom_motion",
+      "bathroom_motion",
+      "kitchen_motion",
+      "living_motion",
+      "fridge_contact"
+    ],
+    "sensors_left_out": [
+      "bed_pressure",
+      "living_radar",
+      "wearable_motion",
+      "resident_beacon"
+    ],
+    "start": "2024-03-04",
+    "timezone": "Europe/Lisbon",
+    "why_left_out": "they report on a cadence, so their silence is already evidence of a failure. What is left is a stream of activations, as in TIHM"
+  },
+  "status": "pre-specified on simulated homes; descriptive on TIHM. The simulator's homes, estimands and criteria are fixed before any simulated home is run with the rule on. Nothing on TIHM is a test",
+  "the_rule": {
+    "conditions": {
+      "h12": "the rule on at 12 hours",
+      "h24": "the rule on at 24 hours",
+      "off": "the rule off: the pipeline's default"
+    },
+    "default": "off",
+    "horizons": "declared, not estimated from any home",
+    "primary": "h12",
+    "setting": "HealthConfig.home_silence_horizon"
+  },
+  "tihm": {
+    "archive_sha256": "368d642b4cdc680d0706abfd3c8b2e5387824d9737ad33f50531bafa6a4bf5a1",
+    "check": "with the rule off the run must give the published record's 2,850 monitored days and 183 behavioural alerts, or nothing is reported",
+    "citation": "Palermo, F.; Chen, Y.; Capstick, A.; Fletcher-Lloyd, N.; Walsh, C.; Kouchaki, S.; True, J.; Balazikova, O.; Soreq, E.; Scott, G.; Rostill, H.; Nilforooshan, R.; Barnaghi, P. TIHM: An open dataset for remote healthcare monitoring in dementia. Scientific Data 10, 606 (2023). https://doi.org/10.1038/s41597-023-02519-y",
+    "conditions": [
+      "off",
+      "h12",
+      "h24"
+    ],
+    "dataset": "TIHM: An Open Dataset for Remote Healthcare Monitoring in Dementia",
+    "everything_else": "as frozen in `artifacts/tihm/alert_burden_protocol.json`",
+    "files": {
+      "Activity.csv": "ead7b1e3c2a91fbd679a909bff3a309a6465ae1ad18528dae57a4cf8599cafca",
+      "Demographics.csv": "15b13a680da6ee3790dfadc25d3a6102070f6e8fe1a47ea6da8f64b6c4b757d4",
+      "Labels.csv": "39495a08fdf1ff8f9b9b88bc98483a565c4433f58713ba3e4d0846e4449b846b",
+      "Physiology.csv": "377b3170b4b650795648e18258f30f9b985c214937823e9c9ea405c66b4ba696",
+      "Sleep.csv": "f1d5a6980263a55a8b69841e13bb349ce6e79152c15bdde0beffeea15293b9fe"
+    },
+    "fleet": "the fleet check with the settings above, over the times of each home's activity records",
+    "licence": "CC BY 4.0; the dataset's repository asks that Surrey and Borders Partnership NHS Foundation Trust and Howz be acknowledged in any publication or use",
+    "not_reported": "any relation to the dataset's labels. Whether the alerts that remain relate to what a clinical team verified is the alert-burden protocol's question and is not reopened here",
+    "reported": [
+      "monitored, usable and evaluable days",
+      "the days the baseline refused because of the rule, in all and per home",
+      "behavioural alerts, in all and by date",
+      "silence alerts, in all and per home",
+      "the stretches of common silence the fleet check finds, and the silence alerts dated inside one"
+    ],
+    "standing": "a description, not a test: the rule was designed from these homes",
+    "step_minutes": 10
+  },
+  "what_the_simulator_cannot_show": [
+    "a simulated home is not expected to be silent for a horizon unless a fault makes it so, so the simulator says nothing about how often a real home is silent for a harmless reason, or about which horizon a real home needs",
+    "a resident who is away for days, or who needs help, is not simulated. The rule reports such a silence in the same words as an outage, and the simulator cannot say what that costs",
+    "the simulated sensors fire at rates this project wrote down"
+  ]
+}

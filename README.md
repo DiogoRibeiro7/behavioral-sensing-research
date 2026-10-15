@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/project-logo.png" alt="behavioral-sensing-research project logo" width="160" height="160">
+</p>
+
 # Sensor Modeling Research Toolkit
 
 A research-grade Python toolkit for **interpretable, probabilistic,
@@ -14,15 +18,17 @@ non-homogeneous Poisson processes.
 > a diagnosis, and no claim of clinical effectiveness is made or supported.
 > Simulator results are not estimates of field performance; the pipeline has
 > now been evaluated on real CASAS recordings, externally tested on a frozen
-> 43-home CASAS cohort, and tested on two independently collected homes, to
-> which it does not transfer. The evidence boundaries are described below.
+> 43-home CASAS cohort, tested on two independently collected homes, to which
+> it does not transfer, and tested on one independently recorded resident, for
+> whom the time prior's gain holds and the CASAS-fitted channels do not
+> transfer. The evidence boundaries are described below.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.11--3.14-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/behavioral-sensing-research/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/sensor-modeling/badge/?version=latest)](https://sensor-modeling.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21337272.svg)](https://doi.org/10.5281/zenodo.21337272)
-[![Version](https://img.shields.io/badge/version-0.9.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.10.0-informational.svg)](CHANGELOG.md)
 
 ## 🎯 Overview
 
@@ -52,6 +58,67 @@ accuracy, in 19 of 20 homes; part of the gap is the formulation. See
 changes to the generative model have since been measured on the same homes; see
 [`ROADMAP.md`](ROADMAP.md). None of them is a held-out claim.
 
+The two that succeeded, a hurdle model fitted for each evidence channel and a
+hierarchical time-of-day prior, were then run together in the filter's
+recursion, under a protocol frozen before any household was scored. Together
+they score 0.517 balanced accuracy on those 20 homes, against 0.456 for the
+fitted channels alone and 0.417 for the declared model. The prior adds +0.061
+[+0.044, +0.077], most in the recall of `away` and `sleeping`, and lowers
+calibration error from 0.284 to 0.213. The earlier versions of the same two
+parts, in the production filter on 11 held-out homes of the panel, scored 0.434
+together against 0.460 for the circadian term alone. See
+[the combined-prior results](docs/PHASE3_COMBINED_PRIOR_RESULTS.md).
+
+Fitted once on those 20 homes and frozen, the combination was then scored once
+on the 43 single-resident CASAS homes outside the development panel, beside
+the Phase 2 baselines, under a protocol frozen before any of them was scored.
+**The gain holds.** The prior adds +0.077 [+0.070, +0.084] balanced accuracy
+to the fitted channels, in all 43 homes and in each of the five CASAS
+families, although 35 of the homes come from families other than the training
+homes', with other layouts and sensor names. The combination scores 0.567,
+against 0.490 for the fitted channels alone and 0.482 for the declared model,
+with calibration error 0.233. The supervised diagnostic, given the hour and the
+last three windows, scores 0.557: not distinguishable from it in balanced
+accuracy, −0.010 [−0.033, +0.014], with better log loss but a worse Brier
+score. Cross-fitted on the development homes it had scored 0.590 against
+0.517. The intervals resample homes and do not allow for families, 25 of the
+43 homes being of one. These homes had been scored once before, by the
+production filter, and share CASAS's sensors and labelling, so this is not an
+independent dataset. The online pipeline offers the combination as an opt-in,
+off by default; see below. See
+[the held-out results](docs/HELDOUT_CONFIRMATION_RESULTS.md).
+
+**On an independent dataset the prior's gain holds, and the fitted channels do
+not transfer.** The same fit, as the package ships it, was then scored once on
+ContextAct@A4H, collected independently of CASAS: one resident of a smart
+apartment in France, over 29 days in two periods, with the day as the unit,
+under a protocol frozen before any day was scored. The prior adds +0.049
+[+0.013, +0.087] balanced accuracy to the fitted channels, 0.385 against 0.336
+(K1, a success), and improves log loss and the Brier score. But with the prior,
+the declared channels score 0.534 there: the CASAS-fitted channels lose 0.149
+[0.076, 0.221] of balanced accuracy to them, with better log loss. The
+combination is not distinguishable from the declared model without the prior in
+balanced accuracy, −0.029 [−0.125, +0.073], with better log loss, Brier score
+and calibration, and the supervised diagnostic at `I3` leads it by +0.181
+[+0.124, +0.239]. The intervals resample days of one person, so they describe
+this resident and nobody else. See
+[the ContextAct results](docs/CONTEXTACT_TRANSFER_RESULTS.md).
+
+**Whether activity sub-states recover `home_active` recall is inconclusive.**
+Back on the 20 development homes, the next model family the predictive
+checks pointed to was tested once, under a protocol frozen before any household
+was scored: two hidden sub-states, quiet and busy, in each common state, in the
+recursion with the time prior. `home_active` recall rises from 0.268 to 0.316,
++0.048 [−0.009, +0.099], which is uncertain, so the primary is inconclusive and
+the fitted hurdle channels stay the reference. Balanced accuracy is unchanged,
+0.515 against 0.517, a negligible −0.001 [−0.018, +0.017], while log loss falls
+from 1.728 to 1.280 and calibration error from 0.213 to 0.172. Recall moves
+between states: `away` gains 0.213 [0.153, 0.281] and `sleeping` 0.053 [0.012,
+0.095], and `bathroom_activity` and `kitchen_activity`, which have no
+sub-states, lose 0.168 [0.125, 0.212] and 0.157 [0.088, 0.233]. These homes have
+been inspected before, so this is not a held-out claim. See
+[the sub-state results](docs/PHASE3_ACTIVITY_SUBSTATES_RESULTS.md).
+
 The frozen v0.3 candidate was also tested once on 43 single-resident CASAS homes
 outside the development panel. The optional circadian prior improved the median
 paired household balanced accuracy by **+0.0091**, with a 95% household bootstrap
@@ -64,6 +131,180 @@ dataset, which has a different sensing layout. **It does not transfer**: zero-sh
 balanced accuracy is 0.246 and 0.244, against chance at 0.25, and a week of
 limited adaptation leaves balanced accuracy unchanged. See
 [Phase 5 external results](docs/PHASE5_EXTERNAL_RESULTS.md).
+
+The online pipeline was also run, with its declared emissions, baseline and
+alert policy, the ten-minute step its protocol declares and nothing fitted, on
+the 56 homes of the TIHM dataset of people living with dementia. Its
+labels are alerts a clinical team verified, not behavioural states, so no state
+is scored; the run is exploratory and describes what the pipeline raises. It
+raises 0.064 behavioural alerts per person-day, with a 95% household bootstrap
+interval of [0.046, 0.084], and **the alerts are not more frequent on the days
+the team confirmed**: alert days are 5.3% of agitation label days and 8.5% of
+other days. Looked at afterwards, a quarter of the alert days are days on which
+no sensor in the home reported anything, which the pipeline reads as sleep. See
+[TIHM alert-burden results](docs/TIHM_ALERT_BURDEN_RESULTS.md).
+
+An opt-in rule, off by default, now treats a home in which no sensor has
+reported for a declared time as not observed, and says so in an alert of its
+own. It was built from the TIHM finding, so it was tested elsewhere: on 100
+paired simulated homes reduced to their event sensors, under a protocol frozen
+before any of them had been run with the rule on. **The evidence is
+simulated.**
+
+- **An outage raises alerts, and the rule removes them.** A 60-hour outage
+  raises 2.76 behavioural alerts per home more than the same home without it,
+  with a 95% interval over homes of [2.36, 3.15] and a Monte Carlo standard
+  error of 0.20. With the rule on at 12 hours the excess is −0.28
+  [−0.44, −0.13], standard error 0.08. That is below zero: the outage arm
+  raises fewer alerts than the same homes left alone, 30 against 58. Whether
+  that is a loss of sensitivity after an outage is not settled.
+- **Every outage is reported**, a median 12.0 hours after it began.
+- **Nothing changes where no home is silent.** No alert of a stable home
+  changes, and the rule raises none of its own there.
+- **After an outage, fewer homes meet the detection definition with the rule
+  on.** 76 of 100 against 91: −0.15 [−0.23, −0.07], standard error 0.04,
+  against a margin of −0.10. The interval excludes zero and lies on both sides
+  of the margin, so the pre-specified verdict is inconclusive. With the rule
+  off, 38 of 100 homes with an outage and no change meet the same definition,
+  and with no outage at all 75 are detected, so whether changes are missed or
+  alerts the outage raised are gone was not tested.
+- **The eight criteria.** The problem was reproduced, four criteria came out
+  as success, detection with no outage was non-inferior, detection after an
+  outage was inconclusive, and a stated limit of the rule was not confirmed in
+  one home in 100.
+
+Run on the TIHM homes as a description and not as a test, the rule shows a
+cost the simulator could not: those homes are silent for twelve hours often.
+At 12 hours 147 of the 183 behavioural alerts are no longer raised and 13 new
+ones are, 322 of the 2,850 monitored days are refused, and 324 alerts about
+silence are raised, 145 of them in the two stretches in which most monitored
+homes were silent together. See
+[the silent-home results](docs/SILENT_HOME_RESULTS.md).
+
+The personal baseline's deviation threshold of three standard deviations is
+passed far more often than it states when a weekday reference rests on a few
+days. On synthetic Gaussian days the default reference passes it on 6.2% of
+days, 23 times the 0.27% it states. An opt-in reference, off by default,
+pools the scale over every retained day and maps the deviation through a
+Student t, and passes it on 0.28%; see
+[the baseline's thresholds on synthetic days](docs/THRESHOLD_CALIBRATION_NULL.md).
+It was built from the TIHM finding, so it was tested on 400 paired simulated
+homes, under a protocol frozen before any of them had been run with it. **The
+evidence is simulated.**
+
+- **At the same false alerts it finds more of a step change.** Where its
+  operating curve has the default's 0.855 false alerts a home in 84 days, it
+  finds the step net of what it raises with nothing injected in 0.72 of homes,
+  against 0.63: +0.09, with a 95% interval over homes of [+0.03, +0.16] and a
+  Monte Carlo standard error of 0.03. The match is placed again in every
+  resample.
+- **Its threshold means what it says for hours of sleep on these homes.**
+  0.35% of stable days of sleep pass 3, the share a Gaussian value passes
+  2.92 [2.85, 2.99]; the default passes 3 on 7.9% of them. On hours away,
+  where no criterion was stated, it passes 3 on 1.66% of days, as often as a
+  Gaussian value passes 2.40.
+- **For a smaller step and a gradual change no difference is shown**: −0.02
+  [−0.09, +0.04] and −0.01 [−0.10, +0.09].
+- **It is not a drop-in replacement.** At the declared thresholds it raises 3
+  false alerts in the 400 homes against 342, and finds the step net of chance
+  in 0.04 of them against 0.63.
+
+On TIHM, as a description: with the silent-home rule off it passes 3 on 8.1%
+of evaluable days of sleep, against the default's 17.4%. Real days are far
+from what its score assumes. See
+[the threshold-calibration results](docs/THRESHOLD_CALIBRATION_RESULTS.md).
+
+Every alerting study here counts its detections on `sleeping_hours`, the
+hours of a day the pipeline gives to sleep. In 17 TIHM homes a mat under the
+mattress recorded each minute a person was in bed, so the two were set side
+by side, under a protocol frozen before any value of the pipeline was set
+beside any record of the mat. On the days the sensors reported throughout, in
+the 14 homes with enough of them:
+
+- **Within a home, the pipeline's hours of sleep barely follow the mat's.** A
+  mean within-home Spearman correlation of 0.11 [0.03, 0.19], against a
+  declared margin of 0.5. On 100 simulated homes, against the simulator's true
+  hours of sleep, the same correlation is 0.70 [0.68, 0.71].
+- **It counts more sleep than the mat does, and about two hours more than the
+  time in bed.** 3.95 hours a day more than the mat's sleep [+1.54, +6.37],
+  and 1.97 more than its hours in bed [−0.01, +3.94], an interval that reaches
+  zero.
+- **A deviation in one is seldom a deviation in the other.** The deviations a
+  personal baseline gives the two correlate at 0.03 [−0.04, 0.11], over 12
+  homes; on 4 of the 46 days the pipeline's reached 3, the mat's did too, in
+  the same direction.
+
+The mat's stages are the device's own and are not validated here. See
+[the sleep-mat results](docs/SLEEP_MAT_RESULTS.md).
+
+The simulator's event sensors are cleaner than TIHM's: no hold-off between
+activations, no hallway sensor, a contact logged once, and 7% of motion
+activations after another room's against 63%. The 400 threshold-calibration
+homes were run again with their sensors drawn from the same days under a
+profile matched to TIHM's sensor records: a 61-second hold-off, a hallway
+sensor, contacts logged twice, and 2 activations an hour from each motion
+sensor of a room the resident is not in, while the resident is at home and
+awake. The protocol was frozen before any of the study's homes was run with
+it. **The evidence is simulated.**
+
+- **The detection of the step change survives.** Net of false detections it
+  finds the step in 0.70 of homes against 0.63: +0.07 [+0.01, +0.13], against
+  a margin of −0.10. False alerts rise from 0.86 to 1.02 a home in 84 days.
+- **The hours of sleep still follow the truth.** A mean within-home
+  correlation of 0.71 [0.70, 0.71], against a margin of 0.5, and 0.67 on the
+  same homes with the simulator's own sensors. In the simulator, the sensor
+  properties the profile matches do not by themselves bring the correlation
+  anywhere near the 0.11 against the sleep mat.
+- **The bathroom collapses; the kitchen falls to about a third.** Pooled-day
+  medians of 0.01 hours of bathroom activity against a true 0.28, and 0.68 of
+  kitchen activity against a true 1.96; TIHM's are 0.00 and 0.06. The
+  pre-specified criterion, which needed both under their ceilings of 0.05 and
+  0.25 hours, reads not reproduced: the kitchen's is over its ceiling. Their
+  correlations with the truth fall from 0.72 to 0.51 and from 0.70 to 0.40.
+
+See [the matched-sensor results](docs/MATCHED_SENSORS_RESULTS.md).
+
+Where, then, do the pipeline's sleep and the mat's part? In the same 14 TIHM
+homes the pipeline's belief was set beside the mat minute by minute, under a
+plan frozen before any of it was computed. It is a description, not a test:
+the comparison it breaks down had been read. With the mat's clock as
+recorded:
+
+- **The extra sleep falls when the mat has no record, mostly by day.** Of the
+  3.95 hours a day more sleep than the mat's, 4.10 are counted when the mat
+  has no record, 3.20 of them between 07:00 and 22:00; 1.34 are counted while
+  the mat says awake in bed; and 1.48 hours of the mat's sleep are not
+  counted. The median home's excess is 2.38 hours; one home's is 17.20.
+  Without the three homes the mat stages mostly awake, 3.36 hours are counted
+  with no record and the excess is 2.55.
+- **The longer the home is quiet, the surer the pipeline is of sleep.** With
+  no mat record, its belief in sleep is 0.39 between ten minutes and an hour
+  after the last activation, 0.90 between one and three hours, and 0.99
+  after three; 2.29 of the 4.10 hours fall within the hour, 1.80 after it.
+  By the sensor that last reported, 1.40 hours follow the bedroom's and 1.07
+  an exit door's, 0.79 of them an hour or more after it. A door's record does
+  not say which way anyone went.
+- **That part moves the daily number.** It carries 0.68 [0.54, 0.83] of the
+  day-to-day variance of the pipeline's hours of sleep, and it follows the
+  mat no better than any other day's beliefs set beside the same mat would.
+  The sleep counted while the mat has a record does follow the mat's sleep
+  beyond that, by +0.10 [+0.05, +0.15], above zero in all 14 homes. The daily
+  hours of sleep correlate with the day's activations at −0.71, which the way
+  the pipeline infers sleep partly builds in.
+- **Part of it sits at the edges of the mat's nights.** Counting each mat
+  record an hour later, the sleep counted off the mat within 30 minutes of a
+  record falls from 0.73 to 0.32 hours a day, and the on-mat part follows the
+  mat by +0.18 [+0.09, +0.26] beyond the reference, above zero in 12 of 14
+  homes. That is consistent with a mat clock an hour behind, or with the
+  pipeline's timing at bedtime and waking.
+
+The mat's stages are the device's own, and a minute with no record may be an
+empty bed, a person asleep elsewhere or a mat that stopped. See
+[the sleep-gap results](docs/SLEEP_GAP_RESULTS.md).
+
+The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
+under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz
+are acknowledged, as the dataset asks. It is not redistributed here.
 
 See [Real-data validation](docs/real_data.md) and
 [Known limitations](docs/limitations.md).
@@ -117,9 +358,22 @@ a failure. Current real-data diagnostics show that the implemented confidence
 threshold is not yet a reliable safety mechanism: confidence weakly separates
 correct from incorrect predictions and becomes less reliable in the highest
 confidence band. Version 0.9.0 adds structural uncertainty diagnostics and a
-selective-prediction evaluation. On the development homes, disagreement between
-fitted model specifications ranks errors better than confidence, but no
-abstention rule has been selected, and abstention is not solved.
+selective-prediction evaluation. On the development homes, for the fitted
+channels without the time prior, disagreement between fitted model
+specifications is materially better than confidence by the declared rule. Rerun
+for the fitted channels with the time prior, under a protocol frozen before any
+household was scored, it is again materially better: its household error AURC
+is 0.048 [0.033, 0.062] lower than confidence's, in 18 of 20 homes. It retains
+less than confidence of `bathroom_activity` and `kitchen_activity`, minority
+states its guard does not cover, at every inspection coverage: at 50% it keeps
+0.55 and 0.50 of the proportional share of each. A rule was then selected on
+those homes, cross-fitted, under a frozen protocol: abstain when structural
+disagreement exceeds 0.2385, which keeps 95% of the windows and at least 0.8
+of each guarded state's proportional share. On homes it was not chosen on it
+lowers the error by only 0.016
+[0.012, 0.019], negligible, so it is not supported and not adopted; abstention
+is not solved. See [the time-prior results](docs/PHASE4_TIME_PRIOR_RESULTS.md)
+and [the abstention rule](docs/PHASE4_ABSTENTION_RESULTS.md).
 
 ### Supported and unsupported claims
 
@@ -180,6 +434,34 @@ dropout and five days of wearable non-adherence, loses, duplicates, delays and
 clock-skews the record, introduces a genuine change in sleep on a known day,
 then runs the whole pipeline and reports what it did and did not recover —
 including its own false-alert burden. Two runs produce identical numbers.
+
+### The formulation confirmed on held-out CASAS homes, as an opt-in
+
+The online pipeline can run the formulation the held-out confirmation scored:
+a hurdle model of each CASAS evidence channel, with the hierarchical time prior
+as an hour-dependent transition. Its parameters were fitted once on 20
+single-resident CASAS development homes and ship with the package. It is off by
+default, and nothing else changes.
+
+```python
+from sensor_modeling.online import BehaviouralSensingPipeline, PipelineConfig
+
+pipeline = BehaviouralSensingPipeline(
+    registry, config=PipelineConfig(formulation="phase3")
+)
+steps = pipeline.run(observations)
+```
+
+It reads event sensors whose room and modality name a CASAS channel: motion in
+the bathroom, bedroom, hall, kitchen and living room, and the hall door. It
+works in five-minute windows, and reads the hour from the timestamps, which must
+carry the home's local zone. Its channels are not weighted by sensor health, as
+in the evaluations, so a sensor that stops reporting reads as silence. It scored
+0.517 balanced accuracy on the development homes and 0.567 on 43 held-out CASAS
+homes. Those homes share CASAS's sensors and labelling. On ContextAct@A4H, one
+resident outside CASAS, its beliefs equal the recursion's and it scored 0.385
+balanced accuracy over 29 days, below the declared channels with the time prior
+at 0.534. It has not been run on TIHM.
 
 ### Sensor-ablation experiment
 
@@ -605,7 +887,7 @@ If you use this software in your research, please cite it as:
   author={Ribeiro, Diogo},
   year={2026},
   url={https://github.com/DiogoRibeiro7/behavioral-sensing-research},
-  version={0.9.0},
+  version={0.10.0},
   doi={10.5281/zenodo.21337272}
 }
 ```

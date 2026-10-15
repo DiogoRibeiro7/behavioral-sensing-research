@@ -37,7 +37,14 @@ band (0.653). Raising the threshold discards the pipeline's best band and keeps
 its saturated one. The likely cause is that during quiet periods the belief
 approaches certainty because no evidence arrived, not because the evidence was
 strong. This is a safety limitation, not a tuning parameter, and the v0.3
-candidate does not touch it.
+candidate does not touch it. On the development homes, disagreement between
+fitted model specifications is materially better than confidence, for the
+formulation with the time prior as for the one without. With the time prior it
+retains less than confidence of `bathroom_activity` and `kitchen_activity`.
+The abstention rule selected on it, guarded for those states, abstains on 5% of
+windows and lowers the error negligibly, 0.016 [0.012, 0.019], so it is not
+adopted; see [the time-prior results](PHASE4_TIME_PRIOR_RESULTS.md) and
+[the abstention rule](PHASE4_ABSTENTION_RESULTS.md).
 
 An earlier revision of this page reported `away` recall of 0.00 and treated it
 as a finding. **That was wrong.** `Leave_Home` annotates twelve seconds of
@@ -90,7 +97,20 @@ prior and smoothing — **do not combine.** All three together score 0.435
 balanced accuracy against 0.463 for smoothing alone, with calibration worse than
 the baseline. Fitted rates trade accuracy for calibration and smoothing trades
 calibration for accuracy, so stacking them gives up both. See
-[Real-data validation](real_data.md) for which to use when.
+[Real-data validation](real_data.md) for which to use when. Their Phase 3
+successors for the first two, fitted hurdle channels and the hierarchical time
+prior, do combine in the filter's recursion: 0.517 balanced accuracy against
+0.456 for the fitted channels alone on the development homes, and 0.567
+against 0.490 on 43 held-out CASAS homes, where the prior's gain holds in every
+home. That is not an independent dataset. On ContextAct@A4H, one resident
+recorded independently of CASAS, the prior's gain holds, +0.049 [+0.013,
++0.087] balanced accuracy, but the CASAS-fitted channels do not transfer: with
+the prior, the declared channels score 0.534 balanced accuracy against 0.385.
+That interval resamples days of one person. The online pipeline offers the
+combination only as an opt-in, `PipelineConfig(formulation="phase3")`; see
+[the combined-prior results](PHASE3_COMBINED_PRIOR_RESULTS.md),
+[the held-out results](HELDOUT_CONFIRMATION_RESULTS.md) and
+[the ContextAct results](CONTEXTACT_TRANSFER_RESULTS.md).
 
 Two further attempts failed. Declared dwell times are 3 to 9 times longer than
 real state durations, but fitting them to measurement lowered balanced accuracy
@@ -109,6 +129,148 @@ The remaining homes are from one research group's instrumentation, so they are
 not 22 independent studies, and 0.607 is a ceiling for this
 instrumentation rather than for ambient sensing generally. The gap between 0.420
 and what is recoverable is real nonetheless.
+
+### On a clinical cohort
+
+The online pipeline was run on the 56 homes of the TIHM dataset of people
+living with dementia, with its declared emissions, baseline and alert policy
+and the ten-minute step its protocol declares. The run is exploratory, and the
+dataset's labels are alerts a clinical team verified, so no state is scored.
+See [the results](TIHM_ALERT_BURDEN_RESULTS.md).
+
+**Its alerts are not more frequent on the days the clinical team confirmed.**
+Alert days are 5.3% of agitation label days and 8.5% of other evaluable days;
+the interval of the difference includes zero. At the same number of flagged
+days, the household's own label history catches 63 of 94 label days and its
+sensor event count against earlier days 53, where the pipeline's deviating
+days catch 18 and chance expects 23.
+
+**A home that reports nothing is read as a home asleep.** On 128 of 2,850
+monitored days no sensor reported an event. Every one passed the pipeline's
+test of a usable day, and the filter inferred a median 23.8 hours of sleep on
+them. On 16 June 2019 all 47 monitored homes are silent, and the next day
+holds 33 of the run's 183 behavioural alerts. The dataset paper reports a
+failure of the data collection server and dates the drop to 14 June; in the
+released file the drop is on 15 to 17 June, so treating them as one event is
+an inference. The dataset holds activations only, so nothing in it says a
+sensor or its gateway was working, and the health layer raised no alert in the
+whole run. A likely reading, not a tested one, is that this is the mechanism
+behind the saturated confidence above: with no evidence the belief goes to the
+quietest state, and the pipeline abstained on 0.06% of usable time.
+
+**The pipeline's hours of sleep do not follow a sleep mat in the TIHM homes.** In
+the 14 TIHM homes with enough days on a mat under the mattress, the mean
+within-home Spearman correlation between the pipeline's daily
+`sleeping_hours` and the mat's hours asleep is 0.11 [0.03, 0.19], on the days
+the sensors reported throughout, and the pipeline gives 3.95 hours a day more
+sleep than the mat. On the sleep-mat study's 100 simulated homes, against the
+simulator's true hours of sleep, the same correlation is 0.70. On the 400
+threshold-calibration homes it is 0.67 with the simulator's own sensors and
+0.71 with their event sensors drawn again to match TIHM's sensor records, so
+in the simulator the sensor properties that profile matches do not by
+themselves bring it anywhere near 0.11. Set beside the mat minute by minute,
+in a description planned after this comparison had been read, most of the
+pipeline's extra sleep falls when the mat has no record, mostly by day, where
+its belief in sleep reaches 0.90 once the home has been quiet for an hour;
+the sleep counted with no record carries about two thirds of the day-to-day
+variance of the daily hours, and follows the mat no better than other days'
+beliefs set beside the same mat; see
+[the sleep-gap results](SLEEP_GAP_RESULTS.md). Every alerting study here counts its
+detections on that feature, so a detection in simulation is a statement about
+the simulator's sleep, not a person's. The mat's stages are the device's own
+and are not validated; see [the sleep-mat results](SLEEP_MAT_RESULTS.md).
+
+**An opt-in baseline reference now keeps its threshold's meaning, and where
+its thresholds belong on a real home is not known.** On synthetic Gaussian
+days the default reference passes its deviation threshold of 3 on 6.24% of
+days, where 0.27% is stated, because a weekday reference of a few days has
+too small a spread; the calibrated reference, `BaselineConfig.calibrated`,
+passes it on 0.28%. On 400 paired simulated homes it keeps that meaning for
+hours of sleep, the feature the criterion was stated for; on hours away it
+passes 3 on 1.66% of days, as often as a Gaussian value passes 2.40. At the
+default's false alerts it finds more of a step change, +0.09 of homes
+net of chance [+0.03, +0.16]; see
+[the threshold-calibration results](THRESHOLD_CALIBRATION_RESULTS.md). That
+evidence is simulated, and it shows no gain for a smaller or a slower change.
+At the declared thresholds the reference reports far less of everything, so
+its thresholds must be set lower, and the simulated homes put them at about
+0.59 times the declared ones. On TIHM, described and not tested, it still
+passes 3 on 8.1% of evaluable days of sleep with the silent-home rule off,
+and on 1.7% with it on at 12 hours: real days are far from the independent
+Gaussian draws its score assumes. It is off by default.
+
+**An opt-in rule now treats a silent home as not observed, and it has a cost
+the simulator cannot show.** `HealthConfig.home_silence_horizon` is off by
+default, so by default a silent home is still read as above. On 100 paired
+simulated homes the rule removes, on average, the alerts an outage raises, and
+changes nothing in a stable home; see
+[the silent-home results](SILENT_HOME_RESULTS.md). That evidence is simulated,
+and a simulated home is not silent for twelve hours unless a fault makes it
+so. The TIHM homes often are. Run on them as a description and not as a test,
+at twelve hours the rule refuses 322 of the 2,850 monitored days in 48 of the
+56 homes and raises 324 alerts about silence, 145 of them in the two stretches
+in which most monitored homes were silent together. Of the 183 behavioural
+alerts of the run without it, 147 are no longer raised and 13 new ones are. It
+does not say why a home is silent: a resident who is away, a resident who
+needs help and a gateway that has stopped are reported in the same words. Four
+things remain open:
+
+- which horizon a real home needs, which depends on its sensors and its
+  resident and was declared here, not estimated;
+- what a person receiving an alert about silence does with it, and whether
+  one about a home is worth more than one about a behaviour;
+- whether the rule costs detection of a real change after an outage. In
+  simulation 76 of 100 homes met the detection definition with the rule on
+  against 91 with it off, −0.15 [−0.23, −0.07], Monte Carlo standard error
+  0.04: fewer, and inconclusive against the −0.10 margin. Whether changes
+  were missed or alerts the outage itself raised were gone was not tested;
+- whether the baseline is less sensitive for a while after the days the rule
+  refuses. In simulation the outage arm raised fewer alerts in its window
+  than the same homes with nothing injected, 30 against 58, an excess of
+  −0.28 [−0.44, −0.13] with a standard error of 0.08, and no arm of the
+  protocol can say why.
+
+The TIHM dataset is by Palermo et al., *Scientific Data* 10, 606 (2023),
+under CC BY 4.0. Surrey and Borders Partnership NHS Foundation Trust and Howz
+are acknowledged, as the dataset asks. It is not redistributed here.
+
+**The deviation threshold does not mean three standard deviations.** The
+baseline compares a day with the same weekday's earlier days once four exist.
+A median and MAD of four values put a Gaussian value past the threshold about 17.5%
+of the time, where a known mean and standard deviation give 0.27%. On
+stationary Gaussian values with each household's own centre and spread, 14.9%
+of days deviate, and the run has 24.4%. Most of what the threshold flags is
+therefore present with no change over time at all.
+
+**Two of the four baseline features are close to inert.** The filter infers a
+median 0.06 hours of kitchen activity and 0.00 hours of bathroom activity a
+day, so the reference sits at the scale floor for 87% of kitchen feature-days
+and for every bathroom one. Why the declared emissions read so little from
+these homes was looked at afterwards in three TIHM homes, and then in the
+pre-specified simulation study below. What the room sensors are is declared, not
+known: the activity table names a location and no sensor type, and the dataset
+paper is not of one voice. Its methods place passive infrared sensors in the
+hallway and living room and movement sensors on the kitchen, bedroom and
+bathroom doors; its first figure's caption says passive infrared and door
+sensors are included in each room. The frozen mapping takes the five room
+locations as motion in that room, with the sensor type declared approximate.
+
+Each of the last three was found after the run had been read. They are
+diagnoses, kept apart from the protocol's results, and no default has been
+changed because of them.
+
+**In the simulator, TIHM's sensor properties take away the bathroom's hours
+and most of the kitchen's.** Under a protocol frozen before any of its homes
+was run, the 400 threshold-calibration homes were run again with their event
+sensors drawn under a profile matched to TIHM's sensor records: a 61-second
+hold-off, a hallway sensor, contacts logged twice and spill-over from the
+motion sensors of other rooms. The pooled-day median of bathroom activity
+falls to 0.01 hours against a true 0.28, and that of kitchen activity to 0.68
+against a true 1.96. The pre-specified criterion, which needed both under
+ceilings of 0.05 and 0.25 hours, reads not reproduced. That such sensors take
+the bathroom's hours to TIHM's level in the simulator does not show that they
+are why TIHM's are near zero; see
+[the matched-sensor results](MATCHED_SENSORS_RESULTS.md).
 
 ## The single most important limitation
 
@@ -294,14 +456,24 @@ In rough priority order, with what has been done since this list was written:
    against real annotations.
    - **CASAS.** Done: a 22-home development panel and a frozen 43-home external
      cohort; see [Real-data validation](real_data.md).
-   - **An independent dataset.** The two homes of UCI ADL Binary were evaluated
+   - **Independent datasets.** The two homes of UCI ADL Binary were evaluated
      under a frozen protocol, and the CASAS-trained model does not transfer;
-     see [Phase 5 external results](PHASE5_EXTERNAL_RESULTS.md).
+     see [Phase 5 external results](PHASE5_EXTERNAL_RESULTS.md). The one
+     resident of ContextAct@A4H was evaluated under another, and the time
+     prior's gain holds while the fitted channels do not transfer; see
+     [the ContextAct results](CONTEXTACT_TRANSFER_RESULTS.md).
    - **Still needed.** Independent datasets with more homes.
 2. **Parameter estimation from data** rather than declaration.
    - **Done for the evidence channels.** Fitted channel models improve
      calibration on the development homes; see
      [fitted rates](PHASE3_FITTED_RATES.md).
+   - **Within-state dependence.** Two hidden activity sub-states in the common
+     states were tested once on the development homes. Whether they recover
+     `home_active` recall is inconclusive: +0.048 [−0.009, +0.099],
+     uncertain. They leave balanced accuracy unchanged and improve log loss
+     and calibration, and they move recall from `bathroom_activity` and
+     `kitchen_activity` to `away` and `sleeping`; see
+     [the sub-state results](PHASE3_ACTIVITY_SUBSTATES_RESULTS.md).
    - **Partial pooling.** Household parameters with partial pooling are
      evaluated; see [partial pooling](PHASE3_PARTIAL_POOLING.md).
    - **Transfer.** The fitted parameters did not transfer to the external

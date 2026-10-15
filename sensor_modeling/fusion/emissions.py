@@ -70,6 +70,15 @@ class EmissionModel(ABC):
         if not math.isfinite(self.weight) or self.weight < 0.0:
             raise ValueError("weight must be finite and non-negative")
 
+    @property
+    def sources(self) -> tuple[str, ...]:
+        """The sensors whose records this model reads: its own sensor alone.
+
+        A model of a channel reads several sensors at once and lists them all.
+        The filter gives each record to the model that lists its sensor.
+        """
+        return (self.sensor_id,)
+
     @abstractmethod
     def _raw_log_likelihood(
         self,
