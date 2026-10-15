@@ -15,6 +15,7 @@ DOI** when referring to the software project across versions.
 
 | Version | Record | Version DOI | Published |
 | --- | --- | --- | --- |
+| 0.10.0 | <https://zenodo.org/records/23400002> | `10.5281/zenodo.23400002` | 2026-10-15 |
 | 0.9.0 | <https://zenodo.org/records/23071324> | `10.5281/zenodo.23071324` | 2026-09-30 |
 | 0.8.0 | <https://zenodo.org/records/23002971> | `10.5281/zenodo.23002971` | 2026-09-27 |
 | 0.7.0 | <https://zenodo.org/records/22977921> | `10.5281/zenodo.22977921` | 2026-09-26 |
