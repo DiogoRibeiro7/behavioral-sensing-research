@@ -1,0 +1,1078 @@
+{
+  "configuration": {
+    "adoption": "the frozen rule is adopted as the formulation's abstention rule only when the decision is supported; otherwise it is recorded and not adopted, and the online pipeline is not changed either way",
+    "bootstrap": {
+      "confidence": 0.95,
+      "resamples": 10000,
+      "seed": 0,
+      "unit": "household"
+    },
+    "cross_fitting": "for each fold, the threshold is selected on its training homes, each scored by the ensemble and time prior fitted on the fold's other training homes; it is applied to the fold's held-out homes, scored by the fold's fits as step 1 scored them",
+    "decision": "supported on development data when A1 favours the rule, A2 does not favour no abstention and the guard holds on the held-out homes; not supported when A1 is negligible or favours no abstention, or the guard fails on the held-out homes; inconclusive otherwise",
+    "edge_cases": "a fold whose threshold never abstains gives its homes A1 and A2 of exactly 0; a home with no kept window has no A1 or A2 and is excluded from the comparison and listed as excluded; kept balanced accuracy averages the states with a kept window",
+    "estimands": {
+      "A1": "primary: per held-out home, the error at full coverage minus the error of the predictions the rule keeps; positive favours the rule",
+      "A2": "per held-out home, the balanced accuracy of the kept predictions minus that at full coverage",
+      "coverage": "the coverage kept, pooled and per home, described",
+      "guard_held_out": "the guard, pooled over the held-out homes' windows"
+    },
+    "final_rule": "the threshold selected the same way on all 20 homes, each scored by the ensemble and time prior fitted on the other 19",
+    "inspected_before": [
+      "The step 1 record, for the fitted channels with the time prior: structural_disagreement is materially better than confidence, household error AURC 0.048 [0.033, 0.062] lower, and the declared rule picks it; full-coverage error is 0.364 pooled, 0.360 as a mean over homes. Pooled over the panel, it keeps of the proportional share of bathroom_activity and kitchen_activity 0.55 and 0.50 at coverage 0.5 and 0.70 and 0.60 at 0.7, and of away 1.17 and 1.11.",
+      "What that record implies for this selection, pooled over all 20 homes: at coverages 0.8, 0.85, 0.9 and 0.95 the kept share of bathroom_activity is 0.76, 0.78, 0.82 and 0.86, of kitchen_activity 0.67, 0.72, 0.79 and 0.87, and of away 1.07, 1.05, 1.03 and 1.02, so the guard first holds at 0.95, and away cannot bind; there the error is 0.347 against 0.364, and the mean gain over homes is 0.017, below the minimal difference of 0.02. A1 is therefore unlikely to favour the rule, and the decision likely to be not supported or inconclusive.",
+      "The target coverage and the guard's fraction were declared after those curves were seen, and were not changed to move that outcome. The guarded states are those the roadmap named before step 1 was run, the activity states and away; step 1's guard covered bed_awake, 68 windows in 5 homes, which this guard leaves out."
+    ],
+    "name": "phase4-abstention-rule",
+    "one_run": {
+      "amendments": "a change to a pinned source after the freeze is declared in artifacts/phase4/abstention_amendments.json with its reason and new digest; the run accepts it only at that digest and lists the file as an input",
+      "branch": "the run writes run-artifacts/phase4-abstention-rule, and the workflow refuses when it exists, or when the frozen protocol file has more than its freeze commit",
+      "crash": "a run that stops before writing its record reports nothing; it is fixed without looking at any outcome, the fix is declared as an amendment, and it is run again; a run that wrote its record is the run",
+      "runs": "one run, by .github/workflows/run-abstention-rule.yml dispatched on develop; the script refuses anywhere else",
+      "sources": "the freeze records every file of the package and pyproject.toml, scripts/freeze_abstention_rule.py, scripts/run_abstention_rule.py, .github/workflows/run-abstention-rule.yml, and the versions of numpy, scipy, pandas; the run refuses when one differs"
+    },
+    "parameters": {
+      "fraction": 0.8,
+      "minimal": 0.02,
+      "target": 0.8
+    },
+    "pinned_records": {
+      "artifacts/heldout/casas-heldout-confirmation.json": "785f6757ed9e9890dc7dfbf471660403779cc7dcc6a246586a87fd2323e2c97a",
+      "artifacts/phase3/combined_prior_protocol.json": "3a0c5cad58187609601181ae841099b9144707ba2327af4173c9442812dc52a5",
+      "artifacts/phase3/fitted_rates_protocol.json": "f695f972fcfcd11266a8a1a720932442e8b7d455bdec7dd6304ecab41843075d",
+      "artifacts/phase3/phase3-activity-substates.json": "73e19a933de8d3bd1cf97aed8981a04bf446673f92d29b56a47f679cb525b1df",
+      "artifacts/phase3/phase3-combined-prior.json": "57db137f57f5b298054d7a4cfe8c837d854ca9a8793329857d7803401477db59",
+      "artifacts/phase3/phase3-fitted-rates.json": "807d60fee5adff828c5a727eedbc8858493e816bdf60a555a004ea8a035d590c",
+      "artifacts/phase4/phase4-uncertainty-diagnostics.json": "faeb9d679ee251b493586292b9d2dd55913cab6cb986f9ad14cc4e8f3bc5c2cb",
+      "artifacts/phase4/phase4-uncertainty-time-prior.json": "99addb681e893df0a988156ddb23056c7aa7fc145471501f3def895591f48022",
+      "artifacts/phase4/prior_uncertainty_protocol.json": "0cd450ef7ba3b5058da025d76a637983e48b2722b20d1b9b62403f2349dc316a",
+      "artifacts/phase4/uncertainty_protocol.json": "537dd3d319e1ec3964d2d8df370cac3d05a72fd267a10eaa148b0148f59782e1"
+    },
+    "protocol_sha256": "0ba0228a7f31e8dcf197cf8e9553cb64bb8d04d8744f0f53dffdfab34ee88887",
+    "question": "which threshold on structural disagreement keeps the coverage near the target while the guarded states keep their share, and does it lower the error on homes it was not chosen on",
+    "schema": "abstention-protocol/1",
+    "selection": {
+      "coverages": [
+        0.8,
+        0.85,
+        0.9,
+        0.95,
+        1.0
+      ],
+      "guard": "each of away, bathroom_activity, kitchen_activity keeps at least 0.8 of its proportional share: its kept share over the coverage kept, pooled over the selection windows; a state with no selection window is not judged",
+      "rule": "the first coverage at which the guard holds; at 1, the rule never abstains",
+      "threshold": "at each coverage from the target upward, the smallest signal value at or below which that share of the selection windows lies, pooled; a window is kept when its signal is at or below the threshold, so ties are kept",
+      "undefined": "a signal undefined in any selection or held-out window stops the run before it writes a record"
+    },
+    "signal": "structural_disagreement",
+    "status": "pre-specified selection on the development panel, which earlier work has inspected; one run; not a confirmation",
+    "step1": {
+      "file": "artifacts/phase4/prior_uncertainty_protocol.json",
+      "protocol_sha256": "c71a08021a7ea434ee8ef9cacc90e4c87c44e9f3565d9796b648cbb13a342865",
+      "sha256": "0cd450ef7ba3b5058da025d76a637983e48b2722b20d1b9b62403f2349dc316a",
+      "used": "its folds, fits, predictions and ensemble; the signal is its record's rule_signal, which the run checks"
+    },
+    "the_check": {
+      "otherwise": "nothing is reported",
+      "tolerance": 1e-06,
+      "what": [
+        "every fold's fitted channels and time prior equal the fitted-rates record's",
+        "every held-out home's reference scores equal the combined-prior record's",
+        "step 1's record picked this signal"
+      ]
+    },
+    "tuning": "none: every setting is declared here, before scoring",
+    "verdicts": "favours the rule: mean at least the minimal difference and lower bound above 0; favours no abstention: the mirror; negligible: the interval within plus or minus it; uncertain: anything else",
+    "what_this_cannot_show": [
+      "A confirmation: the 20 development homes have been inspected, the 43 held-out CASAS homes are used up for this formulation, and ContextAct's per-day scores of it are published too. A confirmation needs an independent dataset this formulation has not been scored on, with the rule frozen here applied once, unchanged.",
+      "Independence of the selection: step 1 saw these homes' curves before the target and fraction were declared.",
+      "The signal's choice: it was picked on these homes, and is not confirmed.",
+      "Uncertainty in the fits and the selection: the homes of a fold share one fit and one threshold, and the household bootstrap resamples the scored homes without selecting the threshold again.",
+      "The frozen threshold's own performance: A1 judges the procedure, with thresholds chosen on fits to nine homes and applied to fits to ten; the frozen threshold is chosen on fits to 19 and has no held-out estimate."
+    ]
+  },
+  "data_source": "casas-hh",
+  "environment": {
+    "git_commit": "d9224f310006440e4355e66731ef29e338d92cdd",
+    "git_dirty": "false",
+    "numpy": "2.3.5",
+    "pandas": "2.3.3",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.13.16",
+    "scipy": "1.15.3",
+    "sensor_modeling": "0.9.0",
+    "sklearn": "1.9.1"
+  },
+  "experiment": "phase4-abstention-rule",
+  "household_metrics": {},
+  "inference": {
+    "causal": true,
+    "delay_seconds": 0.0,
+    "evidence": {
+      "enumerated": true,
+      "first_prediction": "2011-06-15T00:06:32.834414-07:00",
+      "last_prediction": "2014-08-20T17:34:12.589833-07:00",
+      "latest_evidence": "2014-08-20T17:34:12.589833-07:00",
+      "max_lead_seconds": 0.0,
+      "predictions": 232975
+    },
+    "label": "online filter",
+    "lag_steps": 0,
+    "mode": "online_filter",
+    "provenance": "declared by the experiment that wrote the record",
+    "step_seconds": null
+  },
+  "information_set": null,
+  "inputs": [
+    {
+      "name": "abstention_protocol.json",
+      "role": "frozen protocol",
+      "sha256": "f7e3208dacca429e71f0210ef868e139360554650156195675cf18eab896e293",
+      "source": "artifacts/phase4/abstention_protocol.json"
+    },
+    {
+      "name": "fitted_rates_protocol.json",
+      "role": "pinned record",
+      "sha256": "f695f972fcfcd11266a8a1a720932442e8b7d455bdec7dd6304ecab41843075d",
+      "source": "artifacts/phase3/fitted_rates_protocol.json"
+    },
+    {
+      "name": "phase3-fitted-rates.json",
+      "role": "pinned record",
+      "sha256": "807d60fee5adff828c5a727eedbc8858493e816bdf60a555a004ea8a035d590c",
+      "source": "artifacts/phase3/phase3-fitted-rates.json"
+    },
+    {
+      "name": "combined_prior_protocol.json",
+      "role": "pinned record",
+      "sha256": "3a0c5cad58187609601181ae841099b9144707ba2327af4173c9442812dc52a5",
+      "source": "artifacts/phase3/combined_prior_protocol.json"
+    },
+    {
+      "name": "phase3-combined-prior.json",
+      "role": "pinned record",
+      "sha256": "57db137f57f5b298054d7a4cfe8c837d854ca9a8793329857d7803401477db59",
+      "source": "artifacts/phase3/phase3-combined-prior.json"
+    },
+    {
+      "name": "uncertainty_protocol.json",
+      "role": "pinned record",
+      "sha256": "537dd3d319e1ec3964d2d8df370cac3d05a72fd267a10eaa148b0148f59782e1",
+      "source": "artifacts/phase4/uncertainty_protocol.json"
+    },
+    {
+      "name": "phase4-uncertainty-diagnostics.json",
+      "role": "pinned record",
+      "sha256": "faeb9d679ee251b493586292b9d2dd55913cab6cb986f9ad14cc4e8f3bc5c2cb",
+      "source": "artifacts/phase4/phase4-uncertainty-diagnostics.json"
+    },
+    {
+      "name": "casas-heldout-confirmation.json",
+      "role": "pinned record",
+      "sha256": "785f6757ed9e9890dc7dfbf471660403779cc7dcc6a246586a87fd2323e2c97a",
+      "source": "artifacts/heldout/casas-heldout-confirmation.json"
+    },
+    {
+      "name": "phase3-activity-substates.json",
+      "role": "pinned record",
+      "sha256": "73e19a933de8d3bd1cf97aed8981a04bf446673f92d29b56a47f679cb525b1df",
+      "source": "artifacts/phase3/phase3-activity-substates.json"
+    },
+    {
+      "name": "prior_uncertainty_protocol.json",
+      "role": "pinned record",
+      "sha256": "0cd450ef7ba3b5058da025d76a637983e48b2722b20d1b9b62403f2349dc316a",
+      "source": "artifacts/phase4/prior_uncertainty_protocol.json"
+    },
+    {
+      "name": "phase4-uncertainty-time-prior.json",
+      "role": "pinned record",
+      "sha256": "99addb681e893df0a988156ddb23056c7aa7fc145471501f3def895591f48022",
+      "source": "artifacts/phase4/phase4-uncertainty-time-prior.json"
+    },
+    {
+      "name": "hh101.csv",
+      "role": "recording",
+      "sha256": "3f4d4a53ef4940670ef855c66cd9dee0a458700656afb112f2c80b703b65666d",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh102.csv",
+      "role": "recording",
+      "sha256": "3720812ee71d89f230149cc0b6562f308eb8658e9198ff69d27be9a1d77b29d2",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh103.csv",
+      "role": "recording",
+      "sha256": "bb589e6e350d971533a1e75eff4a960a590eb034d54b5e76855ee55e04d0e18b",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh105.csv",
+      "role": "recording",
+      "sha256": "e50b80bab18551ae365c259b5b19210833cdbfecdf85fa6a2e760018e12e5f85",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh106.csv",
+      "role": "recording",
+      "sha256": "d7bc4b7d43e24dc7d826c06c618a2206a2290302da6998dba9a5e7d23b5186a4",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh108.csv",
+      "role": "recording",
+      "sha256": "02dc7a30cf16fd82605084bae34e8b1c2929fe306afef6dd75fc13c316151c6b",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh110.csv",
+      "role": "recording",
+      "sha256": "c89fbf594549cd749d83e1b57c3d4b424d519211456c45d74c691e3bfe476c33",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh111.csv",
+      "role": "recording",
+      "sha256": "10cdf20436acf834fea9d4b3bd40e6bd634050da7e1cff89ee4d79f817532b38",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh114.csv",
+      "role": "recording",
+      "sha256": "51dace896e9e8ebb0dd62fafcadc7319c0b54ef60aacf8d62630fd45401d85d1",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh118.csv",
+      "role": "recording",
+      "sha256": "5fa3f1e2b3c4dde5ce251f635abea710aadc382c6c554595eec8f2e80011ee36",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh119.csv",
+      "role": "recording",
+      "sha256": "8bf08d3568c4eec3d236bd62ef5c0e9ad38ea03a2ddd79e32db7324db11f10f6",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh120.csv",
+      "role": "recording",
+      "sha256": "3d2b52061cd1f6660fe1f2bb1ac84f7784756a756ee8d6b6fcb7c9bfbaad6b1a",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh122.csv",
+      "role": "recording",
+      "sha256": "d4143027bc742e0c7dbdeb16d7095fafa5c69b8f5026aceb22954b8b50d17ac9",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh123.csv",
+      "role": "recording",
+      "sha256": "05f149f788bd4d42fc4314a955f1dd6e55742aa366e3f2fa5fdf334ba2a4a5fb",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh124.csv",
+      "role": "recording",
+      "sha256": "9c944a1460d194bde94a617ba8d4818ffa80cfb3adf67fb70fb2960fb1b6a5ce",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh125.csv",
+      "role": "recording",
+      "sha256": "6723cce771fd0f41e088f23bc59f02a45b275303bcf1bbf5ceff569e4822d4b4",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh126.csv",
+      "role": "recording",
+      "sha256": "c315fb1549522a6dfcd7d4b90540c8c780e27bf3dca0ea3b039825995e0e66d1",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh127.csv",
+      "role": "recording",
+      "sha256": "d3d91e4d08600deabff70ae2fbb63e4aff763ff9c194d643a081920f7d36fe84",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh129.csv",
+      "role": "recording",
+      "sha256": "a6065cbec7a1f9e2bc14cb9a63a2697f3010b9427cebc5338ad90d4925e5d37f",
+      "source": "zenodo:15708568 labeled_data.zip"
+    },
+    {
+      "name": "hh130.csv",
+      "role": "recording",
+      "sha256": "34f48db608acea7a325721a4f81a71fc8fda3c6069f32ed4964a0c7023824103",
+      "source": "zenodo:15708568 labeled_data.zip"
+    }
+  ],
+  "intervals": [],
+  "mcse": {},
+  "metric_definitions": {
+    "balanced_accuracy": "The mean recall over the states among the kept predictions.",
+    "coverage": "The share of a home's labelled windows the rule keeps.",
+    "error": "The share of kept predictions whose state is wrong.",
+    "ratio": "A state's kept share over the coverage kept: 1 for proportional abstention."
+  },
+  "models": [],
+  "notes": [
+    "Every setting and rule was declared before any household was scored.",
+    "Each threshold was selected on homes scored by models fitted without the homes it was applied to."
+  ],
+  "observation_mismatch": null,
+  "preprocessing": {},
+  "recorded_at": "2026-10-15T13:47:28.690095+00:00",
+  "resolved_defaults": {
+    "baseline": {
+      "calibrated": false,
+      "change_point_penalty": 8.0,
+      "deviation_threshold": 3.0,
+      "history_days": 120,
+      "min_samples": 14,
+      "min_scale": 0.25,
+      "persistence_days": 3,
+      "trend_threshold": 3.5,
+      "trend_window": 28,
+      "weekday_min_samples": 4
+    },
+    "context": {
+      "beacon_presence": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 0.9,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.9,
+        "OccupancyContext.VISITOR_ONLY": 0.05
+      },
+      "concurrency_odds": 4.0,
+      "concurrency_window": "0:01:00",
+      "door_mixing": 0.35,
+      "dwell": {
+        "OccupancyContext.EMPTY": "3:00:00",
+        "OccupancyContext.RESIDENT_ALONE": "8:00:00",
+        "OccupancyContext.RESIDENT_WITH_VISITOR": "1:00:00",
+        "OccupancyContext.VISITOR_ONLY": "0:45:00"
+      },
+      "resident_share": {
+        "OccupancyContext.EMPTY": 0.0,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 0.5,
+        "OccupancyContext.VISITOR_ONLY": 0.0
+      },
+      "sample_weight": 0.2,
+      "track_counts": {
+        "OccupancyContext.EMPTY": 0.02,
+        "OccupancyContext.RESIDENT_ALONE": 1.0,
+        "OccupancyContext.RESIDENT_WITH_VISITOR": 2.0,
+        "OccupancyContext.VISITOR_ONLY": 1.0
+      }
+    },
+    "health": {
+      "degraded_after": 2.0,
+      "delivery_floor": 0.6,
+      "delivery_window": 32,
+      "drift_floor": 0.0,
+      "drift_recent": 32,
+      "drift_reference": 64,
+      "drift_sigma": 6.0,
+      "dropout_after": 5.0,
+      "home_silence_horizon": null,
+      "missing_after": 20.0,
+      "out_of_range_tolerance": 2,
+      "outage_canary_fraction": 0.6,
+      "quality_floor": 0.5,
+      "quality_smoothing": 0.2,
+      "stuck_samples": 12,
+      "stuck_state_hours": 36.0
+    },
+    "household": {
+      "carer_weekday_visits": true,
+      "days": 60,
+      "night_bathroom_rate": 0.8,
+      "outing_probability": 0.55,
+      "seed": 20240304,
+      "shift": null,
+      "sleep_hour": 23.0,
+      "start": "2024-03-04",
+      "timing_jitter_minutes": 35.0,
+      "tz": "Europe/Lisbon",
+      "visitor_probability": 0.2,
+      "wake_hour": 7.0
+    },
+    "pipeline": {
+      "attribute_activity": true,
+      "features": [
+        "sleeping",
+        "kitchen_activity",
+        "bathroom_activity",
+        "away"
+      ],
+      "formulation": "declared",
+      "lateness_tolerance": "0:10:00",
+      "min_day_coverage": 0.5,
+      "min_day_observed": 0.6,
+      "step": "0:05:00",
+      "tz": null
+    }
+  },
+  "results": {
+    "check": {
+      "fits": {
+        "folds": [
+          "phase1-fold-a",
+          "phase1-fold-b"
+        ],
+        "identical_digests": false,
+        "reproduced": true
+      },
+      "scores": {
+        "households": 20,
+        "identical": true,
+        "model": "filter_periodic_hurdle",
+        "reproduced": true
+      },
+      "signal": "structural_disagreement"
+    },
+    "decision": "not supported",
+    "estimands": {
+      "A1": {
+        "comparison": {
+          "differences": {
+            "hh101": 0.020545042506754263,
+            "hh102": 0.0037082538994413494,
+            "hh103": 0.013710263168680736,
+            "hh105": 0.0031947036714728705,
+            "hh106": 0.03667998709426368,
+            "hh108": 0.011085308206844169,
+            "hh110": 0.01998626180018509,
+            "hh111": 0.011430240970037864,
+            "hh114": 0.01986171852222085,
+            "hh118": 0.005046730889680773,
+            "hh119": 0.013952193689173054,
+            "hh120": 0.017930059390284026,
+            "hh122": 0.020650377819216914,
+            "hh123": 0.006008760295073412,
+            "hh124": 0.01068061732618697,
+            "hh125": 0.023581746923822644,
+            "hh126": 0.019103993971301525,
+            "hh127": 0.025543971010722033,
+            "hh129": 0.02493367566067617,
+            "hh130": 0.004134775704820348
+          },
+          "effect_size": 1.7558749953873325,
+          "excluded": [],
+          "favours_model": 20,
+          "favours_reference": 0,
+          "households": [
+            "hh101",
+            "hh102",
+            "hh103",
+            "hh105",
+            "hh106",
+            "hh108",
+            "hh110",
+            "hh111",
+            "hh114",
+            "hh118",
+            "hh119",
+            "hh120",
+            "hh122",
+            "hh123",
+            "hh124",
+            "hh125",
+            "hh126",
+            "hh127",
+            "hh129",
+            "hh130"
+          ],
+          "mean": {
+            "estimate": 0.015588434126042938,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.019443368528397197,
+              "low": 0.011782211916393342,
+              "method": "percentile"
+            },
+            "standard_error": 0.001949200083058453
+          },
+          "median": {
+            "estimate": 0.01594112653972854,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.020265652153469677,
+              "low": 0.01068061732618697,
+              "method": "percentile"
+            },
+            "standard_error": 0.003212215565035264
+          },
+          "n": 20,
+          "note": null,
+          "proportion_favouring_model": 1.0,
+          "proportion_favouring_reference": 0.0,
+          "proportion_tied": 0.0,
+          "resamples": 10000,
+          "seed": 0,
+          "tied": 0
+        },
+        "verdict": "negligible"
+      },
+      "A2": {
+        "comparison": {
+          "differences": {
+            "hh101": 0.018353698039325517,
+            "hh102": 0.007159142819721964,
+            "hh103": 0.01626749395780075,
+            "hh105": 0.00873495738893626,
+            "hh106": 0.009633425186006406,
+            "hh108": 0.011185342747629945,
+            "hh110": 0.03692941217883933,
+            "hh111": 0.011568075665527422,
+            "hh114": 0.02006447684723678,
+            "hh118": 0.009829974344631953,
+            "hh119": 0.022284091325909805,
+            "hh120": 0.01131511187306472,
+            "hh122": 0.0280549941413476,
+            "hh123": 0.004679154505704219,
+            "hh124": 0.07296882972496849,
+            "hh125": 0.014688074162297227,
+            "hh126": 0.03163041518486376,
+            "hh127": 0.010398559908215421,
+            "hh129": 0.05042256837081982,
+            "hh130": -0.03181191041254694
+          },
+          "effect_size": 0.8910145811074902,
+          "excluded": [],
+          "favours_model": 19,
+          "favours_reference": 1,
+          "households": [
+            "hh101",
+            "hh102",
+            "hh103",
+            "hh105",
+            "hh106",
+            "hh108",
+            "hh110",
+            "hh111",
+            "hh114",
+            "hh118",
+            "hh119",
+            "hh120",
+            "hh122",
+            "hh123",
+            "hh124",
+            "hh125",
+            "hh126",
+            "hh127",
+            "hh129",
+            "hh130"
+          ],
+          "mean": {
+            "estimate": 0.018217794398015023,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.027116930753890652,
+              "low": 0.009628144824293364,
+              "method": "percentile"
+            },
+            "standard_error": 0.004436464850065308
+          },
+          "median": {
+            "estimate": 0.013128074913912324,
+            "interval": {
+              "confidence": 0.95,
+              "high": 0.021174284086573292,
+              "low": 0.010114267126423687,
+              "method": "percentile"
+            },
+            "standard_error": 0.003332569705925738
+          },
+          "n": 20,
+          "note": null,
+          "proportion_favouring_model": 0.95,
+          "proportion_favouring_reference": 0.05,
+          "proportion_tied": 0.0,
+          "resamples": 10000,
+          "seed": 0,
+          "tied": 0
+        },
+        "verdict": "uncertain"
+      }
+    },
+    "folds": {
+      "phase1-fold-a": {
+        "selection": {
+          "abstains": true,
+          "coverage": 0.95,
+          "threshold": 0.27409509245077573,
+          "tried": [
+            {
+              "coverage": 0.8,
+              "guard_holds": false,
+              "ratios": {
+                "away": 1.1091762781647443,
+                "bathroom_activity": 0.6303635953026197,
+                "kitchen_activity": 0.5955945252352438
+              },
+              "target": 0.8
+            },
+            {
+              "coverage": 0.8500060647717624,
+              "guard_holds": false,
+              "ratios": {
+                "away": 1.0927585728216254,
+                "bathroom_activity": 0.6743136966454712,
+                "kitchen_activity": 0.6521364429491249
+              },
+              "target": 0.85
+            },
+            {
+              "coverage": 0.900004043181175,
+              "guard_holds": false,
+              "ratios": {
+                "away": 1.0672396587252235,
+                "bathroom_activity": 0.7286929022535088,
+                "kitchen_activity": 0.7404205877937396
+              },
+              "target": 0.9
+            },
+            {
+              "coverage": 0.9500020215905874,
+              "guard_holds": true,
+              "ratios": {
+                "away": 1.0341064347152888,
+                "bathroom_activity": 0.8127686788421428,
+                "kitchen_activity": 0.8497273049908811
+              },
+              "target": 0.95
+            }
+          ]
+        },
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      },
+      "phase1-fold-b": {
+        "selection": {
+          "abstains": true,
+          "coverage": 0.95,
+          "threshold": 0.2695247025750483,
+          "tried": [
+            {
+              "coverage": 0.8,
+              "guard_holds": false,
+              "ratios": {
+                "away": 1.1101576879072774,
+                "bathroom_activity": 0.640235260770975,
+                "kitchen_activity": 0.6392740619902121
+              },
+              "target": 0.8
+            },
+            {
+              "coverage": 0.8500045741469217,
+              "guard_holds": false,
+              "ratios": {
+                "away": 1.0814248127192636,
+                "bathroom_activity": 0.7052783174961441,
+                "kitchen_activity": 0.7249745076407902
+              },
+              "target": 0.85
+            },
+            {
+              "coverage": 0.9,
+              "guard_holds": false,
+              "ratios": {
+                "away": 1.0505894642590659,
+                "bathroom_activity": 0.7631015369110608,
+                "kitchen_activity": 0.8065977886532536
+              },
+              "target": 0.9
+            },
+            {
+              "coverage": 0.9500045741469216,
+              "guard_holds": true,
+              "ratios": {
+                "away": 1.0235134260541934,
+                "bathroom_activity": 0.8545131311066806,
+                "kitchen_activity": 0.9135355687989307
+              },
+              "target": 0.95
+            }
+          ]
+        },
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      }
+    },
+    "guard_held_out": {
+      "coverage": 0.9544543405944844,
+      "holds": true,
+      "ratios": {
+        "away": 1.0158168428743606,
+        "bathroom_activity": 0.8698069833934637,
+        "kitchen_activity": 0.8843810786828424
+      }
+    },
+    "households": {
+      "hh101": {
+        "coverage": 0.9381411822178798,
+        "full": {
+          "balanced_accuracy": 0.5227473466755911,
+          "error": 0.3103321934538349
+        },
+        "kept": {
+          "balanced_accuracy": 0.5411010447149166,
+          "error": 0.28978715094708063
+        }
+      },
+      "hh102": {
+        "coverage": 0.9757583066996321,
+        "full": {
+          "balanced_accuracy": 0.5684822514723369,
+          "error": 0.26864861605258394
+        },
+        "kept": {
+          "balanced_accuracy": 0.5756413942920589,
+          "error": 0.2649403621531426
+        }
+      },
+      "hh103": {
+        "coverage": 0.968572644721907,
+        "full": {
+          "balanced_accuracy": 0.3877149479355585,
+          "error": 0.36301078320090807
+        },
+        "kept": {
+          "balanced_accuracy": 0.40398244189335925,
+          "error": 0.34930052003222734
+        }
+      },
+      "hh105": {
+        "coverage": 0.9513659815613634,
+        "full": {
+          "balanced_accuracy": 0.5465247833057003,
+          "error": 0.24359299670134485
+        },
+        "kept": {
+          "balanced_accuracy": 0.5552597406946366,
+          "error": 0.24039829302987198
+        }
+      },
+      "hh106": {
+        "coverage": 0.9248996990972919,
+        "full": {
+          "balanced_accuracy": 0.44181567032945784,
+          "error": 0.38966900702106316
+        },
+        "kept": {
+          "balanced_accuracy": 0.45144909551546425,
+          "error": 0.3529890199267995
+        }
+      },
+      "hh108": {
+        "coverage": 0.955399506547732,
+        "full": {
+          "balanced_accuracy": 0.609132052059406,
+          "error": 0.2660846460428924
+        },
+        "kept": {
+          "balanced_accuracy": 0.620317394807036,
+          "error": 0.2549993378360482
+        }
+      },
+      "hh110": {
+        "coverage": 0.9521097970506643,
+        "full": {
+          "balanced_accuracy": 0.4991870404825501,
+          "error": 0.3861877646371733
+        },
+        "kept": {
+          "balanced_accuracy": 0.5361164526613894,
+          "error": 0.3662015028369882
+        }
+      },
+      "hh111": {
+        "coverage": 0.9493279410015464,
+        "full": {
+          "balanced_accuracy": 0.5605333088689283,
+          "error": 0.33632687046508863
+        },
+        "kept": {
+          "balanced_accuracy": 0.5721013845344557,
+          "error": 0.32489662949505077
+        }
+      },
+      "hh114": {
+        "coverage": 0.949685534591195,
+        "full": {
+          "balanced_accuracy": 0.5500368946729672,
+          "error": 0.39761006289308176
+        },
+        "kept": {
+          "balanced_accuracy": 0.570101371520204,
+          "error": 0.3777483443708609
+        }
+      },
+      "hh118": {
+        "coverage": 0.9796258787084475,
+        "full": {
+          "balanced_accuracy": 0.6429947036241331,
+          "error": 0.30120338377219114
+        },
+        "kept": {
+          "balanced_accuracy": 0.6528246779687651,
+          "error": 0.29615665288251036
+        }
+      },
+      "hh119": {
+        "coverage": 0.9564401051445738,
+        "full": {
+          "balanced_accuracy": 0.47979367902957737,
+          "error": 0.46664163224433597
+        },
+        "kept": {
+          "balanced_accuracy": 0.5020777703554872,
+          "error": 0.4526894385551629
+        }
+      },
+      "hh120": {
+        "coverage": 0.960253193430657,
+        "full": {
+          "balanced_accuracy": 0.4402328676447645,
+          "error": 0.4333941605839416
+        },
+        "kept": {
+          "balanced_accuracy": 0.4515479795178292,
+          "error": 0.41546410119365756
+        }
+      },
+      "hh122": {
+        "coverage": 0.9542686715546166,
+        "full": {
+          "balanced_accuracy": 0.6036747812771,
+          "error": 0.35441779545172114
+        },
+        "kept": {
+          "balanced_accuracy": 0.6317297754184475,
+          "error": 0.3337674176325042
+        }
+      },
+      "hh123": {
+        "coverage": 0.9802840042248563,
+        "full": {
+          "balanced_accuracy": 0.5039389640457621,
+          "error": 0.4095763408050698
+        },
+        "kept": {
+          "balanced_accuracy": 0.5086181185514663,
+          "error": 0.4035675805099964
+        }
+      },
+      "hh124": {
+        "coverage": 0.9757383966244726,
+        "full": {
+          "balanced_accuracy": 0.4066361623661649,
+          "error": 0.5124824191279888
+        },
+        "kept": {
+          "balanced_accuracy": 0.4796049920911334,
+          "error": 0.5018018018018018
+        }
+      },
+      "hh125": {
+        "coverage": 0.9133807369101486,
+        "full": {
+          "balanced_accuracy": 0.5176422973269156,
+          "error": 0.5319327731092437
+        },
+        "kept": {
+          "balanced_accuracy": 0.5323303714892128,
+          "error": 0.508351026185421
+        }
+      },
+      "hh126": {
+        "coverage": 0.9467637993835808,
+        "full": {
+          "balanced_accuracy": 0.5138130594480659,
+          "error": 0.3049873914261698
+        },
+        "kept": {
+          "balanced_accuracy": 0.5454434746329296,
+          "error": 0.2858833974548683
+        }
+      },
+      "hh127": {
+        "coverage": 0.9456121343445287,
+        "full": {
+          "balanced_accuracy": 0.4040497365559273,
+          "error": 0.37659804983748646
+        },
+        "kept": {
+          "balanced_accuracy": 0.4144482964641427,
+          "error": 0.3510540788267644
+        }
+      },
+      "hh129": {
+        "coverage": 0.9482736654350873,
+        "full": {
+          "balanced_accuracy": 0.5657252724485886,
+          "error": 0.2818193400433176
+        },
+        "kept": {
+          "balanced_accuracy": 0.6161478408194084,
+          "error": 0.25688566438264143
+        }
+      },
+      "hh130": {
+        "coverage": 0.9812415154880908,
+        "full": {
+          "balanced_accuracy": 0.5680612383380065,
+          "error": 0.2639763050721955
+        },
+        "kept": {
+          "balanced_accuracy": 0.5362493279254595,
+          "error": 0.25984152936737515
+        }
+      }
+    },
+    "result_schema": "abstention-results/1",
+    "rule": {
+      "abstains": true,
+      "coverage": 0.95,
+      "signal": "structural_disagreement",
+      "threshold": 0.2385118107036081,
+      "tried": [
+        {
+          "coverage": 0.8,
+          "guard_holds": false,
+          "ratios": {
+            "away": 1.0841086603142718,
+            "bathroom_activity": 0.60771744595274,
+            "kitchen_activity": 0.5969961402919952
+          },
+          "target": 0.8
+        },
+        {
+          "coverage": 0.8500010730765104,
+          "guard_holds": false,
+          "ratios": {
+            "away": 1.075904759792253,
+            "bathroom_activity": 0.6482705565103776,
+            "kitchen_activity": 0.6420334826294776
+          },
+          "target": 0.85
+        },
+        {
+          "coverage": 0.9000021461530208,
+          "guard_holds": false,
+          "ratios": {
+            "away": 1.0602130655644892,
+            "bathroom_activity": 0.7091765670851641,
+            "kitchen_activity": 0.7174937674153773
+          },
+          "target": 0.9
+        },
+        {
+          "coverage": 0.950003219229531,
+          "guard_holds": true,
+          "ratios": {
+            "away": 1.0356979329085203,
+            "bathroom_activity": 0.8068031192618742,
+            "kitchen_activity": 0.8401239846980653
+          },
+          "target": 0.95
+        }
+      ]
+    },
+    "status": "pre-specified selection; development panel, which earlier work has inspected"
+  },
+  "schema_version": "1.6",
+  "seeds": [
+    0
+  ],
+  "selective_prediction": null,
+  "sensor_subset": null,
+  "split": {
+    "folds": [
+      {
+        "development": [],
+        "name": "phase1-fold-a",
+        "sha256": "3c81ecfd81f097470c92c5bd539389a8aa50860f6cd1315e77c2acaaa2c3f629",
+        "test": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ],
+        "train": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ]
+      },
+      {
+        "development": [],
+        "name": "phase1-fold-b",
+        "sha256": "f6187b4c595115759259bdcaa38a813f98819e0c126cc2fbc74017efaefa8f96",
+        "test": [
+          "hh102",
+          "hh105",
+          "hh108",
+          "hh111",
+          "hh118",
+          "hh120",
+          "hh123",
+          "hh125",
+          "hh127",
+          "hh130"
+        ],
+        "train": [
+          "hh101",
+          "hh103",
+          "hh106",
+          "hh110",
+          "hh114",
+          "hh119",
+          "hh122",
+          "hh124",
+          "hh126",
+          "hh129"
+        ]
+      }
+    ]
+  },
+  "structural_disagreement": null
+}
