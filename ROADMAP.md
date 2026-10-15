@@ -1247,6 +1247,9 @@ other Phase 3 and 4 conclusion is a development-panel result.
    the rule's signal
    ([PHASE4_TIME_PRIOR_RESULTS](docs/PHASE4_TIME_PRIOR_RESULTS.md)). The rule
    itself is not yet selected.*
+   *Its selection is frozen
+   ([PHASE4_ABSTENTION_PROTOCOL](docs/PHASE4_ABSTENTION_PROTOCOL.md)); it has
+   not been run.*
 5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
    deployment trade-offs for the confirmed formulation, with configurations
    selected before confirmatory scoring.
