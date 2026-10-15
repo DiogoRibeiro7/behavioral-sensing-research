@@ -93,6 +93,7 @@ nav:
       - "Phase 4 for the time prior: protocol": PHASE4_TIME_PRIOR_PROTOCOL.md
       - "Phase 4 for the time prior: results": PHASE4_TIME_PRIOR_RESULTS.md
       - "Phase 4: abstention rule, protocol": PHASE4_ABSTENTION_PROTOCOL.md
+      - "Phase 4: abstention rule, results": PHASE4_ABSTENTION_RESULTS.md
       - Experiment artifacts: EXPERIMENT_ARTIFACTS.md
       - Simulation protocols: SIMULATION_PROTOCOLS.md
       - v0.3 candidate specification: V03_CANDIDATE_SPECIFICATION.md
