@@ -1023,6 +1023,61 @@ Candidate configurations must be selected before confirmatory scoring. Do not
 mine the final evaluation set for the best subset. A frontier depends on the
 model scored, so it follows a confirmed reference formulation.
 
+
+### Proposed extension: 3D perception as an information source
+
+**Status: research candidate only.** No LiDAR/depth dataset, model, deployment,
+or performance result has been evaluated in this programme. The external
+senseEDGE description is a conceptual reference for a deep-learning perception
+front end that converts raw 3D sensor data into object detections,
+classifications and tracks. Its accuracy and high-density reliability claims
+are not evidence for this project, and it is not a software dependency.
+
+**Research question.** Do anonymous features from 3D perception recover
+behavioural information that the current ambient sensors cannot provide, and
+does that gain survive occlusion, visitors, crowding, device failures and domain
+shift? This belongs to the sensor-information frontier, not to a claim that a
+more complex inference model is better.
+
+The proposed boundary is **3D sensing → upstream perception → derived,
+time-stamped observations → existing context/fusion and behavioural inference**.
+The core should not ingest raw point clouds, video or persistent person
+identities. Candidate derived observations include room occupancy, anonymous
+track counts, spatial transitions, motion/velocity summaries and confidence or
+quality flags. Their units, coordinate frames, timestamps, provenance,
+calibration, missingness semantics and retention policy must be specified.
+The existing Observation/SensorSpec contract, including ROOM_OCCUPANCY or
+documented OTHER features, is the starting point; a new modality is justified
+only if those semantics are insufficient. Occupancy and attribution must remain
+separate from behavioural-state inference.
+
+Before implementation or a comparative performance claim:
+
+1. **Data and privacy gate.** Identify a lawfully usable dataset with
+   synchronised ambient and 3D-derived observations, occupancy/activity
+   references and documented sensor placement; assess whether raw 3D data
+   could reveal identity or reconstruct sensitive household activity.
+   Restrict tracks to anonymous, short-lived evidence: no biometric
+   recognition, persistent re-identification or unbounded trajectory storage.
+2. **Perception gate.** Pre-specify detection/classification, tracking,
+   coverage, calibration and latency measures; test occlusion, false tracks,
+   multi-person ambiguity and sensor faults. Record failures and
+   uncertainty instead of converting missing tracks into a claim of absence.
+3. **Behavioural-information gate.** Compare ambient-only, 3D-derived-only
+   and fused configurations on paired homes/windows, with fixed labels,
+   declared information sets, a common evaluation regime, strong
+   modality-appropriate baselines and household-level uncertainty.
+   Distinguish *additional sensing information* from *better modelling of
+   the same information*.
+4. **Deployment frontier gate.** Measure marginal benefit against sensor
+   count, placement, cost, compute/energy, end-to-end latency,
+   missingness robustness and privacy exposure. Freeze the candidate
+   configurations and evaluation split before confirmatory scoring.
+
+This remains exploratory until such data and a reproducible protocol exist.
+It does not change the single-resident ontology, released model defaults,
+the existing evidence base or the Phase 8 production gate.
+
 ## Phase 7 — Reliability and Failure Robustness
 
 **Status: one rule evaluated; not started as statistical modelling.** Related
@@ -1276,6 +1331,9 @@ other Phase 3 and 4 conclusion is a development-panel result.
 5. **Sensor-information frontier (Phase 6).** Formalise multi-objective
    deployment trade-offs for the confirmed formulation, with configurations
    selected before confirmatory scoring.
+   Treat derived 3D perception (LiDAR/depth) as an exploratory candidate,
+   subject to the data, privacy, perception and matched-evaluation gates above;
+   do not assume it outperforms ambient sensing.
 6. **Reliability modelling (Phase 7).** Separate failure processes from
    behavioural state, and quantify robustness under realistic missingness.
    The silent-home rule is a declared rule with a declared horizon. How long
